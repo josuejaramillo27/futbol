@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva tu Cancha</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar navbar-cancha">
+        <div class="logo" id="cancha-nombre-header">Cargando...</div>
+        <a href="index.html" class="volver-link">← Volver a Comunidad</a>
+    </header>
+
+    <main class="container text-center">
+        <div class="cancha-header" id="cancha-imagen">
+            <h1 id="cancha-titulo">Nombre de la Cancha</h1>
+            <p id="cancha-precio" class="precio-destacado">S/ 0.00 / hora</p>
+        </div>
+
+        <section class="reserva-box">
+            <h2>Horarios Disponibles para Hoy</h2>
+            <div class="horarios-grid">
+                <button class="btn-hora">18:00 - 19:00</button>
+                <button class="btn-hora ocupado" disabled>19:00 - 20:00 (Ocupado)</button>
+                <button class="btn-hora">20:00 - 21:00</button>
+                <button class="btn-hora">21:00 - 22:00</button>
+            </div>
+            
+            <div class="servicios">
+                <h3>Incluye:</h3>
+                <p id="cancha-servicios">Balón y Chalecos</p>
+            </div>
+
+            <button class="btn-reservar" onclick="confirmarReserva()">Confirmar Reserva</button>
+        </section>
+    </main>
+    <script src="app.js"></script>
+    <script>
+        // Cargar los datos específicos al abrir esta página
+        window.onload = cargarDatosCancha;
+    </script>
+</body>
+</html>
