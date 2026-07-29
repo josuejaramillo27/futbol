@@ -4,12 +4,12 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDZnSndcRrzQquTa2ExKYcTgjyaFdJU_es",
-  authDomain: "futbol-a74a2.firebaseapp.com",
-  projectId: "futbol-a74a2",
-  storageBucket: "futbol-a74a2.firebasestorage.app",
-  messagingSenderId: "383262709861",
-  appId: "1:383262709861:web:ebf392c929cf704f840e8c"
+  apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
+  authDomain: "app-futbol-acd0f.firebaseapp.com",
+  projectId: "app-futbol-acd0f",
+  storageBucket: "app-futbol-acd0f.firebasestorage.app",
+  messagingSenderId: "223446110165",
+  appId: "1:223446110165:web:219afce6a9dac03203f75c"
 };
 
 const app = initializeApp(firebaseConfig);
