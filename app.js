@@ -1,126 +1,122 @@
 // app.js
-// 1. BASE DE DATOS SIMULADA (Próximamente Supabase/Firebase)
-const bd = {
-    canchas: [
-        { 
-            id: 'maracana', 
-            nombre: 'La Maracaná 5v5', 
-            precio: 80, 
-            servicios: ['Balón', 'Chalecos', 'Duchas'],
-            lat: -5.1950, // Coordenadas ejemplo (Piura)
-            lng: -80.6270,
-            imagen: 'https://images.unsplash.com/photo-1574629810360-1ef2ac304155?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            reseñas: [
-                { usuario: 'Carlos M.', texto: 'Excelente pasto, muy buena iluminación.', rating: 5 }
-            ],
-            horariosOcupados: ['20:00', '21:00']
-        },
-        { 
-            id: 'wembley', 
-            nombre: 'Wembley Sintético 7v7', 
-            precio: 120, 
-            servicios: ['Balón', 'Tribuna', 'Parqueo'],
-            lat: -5.2000, 
-            lng: -80.6300,
-            imagen: 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            reseñas: [],
-            horariosOcupados: ['19:00']
-        }
-    ],
-    bolsaJugadores: [
-        { nombre: 'Juan Pérez', posicion: 'Arquero', mensaje: 'Busco equipo para los jueves en la noche.' }
-    ]
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    // Pega tus claves aquí nuevamente
 };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// 2. UTILIDADES GEOLOCALIZACIÓN (Fórmula Haversine)
-function calcularDistancia(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radio de la tierra en km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return (R * c).toFixed(2);
-}
-
-// 3. LÓGICA DE LA PÁGINA PRINCIPAL (Hub Social - index.html)
+// ======= 1. LÓGICA DEL HUB (index.html) =======
 if (window.location.pathname.includes('index') || window.location.pathname === '/') {
-    const contenedorCanchas = document.getElementById('lista-canchas');
     
-    function renderizarCanchas(canchasArray, latUser = null, lngUser = null) {
-        contenedorCanchas.innerHTML = '';
-        canchasArray.forEach(cancha => {
-            let distanciaHtml = '';
-            if (latUser && lngUser) {
-                const dist = calcularDistancia(latUser, lngUser, cancha.lat, cancha.lng);
-                distanciaHtml = `<p class="distancia">📍 A ${dist} km de ti</p>`;
-            }
-            
-            const ratingAvg = cancha.reseñas.length > 0 
-                ? (cancha.reseñas.reduce((a,b)=>a+b.rating,0) / cancha.reseñas.length).toFixed(1) 
-                : 'Nuevo';
+    async function cargarCanchasAlgoritmo() {
+        const contenedor = document.getElementById('lista-canchas');
+        if(!contenedor) return;
+        contenedor.innerHTML = '<p>Cargando canchas...</p>';
 
-            contenedorCanchas.innerHTML += `
+        const snapshot = await getDocs(collection(db, "canchas"));
+        let canchas = [];
+        
+        // Obtener hora actual para saber si están abiertas
+        const ahora = new Date();
+        const minutosActuales = ahora.getHours() * 60 + ahora.getMinutes();
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if(data.configurado) {
+                // Calcular si está abierto
+                let isOpen = false;
+                if(data.horaApertura && data.horaCierre) {
+                    const [hA, mA] = data.horaApertura.split(':').map(Number);
+                    const [hC, mC] = data.horaCierre.split(':').map(Number);
+                    const minApertura = (hA * 60) + mA;
+                    const minCierre = (hC * 60) + mC;
+                    
+                    if (minCierre > minApertura) { // Horario normal (ej. 08:00 a 22:00)
+                        isOpen = minutosActuales >= minApertura && minutosActuales <= minCierre;
+                    } else { // Horario de trasnoche (ej. 18:00 a 02:00)
+                        isOpen = minutosActuales >= minApertura || minutosActuales <= minCierre;
+                    }
+                }
+
+                // Calcular rating (Si no tiene, le ponemos 0 por defecto)
+                const rating = data.ratingPromedio || 0;
+                
+                canchas.push({ id: doc.id, ...data, isOpen, rating });
+            }
+        });
+
+        // ALGORITMO DE ORDENAMIENTO: 
+        // 1ro: Abiertas arriba. 2do: Mayor puntuación.
+        canchas.sort((a, b) => {
+            if (a.isOpen === b.isOpen) {
+                return b.rating - a.rating; // Si ambos están abiertos o cerrados, gana el de más estrellas
+            }
+            return a.isOpen ? -1 : 1; // El abierto va primero
+        });
+
+        // Renderizar
+        contenedor.innerHTML = '';
+        canchas.forEach(c => {
+            const estadoHtml = c.isOpen ? '<span class="badge-estado badge-abierto">🟢 Abierto Ahora</span>' : '<span class="badge-estado badge-cerrado">🔴 Cerrado</span>';
+            const logoHtml = c.logo ? `<img src="${c.logo}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;">` : '🏟️';
+            
+            contenedor.innerHTML += `
                 <div class="card">
-                    <img src="${cancha.imagen}" alt="${cancha.nombre}" style="width:100%; border-radius:8px;">
-                    <h3>${cancha.nombre}</h3>
-                    <p>⭐ ${ratingAvg}/5 | 💰 S/${cancha.precio} por hora</p>
-                    ${distanciaHtml}
-                    <a href="cancha.html?id=${cancha.id}" class="btn">Ver Disponibilidad y Reservar</a>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        ${logoHtml}
+                        ${estadoHtml}
+                    </div>
+                    <h3 style="margin-top:10px;">${c.nombre}</h3>
+                    <p>⭐ ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'} | 💰 S/ ${c.precio} / hr</p>
+                    <p style="font-size:0.9rem; color:#aaa;">📍 ${c.ubicacionTexto || 'Ubicación no especificada'}</p>
+                    <div class="btn-group">
+                        <a href="cancha.html?id=${c.id}" class="btn"><i class="ph-bold ph-calendar-plus"></i> Reservar y Ver Más</a>
+                    </div>
                 </div>
             `;
         });
     }
-
-    renderizarCanchas(bd.canchas);
-
-    // Botón de Cercanía
-    document.getElementById('btn-geo').addEventListener('click', () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(position => {
-                const { latitude, longitude } = position.coords;
-                // Ordenar por distancia
-                const canchasOrdenadas = [...bd.canchas].sort((a, b) => {
-                    return calcularDistancia(latitude, longitude, a.lat, a.lng) - calcularDistancia(latitude, longitude, b.lat, b.lng);
-                });
-                renderizarCanchas(canchasOrdenadas, latitude, longitude);
-            });
-        } else {
-            alert("Tu navegador no soporta geolocalización.");
-        }
-    });
+    
+    cargarCanchasAlgoritmo();
 }
 
-// 4. LÓGICA DEL MINI-SITIO (Transaccional - cancha.html)
+// ======= 2. LÓGICA DE RESEÑAS INDRIVE (cancha.html) =======
 if (window.location.pathname.includes('cancha.html')) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const idCancha = urlParams.get('id');
-    const canchaInfo = bd.canchas.find(c => c.id === idCancha);
+    // Aquí pondremos la lógica dinámica de estrellas
+    const estrellas = document.querySelectorAll('.estrellas-container i');
+    const tagsDiv = document.getElementById('tags-dinamicos');
+    
+    const tagsPositivos = ["Pasto excelente", "Balones nuevos", "Buena iluminación", "Limpio", "Buen trato"];
+    const tagsNegativos = ["Pasto gastado", "Mala iluminación", "Faltan chalecos", "Impuntuales"];
 
-    if (canchaInfo) {
-        document.getElementById('cancha-nombre').innerText = canchaInfo.nombre;
-        document.getElementById('cancha-precio').innerText = `S/ ${canchaInfo.precio} / Hora`;
-        document.getElementById('cancha-servicios').innerText = canchaInfo.servicios.join(' - ');
-        
-        // Renderizar Horarios (Simulación 6 PM a 11 PM)
-        const horariosDiv = document.getElementById('horarios-grid');
-        const horasBase = ['18:00', '19:00', '20:00', '21:00', '22:00', '23:00'];
-        
-        horasBase.forEach(hora => {
-            const ocupado = canchaInfo.horariosOcupados.includes(hora);
-            const clase = ocupado ? 'btn-horario ocupado' : 'btn-horario libre';
-            const texto = ocupado ? 'Reservado' : hora;
-            horariosDiv.innerHTML += `<button class="${clase}" ${ocupado ? 'disabled' : ''}>${texto}</button>`;
-        });
+    let estrellasSeleccionadas = 0;
 
-        // Renderizar Reseñas
-        const reseñasDiv = document.getElementById('lista-reseñas');
-        if (canchaInfo.reseñas.length === 0) reseñasDiv.innerHTML = '<p>Sé el primero en dejar una reseña.</p>';
-        canchaInfo.reseñas.forEach(r => {
-            reseñasDiv.innerHTML += `<div class="resena"><strong>${r.usuario} (⭐${r.rating})</strong><br>${r.texto}</div>`;
+    estrellas.forEach(estrella => {
+        estrella.addEventListener('click', (e) => {
+            estrellasSeleccionadas = parseInt(e.target.dataset.valor);
+            
+            // Pintar estrellas
+            estrellas.forEach(s => s.classList.remove('activa', 'ph-fill'));
+            estrellas.forEach(s => s.classList.add('ph-light'));
+            for(let i=0; i < estrellasSeleccionadas; i++) {
+                estrellas[i].classList.remove('ph-light');
+                estrellas[i].classList.add('ph-fill', 'activa');
+            }
+
+            // Mostrar Tags según puntuación
+            tagsDiv.innerHTML = '';
+            const tagsAMostrar = estrellasSeleccionadas >= 4 ? tagsPositivos : tagsNegativos;
+            
+            tagsAMostrar.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'tag-resena';
+                span.innerText = tag;
+                span.onclick = () => span.classList.toggle('seleccionado');
+                tagsDiv.appendChild(span);
+            });
         });
-    } else {
-        document.body.innerHTML = '<h1>Cancha no encontrada</h1>';
-    }
+    });
 }
