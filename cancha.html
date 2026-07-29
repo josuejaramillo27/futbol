@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reserva tu cancha | Cancha Hub</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<!--
+  This page is a single reusable template for EVERY affiliated field.
+  app.js reads the "?id=" URL parameter, looks up the matching record in
+  DB.fields, and injects its data into the elements with the IDs below.
+  Example: cancha.html?id=maracana  or  cancha.html?id=bombonera-five
+-->
+<body data-page="cancha">
+
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <span class="brand-mark">CH</span>
+        Cancha Hub
+      </a>
+      <nav class="nav-links">
+        <a href="index.html#feed">Comunidad</a>
+        <a href="index.html#canchas">Canchas</a>
+      </nav>
+      <div class="nav-actions">
+        <a id="whatsapp-btn" href="#" target="_blank" rel="noopener" class="btn btn-primary btn-sm">WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ TENANT HERO (dynamically themed) ============ -->
+  <section class="tenant-hero">
+    <div class="container">
+      <div class="tenant-crumb">
+        <a href="index.html">← Volver a todas las canchas</a>
+      </div>
+      <div class="tenant-top">
+        <div>
+          <span class="eyebrow"><span class="dot"></span> <span id="tenant-type">Cancha</span></span>
+          <h1 id="tenant-name">Nombre de la cancha</h1>
+          <p id="tenant-description" class="lead">Descripción de la cancha.</p>
+          <div class="tenant-meta">
+            <span class="meta-pill">📍 <span id="tenant-location">—</span></span>
+            <span class="meta-pill">⚡ Confirmación inmediata</span>
+            <span class="meta-pill">🔒 Pago seguro o en cancha</span>
+          </div>
+        </div>
+        <div class="tenant-price">
+          <div class="amount" id="tenant-price">S/ 0</div>
+          <div class="unit">por hora</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BOOKING LAYOUT ============ -->
+  <section class="container booking-layout">
+
+    <!-- Slot picker -->
+    <div class="card">
+      <h3>Elige tu horario</h3>
+      <div class="day-tabs">
+        <div class="day-tab active" data-day="today">Hoy</div>
+        <div class="day-tab" data-day="tomorrow">Mañana</div>
+      </div>
+
+      <div class="slot-grid" id="slot-grid" aria-live="polite">
+        <!-- Rendered by app.js: renderSlots() -->
+      </div>
+
+      <div class="legend">
+        <span><i class="i-available"></i> Disponible</span>
+        <span><i class="i-selected"></i> Seleccionado</span>
+        <span><i class="i-booked"></i> Reservado</span>
+      </div>
+
+      <div class="confirm-banner" id="confirm-banner" role="status"></div>
+    </div>
+
+    <!-- Booking summary sidebar -->
+    <aside class="card summary-card">
+      <h3>Resumen de tu reserva</h3>
+      <div class="summary-line">
+        <span>Horario</span>
+        <b id="summary-time">—</b>
+      </div>
+      <div class="summary-line">
+        <span>Duración</span>
+        <b>1 hora</b>
+      </div>
+      <div class="summary-line">
+        <span>Precio</span>
+        <b id="summary-price">—</b>
+      </div>
+
+      <h3 style="margin-top:20px;">Incluye</h3>
+      <ul class="services-list" id="services-list">
+        <!-- Rendered by app.js -->
+      </ul>
+
+      <button class="btn btn-primary btn-block" id="confirm-btn" style="margin-top:18px;" disabled>
+        Confirmar reserva
+      </button>
+      <p style="font-size:0.78rem; margin-top:10px;">
+        Al confirmar, el propietario recibirá tu solicitud y te contactará para coordinar el pago (depósito o total).
+      </p>
+    </aside>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">© 2026 Cancha Hub — Página gestionada dentro de la plataforma multi-tenant.</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
