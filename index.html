@@ -35,32 +35,40 @@
             <button id="btn-contacto-admin">Únete a la Red APP FUTBOL</button>
         </section>
         <div id="modal-cancha" class="modal-oculto">
-    <div class="modal-contenido card">
+    <div class="modal-contenido">
+        
         <button id="cerrar-modal" class="btn-cerrar"><i class="ph ph-x"></i></button>
         
-        <img id="modal-imagen-principal" src="" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; border: 1px solid var(--border-color);">
-        
-        <div style="display:flex; align-items:center; gap:15px; margin-top:15px;">
-            <img id="modal-logo" src="" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid var(--primary-green);">
-            <h2 id="modal-nombre">Nombre Cancha</h2>
+        <div style="position: relative;">
+            <img id="modal-imagen-principal" src="" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-bottom: 1px solid var(--border-color);">
+            
+            <img id="modal-logo" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); position: absolute; bottom: -35px; left: 20px;">
         </div>
         
-        <p style="color: var(--primary-green); font-weight:bold; margin-top:10px;">⭐ <span id="modal-rating"></span> | 💰 S/ <span id="modal-precio"></span> / hr</p>
-        <p><i class="ph ph-clock"></i> <span id="modal-horario"></span></p>
-        <p><i class="ph ph-map-pin"></i> <a id="modal-link-maps" href="#" target="_blank" style="color:#00e676;">Ver en Google Maps</a></p>
-        
-        <hr style="border-color:#333; margin:15px 0;">
-        
-        <h3>Acerca de nosotros</h3>
-        <p id="modal-descripcion" style="font-size:0.9rem; color:var(--text-muted);"></p>
+        <div style="padding: 45px 20px 25px 20px;">
+            <h2 id="modal-nombre" style="font-size: 1.6rem; font-weight: 800; margin-bottom: 5px;">Nombre Cancha</h2>
+            <p style="color: var(--primary-green); font-weight: 800; font-size: 1.1rem;">
+                ⭐ <span id="modal-rating"></span> | 💰 S/ <span id="modal-precio"></span> / hr
+            </p>
+            
+            <div style="margin: 20px 0; padding: 15px; background: #121212; border-radius: 12px; border: 1px solid var(--border-color);">
+                <p style="margin-bottom: 8px;"><i class="ph ph-clock" style="color: var(--primary-green);"></i> <span id="modal-horario"></span></p>
+                <p><i class="ph ph-map-pin" style="color: var(--primary-green);"></i> <a id="modal-link-maps" href="#" target="_blank" style="color: var(--text-main); text-decoration: underline;">Ver en Google Maps</a></p>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Acerca de nosotros</h3>
+            <p id="modal-descripcion" style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;"></p>
 
-        <a id="btn-whatsapp-reserva" href="#" target="_blank" class="btn" style="margin-top:20px; background-color:#25D366; color:#fff; text-align:center; text-decoration:none;">
-            <i class="ph ph-whatsapp-logo"></i> Reservar por WhatsApp
-        </a>
-        
-        <a id="btn-ver-resenas" href="#" class="btn btn-outline" style="text-align:center; text-decoration:none;">
-            ⭐ Ver o Dejar Reseña
-        </a>
+            <div class="btn-group" style="margin-top: 25px;">
+                <a id="btn-whatsapp-reserva" href="#" target="_blank" class="btn" style="background-color: #25D366; color: #000;">
+                    <i class="ph-bold ph-whatsapp-logo" style="font-size: 1.2rem;"></i> Reservar por WhatsApp
+                </a>
+                
+                <a id="btn-ver-resenas" href="#" class="btn btn-outline">
+                    <i class="ph-bold ph-star"></i> Ver o Dejar Reseña
+                </a>
+            </div>
+        </div>
     </div>
 </div>
     </main>
