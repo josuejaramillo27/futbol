@@ -1,41 +1,40 @@
 /* =========================================
-   VARIABLES GLOBALES (Estética Premium)
+   VARIABLES Y ESTÉTICA PREMIUM FUTBOL
 ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+
 :root {
-    --bg-dark: #0a0e17; /* Azul/Negro muy profundo */
-    --card-bg: rgba(20, 26, 38, 0.7); /* Transparencia elegante */
-    --primary-green: #00ff66; /* Verde Neón / Césped Premium */
-    --primary-hover: #00cc52;
+    --bg-dark: #0b132b; /* Azul noche profundo */
+    --card-bg: rgba(28, 37, 65, 0.85); /* Transparencia de tarjeta */
+    --primary-green: #00e676; /* Verde Neón / Césped Premium */
+    --primary-hover: #00c853;
     --text-main: #ffffff;
     --text-muted: #94a3b8;
     --border-color: rgba(255, 255, 255, 0.1);
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --danger: #ff4757;
+    --font-family: 'Poppins', sans-serif;
 }
 
-/* =========================================
-   RESETEO Y BASE
-========================================= */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: var(--font-family);
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); }
 
 body {
     background-color: var(--bg-dark);
+    /* Fondo de estadio con capa oscura para legibilidad */
+    background-image: linear-gradient(rgba(11, 19, 43, 0.85), rgba(11, 19, 43, 0.95)), url('https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.6;
-    background-image: radial-gradient(circle at top right, rgba(0, 255, 102, 0.05), transparent 40%);
     min-height: 100vh;
 }
 
 /* =========================================
-   CONTENEDORES Y NAVEGACIÓN
+   NAVEGACIÓN Y CONTENEDORES
 ========================================= */
 header {
-    background: rgba(10, 14, 23, 0.8);
-    backdrop-filter: blur(10px); /* Efecto vidrio borroso */
+    background: rgba(11, 19, 43, 0.9);
+    backdrop-filter: blur(15px);
     padding: 20px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -45,135 +44,81 @@ header {
     top: 0;
     z-index: 100;
 }
+header h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary-green); }
 
-header h1 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-header h1 i {
-    color: var(--primary-green);
-}
-
-main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 30px 20px;
-}
+main { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+section { margin-bottom: 40px; }
 
 /* =========================================
-   TARJETAS Y MÓDULOS (Glassmorphism)
+   TARJETAS Y FORMULARIOS
 ========================================= */
-section {
-    margin-bottom: 40px;
-}
-
-.card, #login-container, #kpis div {
+.card, #login-container {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 24px;
     backdrop-filter: blur(12px);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-.card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(0, 255, 102, 0.3);
-    box-shadow: 0 10px 30px rgba(0, 255, 102, 0.05);
-}
+/* Separación limpia de elementos de formulario */
+form { display: flex; flex-direction: column; gap: 15px; }
 
-/* =========================================
-   BOTONES PREMIUM
-========================================= */
-button {
-    background: var(--primary-green);
-    color: #000;
-    font-weight: 700;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    width: 100%;
-    margin-top: 15px;
-    font-size: 1rem;
-}
-
-button:hover {
-    background: var(--primary-hover);
-    box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
-}
-
-button.btn-outline {
-    background: transparent;
-    color: var(--primary-green);
-    border: 1px solid var(--primary-green);
-}
-
-button.btn-outline:hover {
-    background: rgba(0, 255, 102, 0.1);
-}
-
-/* =========================================
-   FORMULARIOS (Login / Admin)
-========================================= */
-input {
+input, textarea {
     width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border-color);
     color: var(--text-main);
     padding: 14px;
     border-radius: 8px;
-    margin-top: 8px;
-    margin-bottom: 16px;
     outline: none;
-    transition: border-color 0.3s;
+    transition: 0.3s;
 }
-
-input:focus {
-    border-color: var(--primary-green);
-}
-
-label {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
+input:focus, textarea:focus { border-color: var(--primary-green); background: rgba(255,255,255,0.1); }
 
 /* =========================================
-   DASHBOARD Y GRÁFICOS
+   BOTONES SEPARADOS Y ELEGANTES
 ========================================= */
-#kpis h2 {
-    font-size: 2.5rem;
-    color: var(--primary-green);
-    margin-top: 10px;
-}
+.btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
-#graficos canvas {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 15px;
+button {
+    background: var(--primary-green);
+    color: #000;
+    font-weight: 800;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 230, 118, 0.4); }
+
+.btn-outline { background: transparent; color: var(--primary-green); border: 2px solid var(--primary-green); }
+.btn-outline:hover { background: rgba(0, 230, 118, 0.1); }
+
+/* =========================================
+   RESEÑAS ESTILO INDRIVE
+========================================= */
+.estrellas-container { display: flex; gap: 10px; font-size: 2rem; color: #555; justify-content: center; margin: 15px 0; cursor: pointer; }
+.estrellas-container i.activa { color: #FFD700; }
+
+.tags-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; }
+.tag-resena {
+    background: rgba(255,255,255,0.1);
     border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.3s;
 }
+.tag-resena.seleccionado { background: var(--primary-green); color: #000; font-weight: bold; border-color: var(--primary-green); }
 
-/* =========================================
-   PUBLICIDAD FOOTER
-========================================= */
-#publicidad-dueños {
-    background: linear-gradient(135deg, rgba(0,255,102,0.1) 0%, rgba(10,14,23,1) 100%);
-    border: 1px solid rgba(0,255,102,0.2);
-    border-radius: 16px;
-    text-align: center;
-}
-
-#publicidad-dueños h2 {
-    color: var(--primary-green);
-}
+/* Etiquetas de estado */
+.badge-estado { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+.badge-abierto { background: rgba(0, 230, 118, 0.2); color: var(--primary-green); border: 1px solid var(--primary-green); }
+.badge-cerrado { background: rgba(255, 71, 87, 0.2); color: var(--danger); border: 1px solid var(--danger); }
