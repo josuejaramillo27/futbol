@@ -1,81 +1,179 @@
+/* =========================================
+   VARIABLES GLOBALES (Estética Premium)
+========================================= */
 :root {
-    --bg-color: #121212;
-    --card-bg: #1e1e1e;
-    --primary-color: #28a745; /* Verde Césped */
-    --primary-hover: #218838;
-    --text-main: #f8f9fa;
-    --text-muted: #adb5bd;
-    --danger: #dc3545;
+    --bg-dark: #0a0e17; /* Azul/Negro muy profundo */
+    --card-bg: rgba(20, 26, 38, 0.7); /* Transparencia elegante */
+    --primary-green: #00ff66; /* Verde Neón / Césped Premium */
+    --primary-hover: #00cc52;
+    --text-main: #ffffff;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* =========================================
+   RESETEO Y BASE
+========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-family);
+}
 
 body {
-    background-color: var(--bg-color);
+    background-color: var(--bg-dark);
     color: var(--text-main);
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     line-height: 1.6;
+    background-image: radial-gradient(circle at top right, rgba(0, 255, 102, 0.05), transparent 40%);
+    min-height: 100vh;
 }
 
-.container { padding: 20px; max-width: 800px; margin: 0 auto; }
-
-.navbar {
-    background: #000;
-    padding: 15px 20px;
+/* =========================================
+   CONTENEDORES Y NAVEGACIÓN
+========================================= */
+header {
+    background: rgba(10, 14, 23, 0.8);
+    backdrop-filter: blur(10px); /* Efecto vidrio borroso */
+    padding: 20px;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 2px solid var(--primary-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
-.navbar a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
 
-.card {
+header h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+header h1 i {
+    color: var(--primary-green);
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+/* =========================================
+   TARJETAS Y MÓDULOS (Glassmorphism)
+========================================= */
+section {
+    margin-bottom: 40px;
+}
+
+.card, #login-container, #kpis div {
     background: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(12px);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+.card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(0, 255, 102, 0.3);
+    box-shadow: 0 10px 30px rgba(0, 255, 102, 0.05);
+}
 
-/* Botones */
-.btn {
-    display: inline-block;
-    background: var(--primary-color);
-    color: #fff;
+/* =========================================
+   BOTONES PREMIUM
+========================================= */
+button {
+    background: var(--primary-green);
+    color: #000;
+    font-weight: 700;
     border: none;
-    padding: 10px 15px;
-    border-radius: 6px;
+    padding: 12px 24px;
+    border-radius: 8px;
     cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-    font-weight: bold;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     width: 100%;
-    margin-top: 10px;
-    transition: 0.3s ease;
+    margin-top: 15px;
+    font-size: 1rem;
 }
-.btn:hover { background: var(--primary-hover); }
-.btn-outline { background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
-.btn-large { padding: 15px; font-size: 1.1rem; }
 
-/* Horarios */
-.horarios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-.btn-horario { padding: 10px; border-radius: 5px; border: 1px solid var(--primary-color); background: transparent; color: white; cursor: pointer; }
-.btn-horario.libre { background: rgba(40, 167, 69, 0.1); }
-.btn-horario.ocupado { background: var(--card-bg); border-color: var(--danger); color: var(--text-muted); cursor: not-allowed; text-decoration: line-through; }
+button:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+}
 
-/* Reseñas & Formularios */
-.resena { border-bottom: 1px solid #333; padding: 10px 0; }
-textarea, select { width: 100%; padding: 10px; margin-top: 10px; background: #333; border: none; color: white; border-radius: 5px; }
+button.btn-outline {
+    background: transparent;
+    color: var(--primary-green);
+    border: 1px solid var(--primary-green);
+}
 
-/* Panel Admin */
-.stat-number { font-size: 2rem; font-weight: bold; color: var(--primary-color); }
-.admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
-.admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #333; }
-.badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; }
-.badge.verde { background: rgba(40, 167, 69, 0.2); color: var(--primary-color); }
-.badge.amarillo { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+button.btn-outline:hover {
+    background: rgba(0, 255, 102, 0.1);
+}
 
-.mt-2 { margin-top: 20px; }
-.distancia { color: var(--primary-color); font-weight: bold; font-size: 0.9rem; }
+/* =========================================
+   FORMULARIOS (Login / Admin)
+========================================= */
+input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 14px;
+    border-radius: 8px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+input:focus {
+    border-color: var(--primary-green);
+}
+
+label {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* =========================================
+   DASHBOARD Y GRÁFICOS
+========================================= */
+#kpis h2 {
+    font-size: 2.5rem;
+    color: var(--primary-green);
+    margin-top: 10px;
+}
+
+#graficos canvas {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+}
+
+/* =========================================
+   PUBLICIDAD FOOTER
+========================================= */
+#publicidad-dueños {
+    background: linear-gradient(135deg, rgba(0,255,102,0.1) 0%, rgba(10,14,23,1) 100%);
+    border: 1px solid rgba(0,255,102,0.2);
+    border-radius: 16px;
+    text-align: center;
+}
+
+#publicidad-dueños h2 {
+    color: var(--primary-green);
+}
