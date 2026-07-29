@@ -168,3 +168,60 @@ button:hover { background: var(--primary-hover); transform: translateY(-2px); bo
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
 }
+
+/* =========================================
+   PANTALLA DE LOGIN (SOCIOS PREMIUM)
+========================================= */
+.login-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /* Usa el mismo fondo elegante de estadio */
+    background-image: linear-gradient(rgba(11, 19, 43, 0.85), rgba(11, 19, 43, 0.95)), url('https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+}
+
+.login-wrapper {
+    width: 100%;
+    max-width: 450px; /* <- ESTO EVITA QUE LOS BOTONES SE VEAN LARGOS Y FEOS */
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.login-header h2 {
+    color: var(--primary-green);
+    font-size: 2.2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.login-header h3 {
+    color: var(--text-main);
+    font-size: 1.3rem;
+}
+
+.login-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.login-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Separación perfecta entre botones */
+    margin-top: 20px;
+}
+
+.login-buttons .btn {
+    margin-top: 0; /* Quitamos el margen por defecto porque ya usamos 'gap' */
+}
