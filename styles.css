@@ -1,0 +1,81 @@
+:root {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --primary-color: #28a745; /* Verde Césped */
+    --primary-hover: #218838;
+    --text-main: #f8f9fa;
+    --text-muted: #adb5bd;
+    --danger: #dc3545;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+}
+
+.container { padding: 20px; max-width: 800px; margin: 0 auto; }
+
+.navbar {
+    background: #000;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--primary-color);
+}
+.navbar a { color: var(--primary-color); text-decoration: none; font-weight: bold; }
+
+.card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+
+/* Botones */
+.btn {
+    display: inline-block;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font-weight: bold;
+    width: 100%;
+    margin-top: 10px;
+    transition: 0.3s ease;
+}
+.btn:hover { background: var(--primary-hover); }
+.btn-outline { background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
+.btn-large { padding: 15px; font-size: 1.1rem; }
+
+/* Horarios */
+.horarios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+.btn-horario { padding: 10px; border-radius: 5px; border: 1px solid var(--primary-color); background: transparent; color: white; cursor: pointer; }
+.btn-horario.libre { background: rgba(40, 167, 69, 0.1); }
+.btn-horario.ocupado { background: var(--card-bg); border-color: var(--danger); color: var(--text-muted); cursor: not-allowed; text-decoration: line-through; }
+
+/* Reseñas & Formularios */
+.resena { border-bottom: 1px solid #333; padding: 10px 0; }
+textarea, select { width: 100%; padding: 10px; margin-top: 10px; background: #333; border: none; color: white; border-radius: 5px; }
+
+/* Panel Admin */
+.stat-number { font-size: 2rem; font-weight: bold; color: var(--primary-color); }
+.admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: left; }
+.admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #333; }
+.badge { padding: 5px 10px; border-radius: 20px; font-size: 0.8rem; }
+.badge.verde { background: rgba(40, 167, 69, 0.2); color: var(--primary-color); }
+.badge.amarillo { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+
+.mt-2 { margin-top: 20px; }
+.distancia { color: var(--primary-color); font-weight: bold; font-size: 0.9rem; }
