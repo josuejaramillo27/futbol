@@ -55,25 +55,33 @@ if (window.location.pathname.includes('index') || window.location.pathname === '
             const portadaSrc = (c.fotos && c.fotos.length > 0) ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=800&q=80'; // Foto 1 o Default
             
             contenedor.innerHTML += `
-                <div class="card" style="padding:0; overflow:hidden;">
-                    <div style="height:150px; background-image:url('${portadaSrc}'); background-size:cover; background-position:center; position:relative;">
-                        <div style="position:absolute; top:10px; right:10px;">${estadoHtml}</div>
-                    </div>
+            <div class="card" style="padding:0; overflow:hidden; display:flex; flex-direction:column;">
+                <div style="width: 100%; aspect-ratio: 1 / 1; background-image: url('${portadaSrc}'); background-size: cover; background-position: center; position: relative;">
+                    <div style="position: absolute; top: 10px; right: 10px; z-index: 10;">${estadoHtml}</div>
+                </div>
+                
+                <div style="padding: 20px; position: relative; background: var(--card-bg);">
                     
-                    <div style="padding:20px;">
-                        <div style="display:flex; align-items:center; gap:10px; margin-top:-40px; margin-bottom:10px;">
-                            <img src="${logoSrc}" style="width:60px; height:60px; border-radius:50%; border:3px solid var(--card-bg); object-fit:cover;">
-                            <h3 style="margin-top:20px;">${c.nombre}</h3>
-                        </div>
-                        
-                        <p>⭐ ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'} | 💰 S/ ${c.precio} / hr</p>
-                        
-                        <div class="btn-group">
-                            <button onclick="abrirModal('${c.id}')">Ver Info y Reservar</button>
-                        </div>
+                    <img src="${logoSrc}" style="width: 75px; height: 75px; border-radius: 50%; border: 4px solid var(--bg-dark); object-fit: cover; position: absolute; top: -37px; left: 20px; z-index: 10;">
+                    
+                    <h3 style="margin-top: 35px; font-size: 1.3rem; text-transform: uppercase;">${c.nombre}</h3>
+                    
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 10px;">
+                        <i class="ph ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación no especificada'}
+                    </p>
+                    
+                    <p style="color: var(--primary-green); font-weight: 800; font-size: 1.1rem;">
+                        ⭐ ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'} | 💰 S/ ${c.precio} / hr
+                    </p>
+                    
+                    <div class="btn-group" style="margin-top: 15px;">
+                        <button onclick="abrirModal('${c.id}')">
+                            <i class="ph-bold ph-calendar-plus"></i> Ver Info y Reservar
+                        </button>
                     </div>
                 </div>
-            `;
+            </div>
+        `;
         });
     }
     cargarCanchasAlgoritmo();
