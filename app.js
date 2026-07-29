@@ -1,55 +1,64 @@
-// Navegación entre vistas
-const btnJugador = document.getElementById('btn-jugador');
-const btnAdmin = document.getElementById('btn-admin');
-const vistaJugador = document.getElementById('vista-jugador');
-const vistaAdmin = document.getElementById('vista-admin');
+// Nuestra "Base de Datos" de las canchas afiliadas que pagan su mensualidad
+const baseDeDatosCanchas = {
+    maracana: {
+        id: 'maracana',
+        nombre: 'El Maracaná Fútbol 7',
+        precio: 'S/ 60.00',
+        servicios: '✓ Balón profesional ✓ 14 Chalecos ✓ Camerinos',
+        imagenTema: 'linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8))'
+    },
+    wembley: {
+        id: 'wembley',
+        nombre: 'Wembley Sintética 5',
+        precio: 'S/ 40.00',
+        servicios: '✓ Balón ✓ Bebedero ✗ Sin chalecos',
+        imagenTema: 'linear-gradient(rgba(4, 120, 87, 0.6), rgba(0,0,0,0.8))'
+    }
+};
 
-btnJugador.addEventListener('click', () => {
-    vistaJugador.classList.remove('seccion-oculta');
-    vistaJugador.classList.add('seccion-activa');
-    
-    vistaAdmin.classList.remove('seccion-activa');
-    vistaAdmin.classList.add('seccion-oculta');
-    
-    btnJugador.classList.add('active');
-    btnAdmin.classList.remove('active');
-});
+// 1. Lógica para index.html: Pintar las canchas en la página principal
+const contenedorCanchas = document.getElementById('canchas-container');
+if (contenedorCanchas) {
+    Object.values(baseDeDatosCanchas).forEach(cancha => {
+        contenedorCanchas.innerHTML += `
+            <div class="cancha-card">
+                <h3>${cancha.nombre}</h3>
+                <p class="text-verde font-bold">${cancha.precio} / hora</p>
+                <p class="text-small" style="color: #94A3B8; font-size: 12px; margin-bottom: 15px;">${cancha.servicios}</p>
+                <!-- Al hacer clic, enviamos el ID de la cancha en la URL -->
+                <a href="cancha.html?id=${cancha.id}" class="btn-login" style="display:block; text-align:center;">Ver horarios y Reservar</a>
+            </div>
+        `;
+    });
+}
 
-btnAdmin.addEventListener('click', () => {
-    vistaAdmin.classList.remove('seccion-oculta');
-    vistaAdmin.classList.add('seccion-activa');
-    
-    vistaJugador.classList.remove('seccion-activa');
-    vistaJugador.classList.add('seccion-oculta');
-    
-    btnAdmin.classList.add('active');
-    btnJugador.classList.remove('active');
-});
+// 2. Lógica para cancha.html: Leer la URL y mostrar la info de la cancha correcta
+function cargarDatosCancha() {
+    // Leemos el link, ej: cancha.html?id=maracana
+    const parametros = new URLSearchParams(window.location.search);
+    const idCancha = parametros.get('id');
 
-// Función para el jugador al darle a reservar
-function reservarCancha(nombreCancha) {
-    // Aquí puedes pedir el nombre del jugador en el futuro
-    let nombre = prompt("Ingresa tu nombre para la reserva:");
-    
-    if(nombre) {
-        alert(`¡Pase filtrado, ${nombre}! ⚽\nHas iniciado la reserva para: ${nombreCancha}.\n\nPronto implementaremos la pasarela de pagos.`);
+    // Buscamos la cancha en nuestra base de datos
+    const datos = baseDeDatosCanchas[idCancha];
+
+    if (datos) {
+        // Reemplazamos los textos en el HTML
+        document.getElementById('cancha-nombre-header').innerText = datos.nombre;
+        document.getElementById('cancha-titulo').innerText = datos.nombre;
+        document.getElementById('cancha-precio').innerText = datos.precio + ' / hora';
+        document.getElementById('cancha-servicios').innerText = datos.servicios;
+        document.getElementById('cancha-imagen').style.background = datos.imagenTema;
     } else {
-        alert("Reserva cancelada. Necesitamos tu nombre para separar la cancha.");
+        // Si entra al link sin ID o inventa uno
+        document.getElementById('cancha-titulo').innerText = "Cancha no encontrada";
+        document.getElementById('cancha-precio').innerText = "";
     }
 }
 
-// Lógica para guardar ajustes del administrador
-const switches = document.querySelectorAll('input[type="checkbox"]');
-const mensajeGuardado = document.getElementById('mensaje-guardado');
-
-switches.forEach(interruptor => {
-    interruptor.addEventListener('change', () => {
-        // Muestra un mensaje temporal de guardado
-        mensajeGuardado.classList.remove('oculto');
-        mensajeGuardado.style.color = "#10B981";
-        
-        setTimeout(() => {
-            mensajeGuardado.classList.add('oculto');
-        }, 2000);
-    });
-});
+// Función del botón reservar
+function confirmarReserva() {
+    const nombre = prompt("Para separar el horario, ingresa tu nombre:");
+    if(nombre) {
+        alert(`¡Reserva en proceso para ${nombre}! ⚽\n(En la versión final, esto abrirá la pasarela de pagos para abonar la mensualidad / reserva).`);
+    }
+}
