@@ -4,7 +4,12 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  // Pega tus claves aquí nuevamente
+  apiKey: "AIzaSyDZnSndcRrzQquTa2ExKYcTgjyaFdJU_es",
+  authDomain: "futbol-a74a2.firebaseapp.com",
+  projectId: "futbol-a74a2",
+  storageBucket: "futbol-a74a2.firebasestorage.app",
+  messagingSenderId: "383262709861",
+  appId: "1:383262709861:web:ebf392c929cf704f840e8c"
 };
 
 const app = initializeApp(firebaseConfig);
