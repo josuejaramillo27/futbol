@@ -1,17 +1,17 @@
 /* =========================================
-   VARIABLES Y ESTÉTICA PREMIUM FUTBOL
+   NUEVA ESTÉTICA PREMIUM (Minimalista)
 ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
 
 :root {
-    --bg-dark: #0b132b; /* Azul noche profundo */
-    --card-bg: rgba(28, 37, 65, 0.85); /* Transparencia de tarjeta */
-    --primary-green: #00e676; /* Verde Neón / Césped Premium */
-    --primary-hover: #00c853;
-    --text-main: #ffffff;
-    --text-muted: #94a3b8;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --danger: #ff4757;
+    --bg-dark: #121212; /* Fondo negro elegante */
+    --card-bg: #1e1e1e; /* Gris oscuro para contraste */
+    --primary-green: #00d26a; /* Verde esmeralda premium y legible */
+    --primary-hover: #00b359;
+    --text-main: #f5f5f5; /* Blanco humo */
+    --text-muted: #a0a0a0;
+    --border-color: #2a2a2a;
+    --danger: #ff4d4d;
     --font-family: 'Poppins', sans-serif;
 }
 
@@ -19,11 +19,6 @@
 
 body {
     background-color: var(--bg-dark);
-    /* Fondo de estadio con capa oscura para legibilidad */
-    background-image: linear-gradient(rgba(11, 19, 43, 0.85), rgba(11, 19, 43, 0.95)), url('https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.6;
     min-height: 100vh;
@@ -33,9 +28,9 @@ body {
    NAVEGACIÓN Y CONTENEDORES
 ========================================= */
 header {
-    background: rgba(11, 19, 43, 0.9);
-    backdrop-filter: blur(15px);
-    padding: 20px;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -44,29 +39,49 @@ header {
     top: 0;
     z-index: 100;
 }
-header h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary-green); }
+header h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+header h1 i { color: var(--primary-green); }
 
-main { max-width: 1000px; margin: 0 auto; padding: 30px 20px; }
+main { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
 section { margin-bottom: 40px; }
 
 /* =========================================
-   TARJETAS Y FORMULARIOS
+   CUADRÍCULA DE CANCHAS (Solución al tamaño gigante)
+========================================= */
+#lista-canchas {
+    display: grid;
+    /* Esto crea columnas de tamaño perfecto (min 280px, max 1fr) */
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px; 
+    margin-top: 20px;
+}
+
+/* =========================================
+   TARJETAS
 ========================================= */
 .card, #login-container {
     background: var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 24px;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, border-color 0.2s;
 }
+.card:hover { border-color: #333; transform: translateY(-3px); }
 
-/* Separación limpia de elementos de formulario */
+/* Etiquetas de estado con CONTRASTE MEJORADO */
+.badge-estado { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
+.badge-abierto { background: var(--primary-green); color: #000; box-shadow: 0 2px 10px rgba(0, 210, 106, 0.3); }
+.badge-cerrado { background: #2a2a2a; color: var(--text-muted); border: 1px solid #444; }
+
+/* =========================================
+   FORMULARIOS Y BOTONES
+========================================= */
 form { display: flex; flex-direction: column; gap: 15px; }
 
 input, textarea {
     width: 100%;
-    background: rgba(255, 255, 255, 0.05);
+    background: #121212;
     border: 1px solid var(--border-color);
     color: var(--text-main);
     padding: 14px;
@@ -74,14 +89,15 @@ input, textarea {
     outline: none;
     transition: 0.3s;
 }
-input:focus, textarea:focus { border-color: var(--primary-green); background: rgba(255,255,255,0.1); }
+input:focus, textarea:focus { border-color: var(--primary-green); }
 
-/* =========================================
-   BOTONES SEPARADOS Y ELEGANTES
-========================================= */
 .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
-button {
+button, .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     background: var(--primary-green);
     color: #000;
     font-weight: 800;
@@ -89,139 +105,71 @@ button {
     padding: 14px 24px;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     width: 100%;
-    font-size: 1rem;
+    font-size: 0.95rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    text-decoration: none;
 }
-button:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 230, 118, 0.4); }
+button:hover, .btn:hover { background: var(--primary-hover); transform: scale(1.02); }
 
-.btn-outline { background: transparent; color: var(--primary-green); border: 2px solid var(--primary-green); }
-.btn-outline:hover { background: rgba(0, 230, 118, 0.1); }
+.btn-outline { background: transparent; color: var(--text-main); border: 2px solid var(--border-color); }
+.btn-outline:hover { background: var(--border-color); color: var(--text-main); transform: scale(1.02); }
 
 /* =========================================
    RESEÑAS ESTILO INDRIVE
 ========================================= */
-.estrellas-container { display: flex; gap: 10px; font-size: 2rem; color: #555; justify-content: center; margin: 15px 0; cursor: pointer; }
+.estrellas-container { display: flex; gap: 10px; font-size: 2rem; color: #333; justify-content: center; margin: 15px 0; cursor: pointer; }
 .estrellas-container i.activa { color: #FFD700; }
-
 .tags-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; }
-.tag-resena {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid var(--border-color);
-    padding: 8px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: 0.3s;
-}
-.tag-resena.seleccionado { background: var(--primary-green); color: #000; font-weight: bold; border-color: var(--primary-green); }
-
-/* Etiquetas de estado */
-.badge-estado { padding: 5px 10px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; display: inline-block; margin-bottom: 10px; }
-.badge-abierto { background: rgba(0, 230, 118, 0.2); color: var(--primary-green); border: 1px solid var(--primary-green); }
-.badge-cerrado { background: rgba(255, 71, 87, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+.tag-resena { background: #121212; border: 1px solid var(--border-color); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
+.tag-resena.seleccionado { background: var(--text-main); color: #000; font-weight: bold; border-color: var(--text-main); }
 
 /* =========================================
-   VENTANA MODAL (POPUP)
+   NUEVA VENTANA MODAL (Rediseño)
 ========================================= */
 .modal-oculto {
     display: none;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85); /* Fondo oscuro transparente */
-    backdrop-filter: blur(5px);
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
     z-index: 1000;
     justify-content: center;
     align-items: center;
     padding: 20px;
 }
-
-.modal-oculto.mostrar {
-    display: flex; /* La clase que añade JS para mostrarla */
-    animation: fadeIn 0.3s ease;
-}
+.modal-oculto.mostrar { display: flex; animation: fadeIn 0.2s ease; }
 
 .modal-contenido {
     width: 100%;
-    max-width: 500px;
+    max-width: 450px; /* Tamaño perfecto como en celular */
     max-height: 90vh;
-    overflow-y: auto; /* Permite scroll si la info es larga */
+    overflow-y: auto;
+    background: var(--card-bg);
+    border-radius: 20px;
     position: relative;
-    background: var(--bg-dark); /* Color oscuro base */
-    border: 1px solid var(--primary-green);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .btn-cerrar {
     position: absolute;
     top: 15px; right: 15px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(0,0,0,0.6);
     color: white;
     width: 35px; height: 35px;
     border-radius: 50%;
     padding: 0; display: flex; justify-content: center; align-items: center;
+    z-index: 20;
+    border: none;
 }
-.btn-cerrar:hover { background: var(--danger); }
+.btn-cerrar:hover { background: var(--danger); color: white; }
+
+/* Scrollbar invisible para la modal */
+.modal-contenido::-webkit-scrollbar { width: 6px; }
+.modal-contenido::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-/* =========================================
-   PANTALLA DE LOGIN (SOCIOS PREMIUM)
-========================================= */
-.login-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    /* Usa el mismo fondo elegante de estadio */
-    background-image: linear-gradient(rgba(11, 19, 43, 0.85), rgba(11, 19, 43, 0.95)), url('https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1920&q=80');
-    background-size: cover;
-    background-position: center;
-    padding: 20px;
-}
-
-.login-wrapper {
-    width: 100%;
-    max-width: 450px; /* <- ESTO EVITA QUE LOS BOTONES SE VEAN LARGOS Y FEOS */
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.login-header h2 {
-    color: var(--primary-green);
-    font-size: 2.2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 5px;
-}
-
-.login-header h3 {
-    color: var(--text-main);
-    font-size: 1.3rem;
-}
-
-.login-header p {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-top: 5px;
-}
-
-.login-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* Separación perfecta entre botones */
-    margin-top: 20px;
-}
-
-.login-buttons .btn {
-    margin-top: 0; /* Quitamos el margen por defecto porque ya usamos 'gap' */
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
