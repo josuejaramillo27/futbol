@@ -15,20 +15,46 @@
 
     <main>
         <section class="card mt-2" id="configuracion-cancha">
-    <h3>⚙️ Configura tu Mini-Sitio</h3>
-    <p>Estos datos serán visibles para los jugadores al momento de reservar.</p>
+    <h3>⚙️ Configura tu Mini-Sitio (Público)</h3>
     
     <form id="form-perfil-cancha">
-        <label for="admin-nombre-cancha">Nombre Comercial de la Cancha:</label>
-        <input type="text" id="admin-nombre-cancha" placeholder="Ej. El Maracaná Sintético" required>
+        <label>Nombre de la Cancha:</label>
+        <input type="text" id="admin-nombre" placeholder="Ej. El Maracaná Sintético" required>
         
-        <label for="admin-precio">Precio por Hora (S/):</label>
+        <label>Logo de tu negocio (URL de imagen):</label>
+        <input type="text" id="admin-logo" placeholder="https://ejemplo.com/milogo.jpg">
+
+        <label>Descripción de tus servicios:</label>
+        <textarea id="admin-descripcion" rows="3" placeholder="Contamos con pasto FIFA Quality, pelotas nuevas y estacionamiento privado..."></textarea>
+
+        <label>Precio por Hora (S/):</label>
         <input type="number" id="admin-precio" placeholder="Ej. 80" required>
         
-        <label for="admin-servicios">Servicios Incluidos (Separados por coma):</label>
-        <input type="text" id="admin-servicios" placeholder="Ej. Balón, Chalecos, Duchas, Parqueo" required>
+        <label>Dirección exacta (Texto):</label>
+        <input type="text" id="admin-ubicacion-texto" placeholder="Av. Los Pinos 123, Piura">
         
-        <button type="submit" class="btn">Guardar Cambios y Publicar</button>
+        <label>Link de Google Maps:</label>
+        <input type="url" id="admin-ubicacion-link" placeholder="https://maps.app.goo.gl/...">
+
+        <div style="display: flex; gap: 15px;">
+            <div style="flex: 1;">
+                <label>Hora de Apertura:</label>
+                <input type="time" id="admin-apertura" required>
+            </div>
+            <div style="flex: 1;">
+                <label>Hora de Cierre:</label>
+                <input type="time" id="admin-cierre" required>
+            </div>
+        </div>
+
+        <label>Galería de Fotos (Pega URLs de tus imágenes):</label>
+        <input type="text" id="admin-foto1" placeholder="Foto 1 (URL)">
+        <input type="text" id="admin-foto2" placeholder="Foto 2 (URL)">
+        <input type="text" id="admin-foto3" placeholder="Foto 3 (URL)">
+
+        <div class="btn-group">
+            <button type="submit">Guardar y Publicar Configuración</button>
+        </div>
     </form>
     <p id="mensaje-exito" style="color: var(--primary-green); display: none; margin-top: 10px;">¡Perfil actualizado exitosamente!</p>
 </section>
