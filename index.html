@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva tu Cancha Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <header class="navbar">
+        <div class="logo">⚽ GolazoApp</div>
+        <nav>
+            <button id="btn-jugador" class="active">Vista Jugador</button>
+            <button id="btn-admin">Panel Administrador</button>
+        </nav>
+    </header>
 
+    <!-- VISTA DEL JUGADOR -->
+    <main id="vista-jugador" class="seccion-activa">
+        <section class="hero">
+            <h1>Pisa el césped. Asegura tu partido.</h1>
+            <p>Reserva tu cancha sintética en segundos.</p>
+        </section>
+
+        <section class="canchas-grid">
+            <div class="cancha-card">
+                <div class="cancha-img">Fútbol 7</div>
+                <h3>Cancha "El Maracaná"</h3>
+                <p>S/ 60.00 por hora</p>
+                <p class="condiciones">✓ Balón incluido ✓ Chalecos</p>
+                <button class="btn-reservar" onclick="reservarCancha('El Maracaná')">Reservar Ahora</button>
+            </div>
+            
+            <div class="cancha-card">
+                <div class="cancha-img">Fútbol 5</div>
+                <h3>Cancha "Wembley"</h3>
+                <p>S/ 40.00 por hora</p>
+                <p class="condiciones">✓ Balón incluido ✗ Sin chalecos</p>
+                <button class="btn-reservar" onclick="reservarCancha('Wembley')">Reservar Ahora</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- VISTA DEL ADMINISTRADOR -->
+    <main id="vista-admin" class="seccion-oculta">
+        <section class="dashboard">
+            <h2>Panel de Control de la Cancha</h2>
+            
+            <div class="ajustes-modulo">
+                <div>
+                    <h3>🏆 Sistema de Fidelidad</h3>
+                    <p>Dar 1 hora gratis cada 10 partidos.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-fidelidad">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="ajustes-modulo">
+                <div>
+                    <h3>📣 Anuncios de Campeonatos</h3>
+                    <p>Mostrar torneos a los jugadores.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="toggle-torneos" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <p id="mensaje-guardado" class="oculto">¡Ajustes guardados!</p>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
