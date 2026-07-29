@@ -1,0 +1,180 @@
+/* Variables de colores */
+:root {
+    --verde-cesped: #10B981;
+    --verde-oscuro: #047857;
+    --fondo-oscuro: #111827;
+    --tarjeta-fondo: #1F2937;
+    --texto-claro: #F9FAFB;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--fondo-oscuro);
+    color: var(--texto-claro);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 40px;
+    background-color: #000;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--verde-cesped);
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.navbar button {
+    background: transparent;
+    color: white;
+    padding: 10px 15px;
+    font-size: 16px;
+}
+
+.navbar button.active {
+    border-bottom: 2px solid var(--verde-cesped);
+    color: var(--verde-cesped);
+}
+
+.hero {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1518605368461-1ee7c532066d?auto=format&fit=crop&q=80') center/cover;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    color: var(--verde-cesped);
+}
+
+/* Tarjetas de Canchas */
+.canchas-grid {
+    display: flex;
+    gap: 20px;
+    padding: 40px;
+    justify-content: center;
+}
+
+.cancha-card {
+    background-color: var(--tarjeta-fondo);
+    padding: 20px;
+    border-radius: 12px;
+    width: 300px;
+    text-align: center;
+    border: 1px solid #374151;
+}
+
+.cancha-img {
+    height: 150px;
+    background-color: var(--verde-oscuro);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.condiciones {
+    font-size: 12px;
+    color: #9CA3AF;
+}
+
+.btn-reservar {
+    background-color: var(--verde-cesped);
+    color: #000;
+    padding: 12px 20px;
+    width: 100%;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+.btn-reservar:hover {
+    background-color: var(--verde-oscuro);
+    color: white;
+    transform: scale(1.05); /* Efecto de acercamiento */
+}
+
+/* Panel Administrador */
+.dashboard {
+    max-width: 600px;
+    margin: 40px auto;
+    background-color: var(--tarjeta-fondo);
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.ajustes-modulo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #111827;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+/* Switch (Botón de encendido/apagado) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #4B5563;
+    border-radius: 24px;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--verde-cesped);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.oculto { display: none; }
+.seccion-oculta { display: none; }
+.seccion-activa { display: block; animation: fadeIn 0.5s; }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
