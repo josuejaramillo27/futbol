@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de Cancha</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <a href="index.html">⬅ Volver al Hub</a>
+        <h1 id="cancha-nombre">Cargando...</h1>
+    </header>
+
+    <main class="container">
+        <section class="cancha-detalle card">
+            <h2 id="cancha-precio"></h2>
+            <p><strong>Servicios Incluidos: </strong><span id="cancha-servicios"></span></p>
+            
+            <h3>Disponibilidad Hoy</h3>
+            <div id="horarios-grid" class="horarios-grid">
+                </div>
+        </section>
+
+        <section class="reseñas card mt-2">
+            <h3>Reseñas de Jugadores</h3>
+            <div id="lista-reseñas">
+                </div>
+            <div class="form-reseña">
+                <h4>Dejar una reseña</h4>
+                <p><small>Solo para jugadores que han completado una reserva aquí.</small></p>
+                <select id="rating"><option>5 Estrellas</option><option>4 Estrellas</option></select>
+                <textarea placeholder="¿Qué tal estuvo la cancha?"></textarea>
+                <button class="btn">Enviar Reseña</button>
+            </div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
