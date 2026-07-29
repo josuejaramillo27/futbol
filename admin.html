@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración | Dueños</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <h1>Dashboard Dueño 📊</h1>
+        <a href="index.html">Salir</a>
+    </header>
+
+    <main class="container">
+        <div class="grid">
+            <div class="card stat-card">
+                <h3>Ingresos del Día</h3>
+                <p class="stat-number">S/ 320.00</p>
+            </div>
+            <div class="card stat-card">
+                <h3>Reservas Web</h3>
+                <p class="stat-number">4</p>
+            </div>
+        </div>
+
+        <section class="card mt-2">
+            <h3>Logística de Hoy</h3>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Hora</th>
+                        <th>Cliente</th>
+                        <th>Estado Pago</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>19:00</td>
+                        <td>Equipo "Los Tigres" (Cliente Fijo)</td>
+                        <td><span class="badge verde">Pagado 100%</span></td>
+                        <td><button class="btn btn-outline">Ver Detalle</button></td>
+                    </tr>
+                    <tr>
+                        <td>20:00</td>
+                        <td>Carlos M. (Web)</td>
+                        <td><span class="badge amarillo">Seña 50%</span></td>
+                        <td><button class="btn btn-outline">Confirmar Resto</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>
