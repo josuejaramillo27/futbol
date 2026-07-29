@@ -14,6 +14,24 @@
     </header>
 
     <main>
+        <section class="card mt-2" id="configuracion-cancha">
+    <h3>⚙️ Configura tu Mini-Sitio</h3>
+    <p>Estos datos serán visibles para los jugadores al momento de reservar.</p>
+    
+    <form id="form-perfil-cancha">
+        <label for="admin-nombre-cancha">Nombre Comercial de la Cancha:</label>
+        <input type="text" id="admin-nombre-cancha" placeholder="Ej. El Maracaná Sintético" required>
+        
+        <label for="admin-precio">Precio por Hora (S/):</label>
+        <input type="number" id="admin-precio" placeholder="Ej. 80" required>
+        
+        <label for="admin-servicios">Servicios Incluidos (Separados por coma):</label>
+        <input type="text" id="admin-servicios" placeholder="Ej. Balón, Chalecos, Duchas, Parqueo" required>
+        
+        <button type="submit" class="btn">Guardar Cambios y Publicar</button>
+    </form>
+    <p id="mensaje-exito" style="color: var(--primary-green); display: none; margin-top: 10px;">¡Perfil actualizado exitosamente!</p>
+</section>
         <section id="kpis" style="display: flex; gap: 20px;">
             <div>
                 <h3>Ingresos Hoy</h3>
