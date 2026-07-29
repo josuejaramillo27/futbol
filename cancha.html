@@ -27,13 +27,19 @@
             <h3>Reseñas de Jugadores</h3>
             <div id="lista-reseñas">
                 </div>
-            <div class="form-reseña">
-                <h4>Dejar una reseña</h4>
-                <p><small>Solo para jugadores que han completado una reserva aquí.</small></p>
-                <select id="rating"><option>5 Estrellas</option><option>4 Estrellas</option></select>
-                <textarea placeholder="¿Qué tal estuvo la cancha?"></textarea>
-                <button class="btn">Enviar Reseña</button>
-            </div>
+            <div class="form-reseña card mt-2">
+    <h4>Deja tu Reseña (Estilo InDrive)</h4>
+    <div class="estrellas-container">
+        <i class="ph ph-star" data-valor="1"></i>
+        <i class="ph ph-star" data-valor="2"></i>
+        <i class="ph ph-star" data-valor="3"></i>
+        <i class="ph ph-star" data-valor="4"></i>
+        <i class="ph ph-star" data-valor="5"></i>
+    </div>
+    <div id="tags-dinamicos" class="tags-container">
+        </div>
+    <button class="btn btn-outline">Calificar Cancha</button>
+</div>
         </section>
     </main>
     <script type="module" src="app.js"></script>
