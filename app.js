@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
@@ -11,6 +12,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let canchasGlobales = []; // Guardamos las canchas en memoria para la Modal
 
@@ -120,5 +122,152 @@ const btnCerrar = document.getElementById('cerrar-modal');
 if(btnCerrar) {
     btnCerrar.addEventListener('click', () => {
         document.getElementById('modal-cancha').classList.remove('mostrar');
+    });
+}
+// ==========================================
+// LÓGICA DE PRIVACIDAD: NOMBRES (Ej: Carlos J.)
+// ==========================================
+function formatearNombre(nombreCompleto) {
+    if (!nombreCompleto) return "Jugador";
+    const partes = nombreCompleto.split(" ");
+    if (partes.length > 1) {
+        return `${partes[0]} ${partes[1].charAt(0)}.`; // Retorna "Carlos J."
+    }
+    return partes[0];
+}
+
+// ==========================================
+// LÓGICA DE LA BOLSA DE JUGADORES
+// ==========================================
+if (window.location.pathname.includes('jugadores.html')) {
+    const provider = new GoogleAuthProvider();
+    const btnLogin = document.getElementById('btn-login-google');
+    const formAnuncio = document.getElementById('form-anuncio');
+    const listaJugadores = document.getElementById('lista-jugadores');
+    let usuarioActual = null;
+
+    // Detectar si está logueado
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            usuarioActual = user;
+            btnLogin.style.display = 'none';
+            formAnuncio.style.display = 'block';
+        } else {
+            usuarioActual = null;
+            btnLogin.style.display = 'block';
+            formAnuncio.style.display = 'none';
+        }
+    });
+
+    // Login con Google
+    btnLogin.addEventListener('click', async () => {
+        try { await signInWithPopup(auth, provider); } 
+        catch (error) { alert("Error al iniciar sesión: " + error.message); }
+    });
+
+    // Publicar anuncio
+    formAnuncio.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const texto = document.getElementById('texto-anuncio').value;
+        if (!usuarioActual || texto.trim() === "") return;
+
+        await addDoc(collection(db, "bolsa_jugadores"), {
+            nombre: formatearNombre(usuarioActual.displayName),
+            texto: texto,
+            uid: usuarioActual.uid, // Guardamos su ID secreto para que solo él pueda borrarlo
+            fecha: serverTimestamp()
+        });
+        document.getElementById('texto-anuncio').value = "";
+    });
+
+    // Leer anuncios EN TIEMPO REAL
+    const q = query(collection(db, "bolsa_jugadores"), orderBy("fecha", "desc"));
+    onSnapshot(q, (snapshot) => {
+        listaJugadores.innerHTML = '';
+        if (snapshot.empty) listaJugadores.innerHTML = '<p style="text-align:center;">No hay anuncios hoy. ¡Sé el primero!</p>';
+        
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            
+            // Botón de eliminar SOLO si el anuncio es mío
+            let botonEliminar = "";
+            if (usuarioActual && data.uid === usuarioActual.uid) {
+                botonEliminar = `<button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);" onclick="eliminarAnuncio('${docSnap.id}')"><i class="ph ph-trash"></i> Borrar</button>`;
+            }
+
+            listaJugadores.innerHTML += `
+                <div class="card" style="padding: 15px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                        <strong style="color: var(--primary-green); font-size: 1.1rem;"><i class="ph-fill ph-user-circle"></i> ${data.nombre}</strong>
+                        ${botonEliminar}
+                    </div>
+                    <p style="color: var(--text-main); font-size: 0.95rem;">${data.texto}</p>
+                </div>
+            `;
+        });
+    });
+
+    // Función global para borrar anuncio
+    window.eliminarAnuncio = async function(idDoc) {
+        if(confirm("¿Seguro que deseas eliminar este anuncio?")) {
+            await deleteDoc(doc(db, "bolsa_jugadores", idDoc));
+        }
+    };
+}
+
+// ==========================================
+// REPARACIÓN DE LA PÁGINA DE RESEÑAS
+// ==========================================
+if (window.location.pathname.includes('cancha.html')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const idCancha = urlParams.get('id');
+
+    // Descargar datos de la cancha para el título
+    async function cargarCanchaInfo() {
+        if(!idCancha) return;
+        const docSnap = await getDoc(doc(db, "canchas", idCancha));
+        if (docSnap.exists()) {
+            document.getElementById('cancha-nombre').innerText = docSnap.data().nombre;
+            document.getElementById('cancha-precio').innerText = `💰 S/ ${docSnap.data().precio} / hr`;
+        }
+    }
+    cargarCanchaInfo();
+
+    // Lógica dinámica de estrellas y botones estilo InDrive
+    const estrellas = document.querySelectorAll('.estrellas-container i');
+    const tagsDiv = document.getElementById('tags-dinamicos');
+    const btnEnviar = document.getElementById('btn-enviar-resena');
+    
+    const tagsPositivos = ["Pasto excelente", "Buen balón", "Buena iluminación", "Limpio", "Buenos chalecos"];
+    const tagsNegativos = ["Pasto gastado", "Mala iluminación", "Faltan chalecos", "Mal trato"];
+
+    estrellas.forEach(estrella => {
+        estrella.addEventListener('click', (e) => {
+            const estrellasSeleccionadas = parseInt(e.target.dataset.valor);
+            
+            // Pintar estrellas seleccionadas de color dorado
+            estrellas.forEach(s => s.classList.remove('activa', 'ph-fill'));
+            estrellas.forEach(s => s.classList.add('ph-light'));
+            for(let i=0; i < estrellasSeleccionadas; i++) {
+                estrellas[i].classList.remove('ph-light');
+                estrellas[i].classList.add('ph-fill', 'activa');
+                estrellas[i].style.color = '#FFD700';
+            }
+
+            // Inyectar opciones de tags
+            tagsDiv.innerHTML = '';
+            const tagsAMostrar = estrellasSeleccionadas >= 4 ? tagsPositivos : tagsNegativos;
+            
+            tagsAMostrar.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'tag-resena';
+                span.innerText = tag;
+                span.onclick = () => span.classList.toggle('seleccionado');
+                tagsDiv.appendChild(span);
+            });
+
+            // Mostrar el botón de enviar
+            btnEnviar.style.display = 'block';
+        });
     });
 }
