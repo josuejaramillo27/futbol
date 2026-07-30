@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
-    <title>APP FUTBOL | Encuentra tu cancha</title>
+    <meta name="description" content="Encuentra canchas, jugadores y tu próximo partido.">
+    <title>APP FUTBOL | Encuentra dónde jugar</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -14,9 +15,10 @@
             <span class="brand-mark"><i class="ph-fill ph-soccer-ball"></i></span>
             <span>APP <b>FUTBOL</b></span>
         </a>
-        <a href="jugadores.html" class="topbar-link">
-            <i class="ph-bold ph-users-three"></i><span>Jugadores</span>
-        </a>
+        <nav class="topbar-nav" aria-label="Navegación principal">
+            <a href="#canchas" class="topbar-link"><i class="ph-bold ph-map-pin"></i><span>Canchas</span></a>
+            <a href="jugadores.html" class="topbar-link"><i class="ph-bold ph-users-three"></i><span>Jugadores</span></a>
+        </nav>
     </header>
 
     <main>
@@ -24,9 +26,9 @@
             <div class="hero-copy">
                 <div class="eyebrow"><span></span> TU FÚTBOL, TU COMUNIDAD</div>
                 <h1>Encuentra dónde<br><strong>jugar hoy.</strong></h1>
-                <p>Descubre canchas, encuentra jugadores y arma tu próximo partido en un solo lugar.</p>
+                <p>Descubre canchas, encuentra jugadores y arma tu próximo partido. Todo en un solo lugar.</p>
                 <div class="hero-actions">
-                    <a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Explorar canchas</a>
+                    <a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Encontrar cancha</a>
                     <a href="jugadores.html" class="btn btn-outline hero-secondary"><i class="ph-bold ph-users-three"></i> Buscar jugadores</a>
                 </div>
             </div>
@@ -46,12 +48,33 @@
         <section id="canchas" class="courts-section">
             <div class="section-heading">
                 <div>
-                    <div class="eyebrow"><span></span> CERCA DE TI</div>
+                    <div class="eyebrow"><span></span> DESCUBRE TU PRÓXIMO PARTIDO</div>
                     <h2>Canchas disponibles</h2>
-                    <p>Encuentra, reserva y juega.</p>
+                    <p>Filtra por ciudad, tipo, precio y disponibilidad.</p>
                 </div>
                 <div class="live-indicator"><span></span> Actualizado ahora</div>
             </div>
+
+            <div class="discover-panel">
+                <div class="discover-search">
+                    <i class="ph-bold ph-magnifying-glass"></i>
+                    <input id="filtro-busqueda" type="search" placeholder="Busca una cancha, zona o ciudad..." autocomplete="off">
+                </div>
+                <div class="filter-row">
+                    <label class="filter-field"><span>Ciudad</span><select id="filtro-ciudad"><option value="">Todas las ciudades</option></select></label>
+                    <label class="filter-field"><span>Tipo</span><select id="filtro-tipo"><option value="">Todos los tipos</option></select></label>
+                    <label class="filter-field"><span>Precio</span><select id="filtro-precio"><option value="">Cualquier precio</option><option value="0-30">Hasta S/ 30</option><option value="31-50">S/ 31 – 50</option><option value="51-80">S/ 51 – 80</option><option value="81-9999">S/ 81+</option></select></label>
+                    <label class="filter-field"><span>Ordenar</span><select id="filtro-orden"><option value="recomendadas">Recomendadas</option><option value="rating">Mejor calificadas</option><option value="precio-asc">Menor precio</option><option value="precio-desc">Mayor precio</option></select></label>
+                </div>
+                <div class="quick-filters" aria-label="Filtros rápidos">
+                    <button type="button" class="quick-filter" data-filter="abiertas"><i class="ph-fill ph-circle"></i> Abiertas ahora</button>
+                    <button type="button" class="quick-filter" data-filter="cerca"><i class="ph-fill ph-map-pin"></i> Cerca de mí</button>
+                    <button type="button" class="quick-filter" data-filter="top"><i class="ph-fill ph-star"></i> 4.5+ estrellas</button>
+                    <button type="button" class="quick-filter" data-filter="limpiar"><i class="ph-bold ph-x"></i> Limpiar filtros</button>
+                </div>
+            </div>
+
+            <div class="results-meta"><span id="contador-canchas">Buscando canchas...</span><span id="filtro-activo"></span></div>
             <div id="lista-canchas"></div>
         </section>
 
@@ -89,19 +112,13 @@
                 </div>
                 <div class="modal-body">
                     <div class="modal-title-row">
-                        <div>
-                            <h2 id="modal-nombre">Nombre Cancha</h2>
-                            <p class="modal-rating"><i class="ph-fill ph-star"></i> <span id="modal-rating"></span> <span class="dot">•</span> <i class="ph-bold ph-currency-circle-dollar"></i> S/ <span id="modal-precio"></span> / hr</p>
-                        </div>
+                        <div><h2 id="modal-nombre">Nombre Cancha</h2><p class="modal-rating"><i class="ph-fill ph-star"></i> <span id="modal-rating"></span> <span class="dot">•</span> <i class="ph-bold ph-currency-circle-dollar"></i> S/ <span id="modal-precio"></span> / hr</p></div>
                     </div>
                     <div class="modal-info-grid">
                         <div><i class="ph-bold ph-clock"></i><span><small>Horario</small><b id="modal-horario"></b></span></div>
                         <a id="modal-link-maps" href="#" target="_blank" rel="noopener"><i class="ph-bold ph-map-pin"></i><span><small>Ubicación</small><b>Ver en Google Maps</b></span><i class="ph-bold ph-arrow-up-right"></i></a>
                     </div>
-                    <div class="modal-description">
-                        <h3>Sobre la cancha</h3>
-                        <p id="modal-descripcion"></p>
-                    </div>
+                    <div class="modal-description"><h3>Sobre la cancha</h3><p id="modal-descripcion"></p></div>
                     <div class="btn-group modal-actions">
                         <a id="btn-whatsapp-reserva" href="#" target="_blank" rel="noopener" class="btn whatsapp-btn"><i class="ph-bold ph-whatsapp-logo"></i> Reservar por WhatsApp</a>
                         <a id="btn-ver-resenas" href="#" class="btn btn-outline"><i class="ph-bold ph-star"></i> Ver reseñas</a>
