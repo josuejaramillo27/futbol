@@ -3,35 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bolsa de Jugadores | APP FUTBOL</title>
+    <meta name="theme-color" content="#080B0A">
+    <title>Jugadores | APP FUTBOL</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1><i class="ph ph-soccer-ball"></i> APP FUTBOL</h1>
-        <a href="index.html" class="btn btn-outline" style="width: auto; padding: 8px 15px;"><i class="ph-bold ph-arrow-left"></i> Volver</a>
+    <header class="topbar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark"><i class="ph-fill ph-soccer-ball"></i></span>
+            <span>APP <b>FUTBOL</b></span>
+        </a>
+        <a href="index.html" class="topbar-link"><i class="ph-bold ph-arrow-left"></i><span>Volver</span></a>
     </header>
 
     <main>
-        <div class="card" style="text-align: center; margin-bottom: 25px;">
-            <h2>Bolsa de Jugadores 🤝</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Encuentra retadores o completa tu equipo para hoy.</p>
-            
-            <button id="btn-login-google" class="btn" style="margin-top: 15px; background: white; color: #000;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width: 20px;"> 
-                Iniciar sesión con Google para Publicar
+        <section class="hero-section" style="min-height:280px; padding-top:35px; padding-bottom:35px;">
+            <div class="hero-copy">
+                <div class="eyebrow"><span></span> COMUNIDAD EN TIEMPO REAL</div>
+                <h1 style="font-size:clamp(2rem,5vw,3.2rem);">Encuentra tu<br><strong>próximo partido.</strong></h1>
+                <p>Busca jugadores, completa tu equipo o encuentra retadores cerca de ti. Los anuncios se actualizan al instante.</p>
+            </div>
+            <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-three"></i></div>
+        </section>
+
+        <section class="card" style="max-width:760px; margin:0 auto 28px; padding:24px;">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+                <div class="community-icon"><i class="ph-fill ph-megaphone"></i></div>
+                <div>
+                    <div class="mini-label">PUBLICA EN LA COMUNIDAD</div>
+                    <h2 style="font-size:1.1rem;">¿Qué necesitas para jugar hoy?</h2>
+                </div>
+            </div>
+
+            <button id="btn-login-google" class="btn" style="background:#F5F7F6; color:#101311; box-shadow:none;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" style="width:18px;" alt="Google">
+                Iniciar sesión con Google para publicar
             </button>
 
-            <form id="form-anuncio" style="display: none; margin-top: 20px; text-align: left;">
-                <textarea id="texto-anuncio" rows="2" placeholder="Ej: Soy arquero y busco equipo para hoy en la noche..." required></textarea>
-                <button type="submit" class="btn">Publicar Anuncio</button>
+            <form id="form-anuncio" style="display:none; margin-top:18px;">
+                <textarea id="texto-anuncio" rows="3" maxlength="280" placeholder="Ej: Soy arquero y busco equipo para hoy a las 8 PM..." required></textarea>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <small style="color:var(--text-dim); font-size:.68rem;"><i class="ph-bold ph-shield-check"></i> Tu nombre se muestra como Nombre + inicial.</small>
+                    <button type="submit" class="btn" style="width:auto; white-space:nowrap;">Publicar <i class="ph-bold ph-paper-plane-tilt"></i></button>
+                </div>
             </form>
-        </div>
+        </section>
 
-        <div id="lista-jugadores" style="display: flex; flex-direction: column; gap: 15px;">
-            <p style="text-align: center;">Cargando anuncios de la ciudad...</p>
-        </div>
+        <section style="max-width:760px; margin:0 auto;">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow"><span></span> ÚLTIMAS PUBLICACIONES</div>
+                    <h2>Bolsa de jugadores</h2>
+                    <p>Mensajes recientes de la comunidad.</p>
+                </div>
+                <div class="live-indicator"><span></span> En vivo</div>
+            </div>
+            <div id="lista-jugadores" style="display:flex; flex-direction:column; gap:12px;">
+                <p style="text-align:center; color:var(--text-muted);">Cargando anuncios de la ciudad...</p>
+            </div>
+        </section>
     </main>
     <script type="module" src="app.js"></script>
 </body>
