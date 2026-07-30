@@ -1,36 +1,58 @@
-/* =========================================
-   NUEVA ESTÉTICA PREMIUM (Minimalista)
-========================================= */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --bg-dark: #121212; /* Fondo negro elegante */
-    --card-bg: #1e1e1e; /* Gris oscuro para contraste */
-    --primary-green: #00d26a; /* Verde esmeralda premium y legible */
-    --primary-hover: #00b359;
-    --text-main: #f5f5f5; /* Blanco humo */
-    --text-muted: #a0a0a0;
-    --border-color: #2a2a2a;
-    --danger: #ff4d4d;
+    --bg-dark: #080B0A;
+    --bg-deep: #050806;
+    --card-bg: rgba(23, 27, 25, 0.88);
+    --card-solid: #171B19;
+    --card-elevated: #1E2421;
+    --primary-green: #00D968;
+    --primary-hover: #00F57A;
+    --green-deep: #063D25;
+    --green-muted: #0B5C38;
+    --text-main: #F5F7F6;
+    --text-muted: #9BA5A0;
+    --border-color: rgba(255,255,255,0.08);
+    --border-green: rgba(0,217,104,0.25);
+    --danger: #FF4545;
+    --warning: #FFC857;
+    --gold: #FFD166;
     --font-family: 'Poppins', sans-serif;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --shadow: 0 18px 55px rgba(0,0,0,.35);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: var(--font-family); }
+html { scroll-behavior: smooth; }
 
 body {
+    background:
+        linear-gradient(rgba(5, 10, 8, .88), rgba(5, 10, 8, .94)),
+        radial-gradient(circle at 50% 0%, rgba(0,217,104,.10), transparent 34%),
+        url('https://images.unsplash.com/photo-1553778263-73a83bab9b0c?auto=format&fit=crop&w=2200&q=85') center/cover fixed;
     background-color: var(--bg-dark);
     color: var(--text-main);
     line-height: 1.6;
     min-height: 100vh;
 }
 
-/* =========================================
-   NAVEGACIÓN Y CONTENEDORES
-========================================= */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 25%, transparent 0%, rgba(0,0,0,.18) 55%, rgba(0,0,0,.55) 100%);
+    z-index: -1;
+}
+
+a { color: inherit; }
+
 header {
-    background: rgba(18, 18, 18, 0.95);
-    backdrop-filter: blur(10px);
-    padding: 15px 20px;
+    background: rgba(8, 11, 10, .78);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+    padding: 14px 20px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
@@ -39,57 +61,66 @@ header {
     top: 0;
     z-index: 100;
 }
-header h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+
+header h1 { font-size: 1.35rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 9px; letter-spacing: -.5px; }
 header h1 i { color: var(--primary-green); }
 
-main { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
-section { margin-bottom: 40px; }
+main { max-width: 1180px; margin: 0 auto; padding: 34px 20px 70px; }
+section { margin-bottom: 38px; }
 
-/* =========================================
-   CUADRÍCULA DE CANCHAS (Solución al tamaño gigante)
-========================================= */
+h2, h3 { letter-spacing: -.5px; }
+
 #lista-canchas {
     display: grid;
-    /* Esto crea columnas de tamaño perfecto (min 280px, max 1fr) */
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 25px; 
+    gap: 22px;
     margin-top: 20px;
 }
 
-/* =========================================
-   TARJETAS
-========================================= */
 .card, #login-container {
-    background: var(--card-bg);
+    background: linear-gradient(145deg, rgba(30,36,33,.92), rgba(18,22,20,.88));
     border: 1px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
     padding: 24px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    transition: transform 0.2s ease, border-color 0.2s;
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.035);
+    transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
-.card:hover { border-color: #333; transform: translateY(-3px); }
 
-/* Etiquetas de estado con CONTRASTE MEJORADO */
-.badge-estado { padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;}
-.badge-abierto { background: var(--primary-green); color: #000; box-shadow: 0 2px 10px rgba(0, 210, 106, 0.3); }
-.badge-cerrado { background: #2a2a2a; color: var(--text-muted); border: 1px solid #444; }
+.card:hover { border-color: var(--border-green); transform: translateY(-4px); box-shadow: 0 22px 65px rgba(0,0,0,.45), 0 0 30px rgba(0,217,104,.05); }
 
-/* =========================================
-   FORMULARIOS Y BOTONES
-========================================= */
-form { display: flex; flex-direction: column; gap: 15px; }
+.badge-estado {
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: .70rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .45px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
 
-input, textarea {
+.badge-abierto { background: var(--primary-green); color: #03150B; box-shadow: 0 4px 18px rgba(0,217,104,.28); }
+.badge-cerrado { background: rgba(25,29,27,.92); color: var(--text-muted); border: 1px solid rgba(255,255,255,.10); }
+
+form { display: flex; flex-direction: column; gap: 14px; }
+
+input, textarea, select {
     width: 100%;
-    background: #121212;
+    background: rgba(7,10,9,.72);
     border: 1px solid var(--border-color);
     color: var(--text-main);
-    padding: 14px;
-    border-radius: 8px;
+    padding: 14px 15px;
+    border-radius: var(--radius-md);
     outline: none;
-    transition: 0.3s;
+    transition: .25s ease;
 }
-input:focus, textarea:focus { border-color: var(--primary-green); }
+
+input::placeholder, textarea::placeholder { color: #69736E; }
+input:focus, textarea:focus, select:focus { border-color: rgba(0,217,104,.65); box-shadow: 0 0 0 4px rgba(0,217,104,.08); }
 
 .btn-group { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
@@ -98,78 +129,79 @@ button, .btn {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: var(--primary-green);
-    color: #000;
+    background: linear-gradient(135deg, var(--primary-green), #00B85C);
+    color: #021008;
     font-weight: 800;
-    border: none;
-    padding: 14px 24px;
-    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.06);
+    padding: 13px 20px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all .22s ease;
     width: 100%;
-    font-size: 0.95rem;
+    font-size: .88rem;
     text-transform: uppercase;
     text-decoration: none;
+    box-shadow: 0 8px 25px rgba(0,217,104,.13);
 }
-button:hover, .btn:hover { background: var(--primary-hover); transform: scale(1.02); }
 
-.btn-outline { background: transparent; color: var(--text-main); border: 2px solid var(--border-color); }
-.btn-outline:hover { background: var(--border-color); color: var(--text-main); transform: scale(1.02); }
+button:hover, .btn:hover { background: linear-gradient(135deg, var(--primary-hover), var(--primary-green)); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,217,104,.22); }
+button:active, .btn:active { transform: translateY(0); }
 
-/* =========================================
-   RESEÑAS ESTILO INDRIVE
-========================================= */
-.estrellas-container { display: flex; gap: 10px; font-size: 2rem; color: #333; justify-content: center; margin: 15px 0; cursor: pointer; }
-.estrellas-container i.activa { color: #FFD700; }
-.tags-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; }
-.tag-resena { background: #121212; border: 1px solid var(--border-color); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; }
-.tag-resena.seleccionado { background: var(--text-main); color: #000; font-weight: bold; border-color: var(--text-main); }
+.btn-outline { background: rgba(255,255,255,.025); color: var(--text-main); border: 1px solid var(--border-color); box-shadow: none; }
+.btn-outline:hover { background: rgba(255,255,255,.07); color: var(--text-main); border-color: rgba(255,255,255,.16); }
 
-/* =========================================
-   NUEVA VENTANA MODAL (Rediseño)
-========================================= */
+.estrellas-container { display: flex; gap: 10px; font-size: 2rem; color: #303633; justify-content: center; margin: 15px 0; cursor: pointer; }
+.estrellas-container i.activa { color: var(--gold); filter: drop-shadow(0 0 8px rgba(255,209,102,.2)); }
+.tags-container { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; margin-bottom: 15px; }
+.tag-resena { background: rgba(8,11,10,.7); border: 1px solid var(--border-color); padding: 8px 14px; border-radius: 999px; cursor: pointer; font-size: .82rem; transition: .2s; }
+.tag-resena:hover { border-color: rgba(0,217,104,.35); }
+.tag-resena.seleccionado { background: var(--text-main); color: #000; font-weight: 700; border-color: var(--text-main); }
+
 .modal-oculto {
     display: none;
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
+    inset: 0;
+    background: rgba(0,0,0,.78);
+    backdrop-filter: blur(16px) saturate(120%);
+    -webkit-backdrop-filter: blur(16px) saturate(120%);
     z-index: 1000;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 18px;
 }
-.modal-oculto.mostrar { display: flex; animation: fadeIn 0.2s ease; }
+.modal-oculto.mostrar { display: flex; animation: fadeIn .25s ease; }
 
 .modal-contenido {
     width: 100%;
-    max-width: 450px; /* Tamaño perfecto como en celular */
-    max-height: 90vh;
+    max-width: 480px;
+    max-height: 92vh;
     overflow-y: auto;
-    background: var(--card-bg);
-    border-radius: 20px;
+    background: linear-gradient(145deg, rgba(30,36,33,.97), rgba(12,16,14,.97));
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 24px;
     position: relative;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 30px 100px rgba(0,0,0,.65), 0 0 50px rgba(0,217,104,.06);
 }
 
-.btn-cerrar {
-    position: absolute;
-    top: 15px; right: 15px;
-    background: rgba(0,0,0,0.6);
-    color: white;
-    width: 35px; height: 35px;
-    border-radius: 50%;
-    padding: 0; display: flex; justify-content: center; align-items: center;
-    z-index: 20;
-    border: none;
-}
+.btn-cerrar { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,.62); color: white; width: 38px; height: 38px; border-radius: 50%; padding: 0; display: flex; justify-content: center; align-items: center; z-index: 20; border: 1px solid rgba(255,255,255,.12); }
 .btn-cerrar:hover { background: var(--danger); color: white; }
+.modal-contenido::-webkit-scrollbar { width: 5px; }
+.modal-contenido::-webkit-scrollbar-thumb { background: #343B37; border-radius: 10px; }
 
-/* Scrollbar invisible para la modal */
-.modal-contenido::-webkit-scrollbar { width: 6px; }
-.modal-contenido::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+#publicidad-dueños {
+    background: linear-gradient(135deg, rgba(0,217,104,.12), rgba(6,61,37,.20)) !important;
+    border: 1px solid var(--border-green);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 15px 45px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
 }
+
+@media (max-width: 640px) {
+    main { padding: 24px 14px 55px; }
+    header { padding: 12px 15px; }
+    header h1 { font-size: 1.12rem; }
+    #lista-canchas { grid-template-columns: 1fr; gap: 16px; }
+    .card { border-radius: 17px; }
+    .modal-contenido { max-height: 94vh; border-radius: 20px; }
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
