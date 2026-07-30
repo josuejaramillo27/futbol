@@ -146,70 +146,103 @@ if (window.location.pathname.includes('jugadores.html')) {
     const listaJugadores = document.getElementById('lista-jugadores');
     let usuarioActual = null;
 
-    // Detectar si está logueado
+    // 1. DICCIONARIO DE GROSERÍAS (Filtro de moderación)
+    const groserias = [
+        "mierda", "puta", "puto", "pendejo", "pendeja", "cabron", "cabrón", 
+        "carajo", "joder", "cojudo", "conchatumare", "ctm", "imbecil", "imbécil", 
+        "idiota", "perra", "estupido", "estúpido", "asco"
+    ];
+
+    function tieneGroserias(texto) {
+        const textoMinusculas = texto.toLowerCase();
+        // Verifica si alguna palabra prohibida está dentro del texto del jugador
+        return groserias.some(malaPalabra => textoMinusculas.includes(malaPalabra));
+    }
+
+    // 2. DETECTAR SESIÓN
     onAuthStateChanged(auth, (user) => {
         if (user) {
             usuarioActual = user;
-            btnLogin.style.display = 'none';
-            formAnuncio.style.display = 'block';
+            if(btnLogin) btnLogin.style.display = 'none';
+            if(formAnuncio) formAnuncio.style.display = 'flex'; 
         } else {
             usuarioActual = null;
-            btnLogin.style.display = 'block';
-            formAnuncio.style.display = 'none';
+            if(btnLogin) btnLogin.style.display = 'flex';
+            if(formAnuncio) formAnuncio.style.display = 'none'; 
         }
     });
 
-    // Login con Google
-    btnLogin.addEventListener('click', async () => {
-        try { await signInWithPopup(auth, provider); } 
-        catch (error) { alert("Error al iniciar sesión: " + error.message); }
-    });
-
-    // Publicar anuncio
-    formAnuncio.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const texto = document.getElementById('texto-anuncio').value;
-        if (!usuarioActual || texto.trim() === "") return;
-
-        await addDoc(collection(db, "bolsa_jugadores"), {
-            nombre: formatearNombre(usuarioActual.displayName),
-            texto: texto,
-            uid: usuarioActual.uid, // Guardamos su ID secreto para que solo él pueda borrarlo
-            fecha: serverTimestamp()
+    // 3. LOGIN CON GOOGLE
+    if(btnLogin) {
+        btnLogin.addEventListener('click', async () => {
+            try { await signInWithPopup(auth, provider); } 
+            catch (error) { alert("Error al iniciar sesión: " + error.message); }
         });
-        document.getElementById('texto-anuncio').value = "";
-    });
+    }
 
-    // Leer anuncios EN TIEMPO REAL
+    // 4. PUBLICAR ANUNCIO (Con validaciones de seguridad)
+    if(formAnuncio) {
+        formAnuncio.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const texto = document.getElementById('texto-anuncio').value;
+            
+            // Bloqueo estricto por si logran ver el formulario sin sesión
+            if (!usuarioActual) {
+                alert("🔒 Error: Debes iniciar sesión con Google para publicar.");
+                return;
+            }
+
+            if (texto.trim() === "") return;
+
+            // Bloqueo de Groserías
+            if (tieneGroserias(texto)) {
+                alert("⚠️ Lenguaje inapropiado detectado. Por favor, mantén el respeto en la comunidad.");
+                return;
+            }
+
+            // Si todo está bien, se guarda en la base de datos
+            await addDoc(collection(db, "bolsa_jugadores"), {
+                nombre: formatearNombre(usuarioActual.displayName),
+                texto: texto,
+                uid: usuarioActual.uid, 
+                fecha: serverTimestamp()
+            });
+            document.getElementById('texto-anuncio').value = "";
+        });
+    }
+
+    // 5. LEER ANUNCIOS EN TIEMPO REAL
     const q = query(collection(db, "bolsa_jugadores"), orderBy("fecha", "desc"));
     onSnapshot(q, (snapshot) => {
+        if(!listaJugadores) return;
         listaJugadores.innerHTML = '';
-        if (snapshot.empty) listaJugadores.innerHTML = '<p style="text-align:center;">No hay anuncios hoy. ¡Sé el primero!</p>';
+        if (snapshot.empty) listaJugadores.innerHTML = '<p style="text-align:center; color: var(--text-muted);">No hay anuncios hoy. ¡Sé el primero!</p>';
         
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
             
             // Botón de eliminar SOLO si el anuncio es mío
+            // ARREGLO VISUAL: Se agregó 'width: auto' para que no sea gigante
             let botonEliminar = "";
             if (usuarioActual && data.uid === usuarioActual.uid) {
-                botonEliminar = `<button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);" onclick="eliminarAnuncio('${docSnap.id}')"><i class="ph ph-trash"></i> Borrar</button>`;
+                botonEliminar = `<button class="btn btn-outline" style="width: auto; padding: 6px 15px; font-size: 0.8rem; border-color: var(--danger); color: var(--danger);" onclick="eliminarAnuncio('${docSnap.id}')"><i class="ph-bold ph-trash"></i> Borrar</button>`;
             }
 
             listaJugadores.innerHTML += `
                 <div class="card" style="padding: 15px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
-                        <strong style="color: var(--primary-green); font-size: 1.1rem;"><i class="ph-fill ph-user-circle"></i> ${data.nombre}</strong>
+                        <strong style="color: var(--primary-green); font-size: 1.1rem; display:flex; align-items:center; gap:5px;"><i class="ph-fill ph-user-circle"></i> ${data.nombre}</strong>
                         ${botonEliminar}
                     </div>
-                    <p style="color: var(--text-main); font-size: 0.95rem;">${data.texto}</p>
+                    <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5;">${data.texto}</p>
                 </div>
             `;
         });
     });
 
-    // Función global para borrar anuncio
+    // 6. FUNCIÓN PARA BORRAR
     window.eliminarAnuncio = async function(idDoc) {
-        if(confirm("¿Seguro que deseas eliminar este anuncio?")) {
+        if(confirm("¿Seguro que deseas eliminar tu anuncio?")) {
             await deleteDoc(doc(db, "bolsa_jugadores", idDoc));
         }
     };
