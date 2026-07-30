@@ -2,45 +2,39 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reserva de Cancha</title>
+    <title>Info y Reseñas | APP FUTBOL</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header class="navbar">
-        <a href="index.html">⬅ Volver al Hub</a>
-        <h1 id="cancha-nombre">Cargando...</h1>
+    <header>
+        <h1><i class="ph ph-soccer-ball"></i> APP FUTBOL</h1>
+        <a href="index.html" class="btn btn-outline" style="width: auto; padding: 8px 15px;"><i class="ph-bold ph-arrow-left"></i> Volver al Inicio</a>
     </header>
 
-    <main class="container">
-        <section class="cancha-detalle card">
-            <h2 id="cancha-precio"></h2>
-            <p><strong>Servicios Incluidos: </strong><span id="cancha-servicios"></span></p>
-            
-            <h3>Disponibilidad Hoy</h3>
-            <div id="horarios-grid" class="horarios-grid">
-                </div>
-        </section>
-
-        <section class="reseñas card mt-2">
-            <h3>Reseñas de Jugadores</h3>
-            <div id="lista-reseñas">
-                </div>
-            <div class="form-reseña card mt-2">
-    <h4>Deja tu Reseña (Estilo InDrive)</h4>
-    <div class="estrellas-container">
-        <i class="ph ph-star" data-valor="1"></i>
-        <i class="ph ph-star" data-valor="2"></i>
-        <i class="ph ph-star" data-valor="3"></i>
-        <i class="ph ph-star" data-valor="4"></i>
-        <i class="ph ph-star" data-valor="5"></i>
-    </div>
-    <div id="tags-dinamicos" class="tags-container">
+    <main>
+        <div class="card" style="text-align: center;">
+            <h2 id="cancha-nombre">Cargando Cancha...</h2>
+            <p style="color: var(--primary-green); font-weight: 800; font-size: 1.2rem; margin-top: 10px;" id="cancha-precio"></p>
         </div>
-    <button class="btn btn-outline">Calificar Cancha</button>
-</div>
-        </section>
+
+        <div class="card" style="margin-top: 20px;">
+            <h3 style="margin-bottom: 15px;">⭐ Deja tu Reseña (Estilo InDrive)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Haz clic en las estrellas para calificar tu experiencia.</p>
+            
+            <div class="estrellas-container">
+                <i class="ph ph-star" data-valor="1"></i>
+                <i class="ph ph-star" data-valor="2"></i>
+                <i class="ph ph-star" data-valor="3"></i>
+                <i class="ph ph-star" data-valor="4"></i>
+                <i class="ph ph-star" data-valor="5"></i>
+            </div>
+            
+            <div id="tags-dinamicos" class="tags-container"></div>
+            
+            <button class="btn" id="btn-enviar-resena" style="display: none;">Enviar Calificación</button>
+        </div>
     </main>
     <script type="module" src="app.js"></script>
 </body>
