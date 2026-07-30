@@ -3,83 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APP FUTBOL | Encuentra tu Cancha</title>
-    
+    <meta name="theme-color" content="#080B0A">
+    <title>APP FUTBOL | Encuentra tu cancha</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <header>
-        <h1>APP FUTBOL ⚽</h1>
-        </header>
+<body class="home-page">
+    <header class="topbar">
+        <a class="brand" href="index.html" aria-label="APP FUTBOL inicio">
+            <span class="brand-mark"><i class="ph-fill ph-soccer-ball"></i></span>
+            <span>APP <b>FUTBOL</b></span>
+        </a>
+        <a href="jugadores.html" class="topbar-link">
+            <i class="ph-bold ph-users-three"></i><span>Jugadores</span>
+        </a>
+    </header>
 
     <main>
-        <section style="margin-bottom: 30px; text-align: center;">
-        <a href="jugadores.html" style="display: block; background: linear-gradient(135deg, #00d26a 0%, #007a3d 100%); padding: 20px; border-radius: 16px; text-decoration: none; color: #000; box-shadow: 0 5px 20px rgba(0, 210, 106, 0.4); transition: transform 0.3s;">
-            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 5px;"><i class="ph-fill ph-users-three"></i> Bolsa de Jugadores (NUEVO)</h2>
-            <p style="font-weight: 600;">¿Te falta uno? ¿Buscas equipo? Entra aquí en tiempo real.</p>
-        </a>
-    </section>
-
-    <section>
-        <h2>Canchas Disponibles</h2>
-        <section>
-            <h2>Encuentra, Reserva y Juega.</h2>
-            <div id="lista-canchas">
+        <section class="hero-section">
+            <div class="hero-copy">
+                <div class="eyebrow"><span></span> TU FÚTBOL, TU COMUNIDAD</div>
+                <h1>Encuentra dónde<br><strong>jugar hoy.</strong></h1>
+                <p>Descubre canchas, encuentra jugadores y arma tu próximo partido en un solo lugar.</p>
+                <div class="hero-actions">
+                    <a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Explorar canchas</a>
+                    <a href="jugadores.html" class="btn btn-outline hero-secondary"><i class="ph-bold ph-users-three"></i> Buscar jugadores</a>
                 </div>
+            </div>
+            <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-soccer-ball"></i></div>
         </section>
 
-        <section>
-            <h3>Bolsa de Jugadores</h3>
-            <div id="bolsa-jugadores">
+        <section class="community-banner">
+            <div class="community-icon"><i class="ph-fill ph-users-three"></i></div>
+            <div class="community-copy">
+                <span class="mini-label">NUEVO · EN TIEMPO REAL</span>
+                <h2>Bolsa de Jugadores</h2>
+                <p>¿Te falta uno? ¿Buscas equipo o retadores para hoy?</p>
+            </div>
+            <a href="jugadores.html" class="btn community-btn">Entrar <i class="ph-bold ph-arrow-up-right"></i></a>
+        </section>
+
+        <section id="canchas" class="courts-section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow"><span></span> CERCA DE TI</div>
+                    <h2>Canchas disponibles</h2>
+                    <p>Encuentra, reserva y juega.</p>
                 </div>
+                <div class="live-indicator"><span></span> Actualizado ahora</div>
+            </div>
+            <div id="lista-canchas"></div>
         </section>
 
-        <hr>
-
-        <section id="publicidad-dueños" style="text-align: center; padding: 20px; background-color: #f1f1f1; color: #333;">
-            <h2>¿Eres dueño de una cancha? 🏟️</h2>
-            <p>Digitaliza tus reservas, evita inasistencias y atrae cientos de jugadores en tu ciudad.</p>
-            <button id="btn-contacto-admin">Únete a la Red APP FUTBOL</button>
+        <section class="player-preview">
+            <div>
+                <div class="eyebrow"><span></span> COMUNIDAD</div>
+                <h2>¿Te falta un jugador?</h2>
+                <p>Publica lo que necesitas y conecta con otros jugadores de tu ciudad.</p>
+            </div>
+            <a href="jugadores.html" class="btn btn-outline">Ver bolsa <i class="ph-bold ph-arrow-right"></i></a>
         </section>
+
+        <section id="publicidad-dueños" class="owner-cta">
+            <div class="owner-icon"><i class="ph-fill ph-buildings"></i></div>
+            <div class="owner-copy">
+                <span class="mini-label">PARA DUEÑOS DE CANCHAS</span>
+                <h2>Haz crecer tu cancha con APP FUTBOL.</h2>
+                <p>Digitaliza reservas, reduce inasistencias y consigue nuevos jugadores.</p>
+            </div>
+            <button id="btn-contacto-admin" class="btn">Únete a la red <i class="ph-bold ph-arrow-up-right"></i></button>
+        </section>
+
+        <footer class="site-footer">
+            <span><i class="ph-fill ph-soccer-ball"></i> APP FUTBOL</span>
+            <span>Juega más. Organiza mejor.</span>
+        </footer>
+
         <div id="modal-cancha" class="modal-oculto">
-    <div class="modal-contenido">
-        
-        <button id="cerrar-modal" class="btn-cerrar"><i class="ph ph-x"></i></button>
-        
-        <div style="position: relative;">
-            <img id="modal-imagen-principal" src="" style="width: 100%; aspect-ratio: 1 / 1; object-fit: cover; border-bottom: 1px solid var(--border-color);">
-            
-            <img id="modal-logo" src="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); position: absolute; bottom: -35px; left: 20px;">
-        </div>
-        
-        <div style="padding: 45px 20px 25px 20px;">
-            <h2 id="modal-nombre" style="font-size: 1.6rem; font-weight: 800; margin-bottom: 5px;">Nombre Cancha</h2>
-            <p style="color: var(--primary-green); font-weight: 800; font-size: 1.1rem;">
-                ⭐ <span id="modal-rating"></span> | 💰 S/ <span id="modal-precio"></span> / hr
-            </p>
-            
-            <div style="margin: 20px 0; padding: 15px; background: #121212; border-radius: 12px; border: 1px solid var(--border-color);">
-                <p style="margin-bottom: 8px;"><i class="ph ph-clock" style="color: var(--primary-green);"></i> <span id="modal-horario"></span></p>
-                <p><i class="ph ph-map-pin" style="color: var(--primary-green);"></i> <a id="modal-link-maps" href="#" target="_blank" style="color: var(--text-main); text-decoration: underline;">Ver en Google Maps</a></p>
-            </div>
-            
-            <h3 style="font-size: 1.1rem; margin-bottom: 8px;">Acerca de nosotros</h3>
-            <p id="modal-descripcion" style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;"></p>
-
-            <div class="btn-group" style="margin-top: 25px;">
-                <a id="btn-whatsapp-reserva" href="#" target="_blank" class="btn" style="background-color: #25D366; color: #000;">
-                    <i class="ph-bold ph-whatsapp-logo" style="font-size: 1.2rem;"></i> Reservar por WhatsApp
-                </a>
-                
-                <a id="btn-ver-resenas" href="#" class="btn btn-outline">
-                    <i class="ph-bold ph-star"></i> Ver o Dejar Reseña
-                </a>
+            <div class="modal-contenido">
+                <button id="cerrar-modal" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+                <div class="modal-media">
+                    <img id="modal-imagen-principal" src="" alt="Cancha">
+                    <div class="modal-gradient"></div>
+                    <img id="modal-logo" src="" alt="Logo" class="modal-logo">
+                </div>
+                <div class="modal-body">
+                    <div class="modal-title-row">
+                        <div>
+                            <h2 id="modal-nombre">Nombre Cancha</h2>
+                            <p class="modal-rating"><i class="ph-fill ph-star"></i> <span id="modal-rating"></span> <span class="dot">•</span> <i class="ph-bold ph-currency-circle-dollar"></i> S/ <span id="modal-precio"></span> / hr</p>
+                        </div>
+                    </div>
+                    <div class="modal-info-grid">
+                        <div><i class="ph-bold ph-clock"></i><span><small>Horario</small><b id="modal-horario"></b></span></div>
+                        <a id="modal-link-maps" href="#" target="_blank" rel="noopener"><i class="ph-bold ph-map-pin"></i><span><small>Ubicación</small><b>Ver en Google Maps</b></span><i class="ph-bold ph-arrow-up-right"></i></a>
+                    </div>
+                    <div class="modal-description">
+                        <h3>Sobre la cancha</h3>
+                        <p id="modal-descripcion"></p>
+                    </div>
+                    <div class="btn-group modal-actions">
+                        <a id="btn-whatsapp-reserva" href="#" target="_blank" rel="noopener" class="btn whatsapp-btn"><i class="ph-bold ph-whatsapp-logo"></i> Reservar por WhatsApp</a>
+                        <a id="btn-ver-resenas" href="#" class="btn btn-outline"><i class="ph-bold ph-star"></i> Ver reseñas</a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
     </main>
     <script type="module" src="app.js"></script>
 </body>
