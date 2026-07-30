@@ -1,0 +1,13 @@
+/* Ajustes de layout del panel premium */
+.management-card .section-title .btn,
+.weekly-config-head .btn,
+.section-title > .btn,
+.admin-page .hero-primary,
+.admin-page .btn-outline { width:auto !important; max-width:100%; flex:0 0 auto; box-sizing:border-box; white-space:nowrap; }
+.management-card .section-title { min-width:0; }
+.management-card .section-title > div { min-width:0; }
+@media (max-width:600px){
+  .management-card .section-title .btn,
+  .weekly-config-head .btn { width:auto !important; align-self:flex-start; }
+  .management-card .section-title { width:100%; }
+}
