@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#080B0A"><meta name="description" content="Encuentra canchas, jugadores y tu próximo partido."><title>APP FUTBOL | Encuentra dónde jugar</title>
-<script src="https://unpkg.com/@phosphor-icons/web"></script><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3E6QY8mZqf8xXyWJmWQyQqf6j8J4=" crossorigin=""><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="discovery.css">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="discovery.css">
 </head>
 <body class="home-page">
 <header class="topbar"><a class="brand" href="index.html" aria-label="APP FUTBOL inicio"><span class="brand-mark"><i class="ph-fill ph-soccer-ball"></i></span><span>APP <b>FUTBOL</b></span></a><nav class="topbar-nav" aria-label="Navegación principal"><a href="#canchas" class="topbar-link"><i class="ph-bold ph-map-pin"></i><span>Canchas</span></a><a href="jugadores.html" class="topbar-link"><i class="ph-bold ph-users-three"></i><span>Jugadores</span></a></nav></header>
@@ -18,5 +20,5 @@
 <footer class="site-footer"><span><i class="ph-fill ph-soccer-ball"></i> APP FUTBOL</span><span>Juega más. Organiza mejor.</span></footer>
 <div id="modal-cancha" class="modal-oculto"><div class="modal-contenido"><button id="cerrar-modal" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button><div class="modal-media"><img id="modal-imagen-principal" src="" alt="Cancha"><div class="modal-gradient"></div><img id="modal-logo" src="" alt="Logo" class="modal-logo"></div><div class="modal-body"><div class="modal-title-row"><div><h2 id="modal-nombre">Nombre Cancha</h2><p class="modal-rating"><i class="ph-fill ph-star"></i> <span id="modal-rating"></span> <span class="dot">•</span> <i class="ph-bold ph-currency-circle-dollar"></i> S/ <span id="modal-precio"></span> / hr</p></div></div><div class="modal-info-grid"><div><i class="ph-bold ph-clock"></i><span><small>Horario</small><b id="modal-horario"></b></span></div><a id="modal-link-maps" href="#" target="_blank" rel="noopener"><i class="ph-bold ph-map-pin"></i><span><small>Ubicación</small><b>Ver en Google Maps</b></span><i class="ph-bold ph-arrow-up-right"></i></a></div><div class="modal-description"><h3>Sobre la cancha</h3><p id="modal-descripcion"></p></div><div class="btn-group modal-actions"><a id="btn-whatsapp-reserva" href="#" target="_blank" rel="noopener" class="btn whatsapp-btn"><i class="ph-bold ph-whatsapp-logo"></i> Reservar por WhatsApp</a><a id="btn-ver-resenas" href="#" class="btn btn-outline"><i class="ph-bold ph-star"></i> Ver reseñas</a></div></div></div></div>
 </main>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script type="module" src="app.js"></script><script type="module" src="maps.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script type="module" src="app.js"></script><script type="module" src="maps.js"></script>
 </body></html>
