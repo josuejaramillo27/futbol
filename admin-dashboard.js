@@ -11,7 +11,62 @@ let fechaSeleccionada=new Date();const dias=['domingo','lunes','martes','miérco
 function horarioDelDia(){const nombre=dias[fechaSeleccionada.getDay()],semanal=espacioSeleccionado?.horariosSemana?.[nombre]||canchaActual?.horariosSemana?.[nombre];if(semanal)return semanal;return{activo:true,apertura:espacioSeleccionado?.horaApertura||canchaActual?.horaApertura||'16:00',cierre:espacioSeleccionado?.horaCierre||canchaActual?.horaCierre||'23:00'}}
 function renderWeekDays(){const box=document.getElementById('week-days');if(!box)return;const base=new Date();base.setHours(0,0,0,0);box.innerHTML=Array.from({length:7},(_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);const active=fechaISO(d)===fechaISO(fechaSeleccionada);return `<button type="button" class="week-day ${active?'active':''}" data-date="${fechaISO(d)}"><small>${new Intl.DateTimeFormat('es-PE',{weekday:'short'}).format(d).replace('.','')}</small><strong>${d.getDate()}</strong><span>${i===0?'HOY':new Intl.DateTimeFormat('es-PE',{month:'short'}).format(d).replace('.','')}</span></button>`}).join('');box.querySelectorAll('.week-day').forEach(b=>b.addEventListener('click',()=>{const[y,m,day]=b.dataset.date.split('-').map(Number);fechaSeleccionada=new Date(y,m-1,day);fechaSeleccionada.setHours(0,0,0,0);renderWeekDays();actualizarDia()}))}
 async function actualizarDia(){const texto=fechaTexto(fechaSeleccionada);document.getElementById('fecha-hoy').textContent=texto;document.getElementById('schedule-title').textContent=`Horarios · ${texto}`;document.getElementById('reservas-title').textContent=`Reservas · ${texto}`;const box=document.getElementById('admin-schedule'),list=document.getElementById('lista-reservas');if(box)box.innerHTML='<div class="admin-loading"><i class="ph-bold ph-spinner-gap"></i> Cargando horarios...</div>';if(list)list.innerHTML='<div class="admin-loading"><i class="ph-bold ph-spinner-gap"></i> Cargando reservas...</div>';try{await cargarReservas();renderSchedule();renderReservas()}catch(e){console.error(e);reservasDia=[];renderSchedule();renderReservas();toast('No pudimos leer las reservas. Mostramos los horarios disponibles.',true)}}
-async function cargarPerfil(){const snap=await getDoc(doc(db,'canchas',usuarioActual.uid));if(!snap.exists()){toast('No encontramos tu cancha. Configúrala primero.',true);return false}canchaActual={id:snap.id,...snap.data()};const campos={'admin-nombre':canchaActual.nombre,'admin-distrito':canchaActual.distrito??canchaActual.ciudad,'admin-departamento':canchaActual.departamento,'admin-whatsapp':canchaActual.whatsapp,'admin-descripcion':canchaActual.descripcion,'admin-precio':canchaActual.precio,'admin-ubicacion-texto':canchaActual.ubicacionTexto,'admin-ubicacion-link':canchaActual.ubicacionLink,'admin-intervalo':canchaActual.intervaloMinutos||canchaActual.duracionReserva||60};Object.entries(campos).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v??''});const tipos=Array.isArray(canchaActual.tiposCancha)?canchaActual.tiposCancha:(canchaActual.tipoCancha?[canchaActual.tipoCancha]:[]);document.querySelectorAll('#admin-tipos input[type=checkbox]').forEach(c=>c.checked=tipos.includes(c.value));renderWeeklyHours(canchaActual.horariosSemana||horarioDefault());document.getElementById('nombre-cancha-admin').textContent=canchaActual.nombre?`${canchaActual.nombre} · Panel`:'Mi Cancha';return true}
+async function cargarPerfil(){
+    const snap=await getDoc(doc(db,'canchas',usuarioActual.uid));
+    if(!snap.exists()){
+        toast('No encontramos tu cancha. Configúrala primero.',true);
+        return false;
+    }
+    canchaActual={id:snap.id,...snap.data()};
+    
+    // FASE 9: Banner de Estado de Publicación
+    let bannerEstado = document.getElementById('banner-publicacion');
+    if(!bannerEstado) {
+        bannerEstado = document.createElement('div');
+        bannerEstado.id = 'banner-publicacion';
+        bannerEstado.style.cssText = 'padding:15px; margin-bottom:20px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;';
+        document.querySelector('.admin-heading').insertAdjacentElement('afterend', bannerEstado);
+    }
+
+    const estadoPub = canchaActual.estadoPublicacion || 'draft';
+    if(estadoPub === 'draft') {
+        bannerEstado.style.background = 'rgba(255, 193, 7, 0.15)';
+        bannerEstado.style.border = '1px solid var(--warning)';
+        bannerEstado.innerHTML = `
+            <div><strong style="color:var(--warning); display:block;">Cancha en Borrador (No visible)</strong>
+            <span style="font-size:0.8rem; color:#ccc;">Termina de configurar tus datos y solicita la publicación.</span></div>
+            <button id="btn-solicitar-pub" class="btn hero-primary" style="width:auto; padding:8px 15px;">Solicitar Revisión</button>
+        `;
+        document.getElementById('btn-solicitar-pub').onclick = async () => {
+            if(!canchaActual.configurado) return toast('Guarda la configuración de tu cancha primero.', true);
+            await updateDoc(doc(db, 'canchas', usuarioActual.uid), { estadoPublicacion: 'pending_review' });
+            toast('Solicitud enviada a los administradores.');
+            cargarPerfil(); // Recargar banner
+        };
+    } else if (estadoPub === 'pending_review') {
+        bannerEstado.style.background = 'rgba(23, 162, 184, 0.15)';
+        bannerEstado.style.border = '1px solid #17a2b8';
+        bannerEstado.innerHTML = `
+            <div><strong style="color:#17a2b8; display:block;">En Revisión</strong>
+            <span style="font-size:0.8rem; color:#ccc;">Tu cancha está siendo evaluada por el equipo de APP FUTBOL.</span></div>
+        `;
+    } else if (estadoPub === 'published') {
+        bannerEstado.style.background = 'rgba(0, 217, 104, 0.15)';
+        bannerEstado.style.border = '1px solid var(--primary-green)';
+        bannerEstado.innerHTML = `
+            <div><strong style="color:var(--primary-green); display:block;">Cancha Publicada y Activa</strong>
+            <span style="font-size:0.8rem; color:#ccc;">Tu negocio es visible para todos los jugadores.</span></div>
+        `;
+    }
+
+    const campos={'admin-nombre':canchaActual.nombre,'admin-distrito':canchaActual.distrito??canchaActual.ciudad,'admin-departamento':canchaActual.departamento,'admin-whatsapp':canchaActual.whatsapp,'admin-descripcion':canchaActual.descripcion,'admin-precio':canchaActual.precio,'admin-ubicacion-texto':canchaActual.ubicacionTexto,'admin-ubicacion-link':canchaActual.ubicacionLink,'admin-intervalo':canchaActual.intervaloMinutos||canchaActual.duracionReserva||60};
+    Object.entries(campos).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v??''});
+    const tipos=Array.isArray(canchaActual.tiposCancha)?canchaActual.tiposCancha:(canchaActual.tipoCancha?[canchaActual.tipoCancha]:[]);
+    document.querySelectorAll('#admin-tipos input[type=checkbox]').forEach(c=>c.checked=tipos.includes(c.value));
+    renderWeeklyHours(canchaActual.horariosSemana||horarioDefault());
+    document.getElementById('nombre-cancha-admin').textContent=canchaActual.nombre?`${canchaActual.nombre} · Panel`:'Mi Cancha';
+    return true;
+}
 async function cargarEspacios(){const q=query(collection(db,'espacios'),where('ownerUid','==',usuarioActual.uid));const snap=await getDocs(q);espacios=snap.docs.map(d=>({id:d.id,...d.data()}));const todos=[{id:usuarioActual.uid,nombre:canchaActual.nombre||'Cancha principal',tipoCancha:(Array.isArray(canchaActual.tiposCancha)?canchaActual.tiposCancha[0]:canchaActual.tipoCancha)||'Sintética',horaApertura:canchaActual.horaApertura||'16:00',horaCierre:canchaActual.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana},...espacios.map(e=>({id:e.id,nombre:e.nombre,tipoCancha:e.tipo||'Fútbol',horaApertura:e.horaApertura||'16:00',horaCierre:e.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana}))];if(!espacioSeleccionado||!todos.find(x=>x.id===espacioSeleccionado.id)){espacioSeleccionado=todos[0]}let container=document.getElementById('dashboard-space-selector');if(!container){const header=document.querySelector('.schedule-head');if(header){container=document.createElement('div');container.id='dashboard-space-selector';container.className='space-selector';header.appendChild(container)}}if(container){container.innerHTML=`<label><span>CANCHA ACTIVA</span><select id="select-cancha-activa" style="margin-left:8px; padding:6px; border-radius:8px; background:#101614; color:#fff; border:1px solid #333;">${todos.map(s=>`<option value="${s.id}" ${s.id===espacioSeleccionado.id?'selected':''}>${s.nombre} · ${s.tipoCancha}</option>`).join('')}</select></label>`;document.getElementById('select-cancha-activa').addEventListener('change',(e)=>{espacioSeleccionado=todos.find(x=>x.id===e.target.value);actualizarDia()})}}
 async function cargarReservas(){const snap=await getDocs(collection(db,'reservas'));const idCancha=String(espacioSeleccionado?.id||usuarioActual.uid);reservasDia=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>String(r.canchaId??r.courtId??r.cancha??'')===idCancha&&String(r.fecha||'')===fechaISO(fechaSeleccionada))}
 function generarSlots(){const h=horarioDelDia();if(!h.activo)return[];const a=minutos(h.apertura),b0=minutos(h.cierre),step=Number(canchaActual?.intervaloMinutos||canchaActual?.duracionReserva||60);if(a===null||b0===null||!Number.isFinite(step)||step<=0)return[];let b=b0<=a?b0+1440:b0;const out=[];for(let t=a;t<b;t+=step){const real=t%1440;out.push({hora:`${String(Math.floor(real/60)).padStart(2,'0')}:${String(real%60).padStart(2,'0')}`,min:real})}return out}
