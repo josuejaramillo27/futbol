@@ -19,7 +19,47 @@ if(esInicio()){
  function llenarSelect(select,valores,placeholder){if(!select)return;const actual=select.value;select.innerHTML=`<option value="">${placeholder}</option>`;[...new Set(valores.map(v=>String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;select.appendChild(o)});if([...select.options].some(o=>o.value===actual))select.value=actual}
  function renderizarCanchas(){if(!contenedor)return;const texto=normalizar(inputBusqueda?.value),ciudad=normalizar(filtroCiudad?.value),tipo=normalizar(filtroTipo?.value),rango=filtroPrecio?.value||'',orden=filtroOrden?.value||'recomendadas';let resultados=canchasGlobales.filter(c=>{const buscable=normalizar(`${c.nombre} ${c.ubicacionTexto||''} ${obtenerCiudad(c)} ${obtenerTipo(c)}`),precio=precioNumero(c);let rp=true;if(rango){const[min,max]=rango.split('-').map(Number);rp=precio>=min&&precio<=max}return(!texto||buscable.includes(texto))&&(!ciudad||normalizar(obtenerCiudad(c))===ciudad)&&(!tipo||normalizar(obtenerTipo(c))===tipo)&&rp&&(!soloAbiertas||c.isOpen)&&(!soloTop||c.rating>=4.5)&&(!soloCerca||distanciaCerca(c)<=10)});resultados.sort((a,b)=>orden==='rating'?b.rating-a.rating:orden==='precio-asc'?precioNumero(a)-precioNumero(b):orden==='precio-desc'?precioNumero(b)-precioNumero(a):orden==='cerca'?distanciaCerca(a)-distanciaCerca(b):a.isOpen!==b.isOpen?(a.isOpen?-1:1):b.rating-a.rating);if(contador)contador.textContent=`${resultados.length} ${resultados.length===1?'cancha encontrada':'canchas encontradas'}`;if(filtroActivo){const a=[];if(ciudad)a.push(filtroCiudad.value);if(tipo)a.push(filtroTipo.value);if(rango)a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text);if(soloAbiertas)a.push('Abiertas ahora');if(soloTop)a.push('4.5+ estrellas');if(soloCerca)a.push(ubicacionUsuario?'Cerca de mí':'Cerca de mí*');filtroActivo.textContent=a.length?a.join(' · '):''}contenedor.innerHTML='';if(!resultados.length){contenedor.innerHTML='<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos esa cancha</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';document.getElementById('btn-reset-empty')?.addEventListener('click',limpiarFiltros);return}resultados.forEach(c=>{const estado=c.isOpen?'<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>':'<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>',logo=c.logo||'https://via.placeholder.com/100',portada=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85',d=distanciaCerca(c),dist=Number.isFinite(d)&&d<999999?` · ${d.toFixed(1)} km`:'';contenedor.innerHTML+=`<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo de ${c.nombre||'cancha'}" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><h3>${c.nombre||'Cancha sin nombre'}</h3><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating>0?c.rating.toFixed(1):'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto||'Ubicación no especificada'}${obtenerCiudad(c)?` · ${obtenerCiudad(c)}`:''}${dist}</p><div class="court-meta"><span><i class="ph-bold ph-soccer-ball"></i> ${obtenerTipo(c)||'Fútbol'}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver cancha y reservar</span><i class="ph-bold ph-arrow-right"></i></button></div></div></article>`});contenedor.querySelectorAll('[data-court-id]').forEach(b=>b.addEventListener('click',()=>abrirModal(b.dataset.courtId)))}
  function limpiarFiltros(){if(inputBusqueda)inputBusqueda.value='';if(filtroCiudad)filtroCiudad.value='';if(filtroTipo)filtroTipo.value='';if(filtroPrecio)filtroPrecio.value='';if(filtroOrden)filtroOrden.value='recomendadas';soloAbiertas=soloCerca=soloTop=false;document.querySelectorAll('.quick-filter').forEach(b=>b.classList.remove('active'));renderizarCanchas()}
- async function cargar(){if(!contenedor)return;contenedor.innerHTML='<div class="card loading-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted)"><i class="ph-bold ph-spinner-gap"></i> Buscando canchas...</div>';try{const s=await Promise.race([getDocs(collection(db,'canchas')),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Firestore tardó más de 12 segundos en responder')),12000))]);canchasGlobales=[];s.forEach(ds=>{const d=ds.data();if(d.configurado!==false)canchasGlobales.push({id:ds.id,...d,isOpen:canchaEstaAbierta(d),rating:Number(d.ratingPromedio||d.rating||0)})});llenarSelect(filtroCiudad,canchasGlobales.map(obtenerCiudad),'Todas las ciudades');llenarSelect(filtroTipo,canchasGlobales.map(obtenerTipo),'Todos los tipos');renderizarCanchas()}catch(e){mostrarErrorCarga(contenedor,'las canchas',e)}}
+ async function cargar(){
+     if(!contenedor)return;
+     contenedor.innerHTML='<div class="card loading-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted)"><i class="ph-bold ph-spinner-gap"></i> Buscando canchas...</div>';
+     try{
+         const s=await Promise.race([getDocs(collection(db,'canchas')),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Firestore tardó más de 12 segundos en responder')),12000))]);
+         canchasGlobales=[];
+         s.forEach(ds=>{
+             const d=ds.data();
+             // FASE 10: SOLO mostrar canchas con estado 'published' (o las antiguas para no romper retrocompatibilidad durante las pruebas)
+             if(d.estadoPublicacion === 'published' || (d.configurado === true && !d.estadoPublicacion)) {
+                 canchasGlobales.push({
+                     id:ds.id,
+                     nombre: d.nombre,
+                     ubicacionTexto: d.ubicacionTexto,
+                     ciudad: d.ciudad,
+                     distrito: d.distrito,
+                     departamento: d.departamento,
+                     tipoCancha: d.tipoCancha,
+                     precio: d.precio,
+                     fotos: d.fotos,
+                     logo: d.logo,
+                     horaApertura: d.horaApertura,
+                     horaCierre: d.horaCierre,
+                     lat: d.lat,
+                     lng: d.lng,
+                     whatsapp: d.whatsapp,
+                     ubicacionLink: d.ubicacionLink,
+                     descripcion: d.descripcion,
+                     intervaloMinutos: d.intervaloMinutos,
+                     isOpen:canchaEstaAbierta(d),
+                     rating:Number(d.ratingPromedio||d.rating||0)
+                 });
+             }
+         });
+         llenarSelect(filtroCiudad,canchasGlobales.map(obtenerCiudad),'Todas las ciudades');
+         llenarSelect(filtroTipo,canchasGlobales.map(obtenerTipo),'Todos los tipos');
+         renderizarCanchas();
+     }catch(e){
+         mostrarErrorCarga(contenedor,'las canchas',e);
+     }
+ }
  [inputBusqueda,filtroCiudad,filtroTipo,filtroPrecio,filtroOrden].forEach(e=>e?.addEventListener('input',renderizarCanchas));document.querySelectorAll('.quick-filter').forEach(b=>b.addEventListener('click',()=>{const f=b.dataset.filter;if(f==='limpiar')return limpiarFiltros();if(f==='abiertas')soloAbiertas=!soloAbiertas;if(f==='cerca'){if(!navigator.geolocation)return alert('Tu navegador no permite geolocalización.');navigator.geolocation.getCurrentPosition(p=>{ubicacionUsuario={lat:p.coords.latitude,lng:p.coords.longitude};soloCerca=true;b.classList.add('active');renderizarCanchas()},()=>alert('Activa la ubicación para encontrar canchas cercanas.'));return}if(f==='top')soloTop=!soloTop;b.classList.toggle('active');renderizarCanchas()}));cargar()
 }
 window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';const tel=String(c.whatsapp||'').replace(/\D/g,'');document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de APP FUTBOL y quiero consultar disponibilidad para reservar.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
