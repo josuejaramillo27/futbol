@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Admin | APP FUTBOL</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .master-grid { display: grid; gap: 15px; margin-top: 20px; }
+        .master-card { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 14px; gap: 15px; }
+        .master-card.pending { border-left: 4px solid var(--warning); }
+        .master-card.approved { border-left: 4px solid var(--primary-green); }
+        .master-card.rejected { border-left: 4px solid var(--danger); opacity: 0.6; }
+        .master-info h3 { margin: 0; font-size: 1.1rem; }
+        .master-info p { margin: 3px 0; font-size: 0.8rem; color: var(--text-muted); }
+        .master-actions { display: flex; gap: 10px; }
+        .master-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .master-filters input, .master-filters select { width: auto; flex: 1; min-width: 200px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #fff; }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand"><span class="brand-mark"><i class="ph-fill ph-shield-star"></i></span><span>APP <b>ADMIN</b></span></div>
+        <button id="btn-logout" class="btn btn-outline" style="width: auto; padding: 8px 15px;"><i class="ph-bold ph-sign-out"></i> Salir</button>
+    </header>
+
+    <main style="max-width: 1000px;">
+        <section>
+            <div class="eyebrow"><span></span> CENTRO DE CONTROL GLOBAL</div>
+            <h1>Gestión de <strong>Dueños</strong></h1>
+            <p>Aprueba, rechaza o audita las canchas registradas en la plataforma.</p>
+        </section>
+
+        <section class="master-filters">
+            <input type="text" id="search-input" placeholder="Buscar por nombre, correo, complejo o DNI...">
+            <select id="filter-status">
+                <option value="all">Todos los estados</option>
+                <option value="pending" selected>Pendientes de Aprobación</option>
+                <option value="approved">Aprobados (Activos)</option>
+                <option value="rejected">Rechazados</option>
+            </select>
+        </section>
+
+        <section>
+            <div id="owners-list" class="master-grid">
+                <div style="text-align: center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap"></i> Cargando solicitudes...</div>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal-details" class="modal-oculto">
+        <div class="modal-contenido" style="padding: 25px; max-width: 500px;">
+            <button id="close-modal" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+            <h2 id="det-complejo">Complejo Deportivo</h2>
+            <hr style="border: 1px solid var(--border-color); margin: 15px 0;">
+            <p><strong>Dueño:</strong> <span id="det-nombre"></span></p>
+            <p><strong>DNI/Doc:</strong> <span id="det-dni"></span></p>
+            <p><strong>Email:</strong> <span id="det-email"></span></p>
+            <p><strong>Teléfono:</strong> <span id="det-telefono"></span></p>
+            <p><strong>Dirección:</strong> <span id="det-direccion"></span></p>
+            <p><strong>Estado Actual:</strong> <span id="det-estado" style="text-transform: uppercase; font-weight: bold;"></span></p>
+            
+            <div id="modal-actions" style="display: flex; gap: 10px; margin-top: 25px;">
+                </div>
+        </div>
+    </div>
+
+    <script type="module" src="admin-panel.js"></script>
+</body>
+</html>
