@@ -30,5 +30,65 @@ const btnHoy=document.getElementById('btn-hoy');btnHoy?.addEventListener('click'
 async function subirImagen(archivo,ruta){if(!archivo)return null;const storageRef=ref(storage,ruta);await uploadBytes(storageRef,archivo);return await getDownloadURL(storageRef)}
 const formPerfil=document.getElementById('form-perfil-cancha');if(formPerfil)formPerfil.addEventListener('submit',async e=>{e.preventDefault();if(!usuarioActual||!canchaActual)return;const btn=document.getElementById('btn-guardar-admin'),tipos=[...document.querySelectorAll('#admin-tipos input:checked')].map(x=>x.value);if(!tipos.length){document.getElementById('tipos-error').textContent='Selecciona al menos un tipo de cancha.';return}document.getElementById('tipos-error').textContent='';btn.disabled=true;btn.innerHTML='<i class="ph-bold ph-spinner-gap"></i> Guardando...';try{const uid=usuarioActual.uid,files=[document.getElementById('admin-foto1')?.files[0],document.getElementById('admin-foto2')?.files[0],document.getElementById('admin-foto3')?.files[0]],fotos=await Promise.all(files.map((f,i)=>subirImagen(f,`canchas/${uid}/foto${i+1}`)));const logo=await subirImagen(document.getElementById('admin-logo')?.files[0],`canchas/${uid}/logo`);const inicio=document.getElementById('admin-hora-inicio')?.value||'16:00',cierre=document.getElementById('admin-hora-cierre')?.value||'23:00',weekly=readWeeklyHours();await setDoc(doc(db,'canchas',uid),{nombre:document.getElementById('admin-nombre').value.trim(),departamento:document.getElementById('admin-departamento').value.trim(),distrito:document.getElementById('admin-distrito').value.trim(),whatsapp:document.getElementById('admin-whatsapp').value.trim(),precio:Number(document.getElementById('admin-precio').value||0),tiposCancha:tipos,descripcion:document.getElementById('admin-descripcion').value.trim(),ubicacionTexto:document.getElementById('admin-ubicacion-texto').value.trim(),ubicacionLink:document.getElementById('admin-ubicacion-link').value.trim(),intervaloMinutos:Number(document.getElementById('admin-intervalo').value||60),horaApertura:inicio,horaCierre:cierre,horariosSemana:weekly, ...(logo?{logo}:{}),fotos:[...fotos.map((x,i)=>x||canchaActual.fotos?.[i]).filter(Boolean)],updatedAt:serverTimestamp()},{merge:true});canchaActual={...canchaActual,horaApertura:inicio,horaCierre:cierre,horariosSemana:weekly,intervaloMinutos:Number(document.getElementById('admin-intervalo').value||60)};document.getElementById('mensaje-exito').classList.add('show');toast('Configuración actualizada.');await actualizarDia()}catch(err){console.error(err);toast(`No se pudo guardar: ${err.message||'error desconocido'}`,true)}finally{btn.disabled=false;btn.innerHTML='<i class="ph-bold ph-floppy-disk"></i> Guardar configuración'}});
 
-function init(){document.getElementById('fecha-hoy').textContent=fechaTexto(fechaSeleccionada);renderWeekDays();document.getElementById('btn-cerrar-sesion')?.addEventListener('click',()=>signOut(auth));onAuthStateChanged(auth,async u=>{if(!u){window.location.href='login.html';return}usuarioActual=u;document.getElementById('admin-user-label').textContent=u.email||'';try{if(await cargarPerfil()){await cargarEspacios();actualizarDia()}}catch(e){console.error(e);toast('No se pudo cargar el panel.',true)}})}
+function init(){
+    document.getElementById('fecha-hoy').textContent=fechaTexto(fechaSeleccionada);
+    renderWeekDays();
+    document.getElementById('btn-cerrar-sesion')?.addEventListener('click',()=>signOut(auth));
+    
+    onAuthStateChanged(auth, async u => {
+        if(!u) { 
+            window.location.href='login.html'; 
+            return; 
+        }
+
+        // FASE 4: Verificación estricta de estado (Evitar que usuarios pendientes usen el panel)
+        const userDoc = await getDoc(doc(db, 'usuarios', u.uid));
+        
+        if(userDoc.exists()) {
+            const data = userDoc.data();
+            
+            // Si es el Administrador Maestro, lo enviamos a su panel
+            if(data.rol === "admin" && data.estado === "approved") {
+                window.location.href = "admin-panel.html"; 
+                return;
+            }
+            
+            // Si está pendiente de aprobación
+            if(data.estado === "pending") {
+                document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#080b0a;color:white;text-align:center;padding:20px;">
+                    <i class="ph-bold ph-clock" style="font-size:60px;color:var(--warning);"></i>
+                    <h2 style="margin:20px 0 10px;">Tu cuenta está en revisión</h2>
+                    <p style="color:var(--text-muted);margin-bottom:20px;">Un administrador de APP FUTBOL debe aprobar tu solicitud antes de que puedas configurar tu cancha.</p>
+                    <button onclick="window.location.href='login.html'" class="btn btn-outline" style="width:auto;">Volver al inicio</button>
+                </div>`;
+                auth.signOut();
+                return;
+            }
+            
+            // Si fue rechazado
+            if(data.estado === "rejected") {
+                document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#080b0a;color:white;text-align:center;padding:20px;">
+                    <i class="ph-bold ph-x-circle" style="font-size:60px;color:var(--danger);"></i>
+                    <h2 style="margin:20px 0 10px;">Solicitud Rechazada</h2>
+                    <p style="color:var(--text-muted);margin-bottom:20px;">Lamentablemente tu solicitud para registrar la cancha ha sido rechazada.</p>
+                    <button onclick="window.location.href='login.html'" class="btn btn-outline" style="width:auto;">Volver al inicio</button>
+                </div>`;
+                auth.signOut();
+                return;
+            }
+        }
+
+        // Si pasa las barreras, cargamos su información
+        usuarioActual=u;
+        document.getElementById('admin-user-label').textContent=u.email||'';
+        try{
+            if(await cargarPerfil()){
+                actualizarDia();
+            }
+        }catch(e){
+            console.error(e);
+            toast('No se pudo cargar el panel.',true);
+        }
+    });
+}
 init();
