@@ -28,7 +28,78 @@ function renderWeeklyHours(data){const box=document.getElementById('weekly-hours
 function readWeeklyHours(){const out={};document.querySelectorAll('.day-config-row').forEach(row=>{out[row.dataset.day]={activo:row.querySelector('.day-active').checked,apertura:row.querySelector('.day-open').value,cierre:row.querySelector('.day-close').value}});return out}
 const btnHoy=document.getElementById('btn-hoy');btnHoy?.addEventListener('click',()=>{fechaSeleccionada=new Date();fechaSeleccionada.setHours(0,0,0,0);renderWeekDays();actualizarDia()});document.getElementById('btn-copiar-lunes')?.addEventListener('click',()=>{const lunes=document.querySelector('.day-config-row[data-day="lunes"]');if(!lunes)return;document.querySelectorAll('.day-config-row').forEach(row=>{if(row===lunes)return;row.querySelector('.day-active').checked=lunes.querySelector('.day-active').checked;row.querySelector('.day-open').value=lunes.querySelector('.day-open').value;row.querySelector('.day-close').value=lunes.querySelector('.day-close').value;row.querySelector('.day-active').dispatchEvent(new Event('change'))});toast('Horario del lunes copiado a los demás días.')});
 async function subirImagen(archivo,ruta){if(!archivo)return null;const storageRef=ref(storage,ruta);await uploadBytes(storageRef,archivo);return await getDownloadURL(storageRef)}
-const formPerfil=document.getElementById('form-perfil-cancha');if(formPerfil)formPerfil.addEventListener('submit',async e=>{e.preventDefault();if(!usuarioActual||!canchaActual)return;const btn=document.getElementById('btn-guardar-admin'),tipos=[...document.querySelectorAll('#admin-tipos input:checked')].map(x=>x.value);if(!tipos.length){document.getElementById('tipos-error').textContent='Selecciona al menos un tipo de cancha.';return}document.getElementById('tipos-error').textContent='';btn.disabled=true;btn.innerHTML='<i class="ph-bold ph-spinner-gap"></i> Guardando...';try{const uid=usuarioActual.uid,files=[document.getElementById('admin-foto1')?.files[0],document.getElementById('admin-foto2')?.files[0],document.getElementById('admin-foto3')?.files[0]],fotos=await Promise.all(files.map((f,i)=>subirImagen(f,`canchas/${uid}/foto${i+1}`)));const logo=await subirImagen(document.getElementById('admin-logo')?.files[0],`canchas/${uid}/logo`);const inicio=document.getElementById('admin-hora-inicio')?.value||'16:00',cierre=document.getElementById('admin-hora-cierre')?.value||'23:00',weekly=readWeeklyHours();await setDoc(doc(db,'canchas',uid),{nombre:document.getElementById('admin-nombre').value.trim(),departamento:document.getElementById('admin-departamento').value.trim(),distrito:document.getElementById('admin-distrito').value.trim(),whatsapp:document.getElementById('admin-whatsapp').value.trim(),precio:Number(document.getElementById('admin-precio').value||0),tiposCancha:tipos,descripcion:document.getElementById('admin-descripcion').value.trim(),ubicacionTexto:document.getElementById('admin-ubicacion-texto').value.trim(),ubicacionLink:document.getElementById('admin-ubicacion-link').value.trim(),intervaloMinutos:Number(document.getElementById('admin-intervalo').value||60),horaApertura:inicio,horaCierre:cierre,horariosSemana:weekly, ...(logo?{logo}:{}),fotos:[...fotos.map((x,i)=>x||canchaActual.fotos?.[i]).filter(Boolean)],updatedAt:serverTimestamp()},{merge:true});canchaActual={...canchaActual,horaApertura:inicio,horaCierre:cierre,horariosSemana:weekly,intervaloMinutos:Number(document.getElementById('admin-intervalo').value||60)};document.getElementById('mensaje-exito').classList.add('show');toast('Configuración actualizada.');await actualizarDia()}catch(err){console.error(err);toast(`No se pudo guardar: ${err.message||'error desconocido'}`,true)}finally{btn.disabled=false;btn.innerHTML='<i class="ph-bold ph-floppy-disk"></i> Guardar configuración'}});
+const formPerfil=document.getElementById('form-perfil-cancha');
+if(formPerfil) {
+    formPerfil.addEventListener('submit', async e => {
+        e.preventDefault();
+        if(!usuarioActual) return;
+        
+        const btn = document.getElementById('btn-guardar-admin');
+        const tipos = [...document.querySelectorAll('#admin-tipos input:checked')].map(x=>x.value);
+        
+        if(!tipos.length){
+            document.getElementById('tipos-error').textContent='Selecciona al menos un tipo de cancha.';
+            return;
+        }
+        
+        document.getElementById('tipos-error').textContent='';
+        btn.disabled=true;
+        btn.innerHTML='<i class="ph-bold ph-spinner-gap"></i> Guardando...';
+        
+        try{
+            const uid = usuarioActual.uid;
+            
+            // Subida de imágenes a Storage
+            const files = [document.getElementById('admin-foto1')?.files[0], document.getElementById('admin-foto2')?.files[0], document.getElementById('admin-foto3')?.files[0]];
+            const fotos = await Promise.all(files.map((f,i) => subirImagen(f,`canchas/${uid}/foto${i+1}`)));
+            const logo = await subirImagen(document.getElementById('admin-logo')?.files[0], `canchas/${uid}/logo`);
+            
+            const inicio = document.getElementById('admin-hora-inicio')?.value || '16:00';
+            const cierre = document.getElementById('admin-hora-cierre')?.value || '23:00';
+            const weekly = readWeeklyHours();
+
+            // FASE 7 y PREP FASE 9: Guardado estructurado de Onboarding
+            const dataToSave = {
+                ownerUid: uid, // Seguridad estricta
+                nombre: document.getElementById('admin-nombre').value.trim(),
+                departamento: document.getElementById('admin-departamento').value.trim(),
+                distrito: document.getElementById('admin-distrito').value.trim(),
+                whatsapp: document.getElementById('admin-whatsapp').value.trim(),
+                precio: Number(document.getElementById('admin-precio').value||0),
+                tiposCancha: tipos,
+                descripcion: document.getElementById('admin-descripcion').value.trim(),
+                ubicacionTexto: document.getElementById('admin-ubicacion-texto').value.trim(),
+                ubicacionLink: document.getElementById('admin-ubicacion-link').value.trim(),
+                intervaloMinutos: Number(document.getElementById('admin-intervalo').value||60),
+                horaApertura: inicio,
+                horaCierre: cierre,
+                horariosSemana: weekly,
+                configurado: true, // Marca el Onboarding como completado
+                estadoPublicacion: canchaActual?.estadoPublicacion || 'draft', // Preparación para publicar
+                updatedAt: serverTimestamp()
+            };
+
+            if(logo) dataToSave.logo = logo;
+            
+            const fotosFiltradas = [...fotos.map((x,i) => x || canchaActual?.fotos?.[i]).filter(Boolean)];
+            if(fotosFiltradas.length > 0) dataToSave.fotos = fotosFiltradas;
+
+            await setDoc(doc(db, 'canchas', uid), dataToSave, {merge:true});
+            
+            canchaActual = {...canchaActual, ...dataToSave};
+            document.getElementById('mensaje-exito')?.classList.add('show');
+            toast('¡Configuración guardada exitosamente!');
+            
+            await actualizarDia();
+        }catch(err){
+            console.error(err);
+            toast(`No se pudo guardar: ${err.message||'error desconocido'}`, true);
+        }finally{
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar configuración';
+        }
+    });
+}
 
 function init(){
     document.getElementById('fecha-hoy').textContent=fechaTexto(fechaSeleccionada);
