@@ -138,6 +138,13 @@ if(btnLogin) {
             
             if (userDoc.exists()) {
                 const userData = userDoc.data();
+                
+                // NUEVA LÓGICA: Redirección de Administrador Maestro
+                if (userData.rol === "admin" && userData.estado === "approved") {
+                    window.location.href = "admin-panel.html";
+                    return;
+                }
+
                 if (userData.estado === "pending") {
                     errorMessage.innerText = "Tu solicitud aún está pendiente de aprobación por un administrador.";
                     auth.signOut();
@@ -148,15 +155,14 @@ if(btnLogin) {
                     window.location.href = "admin.html";
                 }
             } else {
-                // BACKWARD COMPATIBILITY: Si es un dueño antiguo que no está en la colección 'usuarios'
+                // BACKWARD COMPATIBILITY: Migración de dueños antiguos
                 const canchaDoc = await getDoc(doc(db, "canchas", user.uid));
                 if(canchaDoc.exists()) {
-                    // Migramos al usuario antiguo automáticamente a la colección segura
                     await setDoc(doc(db, "usuarios", user.uid), {
                         uid: user.uid,
                         email: user.email,
                         rol: "owner",
-                        estado: "approved", // Los antiguos los aprobamos por defecto para no cortarles el acceso
+                        estado: "approved",
                         nombre: canchaDoc.data().nombre || "Dueño Antiguo",
                         migrado: true,
                         createdAt: serverTimestamp(),
