@@ -11,3 +11,21 @@
   .weekly-config-head .btn { width:auto !important; align-self:flex-start; }
   .management-card .section-title { width:100%; }
 }
+/* FIX: Evitar que los botones de agregar se estiren */
+#btn-nuevo-espacio, 
+#btn-nuevo-evento {
+    width: fit-content !important;
+    max-width: max-content !important;
+    flex: 0 0 auto !important;
+    padding: 10px 20px !important;
+    margin-left: auto; /* Ayuda a empujarlos a la derecha si están en un flexbox */
+}
+
+/* Para asegurar que el contenedor no los fuerce a bajar de línea feo */
+.management-card .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
