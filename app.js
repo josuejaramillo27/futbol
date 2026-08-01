@@ -168,55 +168,142 @@ const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',
 onAuthStateChanged(auth,u=>{usuarioActual=u||null});
 
 // ==========================================
-// FASE 26: BOLSA DE JUGADORES SEGURA (ANTI-SPAM)
+// FASE 26: BOLSA DE JUGADORES Y PARTIDOS EN VIVO
 // ==========================================
-const formBolsa = document.getElementById('form-bolsa-jugadores');
-if (formBolsa) {
-    formBolsa.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!usuarioActual) {
-            window.toast('Debes iniciar sesión con Google para publicar.', 'warning');
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (err) { return; }
-            return;
-        }
-        const btn = document.getElementById('btn-publicar-anuncio');
-        if(btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; }
-        try {
-            const qCheck = query(collection(db, 'bolsa_jugadores'), where('uid', '==', usuarioActual.uid));
-            const snapCheck = await getDocs(qCheck);
-            if (!snapCheck.empty) {
-                window.toast("Ya tienes un anuncio activo. Borra el anterior para publicar uno nuevo.", "warning");
-                if(btn) { btn.disabled = false; btn.innerHTML = 'Publicar Anuncio'; }
-                return; 
-            }
-            await addDoc(collection(db, 'bolsa_jugadores'), {
-                uid: usuarioActual.uid, 
-                nombreJugador: usuarioActual.displayName || 'Jugador',
-                tipo: document.getElementById('bolsa-tipo').value,
-                posicion: document.getElementById('bolsa-posicion').value,
-                nivel: document.getElementById('bolsa-nivel').value,
-                distrito: document.getElementById('bolsa-distrito').value.trim(),
-                contacto: document.getElementById('bolsa-contacto').value.trim(),
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            });
-            window.toast('¡Anuncio publicado con éxito!', 'success');
-            formBolsa.reset();
-        } catch (error) {
-            console.error(error); window.toast('Hubo un error al publicar.', 'error');
-        } finally {
-            if(btn) { btn.disabled = false; btn.innerHTML = 'Publicar Anuncio'; }
-        }
+if (window.location.pathname.includes('jugadores.html')) {
+    const btnLogin = document.getElementById('btn-login-google');
+    const formAnuncio = document.getElementById('form-anuncio') || document.getElementById('form-bolsa-jugadores');
+    const lista = document.getElementById('lista-jugadores');
+    const hint = document.getElementById('login-hint');
+
+    // 1. Control visual del Login de Google
+    onAuthStateChanged(auth, u => {
+        usuarioActual = u || null;
+        if (btnLogin) btnLogin.style.display = u ? 'none' : 'flex';
+        if (formAnuncio) formAnuncio.style.display = u ? 'flex' : 'none';
+        if (hint) hint.style.display = u ? 'none' : 'block';
     });
+
+    // 2. Botón Iniciar Sesión con Google
+    if (btnLogin) {
+        btnLogin.addEventListener('click', async () => {
+            try {
+                await signInWithPopup(auth, new GoogleAuthProvider());
+            } catch (e) {
+                window.toast('No se pudo iniciar sesión con Google.', 'error');
+            }
+        });
+    }
+
+    // 3. Descargar y pintar los partidos en vivo (Escáner)
+    if (lista) {
+        const q = query(collection(db, 'bolsa_jugadores'), orderBy('createdAt', 'desc'));
+        onSnapshot(q, s => {
+            lista.innerHTML = '';
+            const docs = [];
+            s.forEach(ds => docs.push({ id: ds.id, ...ds.data() }));
+
+            if (!docs.length) {
+                lista.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:30px;"><i class="ph-bold ph-users-three" style="font-size:40px;color:var(--primary-green)"></i><p style="margin-top:10px;">No hay partidos abiertos todavía. Sé el primero.</p></div>';
+                return;
+            }
+
+            docs.forEach(d => {
+                const esMio = usuarioActual && d.uid === usuarioActual.uid;
+                const borrar = esMio ? `<button class="btn btn-danger btn-borrar" data-id="${d.id}" style="padding:6px 12px; font-size:0.75rem; border-radius:6px; margin-top:10px;"><i class="ph-bold ph-trash"></i> Borrar Anuncio</button>` : '';
+                const fechaTexto = d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
+
+                lista.innerHTML += `
+                <article style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:12px; padding:20px; margin-bottom:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <strong style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem;">
+                            <i class="ph-fill ph-user-circle" style="font-size:1.8rem; color:var(--primary-green);"></i> 
+                            ${d.nombreJugador || d.nombre || 'Jugador'}
+                        </strong>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">${fechaTexto}</span>
+                    </div>
+                    <p style="margin:5px 0; font-size:0.95rem; color:#ddd;">
+                        Busco: <b style="color:#fff;">${d.tipo || 'jugador'}</b> · <b style="color:#fff;">${d.modalidad || d.posicion || 'Fútbol 7'}</b>
+                    </p>
+                    ${d.nivel || d.distrito ? `<p style="margin:5px 0; font-size:0.85rem; color:var(--text-muted);">Nivel: ${d.nivel || 'Amateur'} | Zona: ${d.distrito || 'No especificada'}</p>` : ''}
+                    ${d.texto ? `<p style="margin:12px 0; font-size:0.95rem; color:#eee; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">${d.texto}</p>` : ''}
+                    ${d.contacto ? `<p style="margin:10px 0; font-size:0.95rem; color:var(--primary-green); font-weight:bold;"><i class="ph-bold ph-whatsapp-logo"></i> ${d.contacto}</p>` : ''}
+                    ${borrar}
+                </article>`;
+            });
+
+            // Listener para borrar el anuncio propio
+            lista.querySelectorAll('.btn-borrar').forEach(b => {
+                b.addEventListener('click', async () => {
+                    if (confirm('¿Borrar tu anuncio de búsqueda?')) {
+                        try {
+                            await deleteDoc(doc(db, 'bolsa_jugadores', b.dataset.id));
+                            window.toast('Anuncio eliminado de la comunidad.', 'success');
+                        } catch(e) { window.toast('Error al eliminar.', 'error'); }
+                    }
+                });
+            });
+        }, e => {
+            console.error('Error cargando bolsa:', e);
+            lista.innerHTML = '<p style="color:var(--danger); text-align:center;">Error de conexión. No pudimos cargar los partidos.</p>';
+        });
+    }
+
+    // 4. Enviar Formulario Anti-Spam
+    if (formAnuncio) {
+        formAnuncio.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!usuarioActual) {
+                window.toast('Inicia sesión con Google para publicar.', 'warning');
+                return;
+            }
+
+            const btn = formAnuncio.querySelector('button[type="submit"]') || document.getElementById('btn-publicar-anuncio');
+            const textOriginal = btn ? btn.innerHTML : 'Publicar Anuncio';
+            if(btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; }
+
+            try {
+                // Validar Regla Anti-SPAM
+                const qCheck = query(collection(db, 'bolsa_jugadores'), where('uid', '==', usuarioActual.uid));
+                const snapCheck = await getDocs(qCheck);
+                
+                if (!snapCheck.empty) {
+                    window.toast("Ya tienes un anuncio activo. Bórralo primero para publicar otro nuevo.", "warning");
+                    if(btn) { btn.disabled = false; btn.innerHTML = textOriginal; }
+                    return; 
+                }
+
+                const texto = document.getElementById('texto-anuncio')?.value || '';
+                const tipo = document.getElementById('tipo-anuncio')?.value || document.getElementById('bolsa-tipo')?.value || 'jugador';
+                const modalidad = document.getElementById('modalidad-anuncio')?.value || document.getElementById('bolsa-posicion')?.value || 'Fútbol 7';
+
+                await addDoc(collection(db, 'bolsa_jugadores'), {
+                    uid: usuarioActual.uid, 
+                    nombreJugador: usuarioActual.displayName || 'Jugador',
+                    nombre: usuarioActual.displayName || 'Jugador', // retro-compatibilidad
+                    tipo: tipo,
+                    modalidad: modalidad,
+                    posicion: document.getElementById('bolsa-posicion')?.value || '',
+                    nivel: document.getElementById('bolsa-nivel')?.value || '',
+                    distrito: document.getElementById('bolsa-distrito')?.value || '',
+                    contacto: document.getElementById('bolsa-contacto')?.value || '',
+                    texto: texto,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+                
+                window.toast('¡Tu partido se publicó con éxito!', 'success');
+                formAnuncio.reset();
+                
+            } catch (error) {
+                window.toast('Ocurrió un error al intentar publicar.', 'error');
+            } finally {
+                if(btn) { btn.disabled = false; btn.innerHTML = textOriginal; }
+            }
+        });
+    }
 }
-window.borrarAnuncioPropio = async function(anuncioId, anuncioUid) {
-    if (!usuarioActual || usuarioActual.uid !== anuncioUid) { window.toast('Solo puedes borrar tus propios anuncios.', 'error'); return; }
-    if (!confirm('¿Estás seguro de borrar este anuncio?')) return;
-    try {
-        await deleteDoc(doc(db, 'bolsa_jugadores', anuncioId));
-        window.toast('Anuncio eliminado.', 'success');
-    } catch (e) { window.toast('No se pudo eliminar.', 'error'); }
-};
 
 // ==========================================
 // FASE 27: VISUALIZACIÓN PÚBLICA DE EVENTOS
