@@ -313,3 +313,96 @@ async function cargarEventosPublicos() {
 document.addEventListener('DOMContentLoaded', () => {
     cargarEventosPublicos();
 });
+// ==========================================
+// FASE 29: LÓGICA PARA LA PÁGINA DE RESEÑAS (cancha.html)
+// ==========================================
+if (window.location.pathname.includes('cancha.html')) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const canchaId = urlParams.get('id');
+    
+    async function cargarDetalleCancha() {
+        if (!canchaId) return document.getElementById('court-info').innerHTML = '<h2>Cancha no encontrada</h2>';
+        
+        try {
+            // 1. Cargar info de la cancha
+            const docSnap = await getDoc(doc(db, 'canchas', canchaId));
+            if (!docSnap.exists()) return document.getElementById('court-info').innerHTML = '<h2>Cancha no encontrada</h2>';
+            const c = docSnap.data();
+            
+            const logoEl = document.getElementById('court-logo');
+            if (logoEl) logoEl.src = c.logo || 'https://via.placeholder.com/100';
+            const titleEl = document.getElementById('court-title');
+            if (titleEl) titleEl.textContent = c.nombre || 'Cancha';
+            const metaEl = document.getElementById('court-meta');
+            if (metaEl) metaEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || c.distrito || 'Ubicación'} · <i class="ph-bold ph-soccer-ball"></i> ${c.tipoCancha || 'Fútbol'}`;
+            
+            // 2. Cargar Reseñas
+            const q = query(collection(db, 'resenas'), where('canchaId', '==', canchaId));
+            const resenasSnap = await getDocs(q);
+            let resenas = resenasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            
+            // Promedio
+            const total = resenas.length;
+            const prom = total > 0 ? (resenas.reduce((acc, r) => acc + r.rating, 0) / total).toFixed(1) : "0.0";
+            
+            const ratingEl = document.getElementById('court-rating');
+            if (ratingEl) ratingEl.innerHTML = `<strong>${prom}</strong><span>de 5 (${total} reseñas)</span>`;
+            
+            // 3. Renderizado y Filtros
+            window.resenasGlobales = resenas;
+            renderizarResenas(resenas);
+            
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    const star = e.target.dataset.star;
+                    if (star === 'all') renderizarResenas(window.resenasGlobales);
+                    else renderizarResenas(window.resenasGlobales.filter(r => String(r.rating) === String(star)));
+                });
+            });
+            
+        } catch (e) {
+            console.error(e);
+            document.getElementById('reviews-list').innerHTML = '<p style="color:var(--danger)">Hubo un error al cargar la información.</p>';
+        }
+    }
+    
+    function renderizarResenas(lista) {
+        const listEl = document.getElementById('reviews-list');
+        if (!listEl) return;
+        
+        if (lista.length === 0) {
+            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay reseñas en esta categoría.</div>';
+            return;
+        }
+        
+        // Ordenar más recientes primero
+        lista.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+        
+        listEl.innerHTML = lista.map(r => {
+            const estrellas = Array.from({length: 5}, (_, i) => `<i class="ph-fill ph-star" style="color: ${i < r.rating ? 'var(--warning)' : '#333'}"></i>`).join('');
+            const fechaTexto = r.createdAt ? new Date(r.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
+            
+            return `
+            <article class="review-card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <div style="width:35px; height:35px; background:var(--primary-green); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">
+                            ${r.nombre ? r.nombre.charAt(0).toUpperCase() : 'J'}
+                        </div>
+                        <div>
+                            <strong style="display:block;">${r.nombre || 'Jugador'}</strong>
+                            <small style="color:var(--text-muted);">${fechaTexto}</small>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:2px; font-size:1.1rem;">${estrellas}</div>
+                </div>
+                ${r.comentario ? `<p style="margin-top:10px; color:#ddd; line-height:1.5;">${r.comentario}</p>` : '<p style="margin-top:10px; color:var(--text-muted); font-style:italic;">Sin comentario escrito.</p>'}
+            </article>
+            `;
+        }).join('');
+    }
+    
+    document.addEventListener('DOMContentLoaded', cargarDetalleCancha);
+}
