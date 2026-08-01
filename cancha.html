@@ -41,7 +41,7 @@
             color: var(--warning, #f1c40f);
         }
 
-        /* Chips / Etiquetas rápidas tipo InDrive */
+        /* Chips / Etiquetas rápidas minimalistas */
         .quick-tags {
             display: flex;
             flex-wrap: wrap;
@@ -59,6 +59,9 @@
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
         .tag-chip:hover {
             border-color: var(--primary-green, #2ecc71);
@@ -72,11 +75,13 @@
         }
 
         .tag-badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             background: rgba(46, 204, 113, 0.1);
             color: var(--primary-green, #2ecc71);
             border: 1px solid rgba(46, 204, 113, 0.2);
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 12px;
             font-size: 0.75rem;
             margin-right: 5px;
@@ -95,6 +100,7 @@
 
     <main class="cancha-layout" style="padding: 20px;">
         
+        <!-- COLUMNA IZQUIERDA: Info de la Cancha -->
         <div class="sticky-sidebar">
             <div id="court-info" class="card" style="text-align: center; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; margin:0;">
                 <img id="court-logo" src="" alt="Logo" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-green); display: none;" onload="this.style.display='block'">
@@ -109,27 +115,21 @@
             </div>
         </div>
 
+        <!-- COLUMNA DERECHA: Reseñas y Botón de Publicar (SIN FILTROS) -->
         <div class="card" style="margin: 0;">
             
+            <!-- ENCABEZADO: Título + Botón Escribir Reseña -->
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
                 <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
                     <i class="ph-fill ph-star" style="color:var(--warning);"></i> Opiniones de Jugadores
                 </h3>
                 
                 <button id="btn-open-review-modal" class="btn hero-primary" style="width: auto; padding: 8px 18px; font-size: 0.9rem;">
-                    <i class="ph-bold ph-star"></i> Escribir una Reseña
+                    <i class="ph-bold ph-pencil-simple"></i> Calificar Cancha
                 </button>
             </div>
             
-            <div style="display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;">
-                <button class="btn btn-outline filter-btn active" data-star="all" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">Todas</button>
-                <button class="btn btn-outline filter-btn" data-star="5" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">5 <i class="ph-fill ph-star" style="color:var(--warning)"></i></button>
-                <button class="btn btn-outline filter-btn" data-star="4" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">4 <i class="ph-fill ph-star" style="color:var(--warning)"></i></button>
-                <button class="btn btn-outline filter-btn" data-star="3" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">3 <i class="ph-fill ph-star" style="color:var(--warning)"></i></button>
-                <button class="btn btn-outline filter-btn" data-star="2" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">2 <i class="ph-fill ph-star" style="color:var(--warning)"></i></button>
-                <button class="btn btn-outline filter-btn" data-star="1" style="width: auto; padding: 6px 14px; font-size: 0.85rem;">1 <i class="ph-fill ph-star" style="color:var(--warning)"></i></button>
-            </div>
-            
+            <!-- LISTA DE RESEÑAS -->
             <div id="reviews-list">
                 <div style="text-align:center; padding:30px; color:var(--text-muted);"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando reseñas...</div>
             </div>
@@ -137,6 +137,7 @@
 
     </main>
 
+    <!-- MODAL PARA CREAR RESEÑA -->
     <div id="modal-publicar-resena" class="admin-modal">
         <div class="admin-modal-card" style="max-width: 500px; text-align: center; padding: 25px;">
             <button type="button" class="btn-cerrar admin-modal-close" id="btn-close-review-modal"><i class="ph-bold ph-x"></i></button>
@@ -144,6 +145,7 @@
             <h3 style="margin-bottom: 5px;">Calificar Cancha</h3>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0;">¿Cómo fue tu experiencia en el partido?</p>
 
+            <!-- SELECTOR DE ESTRELLAS -->
             <div class="star-picker" id="star-picker">
                 <i class="ph-fill ph-star" data-val="1"></i>
                 <i class="ph-fill ph-star" data-val="2"></i>
@@ -153,11 +155,13 @@
             </div>
             <span id="star-label" style="font-weight: bold; color: var(--primary-green); font-size: 0.95rem;">Toca las estrellas para calificar</span>
 
+            <!-- ETIQUETAS RÁPIDAS DINÁMICAS (InDrive Style Minimalista) -->
             <div id="quick-tags-box" style="margin-top: 15px; display: none;">
                 <small style="color: var(--text-muted); display: block; margin-bottom: 8px;">Selecciona lo que más destacó (Opcional):</small>
                 <div class="quick-tags" id="quick-tags-container"></div>
             </div>
 
+            <!-- COMENTARIO OPCIONAL -->
             <textarea id="review-comment-input" rows="3" placeholder="Añade un comentario adicional (Opcional)..." style="width: 100%; margin-top: 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 8px; outline: none; font-family: inherit; resize: none;"></textarea>
 
             <button id="btn-submit-review" class="btn hero-primary" style="width: 100%; margin-top: 15px;" disabled>
