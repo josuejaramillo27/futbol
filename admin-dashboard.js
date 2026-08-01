@@ -2,6 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+import { calcularDisponibilidad, fechaISO } from './availability.js';
+let bloqueosDia = [];
 
 const firebaseConfig={apiKey:"AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",authDomain:"app-futbol-acd0f.firebaseapp.com",projectId:"app-futbol-acd0f",storageBucket:"app-futbol-acd0f.firebasestorage.app",messagingSenderId:"223446110165",appId:"1:223446110165:web:219afce6a9dac03203f75c"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
@@ -68,7 +70,19 @@ async function cargarPerfil(){
     return true;
 }
 async function cargarEspacios(){const q=query(collection(db,'espacios'),where('ownerUid','==',usuarioActual.uid));const snap=await getDocs(q);espacios=snap.docs.map(d=>({id:d.id,...d.data()}));const todos=[{id:usuarioActual.uid,nombre:canchaActual.nombre||'Cancha principal',tipoCancha:(Array.isArray(canchaActual.tiposCancha)?canchaActual.tiposCancha[0]:canchaActual.tipoCancha)||'Sintética',horaApertura:canchaActual.horaApertura||'16:00',horaCierre:canchaActual.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana},...espacios.map(e=>({id:e.id,nombre:e.nombre,tipoCancha:e.tipo||'Fútbol',horaApertura:e.horaApertura||'16:00',horaCierre:e.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana}))];if(!espacioSeleccionado||!todos.find(x=>x.id===espacioSeleccionado.id)){espacioSeleccionado=todos[0]}let container=document.getElementById('dashboard-space-selector');if(!container){const header=document.querySelector('.schedule-head');if(header){container=document.createElement('div');container.id='dashboard-space-selector';container.className='space-selector';header.appendChild(container)}}if(container){container.innerHTML=`<label><span>CANCHA ACTIVA</span><select id="select-cancha-activa" style="margin-left:8px; padding:6px; border-radius:8px; background:#101614; color:#fff; border:1px solid #333;">${todos.map(s=>`<option value="${s.id}" ${s.id===espacioSeleccionado.id?'selected':''}>${s.nombre} · ${s.tipoCancha}</option>`).join('')}</select></label>`;document.getElementById('select-cancha-activa').addEventListener('change',(e)=>{espacioSeleccionado=todos.find(x=>x.id===e.target.value);actualizarDia()})}}
-async function cargarReservas(){const snap=await getDocs(collection(db,'reservas'));const idCancha=String(espacioSeleccionado?.id||usuarioActual.uid);reservasDia=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>String(r.canchaId??r.courtId??r.cancha??'')===idCancha&&String(r.fecha||'')===fechaISO(fechaSeleccionada))}
+async function cargarReservas(){
+    const idCancha = String(canchaActual?.id || usuarioActual.uid);
+    const fISO = fechaISO(fechaSeleccionada);
+    
+    // FASE 50 PREP: Usar Querys en lugar de leer toda la base de datos
+    const [snapReservas, snapBloqueos] = await Promise.all([
+        getDocs(query(collection(db,'reservas'), where('canchaId', '==', idCancha), where('fecha', '==', fISO))),
+        getDocs(query(collection(db,'bloqueos'), where('canchaId', '==', idCancha), where('fecha', '==', fISO)))
+    ]);
+    
+    reservasDia = snapReservas.docs.map(d=>({id:d.id,...d.data()}));
+    bloqueosDia = snapBloqueos.docs.map(d=>({id:d.id,...d.data()}));
+}
 function generarSlots(){const h=horarioDelDia();if(!h.activo)return[];const a=minutos(h.apertura),b0=minutos(h.cierre),step=Number(canchaActual?.intervaloMinutos||canchaActual?.duracionReserva||60);if(a===null||b0===null||!Number.isFinite(step)||step<=0)return[];let b=b0<=a?b0+1440:b0;const out=[];for(let t=a;t<b;t+=step){const real=t%1440;out.push({hora:`${String(Math.floor(real/60)).padStart(2,'0')}:${String(real%60).padStart(2,'0')}`,min:real})}return out}
 function reservaPara(hora){return reservasDia.find(r=>r.horaInicio===hora&&!['cancelada','cancelado','cancelled'].includes(normalizar(r.estado)))}function esBloqueoManual(r){return r?.tipo==='bloqueo_manual'||r?.estado==='bloqueada'}
 function estadoReserva(r){
@@ -81,9 +95,78 @@ function estadoReserva(r){
     if(['rechazada', 'rejected'].includes(st)) return 'rejected';
     return 'pending';
 }
-function renderSchedule(){const box=document.getElementById('admin-schedule');if(!box)return;const h=horarioDelDia(),slots=generarSlots();if(!h.activo){box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-moon"></i><b>Cancha cerrada este día</b><span>Según tu horario semanal, no recibes reservas.</span></div>';actualizarKpis([]);return}if(!slots.length){box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-clock"></i><b>Configura el horario de este día</b><span>Ve a configuración y establece apertura y cierre.</span></div>';actualizarKpis([]);return}box.innerHTML=slots.map(s=>{const r=reservaPara(s.hora),busy=!!r,past=fechaISO(fechaSeleccionada)===fechaHoy()&&s.min<horaActual(),manual=esBloqueoManual(r);let cls=busy?'occupied':'available';if(past&&!busy)cls+=' past';const estado=estadoReserva(r),label=busy?(manual?'Bloqueada':estado==='confirmada'?'Confirmada':estado==='cancelada'?'Cancelada':'Pendiente'):'Disponible';return `<button type="button" class="admin-slot ${cls}" data-slot="${s.hora}" data-reserva="${r?.id||''}" title="${busy?'Clic para gestionar':'Clic para ocupar'}"><span class="slot-time">${s.hora}</span><span class="slot-status"><i class="ph-fill ph-circle"></i>${label}</span>${busy&&!manual?`<small>${r.nombre||'Cliente'} · ${r.telefono||''}</small>`:''}</button>`}).join('');box.querySelectorAll('.admin-slot').forEach(b=>b.addEventListener('click',()=>gestionarSlot(b.dataset.slot,b.dataset.reserva)));actualizarKpis(slots)}
-function actualizarKpis(slots){const activos=reservasDia.filter(r=>!['cancelada','cancelado','cancelled'].includes(normalizar(r.estado))),clientes=activos.filter(r=>!esBloqueoManual(r));document.getElementById('reservas-hoy').textContent=clientes.length;document.getElementById('reservas-count').textContent=clientes.length;document.getElementById('horas-libres').textContent=Math.max(0,slots.filter(s=>!reservaPara(s.hora)).length);document.getElementById('ingresos-hoy').textContent=money(clientes.filter(r=>estadoReserva(r)!=='cancelada').reduce((sum,r)=>sum+Number(r.precio??canchaActual?.precio??0),0))}
-async function gestionarSlot(hora,reservaId){const existente=reservaId?reservasDia.find(r=>r.id===reservaId):null;if(existente){const manual=esBloqueoManual(existente);if(manual){if(!confirm(`¿Liberar ${hora} para volver a recibir reservas?`))return;try{await updateDoc(doc(db,'reservas',existente.id),{estado:'cancelada',canceladoPor:'dueno',canceladoEn:serverTimestamp()});toast('Horario liberado.');await refrescar()}catch(e){toast('No se pudo liberar.',true)}return}abrirGestionReserva(existente);return}if(!confirm(`¿Ocupar ${hora} manualmente en ${espacioSeleccionado?.nombre}?`))return;try{await addDoc(collection(db,'reservas'),{canchaId:espacioSeleccionado.id,canchaNombre:espacioSeleccionado.nombre||'',fecha:fechaISO(fechaSeleccionada),horaInicio:hora,horaFin:hora,estado:'bloqueada',tipo:'bloqueo_manual',nombre:'Bloqueo del dueño',uid:usuarioActual.uid,precio:0,creadoEn:serverTimestamp()});toast('Horario ocupado.');await refrescar()}catch(e){console.error(e);toast('No se pudo ocupar el horario.',true)}}
+function renderSchedule(){
+    const box=document.getElementById('admin-schedule'); if(!box)return;
+    const slots = calcularDisponibilidad(canchaActual, fechaSeleccionada, reservasDia, bloqueosDia);
+    
+    if(!slots.length){
+        box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-moon"></i><b>Cancha cerrada o sin horarios</b><span>Revisa tu configuración semanal.</span></div>';
+        actualizarKpis([]);
+        return;
+    }
+    
+    box.innerHTML=slots.map(s => {
+        let cls='available';
+        if(s.estado === 'reservado') cls = 'occupied';
+        if(s.estado === 'bloqueado') cls = 'occupied blocked';
+        if(s.estado === 'pasado') cls += ' past';
+        
+        const label = s.estado === 'reservado' ? 'Reservada' : s.estado === 'bloqueado' ? 'Bloqueada' : s.estado === 'pasado' ? 'Pasado' : 'Disponible';
+        
+        return `<button type="button" class="admin-slot ${cls}" data-slot="${s.hora}" data-reserva="${s.reserva?.id||''}" data-bloqueo="${s.bloqueo?.id||''}" title="Clic para gestionar">
+            <span class="slot-time">${s.hora}</span>
+            <span class="slot-status"><i class="ph-fill ph-circle"></i>${label}</span>
+            ${s.reserva ? `<small>${s.reserva.nombre||'Cliente'}</small>` : ''}
+        </button>`;
+    }).join('');
+    
+    box.querySelectorAll('.admin-slot').forEach(b=>b.addEventListener('click',()=>gestionarSlot(b.dataset.slot, b.dataset.reserva, b.dataset.bloqueo)));
+    actualizarKpis(slots);
+}
+function actualizarKpis(slots){
+    const clientes = reservasDia.filter(r => !['cancelled', 'rejected', 'cancelada', 'cancelado'].includes(estadoReserva(r)));
+    document.getElementById('reservas-hoy').textContent = clientes.length;
+    document.getElementById('reservas-count').textContent = clientes.length;
+    document.getElementById('horas-libres').textContent = Math.max(0, slots.filter(s => s.estado === 'disponible').length);
+    document.getElementById('ingresos-hoy').textContent = money(clientes.reduce((sum,r)=>sum+Number(r.precio??canchaActual?.precio??0),0));
+}
+
+async function gestionarSlot(hora, reservaId, bloqueoId){
+    if(reservaId){
+        const r = reservasDia.find(x=>x.id===reservaId);
+        if(r) abrirGestionReserva(r);
+        return;
+    }
+    
+    if(bloqueoId){
+        if(!confirm(`¿Liberar el horario de las ${hora} para volver a recibir reservas?`)) return;
+        try{
+            await deleteDoc(doc(db,'bloqueos',bloqueoId)); // FASE 17: Borramos el bloqueo de la colección correcta
+            toast('Horario liberado.');
+            await refrescar();
+        }catch(e){toast('No se pudo liberar.',true);}
+        return;
+    }
+    
+    if(!confirm(`¿Bloquear manualmente las ${hora}?\nNadie podrá reservar este horario.`)) return;
+    try{
+        // FASE 17: Guardado en colección 'bloqueos'
+        await addDoc(collection(db,'bloqueos'),{
+            ownerUid: usuarioActual.uid,
+            canchaId: canchaActual.id,
+            fecha: fechaISO(fechaSeleccionada),
+            horaInicio: hora,
+            horaFin: hora,
+            motivo: 'Bloqueo manual',
+            createdAt: serverTimestamp()
+        });
+        toast('Horario bloqueado.');
+        await refrescar();
+    }catch(e){
+        console.error(e);
+        toast('No se pudo bloquear el horario.',true);
+    }
+}
 function abrirGestionReserva(r){
     let m=document.getElementById('modal-gestion-reserva');
     if(!m){
