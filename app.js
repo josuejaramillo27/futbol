@@ -146,3 +146,132 @@ const btnCerrar=document.getElementById('cerrar-modal'),modalCancha=document.get
 function cerrarReserva(){const m=document.getElementById('modal-reserva');if(m){m.classList.remove('mostrar');m.setAttribute('aria-hidden','true')}}
 const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',cerrarReserva);document.getElementById('modal-reserva')?.addEventListener('click',e=>{if(e.target.id==='modal-reserva')cerrarReserva()});document.getElementById('btn-confirmar-reserva')?.addEventListener('click',confirmarReserva);onAuthStateChanged(auth,u=>{usuarioActual=u||null});
 if(window.location.pathname.includes('jugadores.html')){const provider=new GoogleAuthProvider(),btnLogin=document.getElementById('btn-login-google'),form=document.getElementById('form-anuncio'),lista=document.getElementById('lista-jugadores'),hint=document.getElementById('login-hint');let usuario=null;const groserias=['mierda','puta','puto','pendejo','pendeja','cabron','cabrón','carajo','joder','cojudo','conchatumare','ctm','imbecil','imbécil','idiota','perra','estupido','estúpido','asco'];const tieneGroserias=t=>groserias.some(x=>normalizar(t).includes(normalizar(x)));onAuthStateChanged(auth,u=>{usuario=u||null;if(btnLogin)btnLogin.style.display=u?'none':'flex';if(form)form.style.display=u?'flex':'none';if(hint)hint.style.display=u?'none':'block'});if(btnLogin)btnLogin.addEventListener('click',async()=>{try{await signInWithPopup(auth,provider)}catch(e){alert('No se pudo iniciar sesión: '+e.message)}});if(form)form.addEventListener('submit',async e=>{e.preventDefault();const t=document.getElementById('texto-anuncio').value.trim(),tipo=document.getElementById('tipo-anuncio')?.value||'jugador',modalidad=document.getElementById('modalidad-anuncio')?.value||'Fútbol 7';if(!usuario)return alert('Debes iniciar sesión con Google.');if(!t)return;if(tieneGroserias(t))return alert('Lenguaje inapropiado detectado. Mantengamos el respeto.');try{await addDoc(collection(db,'bolsa_jugadores'),{nombre:formatearNombre(usuario.displayName),texto:t,tipo,modalidad,uid:usuario.uid,fecha:serverTimestamp(),expiraEn:Date.now()+86400000});document.getElementById('texto-anuncio').value=''}catch(e){console.error(e);alert('No se pudo publicar. Intenta nuevamente.')}});const q=query(collection(db,'bolsa_jugadores'),orderBy('fecha','desc'));onSnapshot(q,s=>{if(!lista)return;lista.innerHTML='';const ahora=Date.now(),docs=[];s.forEach(ds=>{const d=ds.data();if(d.expiraEn&&d.expiraEn<ahora){if(usuario&&d.uid===usuario.uid)deleteDoc(doc(db,'bolsa_jugadores',ds.id));return}docs.push({id:ds.id,...d})});if(!docs.length){lista.innerHTML='<div class="card" style="text-align:center;color:var(--text-muted);grid-column:1/-1"><i class="ph ph-users-three" style="font-size:30px;color:var(--primary-green)"></i><p style="margin-top:7px">No hay partidos abiertos todavía. Sé el primero.</p></div>';return}docs.forEach(d=>{const borrar=usuario&&d.uid===usuario.uid?`<button class="btn btn-danger btn-borrar" data-id="${d.id}"><i class="ph-bold ph-trash"></i> Borrar</button>`:'';lista.innerHTML+=`<article class="card player-post"><div class="player-post-head"><strong><i class="ph-fill ph-user-circle"></i> ${d.nombre||'Jugador'}</strong>${borrar}</div><p>${d.texto||''}</p><small>${d.tipo||'jugador'} · ${d.modalidad||'Fútbol 7'}</small></article>`});lista.querySelectorAll('.btn-borrar').forEach(b=>b.addEventListener('click',async()=>{if(confirm('¿Borrar tu anuncio?'))await deleteDoc(doc(db,'bolsa_jugadores',b.dataset.id))}))},e=>console.error('APP FUTBOL bolsa:',e))}
+
+// ==========================================
+// FASE 26: BOLSA DE JUGADORES SEGURA
+// ==========================================
+const formBolsa = document.getElementById('form-bolsa-jugadores');
+if (formBolsa) {
+    formBolsa.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // 1. Verificación de Autenticación
+        if (!usuarioActual) {
+            alert('Debes iniciar sesión con Google para publicar un anuncio.');
+            try {
+                const { GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+                await signInWithPopup(auth, new GoogleAuthProvider());
+                // La página recargará o el estado cambiará
+            } catch (err) {
+                return;
+            }
+            return;
+        }
+
+        const btn = document.getElementById('btn-publicar-anuncio');
+        if(btn) { btn.disabled = true; btn.innerHTML = 'Publicando...'; }
+
+        try {
+            // 2. Guardado Seguro Atado al UID del jugador
+            await addDoc(collection(db, 'bolsa_jugadores'), {
+                uid: usuarioActual.uid, // Validado por reglas de Firestore
+                nombreJugador: usuarioActual.displayName || 'Jugador',
+                tipo: document.getElementById('bolsa-tipo').value,
+                posicion: document.getElementById('bolsa-posicion').value,
+                nivel: document.getElementById('bolsa-nivel').value,
+                distrito: document.getElementById('bolsa-distrito').value.trim(),
+                contacto: document.getElementById('bolsa-contacto').value.trim(),
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+
+            alert('¡Anuncio publicado con éxito!');
+            formBolsa.reset();
+            cargarAnunciosBolsa(); // Si tienes una función que renderice la lista, llámala aquí
+        } catch (error) {
+            console.error('Error al publicar anuncio:', error);
+            alert('Hubo un error al publicar tu anuncio. Revisa los permisos.');
+        } finally {
+            if(btn) { btn.disabled = false; btn.innerHTML = 'Publicar Anuncio'; }
+        }
+    });
+}
+
+// Lógica para borrar un anuncio propio
+window.borrarAnuncioPropio = async function(anuncioId, anuncioUid) {
+    if (!usuarioActual || usuarioActual.uid !== anuncioUid) {
+        alert('Solo puedes borrar tus propios anuncios.');
+        return;
+    }
+    if (!confirm('¿Estás seguro de borrar este anuncio?')) return;
+
+    try {
+        await deleteDoc(doc(db, 'bolsa_jugadores', anuncioId));
+        alert('Anuncio eliminado.');
+        cargarAnunciosBolsa();
+    } catch (e) {
+        console.error(e);
+        alert('No se pudo eliminar el anuncio.');
+    }
+};
+// ==========================================
+// FASE 27: VISUALIZACIÓN PÚBLICA DE EVENTOS
+// ==========================================
+async function cargarEventosPublicos() {
+    const contenedorEventos = document.getElementById('lista-eventos-publicos');
+    // Solo se ejecuta si estamos en una página que tiene el contenedor de eventos
+    if (!contenedorEventos) return; 
+
+    contenedorEventos.innerHTML = '<div style="text-align:center; padding:20px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando eventos...</div>';
+
+    try {
+        // Consultamos eventos programados
+        const q = query(collection(db, 'eventos'), where('estado', '==', 'programado'));
+        const snap = await getDocs(q);
+        
+        let eventos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Filtramos eventos que ya pasaron
+        const ahora = new Date();
+        eventos = eventos.filter(e => new Date(e.fin) >= ahora);
+        
+        // Ordenamos por fecha de inicio más cercana
+        eventos.sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
+
+        if (eventos.length === 0) {
+            contenedorEventos.innerHTML = `
+                <div class="empty-state" style="text-align:center; padding: 30px; background: rgba(255,255,255,0.02); border-radius:15px;">
+                    <i class="ph-fill ph-trophy" style="font-size:40px; color:var(--text-muted); margin-bottom:15px;"></i>
+                    <h4>No hay campeonatos próximos</h4>
+                    <p style="color:var(--text-muted); font-size:0.9rem;">Pronto las canchas publicarán nuevos eventos aquí.</p>
+                </div>
+            `;
+            return;
+        }
+
+        contenedorEventos.innerHTML = eventos.map(e => {
+            const fechaInicio = new Date(e.inicio).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
+            return `
+            <article class="evento-publico-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:15px; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <span style="background:var(--primary-green); color:#000; font-size:0.7rem; font-weight:bold; padding:3px 8px; border-radius:4px; margin-bottom:8px; display:inline-block;">TORNEO / EVENTO</span>
+                        <h3 style="margin:0 0 5px; font-size:1.1rem;">${e.nombre}</h3>
+                        <p style="margin:0; color:var(--text-muted); font-size:0.85rem;"><i class="ph-bold ph-calendar"></i> Inicia: ${fechaInicio}</p>
+                    </div>
+                </div>
+                ${e.nota ? `<p style="margin-top:12px; font-size:0.9rem; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px;">${e.nota}</p>` : ''}
+            </article>
+            `;
+        }).join('');
+
+    } catch (error) {
+        console.error("Error cargando eventos:", error);
+        contenedorEventos.innerHTML = '<p style="color:var(--danger);">Error al cargar los eventos.</p>';
+    }
+}
+
+// Llamar a la función al cargar la página (si existe el contenedor)
+document.addEventListener('DOMContentLoaded', () => {
+    cargarEventosPublicos();
+});
