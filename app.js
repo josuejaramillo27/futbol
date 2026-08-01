@@ -13,7 +13,24 @@ const esInicio=()=>{const p=window.location.pathname.replace(/\/$/,'');return p=
 function mostrarErrorCarga(el,tipo,e){console.error(`APP FUTBOL: error cargando ${tipo}`,e);if(el)el.innerHTML=`<div class="card" style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:28px"><i class="ph-bold ph-warning-circle" style="font-size:30px;color:var(--primary-green)"></i><h3 style="margin-top:8px">No pudimos cargar ${tipo}</h3><p style="font-size:.74rem;margin-top:4px">Revisa tu conexión y vuelve a intentarlo.</p><button type="button" class="btn btn-outline" style="width:auto;margin:14px auto 0" onclick="location.reload()">Reintentar</button></div>`}
 const fechaHoy=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const minutos=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null};
-const slotsDeCancha=(c,reservas)=>{const a=minutos(c.horaApertura),b0=minutos(c.horaCierre),step=Number(c.intervaloMinutos||c.duracionReserva||60);if(a===null||b0===null||!Number.isFinite(step)||step<=0)return[];let b=b0<=a?b0+1440:b0;const ocupadas=new Set(reservas.filter(r=>String(r.canchaId)===String(c.id)&&String(r.fecha)===fechaHoy()&&!['cancelada','cancelado','cancelled'].includes(normalizar(r.estado))).map(r=>minutos(r.horaInicio)).filter(Number.isFinite));const now=new Date(),actual=now.getHours()*60+now.getMinutes();const out=[];for(let t=a;t<b;t+=step){const real=t%1440,label=`${String(Math.floor(real/60)).padStart(2,'0')}:${String(real%60).padStart(2,'0')}`;out.push({label,blocked:ocupadas.has(real)||real<actual})}return out};
+const slotsDeCancha = (c, reservas, fechaReq) => {
+    const a = minutos(c.horaApertura), b0 = minutos(c.horaCierre), step = Number(c.intervaloMinutos||c.duracionReserva||60);
+    if(a===null || b0===null || !Number.isFinite(step) || step<=0) return [];
+    let b = b0<=a ? b0+1440 : b0;
+    
+    const fReq = fechaReq || fechaHoy();
+    const ocupadas = new Set(reservas.filter(r => String(r.canchaId)===String(c.id) && String(r.fecha)===fReq && !['cancelada','cancelado','cancelled'].includes(normalizar(r.estado))).map(r=>minutos(r.horaInicio)).filter(Number.isFinite));
+    
+    const isToday = fReq === fechaHoy();
+    const now = new Date(), actual = now.getHours()*60 + now.getMinutes();
+    const out = [];
+    
+    for(let t=a; t<b; t+=step){
+        const real = t%1440, label = `${String(Math.floor(real/60)).padStart(2,'0')}:${String(real%60).padStart(2,'0')}`;
+        out.push({label, blocked: ocupadas.has(real) || (isToday && real<actual)});
+    }
+    return out;
+};
 if(esInicio()){
  const contenedor=document.getElementById('lista-canchas'),inputBusqueda=document.getElementById('filtro-busqueda'),filtroCiudad=document.getElementById('filtro-ciudad'),filtroTipo=document.getElementById('filtro-tipo'),filtroPrecio=document.getElementById('filtro-precio'),filtroOrden=document.getElementById('filtro-orden'),contador=document.getElementById('contador-canchas'),filtroActivo=document.getElementById('filtro-activo');let soloAbiertas=false,soloCerca=false,soloTop=false;
  function llenarSelect(select,valores,placeholder){if(!select)return;const actual=select.value;select.innerHTML=`<option value="">${placeholder}</option>`;[...new Set(valores.map(v=>String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;select.appendChild(o)});if([...select.options].some(o=>o.value===actual))select.value=actual}
@@ -64,81 +81,102 @@ if(esInicio()){
 }
 window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';const tel=String(c.whatsapp||'').replace(/\D/g,'');document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de APP FUTBOL y quiero consultar disponibilidad para reservar.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
 async function obtenerReservasHoy(){try{const snap=await getDocs(collection(db,'reservas'));return snap.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn('APP FUTBOL reservas:',e);return[]}}
-async function pintarDisponibilidadModal(c){const box=document.getElementById('modal-disponibilidad');if(!box)return;box.innerHTML='<div class="availability-loading"><i class="ph-bold ph-spinner-gap"></i> Consultando horarios...</div>';const reservas=await obtenerReservasHoy(),slots=slotsDeCancha(c,reservas),libres=slots.filter(s=>!s.blocked).length;box.innerHTML=`<div class="modal-availability-head"><div><span>HORARIOS DE HOY</span><strong>${libres} disponibles</strong></div><small>Selecciona una hora verde para reservar</small></div><div class="modal-slots">${slots.length?slots.map(s=>`<button type="button" class="modal-slot ${s.blocked?'blocked':''}" data-book-court="${c.id}" data-book-time="${s.label}" ${s.blocked?'disabled':''}>${s.label}</button>`).join(''):'<span class="availability-empty">El dueño aún no configuró sus horarios.</span>'}</div>`;box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b=>b.addEventListener('click',()=>abrirReserva(c,b.dataset.bookTime)))}
-function abrirReserva(c,hora){const modal=document.getElementById('modal-reserva');if(!modal)return;document.getElementById('booking-cancha-nombre').textContent=c.nombre;document.getElementById('booking-hora').textContent=hora;document.getElementById('booking-nombre').value=usuarioActual?.displayName?formatearNombre(usuarioActual.displayName):'';document.getElementById('booking-status').textContent='';modal.dataset.courtId=c.id;modal.dataset.time=hora;modal.classList.add('mostrar');modal.setAttribute('aria-hidden','false')}
+async function pintarDisponibilidadModal(c, fechaElegida){
+    const box = document.getElementById('modal-disponibilidad');
+    if(!box) return;
+    const fReq = fechaElegida || fechaHoy();
+    
+    box.innerHTML = '<div class="availability-loading" style="text-align:center; padding:20px; color:var(--text-muted);"><i class="ph-bold ph-spinner-gap ph-spin"></i> Consultando horarios...</div>';
+    
+    try {
+        const q = query(collection(db, 'reservas'), where('canchaId', '==', c.id), where('fecha', '==', fReq));
+        const snap = await getDocs(q);
+        const reservas = snap.docs.map(d => d.data());
+        
+        const slots = slotsDeCancha(c, reservas, fReq);
+        const libres = slots.filter(s => !s.blocked).length;
+        
+        box.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:10px; border:1px solid var(--border-color);">
+                <label style="display:flex; flex-direction:column; font-size:0.8rem; color:var(--text-muted); font-weight:bold; letter-spacing:0.05em;">
+                    FECHA DE RESERVA
+                    <input type="date" id="input-fecha-modal" value="${fReq}" min="${fechaHoy()}" style="background:transparent; border:none; color:#fff; font-size:1.1rem; font-weight:bold; outline:none; margin-top:4px; font-family:inherit; color-scheme:dark; cursor:pointer;">
+                </label>
+                <div style="text-align:right;">
+                    <span style="font-size:0.75rem; color:var(--text-muted); display:block; font-weight:bold; letter-spacing:0.05em;">DISPONIBLES</span>
+                    <strong style="font-size:1.3rem; color:var(--primary-green);">${libres}</strong>
+                </div>
+            </div>
+            <div class="modal-slots">${slots.length ? slots.map(s=>`<button type="button" class="modal-slot ${s.blocked?'blocked':''}" data-book-court="${c.id}" data-book-time="${s.label}" data-book-date="${fReq}" ${s.blocked?'disabled':''}>${s.label}</button>`).join('') : '<span class="availability-empty">El dueño aún no configuró sus horarios.</span>'}</div>
+        `;
+        
+        // Listener para recargar cuando el jugador cambia la fecha
+        document.getElementById('input-fecha-modal').addEventListener('change', (e) => {
+            pintarDisponibilidadModal(c, e.target.value);
+        });
+
+        box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b=>b.addEventListener('click',()=>abrirReserva(c, b.dataset.bookTime, b.dataset.bookDate)));
+    } catch (e) {
+        console.error(e);
+        box.innerHTML='<span class="availability-empty">Error cargando horarios.</span>';
+    }
+}
+function abrirReserva(c, hora, fechaElegida){
+    const modal = document.getElementById('modal-reserva');
+    if(!modal) return;
+    
+    document.getElementById('booking-cancha-nombre').textContent = c.nombre;
+    const dateObj = new Date(`${fechaElegida}T12:00:00`);
+    const fechaTexto = new Intl.DateTimeFormat('es-PE',{weekday:'long',day:'numeric',month:'short'}).format(dateObj).toUpperCase();
+    
+    document.getElementById('booking-hora').textContent = `${fechaTexto} · ${hora}`;
+    document.getElementById('booking-nombre').value = usuarioActual?.displayName ? formatearNombre(usuarioActual.displayName) : '';
+    document.getElementById('booking-status').textContent = '';
+    
+    modal.dataset.courtId = c.id;
+    modal.dataset.time = hora;
+    modal.dataset.date = fechaElegida; // ¡Guardamos la fecha elegida!
+    
+    modal.classList.add('mostrar');
+    modal.setAttribute('aria-hidden','false');
+}
 async function confirmarReserva(){
-    const modal=document.getElementById('modal-reserva'),id=modal?.dataset.courtId,hora=modal?.dataset.time,nombre=document.getElementById('booking-nombre')?.value.trim(),telefono=document.getElementById('booking-telefono')?.value.trim(),status=document.getElementById('booking-status'),btn=document.getElementById('btn-confirmar-reserva');
-    if(!id||!hora||!nombre||!telefono){status.textContent='Completa tu nombre y teléfono para continuar.';status.className='booking-status error';return}
+    const modal = document.getElementById('modal-reserva');
+    const id = modal?.dataset.courtId, hora = modal?.dataset.time, fechaReq = modal?.dataset.date;
+    const nombre = document.getElementById('booking-nombre')?.value.trim(), telefono = document.getElementById('booking-telefono')?.value.trim(), status = document.getElementById('booking-status'), btn = document.getElementById('btn-confirmar-reserva');
+    
+    if(!id || !hora || !fechaReq || !nombre || !telefono){ status.textContent='Completa tu nombre y teléfono para continuar.'; status.className='booking-status error'; return; }
+    
     if(!usuarioActual){
-        status.textContent='Necesitas iniciar sesión con Google para reservar.';status.className='booking-status error';
+        status.textContent='Necesitas iniciar sesión con Google para reservar.'; status.className='booking-status error';
         try{
             const result = await signInWithPopup(auth, new GoogleAuthProvider());
             const user = result.user;
-            // FASE 22 y 23: Creación de Perfil de Jugador
             const userRef = doc(db, 'usuarios', user.uid);
             const userSnap = await getDoc(userRef);
-            if (!userSnap.exists()) {
-                await setDoc(userRef, {
-                    uid: user.uid,
-                    rol: 'player', // Rol estricto
-                    estado: 'active',
-                    nombre: user.displayName || 'Jugador',
-                    email: user.email,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
-                });
-            }
+            if (!userSnap.exists()) await setDoc(userRef, { uid: user.uid, rol: 'player', estado: 'active', nombre: user.displayName || 'Jugador', email: user.email, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
             usuarioActual = user;
-        }catch(e){
-            console.error("Error en login:", e);
-            status.textContent='El inicio de sesión fue cancelado.';
-            return;
-        }
+        }catch(e){return;}
     }
-    const c=canchasGlobales.find(x=>x.id===id);
-    btn.disabled=true;status.textContent='Confirmando horario…';status.className='booking-status';
     
-    // FASE 14: ID Determinístico para evitar Choques (Atomic Booking)
-    const key=`${id}_${fechaHoy()}_${hora.replace(':','')}`;
+    const c = canchasGlobales.find(x=>x.id===id);
+    btn.disabled = true; status.textContent='Confirmando horario…'; status.className='booking-status';
     
-    try{
-        await runTransaction(db,async tx=>{
-            const ref=doc(db,'reservas',key),existing=await tx.get(ref);
-            if(existing.exists() && !['cancelada','cancelado','cancelled'].includes(normalizar(existing.data().estado))){
-                throw new Error('SLOT_OCUPADO');
-            }
-            
-            // FASE 13: Normalización Absoluta del Modelo de Datos
-            tx.set(ref,{
-                id: key,
-                canchaId: id,
-                canchaNombre: c?.nombre||'',
-                usuarioUid: usuarioActual.uid,
-                usuarioNombre: nombre,
-                usuarioEmail: usuarioActual.email||'',
-                usuarioTelefono: telefono,
-                fecha: fechaHoy(),
-                horaInicio: hora,
-                horaFin: hora, 
-                estado: 'pendiente',
-                precio: Number(c?.precio||0),
-                metodoPago: 'pendiente',
-                senaPagada: false,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            });
+    const key = `${id}_${fechaReq}_${hora.replace(':','')}`;
+    try {
+        await runTransaction(db, async tx => {
+            const ref = doc(db,'reservas',key), existing = await tx.get(ref);
+            if(existing.exists() && !['cancelada','cancelado','cancelled'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
+            tx.set(ref,{ id: key, canchaId: id, canchaNombre: c?.nombre||'', usuarioUid: usuarioActual.uid, usuarioNombre: nombre, usuarioEmail: usuarioActual.email||'', usuarioTelefono: telefono, fecha: fechaReq, horaInicio: hora, horaFin: hora, estado: 'pendiente', precio: Number(c?.precio||0), metodoPago: 'pendiente', senaPagada: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
         });
-        
-        status.textContent='¡Reserva registrada! La cancha ya quedó bloqueada para ese horario.';
-        status.className='booking-status success';
-        await pintarDisponibilidadModal(c);
-        setTimeout(()=>{cerrarReserva();cerrarModal();},1100);
-        
-    }catch(e){
-        status.textContent=e.message==='SLOT_OCUPADO'?'Ese horario acaba de ser reservado por otra persona. Elige otro.':'No pudimos registrar la reserva. Intenta nuevamente.';
+        status.textContent='¡Reserva registrada! La cancha ya quedó bloqueada.'; status.className='booking-status success';
+        await pintarDisponibilidadModal(c, fechaReq);
+        setTimeout(()=>{cerrarReserva(); cerrarModal();}, 1100);
+    } catch(e) {
+        status.textContent = e.message==='SLOT_OCUPADO'?'Ese horario acaba de ser reservado por otra persona. Elige otro.':'No pudimos registrar la reserva. Intenta nuevamente.';
         status.className='booking-status error';
-    }finally{
-        btn.disabled=false;
+    } finally {
+        btn.disabled = false;
     }
 }
 function formatearNombre(n){if(!n)return'Jugador';const p=n.trim().split(/\s+/);return p.length>1?`${p[0]} ${p[1].charAt(0)}.`:p[0]}
