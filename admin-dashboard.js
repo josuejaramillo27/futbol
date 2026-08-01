@@ -284,7 +284,7 @@ function abrirGestionReserva(r){
 window.marcarSenaGestion = async function(recibida) {
     const r=window.__reservaGestion;
     if(!r)return;
-    if(!confirm(recibida ? '¿Confirmas que recibiste el adelanto/seña para esta reserva?' : '¿Retirar la marca de seña?')) return;
+    if(!await customConfirm(recibida ? '¿Confirmas que recibiste el adelanto/seña para esta reserva?' : '¿Retirar la marca de seña?')) return;
 
     try{
         await updateDoc(doc(db,'reservas',r.id), { 
