@@ -27,15 +27,54 @@
             }
         }
 
+        /* --- ESTILOS DEL MODAL (VENTANA FLOTANTE) --- */
+        .modal-overlay {
+            display: none; /* Oculto por defecto */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-overlay.mostrar {
+            display: flex; /* Se muestra cuando JS le añade la clase 'mostrar' */
+        }
+        .modal-box {
+            background: #0b0f0e;
+            border: 1px solid var(--border-color, #222);
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+        .btn-cerrar-modal {
+            position: absolute;
+            top: 15px; right: 15px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted, #888);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .btn-cerrar-modal:hover {
+            color: #fff;
+        }
+
         /* Estilos del selector de estrellas en el modal */
         .star-picker {
             display: flex;
             gap: 8px;
             justify-content: center;
-            font-size: 2.2rem;
-            color: #444;
+            font-size: 2.5rem;
+            color: #333;
             cursor: pointer;
-            margin: 15px 0;
+            margin: 20px 0;
         }
         .star-picker i.selected, .star-picker i:hover {
             color: var(--warning, #f1c40f);
@@ -50,8 +89,8 @@
             margin: 15px 0;
         }
         .tag-chip {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color, rgba(255,255,255,0.1));
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ccc;
             padding: 8px 14px;
             border-radius: 20px;
@@ -115,7 +154,7 @@
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: Reseñas y Botón de Publicar (SIN FILTROS) -->
+        <!-- COLUMNA DERECHA: Reseñas y Botón de Publicar -->
         <div class="card" style="margin: 0;">
             
             <!-- ENCABEZADO: Título + Botón Escribir Reseña -->
@@ -137,10 +176,10 @@
 
     </main>
 
-    <!-- MODAL PARA CREAR RESEÑA -->
-    <div id="modal-publicar-resena" class="admin-modal">
-        <div class="admin-modal-card" style="max-width: 500px; text-align: center; padding: 25px;">
-            <button type="button" class="btn-cerrar admin-modal-close" id="btn-close-review-modal"><i class="ph-bold ph-x"></i></button>
+    <!-- MODAL PARA CREAR RESEÑA (AHORA SÍ FLOTARÁ) -->
+    <div id="modal-publicar-resena" class="modal-overlay">
+        <div class="modal-box">
+            <button type="button" class="btn-cerrar-modal" id="btn-close-review-modal"><i class="ph-bold ph-x"></i></button>
             
             <h3 style="margin-bottom: 5px;">Calificar Cancha</h3>
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0;">¿Cómo fue tu experiencia en el partido?</p>
