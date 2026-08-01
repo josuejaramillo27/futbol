@@ -371,12 +371,21 @@ if (window.location.pathname.includes('cancha.html')) {
     const canchaId = urlParams.get('id');
     
     async function cargarDetalleCancha() {
-        if (!canchaId) return document.getElementById('court-info').innerHTML = '<h2>Cancha no encontrada</h2>';
+        const infoEl = document.getElementById('court-info');
+        const listEl = document.getElementById('reviews-list');
+
+        if (!canchaId) {
+            if (infoEl) infoEl.innerHTML = '<h2>Cancha no encontrada</h2>';
+            return;
+        }
         
         try {
             // 1. Cargar info de la cancha
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
-            if (!docSnap.exists()) return document.getElementById('court-info').innerHTML = '<h2>Cancha no encontrada</h2>';
+            if (!docSnap.exists()) {
+                if (infoEl) infoEl.innerHTML = '<h2>Cancha no encontrada</h2>';
+                return;
+            }
             const c = docSnap.data();
             
             const logoEl = document.getElementById('court-logo');
@@ -413,8 +422,8 @@ if (window.location.pathname.includes('cancha.html')) {
             });
             
         } catch (e) {
-            console.error(e);
-            document.getElementById('reviews-list').innerHTML = '<p style="color:var(--danger)">Hubo un error al cargar la información.</p>';
+            console.error("Error cargando reseñas:", e);
+            if (listEl) listEl.innerHTML = '<p style="color:var(--danger)">Hubo un error al cargar la información. Verifica tus permisos de Firebase.</p>';
         }
     }
     
@@ -423,11 +432,10 @@ if (window.location.pathname.includes('cancha.html')) {
         if (!listEl) return;
         
         if (lista.length === 0) {
-            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay reseñas en esta categoría.</div>';
+            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay reseñas registradas.</div>';
             return;
         }
         
-        // Ordenar más recientes primero
         lista.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
         
         listEl.innerHTML = lista.map(r => {
