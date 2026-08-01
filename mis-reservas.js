@@ -80,6 +80,10 @@ function renderReservas(reservas) {
                     `<button class="btn btn-outline btn-cancelar" data-id="${r.id}" data-fecha="${r.fecha}" data-hora="${r.horaInicio}" style="padding:6px 12px; font-size:0.8rem; color:var(--danger); border-color:var(--danger);">Cancelar</button>` 
                     : ''
                 }
+                ${estado === 'completed' ? 
+                    `<button class="btn btn-outline" onclick="dejarResena('${r.id}', '${r.canchaId}')" style="padding:6px 12px; font-size:0.8rem; color:#a777e8; border-color:#a777e8;"><i class="ph-fill ph-star"></i> Calificar</button>`
+                    : ''
+                }
             </div>
         </article>
         `;
@@ -134,3 +138,38 @@ function normalizarEstado(st) {
     if(['rechazada', 'rejected'].includes(s)) return 'rejected';
     return 'pending';
 }
+
+// FASE 28 y 29: Sistema de Reseñas
+window.dejarResena = async function(reservaId, canchaId) {
+    const rating = prompt("⚽ Califica la cancha del 1 al 5:");
+    
+    if(!rating || isNaN(rating) || rating < 1 || rating > 5) {
+        return alert("Calificación inválida. Debe ser un número del 1 al 5.");
+    }
+    
+    const comentario = prompt("Escribe un breve comentario sobre tu experiencia (Opcional):");
+
+    try {
+        const { addDoc, collection, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js');
+        
+        // FASE 35 (Anti-XSS): Escapamos el comentario para evitar inyección de código
+        const comentarioSeguro = String(comentario || '').replace(/[&<>"']/g, function(m) {
+            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m];
+        });
+
+        await addDoc(collection(db, 'resenas'), {
+            reservaId: reservaId,
+            canchaId: canchaId,
+            usuarioUid: usuarioActual.uid,
+            nombre: usuarioActual.displayName || 'Jugador',
+            rating: Number(rating),
+            comentario: comentarioSeguro,
+            createdAt: serverTimestamp()
+        });
+        
+        alert("¡Gracias por tu reseña! Ayudas a toda la comunidad de APP FUTBOL.");
+    } catch(e) {
+        console.error(e);
+        alert("Hubo un error al guardar tu reseña.");
+    }
+};
