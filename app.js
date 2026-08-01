@@ -71,7 +71,29 @@ async function confirmarReserva(){
     if(!id||!hora||!nombre||!telefono){status.textContent='Completa tu nombre y teléfono para continuar.';status.className='booking-status error';return}
     if(!usuarioActual){
         status.textContent='Necesitas iniciar sesión con Google para reservar.';status.className='booking-status error';
-        try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){return}return
+        try{
+            const result = await signInWithPopup(auth, new GoogleAuthProvider());
+            const user = result.user;
+            // FASE 22 y 23: Creación de Perfil de Jugador
+            const userRef = doc(db, 'usuarios', user.uid);
+            const userSnap = await getDoc(userRef);
+            if (!userSnap.exists()) {
+                await setDoc(userRef, {
+                    uid: user.uid,
+                    rol: 'player', // Rol estricto
+                    estado: 'active',
+                    nombre: user.displayName || 'Jugador',
+                    email: user.email,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+            }
+            usuarioActual = user;
+        }catch(e){
+            console.error("Error en login:", e);
+            status.textContent='El inicio de sesión fue cancelado.';
+            return;
+        }
     }
     const c=canchasGlobales.find(x=>x.id===id);
     btn.disabled=true;status.textContent='Confirmando horario…';status.className='booking-status';
