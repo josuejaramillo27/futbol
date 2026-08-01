@@ -1,6 +1,35 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+// ==========================================
+// SISTEMA DE NOTIFICACIONES ELEGANTES (Toast)
+// ==========================================
+window.toast = function(mensaje, tipo = 'success') {
+    let container = document.getElementById('toast-container-global');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container-global';
+        document.body.appendChild(container);
+    }
+
+    const toastEl = document.createElement('div');
+    toastEl.className = `custom-toast toast-${tipo}`;
+    
+    const iconClass = tipo === 'success' ? 'ph-check-circle' : tipo === 'error' ? 'ph-warning-circle' : 'ph-info';
+    toastEl.innerHTML = `<i class="ph-bold ${iconClass}"></i><span>${mensaje}</span>`;
+
+    container.appendChild(toastEl);
+
+    setTimeout(() => {
+        toastEl.classList.add('toast-out');
+        setTimeout(() => toastEl.remove(), 300);
+    }, 3200);
+};
+
+// Reemplazamos el alert feo por el toast elegante
+window.alert = function(mensaje) {
+    window.toast(mensaje, 'info');
+};
 const firebaseConfig={apiKey:"AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",authDomain:"app-futbol-acd0f.firebaseapp.com",projectId:"app-futbol-acd0f",storageBucket:"app-futbol-acd0f.firebasestorage.app",messagingSenderId:"223446110165",appId:"1:223446110165:web:219afce6a9dac03203f75c"};
 const app=initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app);let canchasGlobales=[];let ubicacionUsuario=null;let usuarioActual=null;
 function normalizar(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -364,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarEventosPublicos();
 });
 // ==========================================
-// FASE 29: LÓGICA DE CALIFICACIÓN DIRECTA Y SEGURA (cancha.html)
+// FASE 29: LÓGICA DE CALIFICACIÓN Y PROMEDIO MINIMALISTA (cancha.html)
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -373,7 +402,6 @@ if (window.location.pathname.includes('cancha.html')) {
     let ratingSeleccionado = 0;
     let etiquetasSeleccionadas = new Map(); 
 
-    // DICCIONARIO DE ETIQUETAS MINIMALISTAS
     const TAGS_POR_RATING = {
         5: [
             { icon: "ph-leaf", text: "Césped impecable" },
@@ -418,7 +446,6 @@ if (window.location.pathname.includes('cancha.html')) {
             return;
         }
 
-        // 1. Cargar Info de Cancha
         try {
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
             if (docSnap.exists()) {
@@ -436,10 +463,7 @@ if (window.location.pathname.includes('cancha.html')) {
             console.error("Error cargando la cancha:", e);
         }
 
-        // 2. Actualizar el Promedio de Estrellas
         await refrescarPromedio();
-
-        // 3. Activar Formulario Directo
         setupRatingForm();
     }
 
@@ -455,7 +479,15 @@ if (window.location.pathname.includes('cancha.html')) {
 
             const ratingEl = document.getElementById('court-rating');
             if (ratingEl) {
-                ratingEl.innerHTML = `<strong>${prom}</strong> <span style="display:block; font-size:0.85rem; color:var(--text-muted); margin-top:3px;">de 5 (${total} ${total === 1 ? 'calificación' : 'calificaciones'})</span>`;
+                // FORMATO MINIMALISTA CON ESTRELLA
+                ratingEl.innerHTML = `
+                    <div class="rating-badge-minimal">
+                        <span>${prom}</span>
+                        <i class="ph-fill ph-star"></i>
+                        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:normal;">Estrellas</span>
+                    </div>
+                    <small style="color:var(--text-muted); margin-top:6px; display:block;">(${total} ${total === 1 ? 'calificación' : 'calificaciones'})</small>
+                `;
             }
         } catch (e) {
             console.error("Error cargando promedio:", e);
@@ -469,7 +501,6 @@ if (window.location.pathname.includes('cancha.html')) {
         const tagsContainer = document.getElementById('quick-tags-container');
         const btnSubmit = document.getElementById('btn-submit-review');
 
-        // Selección de Estrellas
         stars.forEach(star => {
             star.onclick = () => {
                 ratingSeleccionado = Number(star.dataset.val);
@@ -507,13 +538,11 @@ if (window.location.pathname.includes('cancha.html')) {
             };
         });
 
-        // Enviar Calificación Directa y 100% Estructurada (Sin textos libres)
         btnSubmit.onclick = async () => {
             if (!ratingSeleccionado) return;
             
-            // Forzar inicio de sesión antes de calificar
             if (!usuarioActual) {
-                alert("Debes iniciar sesión con Google para calificar la cancha.");
+                window.toast("Debes iniciar sesión con Google para calificar.", "warning");
                 try {
                     await signInWithPopup(auth, new GoogleAuthProvider());
                     if(!auth.currentUser) return;
@@ -531,13 +560,12 @@ if (window.location.pathname.includes('cancha.html')) {
                     usuarioUid: auth.currentUser.uid,
                     nombre: auth.currentUser.displayName || 'Jugador',
                     rating: ratingSeleccionado,
-                    tags: Array.from(etiquetasSeleccionadas.keys()), // Solo guardamos las etiquetas cerradas
+                    tags: Array.from(etiquetasSeleccionadas.keys()),
                     createdAt: serverTimestamp()
                 });
 
-                alert("¡Gracias por calificar la cancha!");
+                window.toast("¡Gracias por calificar la cancha!", "success");
                 
-                // Reiniciar formulario
                 ratingSeleccionado = 0;
                 etiquetasSeleccionadas.clear();
                 stars.forEach(s => s.classList.remove('selected'));
@@ -546,12 +574,11 @@ if (window.location.pathname.includes('cancha.html')) {
                 btnSubmit.textContent = 'Publicar Calificación';
                 btnSubmit.disabled = true;
 
-                // Actualizar el numerito de la izquierda automáticamente
                 await refrescarPromedio();
 
             } catch (e) {
                 console.error("Error al publicar:", e);
-                alert("Ocurrió un error al publicar. Intenta de nuevo.");
+                window.toast("Ocurrió un error al publicar.", "error");
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = 'Publicar Calificación';
             }
