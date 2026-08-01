@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarEventosPublicos();
 });
 // ==========================================
-// FASE 29: LÓGICA DE RESEÑAS CON ETIQUETAS TIPO INDRIVE (cancha.html)
+// FASE 29: LÓGICA DE RESEÑAS MINIMALISTA (cancha.html)
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -372,15 +372,43 @@ if (window.location.pathname.includes('cancha.html')) {
     window.resenasGlobales = [];
     
     let ratingSeleccionado = 0;
-    let etiquetasSeleccionadas = new Set();
+    let etiquetasSeleccionadas = new Map(); // Guardaremos el icono y el texto
 
-    // DICCIONARIO DE ETIQUETAS RÁPIDAS TIPO INDRIVE
+    // DICCIONARIO DE ETIQUETAS MINIMALISTAS (Vectores Phosphor Icons)
     const TAGS_POR_RATING = {
-        5: ["🌱 Césped impecable", "💡 Buena iluminación", "🤝 Excelente atención", "⚽ Pelotas en buen estado", "🧼 Vestuarios limpios", "🚗 Estacionamiento fácil"],
-        4: ["👍 Buena experiencia", "💡 Iluminación aceptable", "⚽ Buenas instalaciones", "🤝 Atención amable", "📍 Fácil acceso"],
-        3: ["⚖️ Regular", "🌱 Césped desgastado", "💡 Luz media", "⏳ Demora en hora"],
-        2: ["⚠️ Mala iluminación", "🌱 Césped muy usado", "🧼 Vestuarios descuidados", "🤝 Mala atención"],
-        1: ["🚫 Pésimo estado", "💡 Luces quemadas", "⏳ No respetaron la hora", "😡 Mala atención"]
+        5: [
+            { icon: "ph-leaf", text: "Césped impecable" },
+            { icon: "ph-lightbulb", text: "Buena iluminación" },
+            { icon: "ph-handshake", text: "Excelente atención" },
+            { icon: "ph-soccer-ball", text: "Pelotas buenas" },
+            { icon: "ph-shower", text: "Vestuarios limpios" },
+            { icon: "ph-car", text: "Estacionamiento" }
+        ],
+        4: [
+            { icon: "ph-thumbs-up", text: "Buena experiencia" },
+            { icon: "ph-lightbulb", text: "Luz aceptable" },
+            { icon: "ph-buildings", text: "Buenas instalaciones" },
+            { icon: "ph-handshake", text: "Atención amable" },
+            { icon: "ph-map-pin", text: "Fácil acceso" }
+        ],
+        3: [
+            { icon: "ph-scales", text: "Regular" },
+            { icon: "ph-leaf", text: "Césped desgastado" },
+            { icon: "ph-lightbulb", text: "Luz media" },
+            { icon: "ph-clock", text: "Demora en hora" }
+        ],
+        2: [
+            { icon: "ph-warning-circle", text: "Mala iluminación" },
+            { icon: "ph-leaf", text: "Césped muy usado" },
+            { icon: "ph-shower", text: "Vestuarios descuidados" },
+            { icon: "ph-thumbs-down", text: "Mala atención" }
+        ],
+        1: [
+            { icon: "ph-prohibit", text: "Pésimo estado" },
+            { icon: "ph-lightbulb", text: "Luces quemadas" },
+            { icon: "ph-clock", text: "Impuntualidad" },
+            { icon: "ph-smiley-sad", text: "Mala atención" }
+        ]
     };
 
     async function cargarDetalleCancha() {
@@ -411,26 +439,8 @@ if (window.location.pathname.includes('cancha.html')) {
             console.error("Error cargando la cancha:", e);
         }
 
-        // 2. Filtros de Estrellas
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.onclick = (e) => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                const target = e.currentTarget;
-                target.classList.add('active');
-                const star = target.dataset.star;
-                
-                if (star === 'all') {
-                    renderizarResenas(window.resenasGlobales);
-                } else {
-                    renderizarResenas(window.resenasGlobales.filter(r => String(r.rating) === String(star)));
-                }
-            };
-        });
-
-        // 3. Cargar Reseñas
+        // 2. Cargar Reseñas Directamente
         await refrescarResenas();
-
-        // 4. Configurar Modal de Publicar Reseña
         setupReviewModal();
     }
 
@@ -464,7 +474,7 @@ if (window.location.pathname.includes('cancha.html')) {
         if (!listEl) return;
 
         if (!lista || lista.length === 0) {
-            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay opiniones en esta categoría.</div>';
+            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay opiniones en esta cancha. ¡Sé el primero!</div>';
             return;
         }
 
@@ -478,8 +488,14 @@ if (window.location.pathname.includes('cancha.html')) {
             
             const fechaTexto = r.createdAt?.toDate ? new Date(r.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
 
-            // Renderizado de etiquetas elegidas
-            const tagsHtml = (r.tags || []).map(t => `<span class="tag-badge">${t}</span>`).join('');
+            // Renderizado de etiquetas con icono vectorial
+            const tagsHtml = (r.tags || []).map(t => {
+                // Separamos el icono del texto si existe
+                const partes = t.split('|');
+                const icon = partes.length > 1 ? partes[0] : 'ph-check';
+                const text = partes.length > 1 ? partes[1] : t;
+                return `<span class="tag-badge"><i class="ph-bold ${icon}"></i> ${text}</span>`;
+            }).join('');
 
             return `
             <article class="review-card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:15px;">
@@ -495,14 +511,13 @@ if (window.location.pathname.includes('cancha.html')) {
                     </div>
                     <div style="display:flex; gap:2px; font-size:1.1rem;">${estrellas}</div>
                 </div>
-                ${tagsHtml ? `<div style="margin-top:8px;">${tagsHtml}</div>` : ''}
+                ${tagsHtml ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap;">${tagsHtml}</div>` : ''}
                 ${r.comentario ? `<p style="margin-top:10px; color:#ddd; line-height:1.4; font-size:0.95rem;">${r.comentario}</p>` : ''}
             </article>
             `;
         }).join('');
     }
 
-    // INTERACTIVIDAD DEL MODAL DE RESEÑA
     function setupReviewModal() {
         const modal = document.getElementById('modal-publicar-resena');
         const btnOpen = document.getElementById('btn-open-review-modal');
@@ -529,29 +544,29 @@ if (window.location.pathname.includes('cancha.html')) {
                 ratingSeleccionado = Number(star.dataset.val);
                 etiquetasSeleccionadas.clear();
 
-                // Pintar estrellas
-                stars.forEach(s => {
-                    s.classList.toggle('selected', Number(s.dataset.val) <= ratingSeleccionado);
-                });
+                stars.forEach(s => s.classList.toggle('selected', Number(s.dataset.val) <= ratingSeleccionado));
 
-                // Texto descriptivo
-                const labels = { 1: "Pésimo 😡", 2: "Malo 🙁", 3: "Regular 😐", 4: "Bueno 🙂", 5: "¡Excelente! 🤩" };
+                const labels = { 1: "Pésimo", 2: "Malo", 3: "Regular", 4: "Bueno", 5: "¡Excelente!" };
                 starLabel.textContent = labels[ratingSeleccionado];
 
-                // Renderizar Etiquetas InDrive según las estrellas
                 const tagsDisponibles = TAGS_POR_RATING[ratingSeleccionado] || [];
-                tagsContainer.innerHTML = tagsDisponibles.map(t => `<div class="tag-chip" data-tag="${t}">${t}</div>`).join('');
+                tagsContainer.innerHTML = tagsDisponibles.map(t => 
+                    `<div class="tag-chip" data-icon="${t.icon}" data-text="${t.text}"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`
+                ).join('');
+                
                 tagsBox.style.display = 'block';
 
-                // Listener para chips
                 tagsContainer.querySelectorAll('.tag-chip').forEach(chip => {
                     chip.onclick = () => {
-                        const tagText = chip.dataset.tag;
-                        if (etiquetasSeleccionadas.has(tagText)) {
-                            etiquetasSeleccionadas.delete(tagText);
+                        const icon = chip.dataset.icon;
+                        const text = chip.dataset.text;
+                        const key = `${icon}|${text}`; // Guardamos ambos unidos
+
+                        if (etiquetasSeleccionadas.has(key)) {
+                            etiquetasSeleccionadas.delete(key);
                             chip.classList.remove('active');
                         } else {
-                            etiquetasSeleccionadas.add(tagText);
+                            etiquetasSeleccionadas.set(key, true);
                             chip.classList.add('active');
                         }
                     };
@@ -561,7 +576,7 @@ if (window.location.pathname.includes('cancha.html')) {
             };
         });
 
-        // Enviar Reseña a Firebase
+        // Enviar Reseña
         btnSubmit.onclick = async () => {
             if (!ratingSeleccionado) return;
             btnSubmit.disabled = true;
@@ -576,7 +591,7 @@ if (window.location.pathname.includes('cancha.html')) {
                     usuarioUid: usuarioActual.uid,
                     nombre: usuarioActual.displayName || 'Jugador',
                     rating: ratingSeleccionado,
-                    tags: Array.from(etiquetasSeleccionadas),
+                    tags: Array.from(etiquetasSeleccionadas.keys()), // Enviamos array de "icon|text"
                     comentario: comentarioSeguro,
                     createdAt: serverTimestamp()
                 });
@@ -584,7 +599,6 @@ if (window.location.pathname.includes('cancha.html')) {
                 alert("¡Gracias por tu opinión!");
                 modal.classList.remove('mostrar');
                 
-                // Reiniciar formulario
                 ratingSeleccionado = 0;
                 etiquetasSeleccionadas.clear();
                 stars.forEach(s => s.classList.remove('selected'));
