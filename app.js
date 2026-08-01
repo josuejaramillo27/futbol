@@ -364,12 +364,24 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarEventosPublicos();
 });
 // ==========================================
-// FASE 29: LÓGICA DEFENSIVA PARA RESEÑAS (cancha.html)
+// FASE 29: LÓGICA DE RESEÑAS CON ETIQUETAS TIPO INDRIVE (cancha.html)
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
     const canchaId = urlParams.get('id');
     window.resenasGlobales = [];
+    
+    let ratingSeleccionado = 0;
+    let etiquetasSeleccionadas = new Set();
+
+    // DICCIONARIO DE ETIQUETAS RÁPIDAS TIPO INDRIVE
+    const TAGS_POR_RATING = {
+        5: ["🌱 Césped impecable", "💡 Buena iluminación", "🤝 Excelente atención", "⚽ Pelotas en buen estado", "🧼 Vestuarios limpios", "🚗 Estacionamiento fácil"],
+        4: ["👍 Buena experiencia", "💡 Iluminación aceptable", "⚽ Buenas instalaciones", "🤝 Atención amable", "📍 Fácil acceso"],
+        3: ["⚖️ Regular", "🌱 Césped desgastado", "💡 Luz media", "⏳ Demora en hora"],
+        2: ["⚠️ Mala iluminación", "🌱 Césped muy usado", "🧼 Vestuarios descuidados", "🤝 Mala atención"],
+        1: ["🚫 Pésimo estado", "💡 Luces quemadas", "⏳ No respetaron la hora", "😡 Mala atención"]
+    };
 
     async function cargarDetalleCancha() {
         const infoEl = document.getElementById('court-info');
@@ -381,7 +393,7 @@ if (window.location.pathname.includes('cancha.html')) {
             return;
         }
 
-        // 1. Cargar Información de la Cancha (Independiente)
+        // 1. Cargar Info de Cancha
         try {
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
             if (docSnap.exists()) {
@@ -394,14 +406,12 @@ if (window.location.pathname.includes('cancha.html')) {
                 
                 const metaEl = document.getElementById('court-meta');
                 if (metaEl) metaEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || c.distrito || 'Ubicación'} · <i class="ph-bold ph-soccer-ball"></i> ${c.tipoCancha || 'Fútbol'}`;
-            } else {
-                if (infoEl) infoEl.innerHTML = '<h2>Cancha no encontrada</h2>';
             }
         } catch (e) {
             console.error("Error cargando la cancha:", e);
         }
 
-        // 2. Activar Botones de Filtro por Estrellas (Siempre funcionales)
+        // 2. Filtros de Estrellas
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.onclick = (e) => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -412,19 +422,25 @@ if (window.location.pathname.includes('cancha.html')) {
                 if (star === 'all') {
                     renderizarResenas(window.resenasGlobales);
                 } else {
-                    const filtradas = window.resenasGlobales.filter(r => String(r.rating) === String(star));
-                    renderizarResenas(filtradas);
+                    renderizarResenas(window.resenasGlobales.filter(r => String(r.rating) === String(star)));
                 }
             };
         });
 
-        // 3. Cargar Reseñas de la Cancha
+        // 3. Cargar Reseñas
+        await refrescarResenas();
+
+        // 4. Configurar Modal de Publicar Reseña
+        setupReviewModal();
+    }
+
+    async function refrescarResenas() {
+        const listEl = document.getElementById('reviews-list');
         try {
             const q = query(collection(db, 'resenas'), where('canchaId', '==', canchaId));
             const resenasSnap = await getDocs(q);
             window.resenasGlobales = resenasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-            // Calcular promedio
             const total = window.resenasGlobales.length;
             const sum = window.resenasGlobales.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
             const prom = total > 0 ? (sum / total).toFixed(1) : "0.0";
@@ -435,15 +451,10 @@ if (window.location.pathname.includes('cancha.html')) {
             }
 
             renderizarResenas(window.resenasGlobales);
-
         } catch (e) {
             console.error("Error cargando reseñas:", e);
             if (listEl) {
-                listEl.innerHTML = `
-                    <div style="text-align:center; padding:20px; color:var(--warning); background:rgba(255,193,7,0.05); border:1px solid rgba(255,193,7,0.2); border-radius:12px;">
-                        <p style="margin:0; font-weight:bold;">⚠️ Permisos de lectura no configurados en Firebase</p>
-                        <small style="color:var(--text-muted);">Asegúrate de publicar la regla para la colección "resenas" en tu consola de Firebase.</small>
-                    </div>`;
+                listEl.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">Aún no hay reseñas públicas registradas.</div>`;
             }
         }
     }
@@ -453,11 +464,10 @@ if (window.location.pathname.includes('cancha.html')) {
         if (!listEl) return;
 
         if (!lista || lista.length === 0) {
-            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay reseñas en esta categoría.</div>';
+            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay opiniones en esta categoría.</div>';
             return;
         }
 
-        // Ordenar por fecha más reciente
         const ordenadas = [...lista].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
 
         listEl.innerHTML = ordenadas.map(r => {
@@ -468,11 +478,14 @@ if (window.location.pathname.includes('cancha.html')) {
             
             const fechaTexto = r.createdAt?.toDate ? new Date(r.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
 
+            // Renderizado de etiquetas elegidas
+            const tagsHtml = (r.tags || []).map(t => `<span class="tag-badge">${t}</span>`).join('');
+
             return `
             <article class="review-card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <div style="display:flex; gap:10px; align-items:center;">
-                        <div style="width:35px; height:35px; background:var(--primary-green); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">
+                        <div style="width:36px; height:36px; background:var(--primary-green); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">
                             ${(r.nombre || 'J').charAt(0).toUpperCase()}
                         </div>
                         <div>
@@ -482,10 +495,112 @@ if (window.location.pathname.includes('cancha.html')) {
                     </div>
                     <div style="display:flex; gap:2px; font-size:1.1rem;">${estrellas}</div>
                 </div>
-                ${r.comentario ? `<p style="margin-top:10px; color:#ddd; line-height:1.5;">${r.comentario}</p>` : '<p style="margin-top:10px; color:var(--text-muted); font-style:italic;">Sin comentario escrito.</p>'}
+                ${tagsHtml ? `<div style="margin-top:8px;">${tagsHtml}</div>` : ''}
+                ${r.comentario ? `<p style="margin-top:10px; color:#ddd; line-height:1.4; font-size:0.95rem;">${r.comentario}</p>` : ''}
             </article>
             `;
         }).join('');
+    }
+
+    // INTERACTIVIDAD DEL MODAL DE RESEÑA
+    function setupReviewModal() {
+        const modal = document.getElementById('modal-publicar-resena');
+        const btnOpen = document.getElementById('btn-open-review-modal');
+        const btnClose = document.getElementById('btn-close-review-modal');
+        const stars = document.querySelectorAll('#star-picker i');
+        const starLabel = document.getElementById('star-label');
+        const tagsBox = document.getElementById('quick-tags-box');
+        const tagsContainer = document.getElementById('quick-tags-container');
+        const btnSubmit = document.getElementById('btn-submit-review');
+
+        if (btnOpen) btnOpen.onclick = () => {
+            if (!usuarioActual) {
+                alert("Debes iniciar sesión con Google para publicar una reseña.");
+                return;
+            }
+            modal.classList.add('mostrar');
+        };
+
+        if (btnClose) btnClose.onclick = () => modal.classList.remove('mostrar');
+
+        // Selección de Estrellas
+        stars.forEach(star => {
+            star.onclick = () => {
+                ratingSeleccionado = Number(star.dataset.val);
+                etiquetasSeleccionadas.clear();
+
+                // Pintar estrellas
+                stars.forEach(s => {
+                    s.classList.toggle('selected', Number(s.dataset.val) <= ratingSeleccionado);
+                });
+
+                // Texto descriptivo
+                const labels = { 1: "Pésimo 😡", 2: "Malo 🙁", 3: "Regular 😐", 4: "Bueno 🙂", 5: "¡Excelente! 🤩" };
+                starLabel.textContent = labels[ratingSeleccionado];
+
+                // Renderizar Etiquetas InDrive según las estrellas
+                const tagsDisponibles = TAGS_POR_RATING[ratingSeleccionado] || [];
+                tagsContainer.innerHTML = tagsDisponibles.map(t => `<div class="tag-chip" data-tag="${t}">${t}</div>`).join('');
+                tagsBox.style.display = 'block';
+
+                // Listener para chips
+                tagsContainer.querySelectorAll('.tag-chip').forEach(chip => {
+                    chip.onclick = () => {
+                        const tagText = chip.dataset.tag;
+                        if (etiquetasSeleccionadas.has(tagText)) {
+                            etiquetasSeleccionadas.delete(tagText);
+                            chip.classList.remove('active');
+                        } else {
+                            etiquetasSeleccionadas.add(tagText);
+                            chip.classList.add('active');
+                        }
+                    };
+                });
+
+                btnSubmit.disabled = false;
+            };
+        });
+
+        // Enviar Reseña a Firebase
+        btnSubmit.onclick = async () => {
+            if (!ratingSeleccionado) return;
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
+
+            const comentarioTxt = document.getElementById('review-comment-input').value.trim();
+            const comentarioSeguro = comentarioTxt.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]));
+
+            try {
+                await addDoc(collection(db, 'resenas'), {
+                    canchaId: canchaId,
+                    usuarioUid: usuarioActual.uid,
+                    nombre: usuarioActual.displayName || 'Jugador',
+                    rating: ratingSeleccionado,
+                    tags: Array.from(etiquetasSeleccionadas),
+                    comentario: comentarioSeguro,
+                    createdAt: serverTimestamp()
+                });
+
+                alert("¡Gracias por tu opinión!");
+                modal.classList.remove('mostrar');
+                
+                // Reiniciar formulario
+                ratingSeleccionado = 0;
+                etiquetasSeleccionadas.clear();
+                stars.forEach(s => s.classList.remove('selected'));
+                tagsBox.style.display = 'none';
+                document.getElementById('review-comment-input').value = '';
+                btnSubmit.textContent = 'Publicar Reseña';
+
+                await refrescarResenas();
+
+            } catch (e) {
+                console.error("Error al publicar reseña:", e);
+                alert("Ocurrió un error al publicar. Intenta de nuevo.");
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = 'Publicar Reseña';
+            }
+        };
     }
 
     document.addEventListener('DOMContentLoaded', cargarDetalleCancha);
