@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Info y Reseñas | APP FUTBOL</title>
+    <title>Info y Calificación | APP FUTBOL</title>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
     <style>
@@ -11,14 +11,14 @@
             display: grid;
             grid-template-columns: 1fr;
             gap: 20px;
-            max-width: 1100px;
+            max-width: 1000px; /* Ancho perfecto para no estirarlo demasiado */
             margin: 0 auto;
             align-items: start;
         }
 
         @media (min-width: 800px) {
             .cancha-layout {
-                grid-template-columns: 320px 1fr;
+                grid-template-columns: 350px 1fr;
                 gap: 30px;
             }
             .sticky-sidebar {
@@ -27,80 +27,43 @@
             }
         }
 
-        /* --- ESTILOS DEL MODAL (VENTANA FLOTANTE) --- */
-        .modal-overlay {
-            display: none; /* Oculto por defecto */
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        .modal-overlay.mostrar {
-            display: flex; /* Se muestra cuando JS le añade la clase 'mostrar' */
-        }
-        .modal-box {
-            background: #0b0f0e;
-            border: 1px solid var(--border-color, #222);
-            border-radius: 16px;
-            padding: 30px;
-            width: 90%;
-            max-width: 450px;
-            position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-        .btn-cerrar-modal {
-            position: absolute;
-            top: 15px; right: 15px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted, #888);
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .btn-cerrar-modal:hover {
-            color: #fff;
-        }
-
-        /* Estilos del selector de estrellas en el modal */
+        /* Estilos del selector de estrellas */
         .star-picker {
             display: flex;
-            gap: 8px;
+            gap: 12px;
             justify-content: center;
-            font-size: 2.5rem;
+            font-size: 3rem; /* Estrellas más grandes y llamativas */
             color: #333;
             cursor: pointer;
             margin: 20px 0;
+            transition: all 0.2s ease;
         }
         .star-picker i.selected, .star-picker i:hover {
             color: var(--warning, #f1c40f);
+            transform: scale(1.1);
         }
 
-        /* Chips / Etiquetas rápidas minimalistas */
+        /* Chips / Etiquetas InDrive minimalistas */
         .quick-tags {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             justify-content: center;
-            margin: 15px 0;
+            margin: 20px 0;
         }
         .tag-chip {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ccc;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            padding: 10px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s ease;
             user-select: none;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
         .tag-chip:hover {
             border-color: var(--primary-green, #2ecc71);
@@ -111,20 +74,6 @@
             color: #000;
             font-weight: bold;
             border-color: var(--primary-green, #2ecc71);
-        }
-
-        .tag-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(46, 204, 113, 0.1);
-            color: var(--primary-green, #2ecc71);
-            border: 1px solid rgba(46, 204, 113, 0.2);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            margin-right: 5px;
-            margin-top: 5px;
         }
     </style>
 </head>
@@ -139,10 +88,10 @@
 
     <main class="cancha-layout" style="padding: 20px;">
         
-        <!-- COLUMNA IZQUIERDA: Info de la Cancha -->
+        <!-- COLUMNA IZQUIERDA: Info de la Cancha y Promedio de Estrellas -->
         <div class="sticky-sidebar">
             <div id="court-info" class="card" style="text-align: center; padding: 30px 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; margin:0;">
-                <img id="court-logo" src="" alt="Logo" style="width: 110px; height: 110px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-green); display: none;" onload="this.style.display='block'">
+                <img id="court-logo" src="" alt="Logo" style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-green); display: none;" onload="this.style.display='block'">
                 
                 <h2 id="court-title" style="margin: 0; font-size: 1.8rem;">Cargando Cancha...</h2>
                 
@@ -154,35 +103,11 @@
             </div>
         </div>
 
-        <!-- COLUMNA DERECHA: Reseñas y Botón de Publicar -->
-        <div class="card" style="margin: 0;">
+        <!-- COLUMNA DERECHA: FORMULARIO DIRECTO DE CALIFICACIÓN -->
+        <div class="card" style="margin: 0; padding: 40px 30px; text-align: center;">
             
-            <!-- ENCABEZADO: Título + Botón Escribir Reseña -->
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
-                <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <i class="ph-fill ph-star" style="color:var(--warning);"></i> Opiniones de Jugadores
-                </h3>
-                
-                <button id="btn-open-review-modal" class="btn hero-primary" style="width: auto; padding: 8px 18px; font-size: 0.9rem;">
-                    <i class="ph-bold ph-pencil-simple"></i> Calificar Cancha
-                </button>
-            </div>
-            
-            <!-- LISTA DE RESEÑAS -->
-            <div id="reviews-list">
-                <div style="text-align:center; padding:30px; color:var(--text-muted);"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando reseñas...</div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- MODAL PARA CREAR RESEÑA (AHORA SÍ FLOTARÁ) -->
-    <div id="modal-publicar-resena" class="modal-overlay">
-        <div class="modal-box">
-            <button type="button" class="btn-cerrar-modal" id="btn-close-review-modal"><i class="ph-bold ph-x"></i></button>
-            
-            <h3 style="margin-bottom: 5px;">Calificar Cancha</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0;">¿Cómo fue tu experiencia en el partido?</p>
+            <h3 style="margin-bottom: 5px; font-size: 1.6rem;">⭐ Calificar Cancha</h3>
+            <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0;">¿Cómo fue tu experiencia en el partido?</p>
 
             <!-- SELECTOR DE ESTRELLAS -->
             <div class="star-picker" id="star-picker">
@@ -192,22 +117,24 @@
                 <i class="ph-fill ph-star" data-val="4"></i>
                 <i class="ph-fill ph-star" data-val="5"></i>
             </div>
-            <span id="star-label" style="font-weight: bold; color: var(--primary-green); font-size: 0.95rem;">Toca las estrellas para calificar</span>
+            <span id="star-label" style="font-weight: bold; color: var(--primary-green); font-size: 1.05rem;">Toca las estrellas para calificar</span>
 
-            <!-- ETIQUETAS RÁPIDAS DINÁMICAS (InDrive Style Minimalista) -->
-            <div id="quick-tags-box" style="margin-top: 15px; display: none;">
-                <small style="color: var(--text-muted); display: block; margin-bottom: 8px;">Selecciona lo que más destacó (Opcional):</small>
+            <!-- ETIQUETAS RÁPIDAS DINÁMICAS -->
+            <div id="quick-tags-box" style="margin-top: 25px; display: none;">
+                <small style="color: var(--text-muted); display: block; margin-bottom: 12px; font-size: 0.95rem;">Selecciona lo que más destacó (Opcional):</small>
                 <div class="quick-tags" id="quick-tags-container"></div>
             </div>
 
             <!-- COMENTARIO OPCIONAL -->
-            <textarea id="review-comment-input" rows="3" placeholder="Añade un comentario adicional (Opcional)..." style="width: 100%; margin-top: 15px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 8px; outline: none; font-family: inherit; resize: none;"></textarea>
+            <textarea id="review-comment-input" rows="4" placeholder="Añade un comentario adicional (Opcional)..." style="width: 100%; margin-top: 25px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-color); color: #fff; padding: 15px; border-radius: 12px; outline: none; font-family: inherit; resize: none; font-size: 0.95rem; box-sizing: border-box;"></textarea>
 
-            <button id="btn-submit-review" class="btn hero-primary" style="width: 100%; margin-top: 15px;" disabled>
-                Publicar Reseña
+            <button id="btn-submit-review" class="btn hero-primary" style="width: 100%; margin-top: 25px; padding: 14px; font-size: 1.1rem;" disabled>
+                Publicar Calificación
             </button>
+
         </div>
-    </div>
+
+    </main>
 
     <script type="module" src="app.js"></script>
 </body>
