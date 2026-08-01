@@ -167,11 +167,61 @@ async function confirmarReserva(){
         await runTransaction(db, async tx => {
             const ref = doc(db,'reservas',key), existing = await tx.get(ref);
             if(existing.exists() && !['cancelada','cancelado','cancelled'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
-            tx.set(ref,{ id: key, canchaId: id, canchaNombre: c?.nombre||'', usuarioUid: usuarioActual.uid, usuarioNombre: nombre, usuarioEmail: usuarioActual.email||'', usuarioTelefono: telefono, fecha: fechaReq, horaInicio: hora, horaFin: hora, estado: 'pendiente', precio: Number(c?.precio||0), metodoPago: 'pendiente', senaPagada: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+            
+            // Guardamos tanto nombre como usuarioNombre para compatibilidad total
+            tx.set(ref,{ 
+                id: key, 
+                canchaId: id, 
+                canchaNombre: c?.nombre||'', 
+                usuarioUid: usuarioActual.uid, 
+                nombre: nombre,
+                usuarioNombre: nombre, 
+                usuarioEmail: usuarioActual.email||'', 
+                telefono: telefono,
+                usuarioTelefono: telefono, 
+                fecha: fechaReq, 
+                horaInicio: hora, 
+                horaFin: hora, 
+                estado: 'pendiente', 
+                precio: Number(c?.precio||0), 
+                metodoPago: 'pendiente', 
+                senaPagada: false, 
+                createdAt: serverTimestamp(), 
+                updatedAt: serverTimestamp() 
+            });
         });
-        status.textContent='¡Reserva registrada! La cancha ya quedó bloqueada.'; status.className='booking-status success';
+        
+        status.textContent='¡Reserva registrada! Abriendo WhatsApp con el dueño…'; 
+        status.className='booking-status success';
         await pintarDisponibilidadModal(c, fechaReq);
-        setTimeout(()=>{cerrarReserva(); cerrarModal();}, 1100);
+        
+        // REDIRECCIÓN AUTOMÁTICA A WHATSAPP DEL DUEÑO CON DETALLES DE LA RESERVA
+        const telOwner = String(c?.whatsapp || '').replace(/\D/g, '');
+        const dateObj = new Date(`${fechaReq}T12:00:00`);
+        const fechaTexto = new Intl.DateTimeFormat('es-PE',{weekday:'long',day:'numeric',month:'long'}).format(dateObj);
+
+        if (telOwner) {
+            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de registrar una solicitud de reserva desde APP FÚTBOL:\n\n` +
+                              `👤 *Nombre:* ${nombre}\n` +
+                              `📅 *Fecha:* ${fechaTexto}\n` +
+                              `⏰ *Hora:* ${hora}\n` +
+                              `📱 *Teléfono:* ${telefono}\n\n` +
+                              `Por favor, confirmen mi reserva. ¡Muchas gracias!`;
+            
+            const waUrl = `https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`;
+            
+            setTimeout(() => {
+                window.open(waUrl, '_blank');
+                cerrarReserva(); 
+                cerrarModal();
+            }, 1200);
+        } else {
+            setTimeout(() => {
+                cerrarReserva(); 
+                cerrarModal();
+            }, 1100);
+        }
+
     } catch(e) {
         status.textContent = e.message==='SLOT_OCUPADO'?'Ese horario acaba de ser reservado por otra persona. Elige otro.':'No pudimos registrar la reserva. Intenta nuevamente.';
         status.className='booking-status error';
