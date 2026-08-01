@@ -364,90 +364,116 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarEventosPublicos();
 });
 // ==========================================
-// FASE 29: LÓGICA PARA LA PÁGINA DE RESEÑAS (cancha.html)
+// FASE 29: LÓGICA DEFENSIVA PARA RESEÑAS (cancha.html)
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
     const canchaId = urlParams.get('id');
-    
+    window.resenasGlobales = [];
+
     async function cargarDetalleCancha() {
         const infoEl = document.getElementById('court-info');
         const listEl = document.getElementById('reviews-list');
 
         if (!canchaId) {
-            if (infoEl) infoEl.innerHTML = '<h2>Cancha no encontrada</h2>';
+            if (infoEl) infoEl.innerHTML = '<h2>Cancha no especificada</h2>';
+            if (listEl) listEl.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Selecciona una cancha desde la página principal.</p>';
             return;
         }
-        
+
+        // 1. Cargar Información de la Cancha (Independiente)
         try {
-            // 1. Cargar info de la cancha
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
-            if (!docSnap.exists()) {
+            if (docSnap.exists()) {
+                const c = docSnap.data();
+                const logoEl = document.getElementById('court-logo');
+                if (logoEl) logoEl.src = c.logo || 'https://via.placeholder.com/100';
+                
+                const titleEl = document.getElementById('court-title');
+                if (titleEl) titleEl.textContent = c.nombre || 'Cancha';
+                
+                const metaEl = document.getElementById('court-meta');
+                if (metaEl) metaEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || c.distrito || 'Ubicación'} · <i class="ph-bold ph-soccer-ball"></i> ${c.tipoCancha || 'Fútbol'}`;
+            } else {
                 if (infoEl) infoEl.innerHTML = '<h2>Cancha no encontrada</h2>';
-                return;
             }
-            const c = docSnap.data();
-            
-            const logoEl = document.getElementById('court-logo');
-            if (logoEl) logoEl.src = c.logo || 'https://via.placeholder.com/100';
-            const titleEl = document.getElementById('court-title');
-            if (titleEl) titleEl.textContent = c.nombre || 'Cancha';
-            const metaEl = document.getElementById('court-meta');
-            if (metaEl) metaEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || c.distrito || 'Ubicación'} · <i class="ph-bold ph-soccer-ball"></i> ${c.tipoCancha || 'Fútbol'}`;
-            
-            // 2. Cargar Reseñas
+        } catch (e) {
+            console.error("Error cargando la cancha:", e);
+        }
+
+        // 2. Activar Botones de Filtro por Estrellas (Siempre funcionales)
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                const target = e.currentTarget;
+                target.classList.add('active');
+                const star = target.dataset.star;
+                
+                if (star === 'all') {
+                    renderizarResenas(window.resenasGlobales);
+                } else {
+                    const filtradas = window.resenasGlobales.filter(r => String(r.rating) === String(star));
+                    renderizarResenas(filtradas);
+                }
+            };
+        });
+
+        // 3. Cargar Reseñas de la Cancha
+        try {
             const q = query(collection(db, 'resenas'), where('canchaId', '==', canchaId));
             const resenasSnap = await getDocs(q);
-            let resenas = resenasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-            
-            // Promedio
-            const total = resenas.length;
-            const prom = total > 0 ? (resenas.reduce((acc, r) => acc + r.rating, 0) / total).toFixed(1) : "0.0";
-            
+            window.resenasGlobales = resenasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+            // Calcular promedio
+            const total = window.resenasGlobales.length;
+            const sum = window.resenasGlobales.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+            const prom = total > 0 ? (sum / total).toFixed(1) : "0.0";
+
             const ratingEl = document.getElementById('court-rating');
-            if (ratingEl) ratingEl.innerHTML = `<strong>${prom}</strong><span>de 5 (${total} reseñas)</span>`;
-            
-            // 3. Renderizado y Filtros
-            window.resenasGlobales = resenas;
-            renderizarResenas(resenas);
-            
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                    e.target.classList.add('active');
-                    const star = e.target.dataset.star;
-                    if (star === 'all') renderizarResenas(window.resenasGlobales);
-                    else renderizarResenas(window.resenasGlobales.filter(r => String(r.rating) === String(star)));
-                });
-            });
-            
+            if (ratingEl) {
+                ratingEl.innerHTML = `<strong>${prom}</strong> <span>de 5 (${total} ${total === 1 ? 'reseña' : 'reseñas'})</span>`;
+            }
+
+            renderizarResenas(window.resenasGlobales);
+
         } catch (e) {
             console.error("Error cargando reseñas:", e);
-            if (listEl) listEl.innerHTML = '<p style="color:var(--danger)">Hubo un error al cargar la información. Verifica tus permisos de Firebase.</p>';
+            if (listEl) {
+                listEl.innerHTML = `
+                    <div style="text-align:center; padding:20px; color:var(--warning); background:rgba(255,193,7,0.05); border:1px solid rgba(255,193,7,0.2); border-radius:12px;">
+                        <p style="margin:0; font-weight:bold;">⚠️ Permisos de lectura no configurados en Firebase</p>
+                        <small style="color:var(--text-muted);">Asegúrate de publicar la regla para la colección "resenas" en tu consola de Firebase.</small>
+                    </div>`;
+            }
         }
     }
-    
+
     function renderizarResenas(lista) {
         const listEl = document.getElementById('reviews-list');
         if (!listEl) return;
-        
-        if (lista.length === 0) {
-            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay reseñas registradas.</div>';
+
+        if (!lista || lista.length === 0) {
+            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay reseñas en esta categoría.</div>';
             return;
         }
-        
-        lista.sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-        
-        listEl.innerHTML = lista.map(r => {
-            const estrellas = Array.from({length: 5}, (_, i) => `<i class="ph-fill ph-star" style="color: ${i < r.rating ? 'var(--warning)' : '#333'}"></i>`).join('');
-            const fechaTexto = r.createdAt ? new Date(r.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
+
+        // Ordenar por fecha más reciente
+        const ordenadas = [...lista].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+
+        listEl.innerHTML = ordenadas.map(r => {
+            const numRating = Number(r.rating) || 0;
+            const estrellas = Array.from({ length: 5 }, (_, i) => 
+                `<i class="ph-fill ph-star" style="color: ${i < numRating ? 'var(--warning)' : '#333'}"></i>`
+            ).join('');
             
+            const fechaTexto = r.createdAt?.toDate ? new Date(r.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
+
             return `
             <article class="review-card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:15px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <div style="display:flex; gap:10px; align-items:center;">
                         <div style="width:35px; height:35px; background:var(--primary-green); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">
-                            ${r.nombre ? r.nombre.charAt(0).toUpperCase() : 'J'}
+                            ${(r.nombre || 'J').charAt(0).toUpperCase()}
                         </div>
                         <div>
                             <strong style="display:block;">${r.nombre || 'Jugador'}</strong>
@@ -461,6 +487,6 @@ if (window.location.pathname.includes('cancha.html')) {
             `;
         }).join('');
     }
-    
+
     document.addEventListener('DOMContentLoaded', cargarDetalleCancha);
 }
