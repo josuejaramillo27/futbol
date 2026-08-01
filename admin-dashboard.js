@@ -200,9 +200,15 @@ function abrirGestionReserva(r){
         ? '<span style="color:#4ba3ff; font-weight:bold;"><i class="ph-fill ph-check-circle"></i> Seña recibida</span>' 
         : '<span style="color:var(--text-muted);">Pendiente / Sin seña</span>';
 
-    m.querySelector('#manage-summary').innerHTML=`
+    const clienteNombre = r.nombre || r.usuarioNombre || 'Cliente';
+    const clienteTelefono = r.telefono || r.usuarioTelefono || 'Sin teléfono';
+
+    m.querySelector('#manage-title').textContent = `${clienteNombre} · ${r.horaInicio||'--:--'}`;
+
+    m.querySelector('#manage-summary').innerHTML = `
         <div><span>Fecha:</span> <b>${fechaTexto(fechaSeleccionada)}</b></div>
-        <div><span>WhatsApp:</span> <b>${r.telefono||'No indicado'}</b></div>
+        <div><span>Jugador:</span> <b>${clienteNombre}</b></div>
+        <div><span>WhatsApp:</span> <b>${clienteTelefono}</b></div>
         <div><span>Importe Total:</span> <b>${money(r.precio??canchaActual?.precio)}</b></div>
         <div><span>Adelanto (Seña):</span> <b>${senaBadge}</b></div>
         <div><span>Estado Reserva:</span> <b>${statusLabels[st]}</b></div>
@@ -286,7 +292,6 @@ async function cambiarEstadoGestion(nuevoEstado){
 async function refrescar(){await cargarReservas();renderSchedule();renderReservas()}
 function renderReservas(){
     const box=document.getElementById('lista-reservas');
-    // Filtramos las canceladas/rechazadas para la vista principal, a menos que quieras ver el historial
     const activos = reservasDia.filter(r => !['cancelled', 'rejected', 'cancelada', 'cancelado'].includes(estadoReserva(r)) && !esBloqueoManual(r)).sort((a,b)=>String(a.horaInicio).localeCompare(String(b.horaInicio)));
     
     if(!activos.length){
@@ -301,9 +306,13 @@ function renderReservas(){
         if(st === 'confirmed') { label = 'Confirmada'; colorClass = 'confirmada'; icon = '<i class="ph-bold ph-check-circle"></i>'; }
         if(st === 'completed') { label = 'Jugado'; colorClass = 'jugada'; icon = '<i class="ph-bold ph-flag-checkered"></i>'; }
 
+        // Mapeo seguro de Nombre y Teléfono
+        const clienteNombre = r.nombre || r.usuarioNombre || 'Cliente';
+        const clienteTelefono = r.telefono || r.usuarioTelefono || 'Sin teléfono';
+
         return `<article class="reservation-row">
             <div class="reservation-time">${r.horaInicio||'--:--'}<small>${r.horaFin&&r.horaFin!==r.horaInicio?`hasta ${r.horaFin}`:'1 hora'}</small></div>
-            <div class="reservation-client"><b>${r.nombre||'Cliente'}</b><span>${r.telefono||'Sin teléfono'} · ${label}</span></div>
+            <div class="reservation-client"><b>${clienteNombre}</b><span>${clienteTelefono} · ${label}</span></div>
             <div class="reservation-actions">
                 <button class="reservation-state ${colorClass}" data-id="${r.id}">${icon} ${label}</button>
                 <button class="icon-btn release-reservation" data-id="${r.id}" title="Gestionar"><i class="ph-bold ph-sliders-horizontal"></i></button>
