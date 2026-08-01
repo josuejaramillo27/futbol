@@ -113,9 +113,9 @@ if(formPerfil) {
             const cierre = document.getElementById('admin-hora-cierre')?.value || '23:00';
             const weekly = readWeeklyHours();
 
-            // FASE 7 y PREP FASE 9: Guardado estructurado de Onboarding
+            // FASE 7, 9 y 12: Guardado estructurado con Coordenadas
             const dataToSave = {
-                ownerUid: uid, // Seguridad estricta
+                ownerUid: uid,
                 nombre: document.getElementById('admin-nombre').value.trim(),
                 departamento: document.getElementById('admin-departamento').value.trim(),
                 distrito: document.getElementById('admin-distrito').value.trim(),
@@ -125,12 +125,14 @@ if(formPerfil) {
                 descripcion: document.getElementById('admin-descripcion').value.trim(),
                 ubicacionTexto: document.getElementById('admin-ubicacion-texto').value.trim(),
                 ubicacionLink: document.getElementById('admin-ubicacion-link').value.trim(),
+                lat: document.getElementById('admin-lat').value.trim(), // NUEVO
+                lng: document.getElementById('admin-lng').value.trim(), // NUEVO
                 intervaloMinutos: Number(document.getElementById('admin-intervalo').value||60),
                 horaApertura: inicio,
                 horaCierre: cierre,
                 horariosSemana: weekly,
-                configurado: true, // Marca el Onboarding como completado
-                estadoPublicacion: canchaActual?.estadoPublicacion || 'draft', // Preparación para publicar
+                configurado: true,
+                estadoPublicacion: canchaActual?.estadoPublicacion || 'draft',
                 updatedAt: serverTimestamp()
             };
 
@@ -218,3 +220,14 @@ function init(){
     });
 }
 init();
+document.getElementById('btn-extraer-coords')?.addEventListener('click', () => {
+    const link = document.getElementById('admin-ubicacion-link').value;
+    let m = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || link.match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if(m) {
+        document.getElementById('admin-lat').value = m[1];
+        document.getElementById('admin-lng').value = m[2];
+        toast('Coordenadas extraídas correctamente.');
+    } else {
+        toast('No detectamos coordenadas. Escríbelas manualmente.', true);
+    }
+});
