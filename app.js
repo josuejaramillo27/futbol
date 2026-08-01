@@ -66,7 +66,59 @@ window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)re
 async function obtenerReservasHoy(){try{const snap=await getDocs(collection(db,'reservas'));return snap.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn('APP FUTBOL reservas:',e);return[]}}
 async function pintarDisponibilidadModal(c){const box=document.getElementById('modal-disponibilidad');if(!box)return;box.innerHTML='<div class="availability-loading"><i class="ph-bold ph-spinner-gap"></i> Consultando horarios...</div>';const reservas=await obtenerReservasHoy(),slots=slotsDeCancha(c,reservas),libres=slots.filter(s=>!s.blocked).length;box.innerHTML=`<div class="modal-availability-head"><div><span>HORARIOS DE HOY</span><strong>${libres} disponibles</strong></div><small>Selecciona una hora verde para reservar</small></div><div class="modal-slots">${slots.length?slots.map(s=>`<button type="button" class="modal-slot ${s.blocked?'blocked':''}" data-book-court="${c.id}" data-book-time="${s.label}" ${s.blocked?'disabled':''}>${s.label}</button>`).join(''):'<span class="availability-empty">El dueño aún no configuró sus horarios.</span>'}</div>`;box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b=>b.addEventListener('click',()=>abrirReserva(c,b.dataset.bookTime)))}
 function abrirReserva(c,hora){const modal=document.getElementById('modal-reserva');if(!modal)return;document.getElementById('booking-cancha-nombre').textContent=c.nombre;document.getElementById('booking-hora').textContent=hora;document.getElementById('booking-nombre').value=usuarioActual?.displayName?formatearNombre(usuarioActual.displayName):'';document.getElementById('booking-status').textContent='';modal.dataset.courtId=c.id;modal.dataset.time=hora;modal.classList.add('mostrar');modal.setAttribute('aria-hidden','false')}
-async function confirmarReserva(){const modal=document.getElementById('modal-reserva'),id=modal?.dataset.courtId,hora=modal?.dataset.time,nombre=document.getElementById('booking-nombre')?.value.trim(),telefono=document.getElementById('booking-telefono')?.value.trim(),status=document.getElementById('booking-status'),btn=document.getElementById('btn-confirmar-reserva');if(!id||!hora||!nombre||!telefono){status.textContent='Completa tu nombre y teléfono para continuar.';status.className='booking-status error';return}if(!usuarioActual){status.textContent='Necesitas iniciar sesión con Google para reservar.';status.className='booking-status error';try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){return}return}const c=canchasGlobales.find(x=>x.id===id);btn.disabled=true;status.textContent='Confirmando horario…';status.className='booking-status';const key=`${id}_${fechaHoy()}_${hora.replace(':','')}`;try{await runTransaction(db,async tx=>{const ref=doc(db,'reservas',key),existing=await tx.get(ref);if(existing.exists()){const d=existing.data();if(!['cancelada','cancelado','cancelled'].includes(normalizar(d.estado)))throw new Error('SLOT_OCUPADO')}tx.set(ref,{canchaId:id,canchaNombre:c?.nombre||'',fecha:fechaHoy(),horaInicio:hora,horaFin:hora,estado:'pendiente',nombre,telefono,uid:usuarioActual.uid,email:usuarioActual.email||'',creadoEn:serverTimestamp()})});status.textContent='¡Reserva registrada! La cancha ya quedó bloqueada para ese horario.';status.className='booking-status success';await pintarDisponibilidadModal(c);setTimeout(()=>{modal.classList.remove('mostrar');modal.setAttribute('aria-hidden','true');document.getElementById('modal-cancha')?.classList.remove('mostrar');document.body.style.overflow=''},1100)}catch(e){status.textContent=e.message==='SLOT_OCUPADO'?'Ese horario acaba de ser reservado por otra persona. Elige otro.':'No pudimos registrar la reserva. Intenta nuevamente.';status.className='booking-status error'}finally{btn.disabled=false}}
+async function confirmarReserva(){
+    const modal=document.getElementById('modal-reserva'),id=modal?.dataset.courtId,hora=modal?.dataset.time,nombre=document.getElementById('booking-nombre')?.value.trim(),telefono=document.getElementById('booking-telefono')?.value.trim(),status=document.getElementById('booking-status'),btn=document.getElementById('btn-confirmar-reserva');
+    if(!id||!hora||!nombre||!telefono){status.textContent='Completa tu nombre y teléfono para continuar.';status.className='booking-status error';return}
+    if(!usuarioActual){
+        status.textContent='Necesitas iniciar sesión con Google para reservar.';status.className='booking-status error';
+        try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){return}return
+    }
+    const c=canchasGlobales.find(x=>x.id===id);
+    btn.disabled=true;status.textContent='Confirmando horario…';status.className='booking-status';
+    
+    // FASE 14: ID Determinístico para evitar Choques (Atomic Booking)
+    const key=`${id}_${fechaHoy()}_${hora.replace(':','')}`;
+    
+    try{
+        await runTransaction(db,async tx=>{
+            const ref=doc(db,'reservas',key),existing=await tx.get(ref);
+            if(existing.exists() && !['cancelada','cancelado','cancelled'].includes(normalizar(existing.data().estado))){
+                throw new Error('SLOT_OCUPADO');
+            }
+            
+            // FASE 13: Normalización Absoluta del Modelo de Datos
+            tx.set(ref,{
+                id: key,
+                canchaId: id,
+                canchaNombre: c?.nombre||'',
+                usuarioUid: usuarioActual.uid,
+                usuarioNombre: nombre,
+                usuarioEmail: usuarioActual.email||'',
+                usuarioTelefono: telefono,
+                fecha: fechaHoy(),
+                horaInicio: hora,
+                horaFin: hora, 
+                estado: 'pendiente',
+                precio: Number(c?.precio||0),
+                metodoPago: 'pendiente',
+                senaPagada: false,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
+        });
+        
+        status.textContent='¡Reserva registrada! La cancha ya quedó bloqueada para ese horario.';
+        status.className='booking-status success';
+        await pintarDisponibilidadModal(c);
+        setTimeout(()=>{cerrarReserva();cerrarModal();},1100);
+        
+    }catch(e){
+        status.textContent=e.message==='SLOT_OCUPADO'?'Ese horario acaba de ser reservado por otra persona. Elige otro.':'No pudimos registrar la reserva. Intenta nuevamente.';
+        status.className='booking-status error';
+    }finally{
+        btn.disabled=false;
+    }
+}
 function formatearNombre(n){if(!n)return'Jugador';const p=n.trim().split(/\s+/);return p.length>1?`${p[0]} ${p[1].charAt(0)}.`:p[0]}
 const btnCerrar=document.getElementById('cerrar-modal'),modalCancha=document.getElementById('modal-cancha');if(btnCerrar)btnCerrar.addEventListener('click',cerrarModal);if(modalCancha)modalCancha.addEventListener('click',e=>{if(e.target===modalCancha)cerrarModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarModal();cerrarReserva()}});function cerrarModal(){if(!modalCancha)return;modalCancha.classList.remove('mostrar');document.body.style.overflow=''}
 function cerrarReserva(){const m=document.getElementById('modal-reserva');if(m){m.classList.remove('mostrar');m.setAttribute('aria-hidden','true')}}
