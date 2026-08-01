@@ -71,14 +71,140 @@ async function cargarEspacios(){const q=query(collection(db,'espacios'),where('o
 async function cargarReservas(){const snap=await getDocs(collection(db,'reservas'));const idCancha=String(espacioSeleccionado?.id||usuarioActual.uid);reservasDia=snap.docs.map(d=>({id:d.id,...d.data()})).filter(r=>String(r.canchaId??r.courtId??r.cancha??'')===idCancha&&String(r.fecha||'')===fechaISO(fechaSeleccionada))}
 function generarSlots(){const h=horarioDelDia();if(!h.activo)return[];const a=minutos(h.apertura),b0=minutos(h.cierre),step=Number(canchaActual?.intervaloMinutos||canchaActual?.duracionReserva||60);if(a===null||b0===null||!Number.isFinite(step)||step<=0)return[];let b=b0<=a?b0+1440:b0;const out=[];for(let t=a;t<b;t+=step){const real=t%1440;out.push({hora:`${String(Math.floor(real/60)).padStart(2,'0')}:${String(real%60).padStart(2,'0')}`,min:real})}return out}
 function reservaPara(hora){return reservasDia.find(r=>r.horaInicio===hora&&!['cancelada','cancelado','cancelled'].includes(normalizar(r.estado)))}function esBloqueoManual(r){return r?.tipo==='bloqueo_manual'||r?.estado==='bloqueada'}
-function estadoReserva(r){return normalizar(r?.estado||'pendiente')}
+function estadoReserva(r){
+    const st = normalizar(r?.estado||'pending');
+    // Mapeo de retrocompatibilidad y estados permitidos
+    if(['pendiente', 'pending'].includes(st)) return 'pending';
+    if(['confirmada', 'confirmed'].includes(st)) return 'confirmed';
+    if(['cancelada', 'cancelado', 'cancelled'].includes(st)) return 'cancelled';
+    if(['completada', 'completed', 'jugada'].includes(st)) return 'completed';
+    if(['rechazada', 'rejected'].includes(st)) return 'rejected';
+    return 'pending';
+}
 function renderSchedule(){const box=document.getElementById('admin-schedule');if(!box)return;const h=horarioDelDia(),slots=generarSlots();if(!h.activo){box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-moon"></i><b>Cancha cerrada este día</b><span>Según tu horario semanal, no recibes reservas.</span></div>';actualizarKpis([]);return}if(!slots.length){box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-clock"></i><b>Configura el horario de este día</b><span>Ve a configuración y establece apertura y cierre.</span></div>';actualizarKpis([]);return}box.innerHTML=slots.map(s=>{const r=reservaPara(s.hora),busy=!!r,past=fechaISO(fechaSeleccionada)===fechaHoy()&&s.min<horaActual(),manual=esBloqueoManual(r);let cls=busy?'occupied':'available';if(past&&!busy)cls+=' past';const estado=estadoReserva(r),label=busy?(manual?'Bloqueada':estado==='confirmada'?'Confirmada':estado==='cancelada'?'Cancelada':'Pendiente'):'Disponible';return `<button type="button" class="admin-slot ${cls}" data-slot="${s.hora}" data-reserva="${r?.id||''}" title="${busy?'Clic para gestionar':'Clic para ocupar'}"><span class="slot-time">${s.hora}</span><span class="slot-status"><i class="ph-fill ph-circle"></i>${label}</span>${busy&&!manual?`<small>${r.nombre||'Cliente'} · ${r.telefono||''}</small>`:''}</button>`}).join('');box.querySelectorAll('.admin-slot').forEach(b=>b.addEventListener('click',()=>gestionarSlot(b.dataset.slot,b.dataset.reserva)));actualizarKpis(slots)}
 function actualizarKpis(slots){const activos=reservasDia.filter(r=>!['cancelada','cancelado','cancelled'].includes(normalizar(r.estado))),clientes=activos.filter(r=>!esBloqueoManual(r));document.getElementById('reservas-hoy').textContent=clientes.length;document.getElementById('reservas-count').textContent=clientes.length;document.getElementById('horas-libres').textContent=Math.max(0,slots.filter(s=>!reservaPara(s.hora)).length);document.getElementById('ingresos-hoy').textContent=money(clientes.filter(r=>estadoReserva(r)!=='cancelada').reduce((sum,r)=>sum+Number(r.precio??canchaActual?.precio??0),0))}
 async function gestionarSlot(hora,reservaId){const existente=reservaId?reservasDia.find(r=>r.id===reservaId):null;if(existente){const manual=esBloqueoManual(existente);if(manual){if(!confirm(`¿Liberar ${hora} para volver a recibir reservas?`))return;try{await updateDoc(doc(db,'reservas',existente.id),{estado:'cancelada',canceladoPor:'dueno',canceladoEn:serverTimestamp()});toast('Horario liberado.');await refrescar()}catch(e){toast('No se pudo liberar.',true)}return}abrirGestionReserva(existente);return}if(!confirm(`¿Ocupar ${hora} manualmente en ${espacioSeleccionado?.nombre}?`))return;try{await addDoc(collection(db,'reservas'),{canchaId:espacioSeleccionado.id,canchaNombre:espacioSeleccionado.nombre||'',fecha:fechaISO(fechaSeleccionada),horaInicio:hora,horaFin:hora,estado:'bloqueada',tipo:'bloqueo_manual',nombre:'Bloqueo del dueño',uid:usuarioActual.uid,precio:0,creadoEn:serverTimestamp()});toast('Horario ocupado.');await refrescar()}catch(e){console.error(e);toast('No se pudo ocupar el horario.',true)}}
-function abrirGestionReserva(r){let m=document.getElementById('modal-gestion-reserva');if(!m){m=document.createElement('div');m.id='modal-gestion-reserva';m.className='admin-modal';m.innerHTML=`<div class="admin-modal-card reservation-manage-card"><button type="button" class="btn-cerrar admin-modal-close" data-close="modal-gestion-reserva"><i class="ph-bold ph-x"></i></button><span class="mini-label">GESTIÓN DE RESERVA</span><h2 id="manage-title">Reserva</h2><div id="manage-summary" class="manage-summary"></div><div class="manage-actions"><button id="manage-confirm" class="btn hero-primary"><i class="ph-bold ph-check-circle"></i> Confirmar reserva</button><button id="manage-pending" class="btn btn-outline"><i class="ph-bold ph-hourglass"></i> Dejar pendiente</button><button id="manage-cancel" class="btn btn-danger"><i class="ph-bold ph-x-circle"></i> Cancelar y liberar</button></div></div>`;document.body.appendChild(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('mostrar');m.querySelector('#manage-confirm').onclick=()=>cambiarEstadoGestion('confirmada');m.querySelector('#manage-pending').onclick=()=>cambiarEstadoGestion('pendiente');m.querySelector('#manage-cancel').onclick=()=>cambiarEstadoGestion('cancelada')}window.__reservaGestion=r;m.querySelector('#manage-title').textContent=`${r.nombre||'Cliente'} · ${r.horaInicio||'--:--'}`;m.querySelector('#manage-summary').innerHTML=`<div><span>Fecha</span><b>${fechaTexto(fechaSeleccionada)}</b></div><div><span>Cancha</span><b>${r.canchaNombre||'Principal'}</b></div><div><span>WhatsApp</span><b>${r.telefono||'No indicado'}</b></div><div><span>Importe</span><b>${money(r.precio??canchaActual?.precio)}</b></div><div><span>Estado</span><b>${estadoReserva(r)==='confirmada'?'Confirmada':'Pendiente'}</b></div>`;m.classList.add('mostrar');m.setAttribute('aria-hidden','false')}
-async function cambiarEstadoGestion(estado){const r=window.__reservaGestion;if(!r)return;try{await updateDoc(doc(db,'reservas',r.id),{estado, ...(estado==='confirmada'?{confirmadoPor:usuarioActual.uid,confirmadoEn:serverTimestamp()}:{})});document.getElementById('modal-gestion-reserva')?.classList.remove('mostrar');toast(estado==='confirmada'?'Reserva confirmada.':estado==='cancelada'?'Reserva cancelada y hora liberada.':'Reserva dejada como pendiente.');await refrescar()}catch(e){console.error(e);toast('No se pudo actualizar la reserva.',true)}}
+function abrirGestionReserva(r){
+    let m=document.getElementById('modal-gestion-reserva');
+    if(!m){
+        m=document.createElement('div');
+        m.id='modal-gestion-reserva';
+        m.className='admin-modal';
+        m.innerHTML=`<div class="admin-modal-card reservation-manage-card">
+            <button type="button" class="btn-cerrar admin-modal-close" data-close="modal-gestion-reserva"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label">GESTIÓN DE RESERVA</span>
+            <h2 id="manage-title">Reserva</h2>
+            <div id="manage-summary" class="manage-summary" style="margin-bottom: 20px;"></div>
+            <div class="manage-actions" id="manage-buttons" style="display:flex; flex-direction:column; gap:10px;">
+                </div>
+        </div>`;
+        document.body.appendChild(m);
+        m.querySelector('[data-close]').onclick=()=>m.classList.remove('mostrar');
+    }
+    window.__reservaGestion=r;
+    const st = estadoReserva(r);
+    
+    m.querySelector('#manage-title').textContent=`${r.nombre||'Cliente'} · ${r.horaInicio||'--:--'}`;
+    
+    // Etiqueta de estado visual
+    const statusLabels = {
+        'pending': '<span style="color:#d7a938">Pendiente</span>',
+        'confirmed': '<span style="color:var(--primary-green)">Confirmada</span>',
+        'completed': '<span style="color:#a777e8">Completada (Jugada)</span>',
+        'cancelled': '<span style="color:var(--text-muted)">Cancelada</span>',
+        'rejected': '<span style="color:var(--danger)">Rechazada por la Cancha</span>'
+    };
+
+    m.querySelector('#manage-summary').innerHTML=`
+        <div><span>Fecha:</span> <b>${fechaTexto(fechaSeleccionada)}</b></div>
+        <div><span>WhatsApp:</span> <b>${r.telefono||'No indicado'}</b></div>
+        <div><span>Importe:</span> <b>${money(r.precio??canchaActual?.precio)}</b></div>
+        <div><span>Estado actual:</span> <b>${statusLabels[st]}</b></div>
+    `;
+
+    // Lógica de Máquina de Estados (Qué botones mostrar según el estado actual)
+    const btnContainer = m.querySelector('#manage-buttons');
+    btnContainer.innerHTML = '';
+    
+    // Botón de WhatsApp siempre disponible si hay teléfono
+    if(r.telefono) {
+        const phone = String(r.telefono).replace(/\D/g,'');
+        btnContainer.innerHTML += `<a href="https://wa.me/${phone}?text=${encodeURIComponent(`Hola ${r.nombre}, te escribimos de ${canchaActual.nombre} sobre tu reserva de hoy a las ${r.horaInicio}.`)}" target="_blank" class="btn" style="background:#25D366; color:#000;"><i class="ph-bold ph-whatsapp-logo"></i> Chatear por WhatsApp</a>`;
+    }
+
+    if(st === 'pending') {
+        btnContainer.innerHTML += `
+            <button onclick="cambiarEstadoGestion('confirmed')" class="btn hero-primary"><i class="ph-bold ph-check-circle"></i> Aprobar Reserva</button>
+            <button onclick="cambiarEstadoGestion('rejected')" class="btn" style="background:var(--danger);"><i class="ph-bold ph-x-circle"></i> Rechazar (Sin disponibilidad)</button>
+        `;
+    } else if(st === 'confirmed') {
+        btnContainer.innerHTML += `
+            <button onclick="cambiarEstadoGestion('completed')" class="btn" style="background:#a777e8;"><i class="ph-bold ph-flag-checkered"></i> Marcar como Partido Jugado</button>
+            <button onclick="cambiarEstadoGestion('cancelled')" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
+        `;
+    }
+
+    m.classList.add('mostrar');
+    m.setAttribute('aria-hidden','false');
+}
+async function cambiarEstadoGestion(nuevoEstado){
+    const r=window.__reservaGestion;
+    if(!r)return;
+    
+    if(!confirm(`¿Estás seguro de cambiar la reserva a estado: ${nuevoEstado.toUpperCase()}?`)) return;
+
+    try{
+        const updateData = { estado: nuevoEstado, updatedAt: serverTimestamp() };
+        if(nuevoEstado === 'confirmed') {
+            updateData.confirmadoPor = usuarioActual.uid;
+            updateData.confirmadoEn = serverTimestamp();
+        } else if (nuevoEstado === 'cancelled' || nuevoEstado === 'rejected') {
+            updateData.canceladoPor = usuarioActual.uid;
+            updateData.canceladoEn = serverTimestamp();
+        }
+
+        await updateDoc(doc(db,'reservas',r.id), updateData);
+        document.getElementById('modal-gestion-reserva')?.classList.remove('mostrar');
+        toast('Estado de reserva actualizado correctamente.');
+        await refrescar();
+    }catch(e){
+        console.error(e);
+        toast('No se pudo actualizar la reserva.',true);
+    }
+}
 async function refrescar(){await cargarReservas();renderSchedule();renderReservas()}
-function renderReservas(){const box=document.getElementById('lista-reservas'),activos=reservasDia.filter(r=>!['cancelada','cancelado','cancelled'].includes(normalizar(r.estado))&&!esBloqueoManual(r)).sort((a,b)=>String(a.horaInicio).localeCompare(String(b.horaInicio)));if(!activos.length){box.innerHTML='<div class="admin-empty compact"><i class="ph-bold ph-calendar-blank"></i><b>No tienes reservas de clientes este día</b><span>Las reservas que lleguen desde la web aparecerán aquí.</span></div>';return}box.innerHTML=activos.map(r=>{const st=estadoReserva(r),label=st==='confirmada'?'Confirmada':'Pendiente';return `<article class="reservation-row"><div class="reservation-time">${r.horaInicio||'--:--'}<small>${r.canchaNombre||'Principal'}</small></div><div class="reservation-client"><b>${r.nombre||'Cliente'}</b><span>${r.telefono||'Sin teléfono'} · ${label}</span></div><div class="reservation-actions"><button class="reservation-state ${st}" data-id="${r.id}">${st==='confirmada'?'<i class="ph-bold ph-check-circle"></i> Confirmada':'<i class="ph-bold ph-hourglass"></i> Pendiente'}</button><button class="icon-btn release-reservation" data-id="${r.id}" title="Gestionar"><i class="ph-bold ph-sliders-horizontal"></i></button>${r.telefono?`<a class="icon-btn" href="https://wa.me/${String(r.telefono).replace(/\D/g,'')}" target="_blank" rel="noopener" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>`:''}</div></article>`}).join('');box.querySelectorAll('.release-reservation,.reservation-state').forEach(b=>b.addEventListener('click',()=>{const r=reservasDia.find(x=>x.id===b.dataset.id);if(r)abrirGestionReserva(r)}))}
+function renderReservas(){
+    const box=document.getElementById('lista-reservas');
+    // Filtramos las canceladas/rechazadas para la vista principal, a menos que quieras ver el historial
+    const activos = reservasDia.filter(r => !['cancelled', 'rejected', 'cancelada', 'cancelado'].includes(estadoReserva(r)) && !esBloqueoManual(r)).sort((a,b)=>String(a.horaInicio).localeCompare(String(b.horaInicio)));
+    
+    if(!activos.length){
+        box.innerHTML='<div class="admin-empty compact"><i class="ph-bold ph-calendar-blank"></i><b>No tienes reservas activas hoy</b><span>Las reservas que lleguen desde la web aparecerán aquí.</span></div>';
+        return;
+    }
+    box.innerHTML=activos.map(r=>{
+        const st=estadoReserva(r);
+        let label = 'Pendiente', colorClass = 'pendiente';
+        let icon = '<i class="ph-bold ph-hourglass"></i>';
+        
+        if(st === 'confirmed') { label = 'Confirmada'; colorClass = 'confirmada'; icon = '<i class="ph-bold ph-check-circle"></i>'; }
+        if(st === 'completed') { label = 'Jugado'; colorClass = 'jugada'; icon = '<i class="ph-bold ph-flag-checkered"></i>'; }
+
+        return `<article class="reservation-row">
+            <div class="reservation-time">${r.horaInicio||'--:--'}<small>${r.horaFin&&r.horaFin!==r.horaInicio?`hasta ${r.horaFin}`:'1 hora'}</small></div>
+            <div class="reservation-client"><b>${r.nombre||'Cliente'}</b><span>${r.telefono||'Sin teléfono'} · ${label}</span></div>
+            <div class="reservation-actions">
+                <button class="reservation-state ${colorClass}" data-id="${r.id}">${icon} ${label}</button>
+                <button class="icon-btn release-reservation" data-id="${r.id}" title="Gestionar"><i class="ph-bold ph-sliders-horizontal"></i></button>
+            </div>
+        </article>`;
+    }).join('');
+    
+    box.querySelectorAll('.release-reservation,.reservation-state').forEach(b=>b.addEventListener('click',()=>{
+        const r=reservasDia.find(x=>x.id===b.dataset.id);
+        if(r) abrirGestionReserva(r);
+    }));
+}
 function renderWeeklyHours(data){const box=document.getElementById('weekly-hours');if(!box)return;box.innerHTML=dias.slice(1).concat(['domingo']).map(dia=>{const h=data[dia]||{activo:true,apertura:'16:00',cierre:'23:00'};return `<div class="day-config-row" data-day="${dia}"><label class="day-toggle"><input type="checkbox" class="day-active" ${h.activo?'checked':''}><span class="toggle-ui"></span><b>${dia.charAt(0).toUpperCase()+dia.slice(1)}</b></label><div class="day-times"><input type="time" class="day-open" value="${h.apertura||'16:00'}"><span>—</span><input type="time" class="day-close" value="${h.cierre||'23:00'}"></div><span class="day-state">${h.activo?'Abierto':'Cerrado'}</span></div>`}).join('');box.querySelectorAll('.day-config-row').forEach(row=>{const cb=row.querySelector('.day-active'),update=()=>{row.classList.toggle('closed',!cb.checked);row.querySelector('.day-state').textContent=cb.checked?'Abierto':'Cerrado';row.querySelectorAll('.day-open,.day-close').forEach(x=>x.disabled=!cb.checked)};cb.addEventListener('change',update);update()})}
 function readWeeklyHours(){const out={};document.querySelectorAll('.day-config-row').forEach(row=>{out[row.dataset.day]={activo:row.querySelector('.day-active').checked,apertura:row.querySelector('.day-open').value,cierre:row.querySelector('.day-close').value}});return out}
 const btnHoy=document.getElementById('btn-hoy');btnHoy?.addEventListener('click',()=>{fechaSeleccionada=new Date();fechaSeleccionada.setHours(0,0,0,0);renderWeekDays();actualizarDia()});document.getElementById('btn-copiar-lunes')?.addEventListener('click',()=>{const lunes=document.querySelector('.day-config-row[data-day="lunes"]');if(!lunes)return;document.querySelectorAll('.day-config-row').forEach(row=>{if(row===lunes)return;row.querySelector('.day-active').checked=lunes.querySelector('.day-active').checked;row.querySelector('.day-open').value=lunes.querySelector('.day-open').value;row.querySelector('.day-close').value=lunes.querySelector('.day-close').value;row.querySelector('.day-active').dispatchEvent(new Event('change'))});toast('Horario del lunes copiado a los demás días.')});
