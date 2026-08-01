@@ -14,6 +14,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const mapEl = document.getElementById('map-canchas');
 
+// Controles del Modal
+const modalMapa = document.getElementById('modal-mapa');
+const btnAbrirMapa = document.getElementById('btn-abrir-mapa');
+const btnCerrarMapa = document.getElementById('cerrar-mapa');
+
 if (mapEl && window.L) {
     const map = L.map(mapEl, { zoomControl: false, scrollWheelZoom: true, fadeAnimation: true }).setView([-5.1945, -80.6328], 13);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -91,15 +96,18 @@ if (mapEl && window.L) {
     function bindSlots(c) {
         document.querySelectorAll(`.availability-slot.free[data-id="${CSS.escape(c.id)}"]`).forEach(el => el.addEventListener('click', () => {
             const time = el.dataset.time, tel = String(c.whatsapp || '').replace(/\D/g, '');
-            if (!tel) { window.abrirModal?.(c.id); return; }
-            // ACTUALIZADO PARA CHALACAPP
+            if (!tel) { 
+                modalMapa.classList.remove('mostrar'); // Cerrar mapa
+                window.abrirModal?.(c.id); // Abrir info cancha
+                return; 
+            }
             const msg = `Hola ${c.nombre}, vengo de CHALACAPP. Quiero reservar la cancha hoy a las ${time}. ¿Está disponible?`;
             window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
         }));
     }
 
     async function cargar() {
-        try { // <- ¡AQUÍ ESTÁ EL TRY QUE INICIA!
+        try { 
             const [snap, resSnap] = await Promise.all([getDocs(collection(db, 'canchas')), getDocs(collection(db, 'reservas')).catch(() => null)]);
             const reservas = resSnap ? resSnap.docs.map(d => ({ id: d.id, ...d.data() })) : [];
             const bounds = [];
@@ -114,7 +122,10 @@ if (mapEl && window.L) {
                 marker.on('popupopen', () => {
                     bindSlots(c);
                     const el = document.querySelector(`.map-open-card[data-id="${CSS.escape(c.id)}"]`);
-                    el?.addEventListener('click', () => window.abrirModal?.(c.id));
+                    el?.addEventListener('click', () => {
+                        modalMapa.classList.remove('mostrar');
+                        window.abrirModal?.(c.id);
+                    });
                 });
                 marker.addTo(markers);
                 bounds.push(pos);
@@ -126,7 +137,7 @@ if (mapEl && window.L) {
             } else {
                 if(status) status.textContent = 'Aún no hay canchas en el mapa.';
             }
-        } catch (error) { // <- ¡Y AQUÍ ESTÁ EL CATCH QUE FALTABA!
+        } catch (error) { 
             console.error("Error cargando el mapa:", error);
             if(status) status.textContent = 'No pudimos cargar el mapa.';
         }
@@ -146,12 +157,36 @@ if (mapEl && window.L) {
             if(status) status.textContent = 'Ubicación activada. Explora las canchas cercanas.';
             if(btn) btn.removeAttribute('disabled');
         }, () => {
-            if(status) status.textContent = 'No pudimos acceder a tu ubicación. Revisa el permiso del navegador.';
+            if(status) status.textContent = 'No pudimos acceder a tu ubicación. Revisa permisos.';
             if(btn) btn.removeAttribute('disabled');
         }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
     }
 
     if(btn) btn.addEventListener('click', ubicarUsuario);
+    
+    // =====================================
+    // EVENTOS PARA ABRIR Y CERRAR EL MAPA
+    // =====================================
+    if (btnAbrirMapa && modalMapa) {
+        btnAbrirMapa.addEventListener('click', () => {
+            modalMapa.classList.add('mostrar');
+            // TRUCO VITAL: Avisarle a Leaflet que el contenedor ya es visible
+            setTimeout(() => {
+                map.invalidateSize(true);
+            }, 250); 
+        });
+    }
+
+    if (btnCerrarMapa && modalMapa) {
+        btnCerrarMapa.addEventListener('click', () => {
+            modalMapa.classList.remove('mostrar');
+        });
+    }
+
+    // Cerrar al hacer clic fuera
+    modalMapa?.addEventListener('click', (e) => {
+        if (e.target === modalMapa) modalMapa.classList.remove('mostrar');
+    });
+
     cargar();
-    window.addEventListener('resize', () => map.invalidateSize(true));
 }
