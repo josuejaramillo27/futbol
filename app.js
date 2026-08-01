@@ -364,15 +364,14 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarEventosPublicos();
 });
 // ==========================================
-// FASE 29: LÓGICA DE RESEÑAS MINIMALISTA (cancha.html)
+// FASE 29: LÓGICA DE CALIFICACIÓN DIRECTA (cancha.html)
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
     const canchaId = urlParams.get('id');
-    window.resenasGlobales = [];
     
     let ratingSeleccionado = 0;
-    let etiquetasSeleccionadas = new Map(); // Guardaremos el icono y el texto
+    let etiquetasSeleccionadas = new Map(); 
 
     // DICCIONARIO DE ETIQUETAS MINIMALISTAS (Vectores Phosphor Icons)
     const TAGS_POR_RATING = {
@@ -413,11 +412,9 @@ if (window.location.pathname.includes('cancha.html')) {
 
     async function cargarDetalleCancha() {
         const infoEl = document.getElementById('court-info');
-        const listEl = document.getElementById('reviews-list');
 
         if (!canchaId) {
             if (infoEl) infoEl.innerHTML = '<h2>Cancha no especificada</h2>';
-            if (listEl) listEl.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Selecciona una cancha desde la página principal.</p>';
             return;
         }
 
@@ -439,104 +436,38 @@ if (window.location.pathname.includes('cancha.html')) {
             console.error("Error cargando la cancha:", e);
         }
 
-        // 2. Cargar Reseñas Directamente
-        await refrescarResenas();
-        setupReviewModal();
+        // 2. Actualizar el Promedio de Estrellas
+        await refrescarPromedio();
+
+        // 3. Activar Formulario Directo
+        setupRatingForm();
     }
 
-    async function refrescarResenas() {
-        const listEl = document.getElementById('reviews-list');
+    async function refrescarPromedio() {
         try {
             const q = query(collection(db, 'resenas'), where('canchaId', '==', canchaId));
             const resenasSnap = await getDocs(q);
-            window.resenasGlobales = resenasSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            const reseñas = resenasSnap.docs.map(d => d.data());
 
-            const total = window.resenasGlobales.length;
-            const sum = window.resenasGlobales.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+            const total = reseñas.length;
+            const sum = reseñas.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
             const prom = total > 0 ? (sum / total).toFixed(1) : "0.0";
 
             const ratingEl = document.getElementById('court-rating');
             if (ratingEl) {
-                ratingEl.innerHTML = `<strong>${prom}</strong> <span>de 5 (${total} ${total === 1 ? 'reseña' : 'reseñas'})</span>`;
+                ratingEl.innerHTML = `<strong>${prom}</strong> <span style="display:block; font-size:0.85rem; color:var(--text-muted); margin-top:3px;">de 5 (${total} ${total === 1 ? 'calificación' : 'calificaciones'})</span>`;
             }
-
-            renderizarResenas(window.resenasGlobales);
         } catch (e) {
-            console.error("Error cargando reseñas:", e);
-            if (listEl) {
-                listEl.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted);">Aún no hay reseñas públicas registradas.</div>`;
-            }
+            console.error("Error cargando promedio:", e);
         }
     }
 
-    function renderizarResenas(lista) {
-        const listEl = document.getElementById('reviews-list');
-        if (!listEl) return;
-
-        if (!lista || lista.length === 0) {
-            listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); background:rgba(255,255,255,0.02); border-radius:12px; border:1px dashed var(--border-color);">Aún no hay opiniones en esta cancha. ¡Sé el primero!</div>';
-            return;
-        }
-
-        const ordenadas = [...lista].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-
-        listEl.innerHTML = ordenadas.map(r => {
-            const numRating = Number(r.rating) || 0;
-            const estrellas = Array.from({ length: 5 }, (_, i) => 
-                `<i class="ph-fill ph-star" style="color: ${i < numRating ? 'var(--warning)' : '#333'}"></i>`
-            ).join('');
-            
-            const fechaTexto = r.createdAt?.toDate ? new Date(r.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
-
-            // Renderizado de etiquetas con icono vectorial
-            const tagsHtml = (r.tags || []).map(t => {
-                // Separamos el icono del texto si existe
-                const partes = t.split('|');
-                const icon = partes.length > 1 ? partes[0] : 'ph-check';
-                const text = partes.length > 1 ? partes[1] : t;
-                return `<span class="tag-badge"><i class="ph-bold ${icon}"></i> ${text}</span>`;
-            }).join('');
-
-            return `
-            <article class="review-card" style="background:rgba(255,255,255,0.02); border:1px solid var(--border-color); padding:20px; border-radius:12px; margin-bottom:15px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <div style="display:flex; gap:10px; align-items:center;">
-                        <div style="width:36px; height:36px; background:var(--primary-green); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#000; font-weight:bold;">
-                            ${(r.nombre || 'J').charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                            <strong style="display:block;">${r.nombre || 'Jugador'}</strong>
-                            <small style="color:var(--text-muted);">${fechaTexto}</small>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:2px; font-size:1.1rem;">${estrellas}</div>
-                </div>
-                ${tagsHtml ? `<div style="margin-top:8px; display:flex; flex-wrap:wrap;">${tagsHtml}</div>` : ''}
-                ${r.comentario ? `<p style="margin-top:10px; color:#ddd; line-height:1.4; font-size:0.95rem;">${r.comentario}</p>` : ''}
-            </article>
-            `;
-        }).join('');
-    }
-
-    function setupReviewModal() {
-        const modal = document.getElementById('modal-publicar-resena');
-        const btnOpen = document.getElementById('btn-open-review-modal');
-        const btnClose = document.getElementById('btn-close-review-modal');
+    function setupRatingForm() {
         const stars = document.querySelectorAll('#star-picker i');
         const starLabel = document.getElementById('star-label');
         const tagsBox = document.getElementById('quick-tags-box');
         const tagsContainer = document.getElementById('quick-tags-container');
         const btnSubmit = document.getElementById('btn-submit-review');
-
-        if (btnOpen) btnOpen.onclick = () => {
-            if (!usuarioActual) {
-                alert("Debes iniciar sesión con Google para publicar una reseña.");
-                return;
-            }
-            modal.classList.add('mostrar');
-        };
-
-        if (btnClose) btnClose.onclick = () => modal.classList.remove('mostrar');
 
         // Selección de Estrellas
         stars.forEach(star => {
@@ -560,7 +491,7 @@ if (window.location.pathname.includes('cancha.html')) {
                     chip.onclick = () => {
                         const icon = chip.dataset.icon;
                         const text = chip.dataset.text;
-                        const key = `${icon}|${text}`; // Guardamos ambos unidos
+                        const key = `${icon}|${text}`; 
 
                         if (etiquetasSeleccionadas.has(key)) {
                             etiquetasSeleccionadas.delete(key);
@@ -576,9 +507,22 @@ if (window.location.pathname.includes('cancha.html')) {
             };
         });
 
-        // Enviar Reseña
+        // Enviar Calificación Directa
         btnSubmit.onclick = async () => {
             if (!ratingSeleccionado) return;
+            
+            // Forzar inicio de sesión antes de calificar
+            if (!usuarioActual) {
+                alert("Debes iniciar sesión con Google para calificar la cancha.");
+                try {
+                    await signInWithPopup(auth, new GoogleAuthProvider());
+                    // Si se loguea, el estado de onAuthStateChanged actualizará usuarioActual
+                    if(!auth.currentUser) return;
+                } catch(e) {
+                    return;
+                }
+            }
+
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
 
@@ -588,31 +532,34 @@ if (window.location.pathname.includes('cancha.html')) {
             try {
                 await addDoc(collection(db, 'resenas'), {
                     canchaId: canchaId,
-                    usuarioUid: usuarioActual.uid,
-                    nombre: usuarioActual.displayName || 'Jugador',
+                    usuarioUid: auth.currentUser.uid,
+                    nombre: auth.currentUser.displayName || 'Jugador',
                     rating: ratingSeleccionado,
-                    tags: Array.from(etiquetasSeleccionadas.keys()), // Enviamos array de "icon|text"
+                    tags: Array.from(etiquetasSeleccionadas.keys()),
                     comentario: comentarioSeguro,
                     createdAt: serverTimestamp()
                 });
 
-                alert("¡Gracias por tu opinión!");
-                modal.classList.remove('mostrar');
+                alert("¡Gracias por calificar la cancha!");
                 
+                // Reiniciar formulario
                 ratingSeleccionado = 0;
                 etiquetasSeleccionadas.clear();
                 stars.forEach(s => s.classList.remove('selected'));
                 tagsBox.style.display = 'none';
                 document.getElementById('review-comment-input').value = '';
-                btnSubmit.textContent = 'Publicar Reseña';
+                starLabel.textContent = "Toca las estrellas para calificar";
+                btnSubmit.textContent = 'Publicar Calificación';
+                btnSubmit.disabled = true;
 
-                await refrescarResenas();
+                // Actualizar el numerito de la izquierda
+                await refrescarPromedio();
 
             } catch (e) {
-                console.error("Error al publicar reseña:", e);
+                console.error("Error al publicar:", e);
                 alert("Ocurrió un error al publicar. Intenta de nuevo.");
                 btnSubmit.disabled = false;
-                btnSubmit.textContent = 'Publicar Reseña';
+                btnSubmit.textContent = 'Publicar Calificación';
             }
         };
     }
