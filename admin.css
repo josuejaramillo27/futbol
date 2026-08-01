@@ -64,3 +64,41 @@
 .btn-confirm-yes:hover { filter: brightness(1.1); transform: scale(1.02); }
 .btn-confirm-no { background: rgba(255,255,255,0.1); color: #fff; }
 .btn-confirm-no:hover { background: rgba(255,255,255,0.2); }
+
+/* ==========================================
+   SOLUCIÓN DEFINITIVA: DESBORDE DE HORARIOS
+   ========================================== */
+
+/* 1. Convertimos el contenedor en una cuadrícula rígida e irrompible */
+#lista-horarios, .slots-grid, .horarios-container, .admin-slots {
+    display: grid !important;
+    /* Esto crea columnas que se ajustan automáticamente, pero nunca superan el ancho de la pantalla */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. Obligamos a los botones a respetar la cuadrícula */
+#lista-horarios button, .slots-grid button, .horarios-container button, .admin-slot {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important; /* Crucial: le dice al navegador que permita encoger la caja */
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    padding: 12px 8px !important;
+}
+
+/* 3. Cortamos CUALQUIER texto largo que esté adentro con "..." */
+#lista-horarios button span, 
+#lista-horarios button b, 
+#lista-horarios button small,
+.slots-grid button span,
+.slots-grid button b,
+.slots-grid button small {
+    display: block !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+}
