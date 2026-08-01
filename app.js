@@ -364,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cargarEventosPublicos();
 });
 // ==========================================
-// FASE 29: LÓGICA DE CALIFICACIÓN DIRECTA (cancha.html)
+// FASE 29: LÓGICA DE CALIFICACIÓN DIRECTA Y SEGURA (cancha.html)
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -373,7 +373,7 @@ if (window.location.pathname.includes('cancha.html')) {
     let ratingSeleccionado = 0;
     let etiquetasSeleccionadas = new Map(); 
 
-    // DICCIONARIO DE ETIQUETAS MINIMALISTAS (Vectores Phosphor Icons)
+    // DICCIONARIO DE ETIQUETAS MINIMALISTAS
     const TAGS_POR_RATING = {
         5: [
             { icon: "ph-leaf", text: "Césped impecable" },
@@ -507,7 +507,7 @@ if (window.location.pathname.includes('cancha.html')) {
             };
         });
 
-        // Enviar Calificación Directa
+        // Enviar Calificación Directa y 100% Estructurada (Sin textos libres)
         btnSubmit.onclick = async () => {
             if (!ratingSeleccionado) return;
             
@@ -516,7 +516,6 @@ if (window.location.pathname.includes('cancha.html')) {
                 alert("Debes iniciar sesión con Google para calificar la cancha.");
                 try {
                     await signInWithPopup(auth, new GoogleAuthProvider());
-                    // Si se loguea, el estado de onAuthStateChanged actualizará usuarioActual
                     if(!auth.currentUser) return;
                 } catch(e) {
                     return;
@@ -526,17 +525,13 @@ if (window.location.pathname.includes('cancha.html')) {
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
 
-            const comentarioTxt = document.getElementById('review-comment-input').value.trim();
-            const comentarioSeguro = comentarioTxt.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]));
-
             try {
                 await addDoc(collection(db, 'resenas'), {
                     canchaId: canchaId,
                     usuarioUid: auth.currentUser.uid,
                     nombre: auth.currentUser.displayName || 'Jugador',
                     rating: ratingSeleccionado,
-                    tags: Array.from(etiquetasSeleccionadas.keys()),
-                    comentario: comentarioSeguro,
+                    tags: Array.from(etiquetasSeleccionadas.keys()), // Solo guardamos las etiquetas cerradas
                     createdAt: serverTimestamp()
                 });
 
@@ -547,12 +542,11 @@ if (window.location.pathname.includes('cancha.html')) {
                 etiquetasSeleccionadas.clear();
                 stars.forEach(s => s.classList.remove('selected'));
                 tagsBox.style.display = 'none';
-                document.getElementById('review-comment-input').value = '';
                 starLabel.textContent = "Toca las estrellas para calificar";
                 btnSubmit.textContent = 'Publicar Calificación';
                 btnSubmit.disabled = true;
 
-                // Actualizar el numerito de la izquierda
+                // Actualizar el numerito de la izquierda automáticamente
                 await refrescarPromedio();
 
             } catch (e) {
