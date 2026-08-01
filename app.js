@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, deleteDoc, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 // ==========================================
 // SISTEMA DE NOTIFICACIONES ELEGANTES (Toast)
@@ -265,20 +265,18 @@ const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',
 if(window.location.pathname.includes('jugadores.html')){const provider=new GoogleAuthProvider(),btnLogin=document.getElementById('btn-login-google'),form=document.getElementById('form-anuncio'),lista=document.getElementById('lista-jugadores'),hint=document.getElementById('login-hint');let usuario=null;const groserias=['mierda','puta','puto','pendejo','pendeja','cabron','cabrón','carajo','joder','cojudo','conchatumare','ctm','imbecil','imbécil','idiota','perra','estupido','estúpido','asco'];const tieneGroserias=t=>groserias.some(x=>normalizar(t).includes(normalizar(x)));onAuthStateChanged(auth,u=>{usuario=u||null;if(btnLogin)btnLogin.style.display=u?'none':'flex';if(form)form.style.display=u?'flex':'none';if(hint)hint.style.display=u?'none':'block'});if(btnLogin)btnLogin.addEventListener('click',async()=>{try{await signInWithPopup(auth,provider)}catch(e){alert('No se pudo iniciar sesión: '+e.message)}});if(form)form.addEventListener('submit',async e=>{e.preventDefault();const t=document.getElementById('texto-anuncio').value.trim(),tipo=document.getElementById('tipo-anuncio')?.value||'jugador',modalidad=document.getElementById('modalidad-anuncio')?.value||'Fútbol 7';if(!usuario)return alert('Debes iniciar sesión con Google.');if(!t)return;if(tieneGroserias(t))return alert('Lenguaje inapropiado detectado. Mantengamos el respeto.');try{await addDoc(collection(db,'bolsa_jugadores'),{nombre:formatearNombre(usuario.displayName),texto:t,tipo,modalidad,uid:usuario.uid,fecha:serverTimestamp(),expiraEn:Date.now()+86400000});document.getElementById('texto-anuncio').value=''}catch(e){console.error(e);alert('No se pudo publicar. Intenta nuevamente.')}});const q=query(collection(db,'bolsa_jugadores'),orderBy('fecha','desc'));onSnapshot(q,s=>{if(!lista)return;lista.innerHTML='';const ahora=Date.now(),docs=[];s.forEach(ds=>{const d=ds.data();if(d.expiraEn&&d.expiraEn<ahora){if(usuario&&d.uid===usuario.uid)deleteDoc(doc(db,'bolsa_jugadores',ds.id));return}docs.push({id:ds.id,...d})});if(!docs.length){lista.innerHTML='<div class="card" style="text-align:center;color:var(--text-muted);grid-column:1/-1"><i class="ph ph-users-three" style="font-size:30px;color:var(--primary-green)"></i><p style="margin-top:7px">No hay partidos abiertos todavía. Sé el primero.</p></div>';return}docs.forEach(d=>{const borrar=usuario&&d.uid===usuario.uid?`<button class="btn btn-danger btn-borrar" data-id="${d.id}"><i class="ph-bold ph-trash"></i> Borrar</button>`:'';lista.innerHTML+=`<article class="card player-post"><div class="player-post-head"><strong><i class="ph-fill ph-user-circle"></i> ${d.nombre||'Jugador'}</strong>${borrar}</div><p>${d.texto||''}</p><small>${d.tipo||'jugador'} · ${d.modalidad||'Fútbol 7'}</small></article>`});lista.querySelectorAll('.btn-borrar').forEach(b=>b.addEventListener('click',async()=>{if(confirm('¿Borrar tu anuncio?'))await deleteDoc(doc(db,'bolsa_jugadores',b.dataset.id))}))},e=>console.error('APP FUTBOL bolsa:',e))}
 
 // ==========================================
-// FASE 26: BOLSA DE JUGADORES SEGURA
+// FASE 26: BOLSA DE JUGADORES SEGURA (ANTI-SPAM)
 // ==========================================
 const formBolsa = document.getElementById('form-bolsa-jugadores');
 if (formBolsa) {
     formBolsa.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // 1. Verificación de Autenticación
         if (!usuarioActual) {
-            alert('Debes iniciar sesión con Google para publicar un anuncio.');
+            window.toast('Debes iniciar sesión con Google para publicar un anuncio.', 'warning');
             try {
                 const { GoogleAuthProvider, signInWithPopup } = await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
                 await signInWithPopup(auth, new GoogleAuthProvider());
-                // La página recargará o el estado cambiará
             } catch (err) {
                 return;
             }
@@ -286,12 +284,22 @@ if (formBolsa) {
         }
 
         const btn = document.getElementById('btn-publicar-anuncio');
-        if(btn) { btn.disabled = true; btn.innerHTML = 'Publicando...'; }
+        if(btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; }
 
         try {
-            // 2. Guardado Seguro Atado al UID del jugador
+            // VERIFICACIÓN ANTI-SPAM: ¿El usuario ya tiene un anuncio activo?
+            const qCheck = query(collection(db, 'bolsa_jugadores'), where('uid', '==', usuarioActual.uid));
+            const snapCheck = await getDocs(qCheck);
+            
+            if (!snapCheck.empty) {
+                window.toast("Ya tienes un anuncio activo. Borra el anterior para publicar uno nuevo.", "warning");
+                if(btn) { btn.disabled = false; btn.innerHTML = 'Publicar Anuncio'; }
+                return; // Detiene el código aquí, no publica nada.
+            }
+
+            // Si pasa la validación, publica el anuncio
             await addDoc(collection(db, 'bolsa_jugadores'), {
-                uid: usuarioActual.uid, // Validado por reglas de Firestore
+                uid: usuarioActual.uid, 
                 nombreJugador: usuarioActual.displayName || 'Jugador',
                 tipo: document.getElementById('bolsa-tipo').value,
                 posicion: document.getElementById('bolsa-posicion').value,
@@ -302,12 +310,11 @@ if (formBolsa) {
                 updatedAt: serverTimestamp()
             });
 
-            alert('¡Anuncio publicado con éxito!');
+            window.toast('¡Anuncio publicado con éxito!', 'success');
             formBolsa.reset();
-            cargarAnunciosBolsa(); // Si tienes una función que renderice la lista, llámala aquí
         } catch (error) {
             console.error('Error al publicar anuncio:', error);
-            alert('Hubo un error al publicar tu anuncio. Revisa los permisos.');
+            window.toast('Hubo un error al publicar tu anuncio.', 'error');
         } finally {
             if(btn) { btn.disabled = false; btn.innerHTML = 'Publicar Anuncio'; }
         }
@@ -555,7 +562,12 @@ if (window.location.pathname.includes('cancha.html')) {
             btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
 
             try {
-                await addDoc(collection(db, 'resenas'), {
+                // CREAMOS UN ID ÚNICO COMBINANDO LA CANCHA Y EL JUGADOR
+                const reseñaUnicaId = `${canchaId}_${auth.currentUser.uid}`;
+                const docRef = doc(db, 'resenas', reseñaUnicaId);
+
+                // USAMOS setDoc: Si no existe, lo crea. Si ya existe, lo actualiza.
+                await setDoc(docRef, {
                     canchaId: canchaId,
                     usuarioUid: auth.currentUser.uid,
                     nombre: auth.currentUser.displayName || 'Jugador',
@@ -564,7 +576,7 @@ if (window.location.pathname.includes('cancha.html')) {
                     createdAt: serverTimestamp()
                 });
 
-                window.toast("¡Gracias por calificar la cancha!", "success");
+                window.toast("¡Calificación registrada con éxito!", "success");
                 
                 ratingSeleccionado = 0;
                 etiquetasSeleccionadas.clear();
@@ -578,12 +590,8 @@ if (window.location.pathname.includes('cancha.html')) {
 
             } catch (e) {
                 console.error("Error al publicar:", e);
-                window.toast("Ocurrió un error al publicar.", "error");
+                window.toast("Ocurrió un error al registrar tu calificación.", "error");
                 btnSubmit.disabled = false;
                 btnSubmit.textContent = 'Publicar Calificación';
             }
         };
-    }
-
-    document.addEventListener('DOMContentLoaded', cargarDetalleCancha);
-}
