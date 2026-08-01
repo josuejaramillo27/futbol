@@ -167,6 +167,7 @@ async function gestionarSlot(hora, reservaId, bloqueoId){
         toast('No se pudo bloquear el horario.',true);
     }
 }
+// FASE 20: Control de Señas unificado
 function abrirGestionReserva(r){
     let m=document.getElementById('modal-gestion-reserva');
     if(!m){
@@ -178,18 +179,15 @@ function abrirGestionReserva(r){
             <span class="mini-label">GESTIÓN DE RESERVA</span>
             <h2 id="manage-title">Reserva</h2>
             <div id="manage-summary" class="manage-summary" style="margin-bottom: 20px;"></div>
-            <div class="manage-actions" id="manage-buttons" style="display:flex; flex-direction:column; gap:10px;">
-                </div>
+            <div class="manage-actions" id="manage-buttons" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>`;
         document.body.appendChild(m);
         m.querySelector('[data-close]').onclick=()=>m.classList.remove('mostrar');
     }
     window.__reservaGestion=r;
     const st = estadoReserva(r);
-    
     m.querySelector('#manage-title').textContent=`${r.nombre||'Cliente'} · ${r.horaInicio||'--:--'}`;
     
-    // Etiqueta de estado visual
     const statusLabels = {
         'pending': '<span style="color:#d7a938">Pendiente</span>',
         'confirmed': '<span style="color:var(--primary-green)">Confirmada</span>',
@@ -198,21 +196,31 @@ function abrirGestionReserva(r){
         'rejected': '<span style="color:var(--danger)">Rechazada por la Cancha</span>'
     };
 
+    const senaBadge = r.senaPagada 
+        ? '<span style="color:#4ba3ff; font-weight:bold;"><i class="ph-fill ph-check-circle"></i> Seña recibida</span>' 
+        : '<span style="color:var(--text-muted);">Pendiente / Sin seña</span>';
+
     m.querySelector('#manage-summary').innerHTML=`
         <div><span>Fecha:</span> <b>${fechaTexto(fechaSeleccionada)}</b></div>
         <div><span>WhatsApp:</span> <b>${r.telefono||'No indicado'}</b></div>
-        <div><span>Importe:</span> <b>${money(r.precio??canchaActual?.precio)}</b></div>
-        <div><span>Estado actual:</span> <b>${statusLabels[st]}</b></div>
+        <div><span>Importe Total:</span> <b>${money(r.precio??canchaActual?.precio)}</b></div>
+        <div><span>Adelanto (Seña):</span> <b>${senaBadge}</b></div>
+        <div><span>Estado Reserva:</span> <b>${statusLabels[st]}</b></div>
     `;
 
-    // Lógica de Máquina de Estados (Qué botones mostrar según el estado actual)
     const btnContainer = m.querySelector('#manage-buttons');
     btnContainer.innerHTML = '';
     
-    // Botón de WhatsApp siempre disponible si hay teléfono
     if(r.telefono) {
         const phone = String(r.telefono).replace(/\D/g,'');
         btnContainer.innerHTML += `<a href="https://wa.me/${phone}?text=${encodeURIComponent(`Hola ${r.nombre}, te escribimos de ${canchaActual.nombre} sobre tu reserva de hoy a las ${r.horaInicio}.`)}" target="_blank" class="btn" style="background:#25D366; color:#000;"><i class="ph-bold ph-whatsapp-logo"></i> Chatear por WhatsApp</a>`;
+    }
+
+    // Botones de Seña Inteligentes
+    if(!r.senaPagada && !['cancelled', 'rejected'].includes(st)) {
+        btnContainer.innerHTML += `<button onclick="marcarSenaGestion(true)" class="btn" style="background:#4ba3ff; color:#000;"><i class="ph-bold ph-wallet"></i> Registrar Seña Recibida</button>`;
+    } else if (r.senaPagada) {
+        btnContainer.innerHTML += `<button onclick="marcarSenaGestion(false)" class="btn btn-outline" style="color:#4ba3ff; border-color:rgba(75, 163, 255, 0.3);"><i class="ph-bold ph-x"></i> Quitar marca de Seña</button>`;
     }
 
     if(st === 'pending') {
@@ -226,10 +234,30 @@ function abrirGestionReserva(r){
             <button onclick="cambiarEstadoGestion('cancelled')" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
         `;
     }
-
     m.classList.add('mostrar');
     m.setAttribute('aria-hidden','false');
 }
+
+// Inyección global de la función para el botón
+window.marcarSenaGestion = async function(recibida) {
+    const r=window.__reservaGestion;
+    if(!r)return;
+    if(!confirm(recibida ? '¿Confirmas que recibiste el adelanto/seña para esta reserva?' : '¿Retirar la marca de seña?')) return;
+
+    try{
+        await updateDoc(doc(db,'reservas',r.id), { 
+            senaPagada: recibida, 
+            senaActualizadaEn: serverTimestamp(),
+            senaActualizadaPor: usuarioActual.uid
+        });
+        document.getElementById('modal-gestion-reserva')?.classList.remove('mostrar');
+        toast(recibida ? 'Seña registrada correctamente.' : 'Marca de seña retirada.');
+        await refrescar();
+    }catch(e){
+        console.error(e);
+        toast('Error al actualizar la seña.',true);
+    }
+};
 async function cambiarEstadoGestion(nuevoEstado){
     const r=window.__reservaGestion;
     if(!r)return;
