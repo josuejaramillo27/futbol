@@ -4,7 +4,43 @@ import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, a
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 import { calcularDisponibilidad, fechaISO } from './availability.js';
 let bloqueosDia = [];
+// ==========================================
+// SISTEMA DE CONFIRMACIÓN ELEGANTE (REEMPLAZO DEL ALERT NATIVO)
+// ==========================================
+window.customConfirm = function(mensaje) {
+    return new Promise((resolve) => {
+        let overlay = document.getElementById('custom-confirm-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'custom-confirm-overlay';
+            overlay.innerHTML = `
+                <div class="custom-confirm-box">
+                    <i class="ph-fill ph-warning-circle"></i>
+                    <p id="custom-confirm-msg" style="margin:0; font-size:1.05rem; color:#fff; line-height:1.4;"></p>
+                    <div class="custom-confirm-buttons">
+                        <button id="btn-confirm-no" class="btn-confirm-no">Cancelar</button>
+                        <button id="btn-confirm-yes" class="btn-confirm-yes">Aceptar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+        
+        document.getElementById('custom-confirm-msg').textContent = mensaje;
+        overlay.classList.add('show');
 
+        // Si dice SÍ
+        document.getElementById('btn-confirm-yes').onclick = () => { 
+            overlay.classList.remove('show'); 
+            resolve(true); 
+        };
+        // Si dice NO
+        document.getElementById('btn-confirm-no').onclick = () => { 
+            overlay.classList.remove('show'); 
+            resolve(false); 
+        };
+    });
+};
 const firebaseConfig={apiKey:"AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",authDomain:"app-futbol-acd0f.firebaseapp.com",projectId:"app-futbol-acd0f",storageBucket:"app-futbol-acd0f.firebasestorage.app",messagingSenderId:"223446110165",appId:"1:223446110165:web:219afce6a9dac03203f75c"};
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),storage=getStorage(app);
 let usuarioActual=null,canchaActual=null,reservasDia=[],espacios=[],espacioSeleccionado=null;
