@@ -399,6 +399,7 @@ function init(){
     document.getElementById('fecha-hoy').textContent=fechaTexto(fechaSeleccionada);
     renderWeekDays();
     document.getElementById('btn-cerrar-sesion')?.addEventListener('click',()=>signOut(auth));
+    document.getElementById('btn-logout')?.addEventListener('click',()=>signOut(auth));
     
     onAuthStateChanged(auth, async u => {
         if(!u) { 
