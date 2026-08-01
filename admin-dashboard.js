@@ -398,8 +398,23 @@ if(formPerfil) {
 function init(){
     document.getElementById('fecha-hoy').textContent=fechaTexto(fechaSeleccionada);
     renderWeekDays();
-    document.getElementById('btn-cerrar-sesion')?.addEventListener('click',()=>signOut(auth));
-    document.getElementById('btn-logout')?.addEventListener('click',()=>signOut(auth));
+    // Bloque blindado para cerrar sesión (Dentro de la función init)
+    const salirSeguro = async (e) => {
+        e.preventDefault(); // Evita que el botón recargue la página prematuramente
+        e.target.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Saliendo...';
+        try {
+            await signOut(auth);
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error("Error al salir:", error);
+        }
+    };
+
+    const btnSalir1 = document.getElementById('btn-cerrar-sesion');
+    const btnSalir2 = document.getElementById('btn-logout');
+    
+    if(btnSalir1) btnSalir1.addEventListener('click', salirSeguro);
+    if(btnSalir2) btnSalir2.addEventListener('click', salirSeguro);
     
     onAuthStateChanged(auth, async u => {
         if(!u) { 
