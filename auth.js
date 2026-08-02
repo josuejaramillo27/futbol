@@ -22,7 +22,7 @@ const btnRegister = document.getElementById('btn-register');
 const errorMessage = document.getElementById('auth-error-message');
 const successMessage = document.getElementById('auth-success-message');
 
-// Referencias de UI (Alternar Login/Registro)
+// Referencias de UI
 const btnShowRegister = document.getElementById('btn-show-register');
 const btnShowLogin = document.getElementById('btn-show-login');
 const registerFields = document.getElementById('register-fields');
@@ -30,6 +30,13 @@ const loginActions = document.getElementById('login-actions');
 const registerActions = document.getElementById('register-actions');
 const formTitle = document.getElementById('form-title');
 const formSubtitle = document.getElementById('form-subtitle');
+
+// ==========================================
+// FIX 1: Bloquear la tecla "Enter" para que no active botones por error
+// ==========================================
+document.getElementById('auth-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+});
 
 if(btnShowRegister) {
     btnShowRegister.addEventListener('click', () => {
@@ -53,7 +60,9 @@ if(btnShowLogin) {
     });
 }
 
-// LÓGICA DE REGISTRO FASE 1
+// ==========================================
+// LÓGICA DE REGISTRO 
+// ==========================================
 if(btnRegister) {
     btnRegister.addEventListener('click', async () => {
         errorMessage.innerText = '';
@@ -62,8 +71,10 @@ if(btnRegister) {
         const telefono = document.getElementById('reg-telefono').value.trim();
         const complejo = document.getElementById('reg-complejo').value.trim();
         const direccion = document.getElementById('reg-direccion').value.trim();
+        const email = emailInput.value.trim();
+        const pass = passwordInput.value.trim();
 
-        if(!nombre || !dni || !telefono || !complejo || !direccion || !emailInput.value || !passwordInput.value) {
+        if(!nombre || !dni || !telefono || !complejo || !direccion || !email || !pass) {
             errorMessage.innerText = 'Por favor, completa absolutamente todos los campos.';
             return;
         }
@@ -72,13 +83,12 @@ if(btnRegister) {
         btnRegister.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> Enviando...';
 
         try {
-            const userCredential = await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
             const user = userCredential.user;
             
-            // Creamos el perfil de usuario protegido
             await setDoc(doc(db, "usuarios", user.uid), {
                 uid: user.uid,
-                email: emailInput.value.trim(),
+                email: email,
                 rol: "owner",
                 estado: "pending",
                 nombre: nombre,
@@ -90,10 +100,9 @@ if(btnRegister) {
                 updatedAt: serverTimestamp()
             });
 
-            // Creamos la solicitud para el panel de Admin
             await setDoc(doc(db, "solicitudes_duenos", user.uid), {
                 uid: user.uid,
-                email: emailInput.value.trim(),
+                email: email,
                 nombre: nombre,
                 telefono: telefono,
                 documento: dni,
@@ -103,23 +112,20 @@ if(btnRegister) {
                 createdAt: serverTimestamp()
             });
 
-            successMessage.innerText = "¡Solicitud enviada! Tu cuenta está en revisión y pendiente de aprobación.";
+            successMessage.innerText = "¡Solicitud enviada! Abriendo WhatsApp...";
             successMessage.style.display = "block";
             
             // ==========================================
-            // ALERTA AUTOMÁTICA POR WHATSAPP (AQUÍ ESTÁ LO NUEVO)
+            // FIX 2: Alerta por WhatsApp segura contra bloqueos
             // ==========================================
             const tuNumeroWhatsApp = "51953066853"; // <-- CAMBIA ESTO POR TU NÚMERO
             const mensajeWhatsApp = `Hola CHALACAPP ⚽, acabo de enviar una solicitud en la web para registrar mi complejo "${complejo}". Mi nombre es ${nombre} y mi DNI es ${dni}. Quedo a la espera de la aprobación.`;
-            window.open(`https://wa.me/${tuNumeroWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`, '_blank', 'noopener');
-            // ==========================================
+            
+            // Forzamos la redirección en la misma ventana para evitar pop-up blockers
+            window.location.href = `https://wa.me/${tuNumeroWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`;
             
             document.getElementById('auth-form').reset();
-            setTimeout(() => {
-                btnShowLogin.click();
-                successMessage.style.display = "none";
-                auth.signOut(); // Cerramos sesión para que no entren hasta ser aprobados
-            }, 4000);
+            auth.signOut(); 
 
         } catch (error) {
             console.error(error);
@@ -131,15 +137,27 @@ if(btnRegister) {
     });
 }
 
-// LÓGICA DE INICIO DE SESIÓN FASE 1 & FASE 4 (Preparativo)
+// ==========================================
+// LÓGICA DE INICIO DE SESIÓN 
+// ==========================================
 if(btnLogin) {
     btnLogin.addEventListener('click', async () => {
         errorMessage.innerText = '';
+        
+        // FIX 3: Validar que no manden campos vacíos
+        const email = emailInput.value.trim();
+        const pass = passwordInput.value.trim();
+        
+        if(!email || !pass) {
+            errorMessage.innerText = 'Por favor, ingresa tu correo y contraseña.';
+            return;
+        }
+
         btnLogin.disabled = true;
         btnLogin.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> Conectando...';
 
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+            const userCredential = await signInWithEmailAndPassword(auth, email, pass);
             const user = userCredential.user;
             
             const userDoc = await getDoc(doc(db, "usuarios", user.uid));
@@ -147,7 +165,6 @@ if(btnLogin) {
             if (userDoc.exists()) {
                 const userData = userDoc.data();
                 
-                // NUEVA LÓGICA: Redirección de Administrador Maestro
                 if (userData.rol === "admin" && userData.estado === "approved") {
                     window.location.href = "admin-panel.html";
                     return;
@@ -163,7 +180,6 @@ if(btnLogin) {
                     window.location.href = "admin.html";
                 }
             } else {
-                // BACKWARD COMPATIBILITY: Migración de dueños antiguos
                 const canchaDoc = await getDoc(doc(db, "canchas", user.uid));
                 if(canchaDoc.exists()) {
                     await setDoc(doc(db, "usuarios", user.uid), {
@@ -184,7 +200,7 @@ if(btnLogin) {
             }
         } catch (error) {
             console.error(error);
-            errorMessage.innerText = "Credenciales incorrectas o error de conexión.";
+            errorMessage.innerText = "Credenciales incorrectas o correo inválido.";
         } finally {
             btnLogin.disabled = false;
             btnLogin.innerHTML = 'Iniciar Sesión';
