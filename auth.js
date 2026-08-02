@@ -106,6 +106,14 @@ if(btnRegister) {
             successMessage.innerText = "¡Solicitud enviada! Tu cuenta está en revisión y pendiente de aprobación.";
             successMessage.style.display = "block";
             
+            // ==========================================
+            // ALERTA AUTOMÁTICA POR WHATSAPP (AQUÍ ESTÁ LO NUEVO)
+            // ==========================================
+            const tuNumeroWhatsApp = "51953066853"; // <-- CAMBIA ESTO POR TU NÚMERO
+            const mensajeWhatsApp = `Hola CHALACAPP ⚽, acabo de enviar una solicitud en la web para registrar mi complejo "${complejo}". Mi nombre es ${nombre} y mi DNI es ${dni}. Quedo a la espera de la aprobación.`;
+            window.open(`https://wa.me/${tuNumeroWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`, '_blank', 'noopener');
+            // ==========================================
+            
             document.getElementById('auth-form').reset();
             setTimeout(() => {
                 btnShowLogin.click();
