@@ -349,11 +349,6 @@
             <div id="contenido-perfil-publico" style="margin-top: 15px;">
                 <p style="text-align:center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap"></i> Cargando datos...</p>
             </div>
-
-            <!-- Botón para contactarlo (Opcional, para el futuro) -->
-            <button class="btn" style="width: 100%; margin-top: 20px; background: #25D366; color: #000; border: none;">
-                <i class="ph-bold ph-whatsapp-logo"></i> Invitar a jugar
-            </button>
         </div>
     </div>
 </main>
@@ -489,13 +484,11 @@
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 
-                // Dibujamos la FUT Card idéntica a la tuya
                 contenedorPerfil.innerHTML = `
                     <div class="player-card-container">
                         <div class="player-avatar-wrapper">
                             <img src="${data.foto || 'https://ui-avatars.com/api/?name=' + data.nombre}" alt="Avatar" class="player-photo">
-                            <span class="player-rating">99</span>
-                            <span class="player-pos">${data.posicion || '---'}</span>
+                            <span class="player-pos" style="margin-top: 10px; font-size: 0.9rem;">${data.posicion || '---'}</span>
                         </div>
                         <div class="player-info">
                             <h3 class="player-name">${data.nombre} ${data.verificado ? '<i class="ph-fill ph-seal-check verified-badge"></i>' : ''}</h3>
