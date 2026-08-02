@@ -154,10 +154,16 @@
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             color: #aaa;
-            padding: 8px;
+            /* Aquí está la magia: 15px de espacio a la derecha para que no choque con la curva */
+            padding: 6px 15px 6px 6px; 
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
+            
+            /* Evita que el texto rompa el diseño y le pone "..." si es muy largo */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         input[type="file"]::file-selector-button {
@@ -168,7 +174,7 @@
             border-radius: 6px;
             font-weight: bold;
             cursor: pointer;
-            margin-right: 10px;
+            margin-right: 12px;
             transition: all 0.3s ease;
         }
 
