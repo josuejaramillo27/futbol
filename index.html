@@ -1,9 +1,215 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#080B0A"><meta name="description" content="Encuentra canchas, jugadores y tu próximo partido."><title>CHALACAPP | Encuentra dónde jugar</title><link rel="icon" type="image/png" href="logo-chalacapp-nav.png"><script src="https://unpkg.com/@phosphor-icons/web"></script><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="discovery.css"><link rel="stylesheet" href="map-fix.css"><link rel="stylesheet" href="booking.css"><link rel="stylesheet" href="phase34-public.css"></head><body class="home-page"><header class="topbar"><a class="brand" href="index.html" aria-label="Chalacapp inicio" style="display: flex; align-items: center; gap: 10px;">
-    <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 32px; width: auto; object-fit: contain;">
-    <span style="font-size: 1.3rem; letter-spacing: 1px;"><b>CHALACAPP</b></span>
-</a><nav class="topbar-nav" aria-label="Navegación principal"><a href="#canchas" class="topbar-link"><i class="ph-bold ph-map-pin"></i><span>Canchas</span></a><a href="jugadores.html" class="topbar-link"><i class="ph-bold ph-users-three"></i><span>Jugadores</span></a><a href="mis-reservas.html" class="topbar-link"><i class="ph-bold ph-calendar-check"></i><span>Mis reservas</span></a></nav></header><main><section class="hero-section"><div class="hero-copy"><div class="eyebrow"><span></span> TU FÚTBOL, TU COMUNIDAD</div><h1>Encuentra dónde<br><strong>jugar hoy.</strong></h1><p>Descubre canchas, encuentra jugadores y arma tu próximo partido. Todo en un solo lugar.</p><div class="hero-actions"><a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Encontrar cancha</a><a href="jugadores.html" class="btn btn-outline hero-secondary"><i class="ph-bold ph-users-three"></i> Buscar jugadores</a></div></div><div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-soccer-ball"></i></div></section><section class="community-banner"><div class="community-icon"><i class="ph-fill ph-users-three"></i></div><div class="community-copy"><span class="mini-label">NUEVO · EN TIEMPO REAL</span><h2>Bolsa de Jugadores</h2><p>¿Te falta uno? ¿Buscas equipo o retadores para hoy?</p></div><a href="jugadores.html" class="btn community-btn">Entrar <i class="ph-bold ph-arrow-up-right"></i></a></section><section id="canchas" class="courts-section"><div class="section-heading"><div><div class="eyebrow"><span></span> DESCUBRE TU PRÓXIMO PARTIDO</div><h2>Canchas disponibles</h2><p>Filtra por distrito, tipo, precio y disponibilidad.</p></div><div class="live-indicator"><span></span> Actualizado ahora</div></div><div class="discover-panel"><div class="discover-search"><i class="ph-bold ph-magnifying-glass"></i><input id="filtro-busqueda" type="search" placeholder="Busca una cancha, zona o distrito..." autocomplete="off"></div><div class="filter-row"><label class="filter-field"><span>Distrito</span><select id="filtro-ciudad"><option value="">Todos los distritos</option></select></label><label class="filter-field"><span>Tipo</span><select id="filtro-tipo"><option value="">Todos los tipos</option></select></label><label class="filter-field"><span>Precio</span><select id="filtro-precio"><option value="">Cualquier precio</option><option value="0-30">Hasta S/ 30</option><option value="31-50">S/ 31 – 50</option><option value="51-80">S/ 51 – 80</option><option value="81-9999">S/ 81+</option></select></label><label class="filter-field"><span>Ordenar</span><select id="filtro-orden"><option value="recomendadas">Recomendadas</option><option value="rating">Mejor calificadas</option><option value="precio-asc">Menor precio</option><option value="precio-desc">Mayor precio</option></select></label></div></div><div class="results-meta"><span id="contador-canchas">Buscando canchas...</span><span id="filtro-activo"></span></div><button id="btn-abrir-mapa" class="btn btn-outline" style="width: 100%; margin-bottom: 20px; border-color: var(--primary-green); color: #fff;">
-    <i class="ph-fill ph-map-trifold" style="color: var(--primary-green);"></i> Explorar canchas en el mapa
-</button><div id="lista-canchas"></div></section><section class="player-preview"><div><div class="eyebrow"><span></span> COMUNIDAD</div><h2>¿Te falta un jugador?</h2><p>Publica lo que necesitas y conecta con otros jugadores de tu ciudad.</p></div><a href="jugadores.html" class="btn btn-outline">Ver bolsa <i class="ph-bold ph-arrow-right"></i></a></section><section id="publicidad-dueños" class="owner-cta"><div class="owner-icon"><i class="ph-fill ph-buildings"></i></div><div class="owner-copy"><span class="mini-label">PARA DUEÑOS DE CANCHAS</span><h2>Haz crecer tu cancha con CHALACAPP.</h2><p>Digitaliza reservas, reduce inasistencias y consigue nuevos jugadores.</p></div><button id="btn-contacto-admin" class="btn">Únete a la red <i class="ph-bold ph-arrow-up-right"></i></button></section><footer class="site-footer"><span><i class="ph-fill ph-soccer-ball"></i> CHALACAPP</span><span>Juega más. Organiza mejor.</span></footer><div id="modal-cancha" class="modal-oculto"><div class="modal-contenido"><button id="cerrar-modal" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button><div class="modal-media"><img id="modal-imagen-principal" src="" alt="Cancha"><div class="modal-gradient"></div><img id="modal-logo" src="" alt="Logo" class="modal-logo"></div><div class="modal-body"><div class="modal-title-row"><div><h2 id="modal-nombre">Nombre Cancha</h2><p class="modal-rating"><i class="ph-fill ph-star"></i> <span id="modal-rating"></span> <span class="dot">•</span> <i class="ph-bold ph-currency-circle-dollar"></i> S/ <span id="modal-precio"></span> / hr</p></div></div><div class="modal-info-grid"><div><i class="ph-bold ph-clock"></i><span><small>Horario</small><b id="modal-horario"></b></span></div><a id="modal-link-maps" href="#" target="_blank" rel="noopener"><i class="ph-bold ph-map-pin"></i><span><small>Ubicación</small><b>Ver en Google Maps</b></span><i class="ph-bold ph-arrow-up-right"></i></a></div><div class="modal-description"><h3>Sobre la cancha</h3><p id="modal-descripcion"></p></div><div id="modal-disponibilidad" class="modal-availability"></div><div class="btn-group modal-actions"><a id="btn-whatsapp-reserva" href="#" target="_blank" rel="noopener" class="btn whatsapp-btn"><i class="ph-bold ph-whatsapp-logo"></i> Consultar por WhatsApp</a><a id="btn-ver-resenas" href="#" class="btn btn-outline"><i class="ph-bold ph-star"></i> Ver reseñas</a></div></div></div></div><div id="modal-reserva" class="booking-modal" aria-hidden="true"><div class="booking-card"><button id="cerrar-reserva" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button><span class="mini-label">RESERVA DIRECTA</span><h2>Confirma tu horario</h2><p id="booking-cancha-nombre"></p><div class="booking-summary"><span><i class="ph-bold ph-calendar-blank"></i> Fecha y hora</span><strong id="booking-hora"></strong></div><label class="booking-field"><span>Tu nombre</span><input id="booking-nombre" type="text" maxlength="60" placeholder="Ej. Carlos J." autocomplete="name"></label><label class="booking-field"><span>Teléfono / WhatsApp</span><input id="booking-telefono" type="tel" maxlength="20" placeholder="Ej. 999 999 999"></label><button id="btn-confirmar-reserva" class="btn hero-primary booking-confirm"><i class="ph-bold ph-check"></i> Solicitar reserva</button><small class="booking-note"><i class="ph-bold ph-shield-check"></i> La reserva queda pendiente hasta que la cancha la confirme.</small><div id="booking-status" class="booking-status" role="status"></div></div></div><div id="modal-mapa" class="modal-oculto">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080B0A">
+    <meta name="description" content="Encuentra canchas, jugadores y tu próximo partido.">
+    <title>CHALACAPP | Encuentra dónde jugar</title>
+    
+    <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="discovery.css">
+    <link rel="stylesheet" href="map-fix.css">
+    <link rel="stylesheet" href="booking.css">
+    <link rel="stylesheet" href="phase34-public.css">
+</head>
+<body class="home-page">
+
+<header class="topbar">
+    <a class="brand" href="index.html" aria-label="Chalacapp inicio" style="display: flex; align-items: center; gap: 10px;">
+        <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 32px; width: auto; object-fit: contain;">
+        <span style="font-size: 1.3rem; letter-spacing: 1px;"><b>CHALACAPP</b></span>
+    </a>
+    <nav class="topbar-nav" aria-label="Navegación principal">
+        <a href="#canchas" class="topbar-link"><i class="ph-bold ph-map-pin"></i><span>Canchas</span></a>
+        <a href="jugadores.html" class="topbar-link"><i class="ph-bold ph-users-three"></i><span>Jugadores</span></a>
+        <a href="mis-reservas.html" class="topbar-link"><i class="ph-bold ph-calendar-check"></i><span>Mis reservas</span></a>
+    </nav>
+</header>
+
+<main>
+    <!-- ==============================================
+         1. EL HÉROE (Llamado a la acción principal)
+         ============================================== -->
+    <section class="hero-section">
+        <div class="hero-copy">
+            <div class="eyebrow"><span></span> TU FÚTBOL, TU COMUNIDAD</div>
+            <h1>Encuentra dónde<br><strong>jugar hoy.</strong></h1>
+            <p>Descubre canchas, encuentra jugadores y arma tu próximo partido. Todo en un solo lugar.</p>
+            <div class="hero-actions">
+                <a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Encontrar cancha</a>
+                <a href="jugadores.html" class="btn btn-outline hero-secondary"><i class="ph-bold ph-users-three"></i> Buscar jugadores</a>
+            </div>
+        </div>
+        <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-soccer-ball"></i></div>
+    </section>
+
+    <!-- ==============================================
+         2 Y 3. BUSCADOR, MAPA Y LISTA DE CANCHAS
+         ============================================== -->
+    <section id="canchas" class="courts-section">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow"><span></span> DESCUBRE TU PRÓXIMO PARTIDO</div>
+                <h2>Canchas disponibles</h2>
+                <p>Filtra por distrito, tipo, precio y disponibilidad.</p>
+            </div>
+            <div class="live-indicator"><span></span> Actualizado ahora</div>
+        </div>
+        
+        <div class="discover-panel">
+            <div class="discover-search">
+                <i class="ph-bold ph-magnifying-glass"></i>
+                <input id="filtro-busqueda" type="search" placeholder="Busca una cancha, zona o distrito..." autocomplete="off">
+            </div>
+            <div class="filter-row">
+                <label class="filter-field"><span>Distrito</span>
+                    <select id="filtro-ciudad"><option value="">Todos los distritos</option></select>
+                </label>
+                <label class="filter-field"><span>Tipo</span>
+                    <select id="filtro-tipo"><option value="">Todos los tipos</option></select>
+                </label>
+                <label class="filter-field"><span>Precio</span>
+                    <select id="filtro-precio">
+                        <option value="">Cualquier precio</option>
+                        <option value="0-30">Hasta S/ 30</option>
+                        <option value="31-50">S/ 31 – 50</option>
+                        <option value="51-80">S/ 51 – 80</option>
+                        <option value="81-9999">S/ 81+</option>
+                    </select>
+                </label>
+                <label class="filter-field"><span>Ordenar</span>
+                    <select id="filtro-orden">
+                        <option value="recomendadas">Recomendadas</option>
+                        <option value="rating">Mejor calificadas</option>
+                        <option value="precio-asc">Menor precio</option>
+                        <option value="precio-desc">Mayor precio</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+        
+        <div class="results-meta">
+            <span id="contador-canchas">Buscando canchas...</span>
+            <span id="filtro-activo"></span>
+        </div>
+        
+        <!-- Botón del Mapa interactivo justo antes de las canchas -->
+        <button id="btn-abrir-mapa" class="btn btn-outline" style="width: 100%; margin-bottom: 20px; border-color: var(--primary-green); color: #fff;">
+            <i class="ph-fill ph-map-trifold" style="color: var(--primary-green);"></i> Explorar canchas en el mapa
+        </button>
+        
+        <div id="lista-canchas"></div>
+    </section>
+
+    <!-- ==============================================
+         4. COMUNIDAD / BOLSA DE JUGADORES (Retención)
+         ============================================== -->
+    <section class="community-banner">
+        <div class="community-icon"><i class="ph-fill ph-users-three"></i></div>
+        <div class="community-copy">
+            <span class="mini-label">NUEVO · EN TIEMPO REAL</span>
+            <h2>Bolsa de Jugadores</h2>
+            <p>¿Te falta uno? ¿Buscas equipo o retadores para hoy?</p>
+        </div>
+        <a href="jugadores.html" class="btn community-btn">Entrar <i class="ph-bold ph-arrow-up-right"></i></a>
+    </section>
+
+    <!-- ==============================================
+         5. CAPTACIÓN DE DUEÑOS (Crecimiento)
+         ============================================== -->
+    <section id="publicidad-dueños" class="owner-cta">
+        <div class="owner-icon"><i class="ph-fill ph-buildings"></i></div>
+        <div class="owner-copy">
+            <span class="mini-label">PARA DUEÑOS DE CANCHAS</span>
+            <h2>Haz crecer tu cancha con CHALACAPP.</h2>
+            <p>Digitaliza reservas, reduce inasistencias y consigue nuevos jugadores.</p>
+        </div>
+        <button id="btn-contacto-admin" class="btn">Únete a la red <i class="ph-bold ph-arrow-up-right"></i></button>
+    </section>
+
+</main>
+
+<footer class="site-footer">
+    <span><i class="ph-fill ph-soccer-ball"></i> CHALACAPP</span>
+    <span>Juega más. Organiza mejor.</span>
+</footer>
+
+<!-- ==============================================
+     MODALES (Ventanas Ocultas)
+     ============================================== -->
+
+<!-- Modal: Ficha de la Cancha -->
+<div id="modal-cancha" class="modal-oculto">
+    <div class="modal-contenido">
+        <button id="cerrar-modal" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+        <div class="modal-media">
+            <img id="modal-imagen-principal" src="" alt="Cancha">
+            <div class="modal-gradient"></div>
+            <img id="modal-logo" src="" alt="Logo" class="modal-logo">
+        </div>
+        <div class="modal-body">
+            <div class="modal-title-row">
+                <div>
+                    <h2 id="modal-nombre">Nombre Cancha</h2>
+                    <p class="modal-rating"><i class="ph-fill ph-star"></i> <span id="modal-rating"></span> <span class="dot">•</span> <i class="ph-bold ph-currency-circle-dollar"></i> S/ <span id="modal-precio"></span> / hr</p>
+                </div>
+            </div>
+            <div class="modal-info-grid">
+                <div>
+                    <i class="ph-bold ph-clock"></i>
+                    <span><small>Horario</small><b id="modal-horario"></b></span>
+                </div>
+                <a id="modal-link-maps" href="#" target="_blank" rel="noopener">
+                    <i class="ph-bold ph-map-pin"></i>
+                    <span><small>Ubicación</small><b>Ver en Google Maps</b></span>
+                    <i class="ph-bold ph-arrow-up-right"></i>
+                </a>
+            </div>
+            <div class="modal-description">
+                <h3>Sobre la cancha</h3>
+                <p id="modal-descripcion"></p>
+            </div>
+            <div id="modal-disponibilidad" class="modal-availability"></div>
+            <div class="btn-group modal-actions">
+                <a id="btn-whatsapp-reserva" href="#" target="_blank" rel="noopener" class="btn whatsapp-btn"><i class="ph-bold ph-whatsapp-logo"></i> Consultar por WhatsApp</a>
+                <a id="btn-ver-resenas" href="#" class="btn btn-outline"><i class="ph-bold ph-star"></i> Ver reseñas</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Confirmar Reserva -->
+<div id="modal-reserva" class="booking-modal" aria-hidden="true">
+    <div class="booking-card">
+        <button id="cerrar-reserva" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+        <span class="mini-label">RESERVA DIRECTA</span>
+        <h2>Confirma tu horario</h2>
+        <p id="booking-cancha-nombre"></p>
+        <div class="booking-summary">
+            <span><i class="ph-bold ph-calendar-blank"></i> Fecha y hora</span>
+            <strong id="booking-hora"></strong>
+        </div>
+        <label class="booking-field">
+            <span>Tu nombre</span>
+            <input id="booking-nombre" type="text" maxlength="60" placeholder="Ej. Carlos J." autocomplete="name">
+        </label>
+        <label class="booking-field">
+            <span>Teléfono / WhatsApp</span>
+            <input id="booking-telefono" type="tel" maxlength="20" placeholder="Ej. 999 999 999">
+        </label>
+        <button id="btn-confirmar-reserva" class="btn hero-primary booking-confirm"><i class="ph-bold ph-check"></i> Solicitar reserva</button>
+        <small class="booking-note"><i class="ph-bold ph-shield-check"></i> La reserva queda pendiente hasta que la cancha la confirme.</small>
+        <div id="booking-status" class="booking-status" role="status"></div>
+    </div>
+</div>
+
+<!-- Modal: Mapa -->
+<div id="modal-mapa" class="modal-oculto">
     <div class="modal-contenido" style="max-width: 1000px; height: 85vh; padding: 0; display: flex; flex-direction: column; overflow: hidden;">
         <div style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 20, 0.95); border-bottom: 1px solid var(--border-color);">
             <h3 style="margin: 0; color: #fff; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
@@ -17,7 +223,9 @@
         </div>
         <div id="map-canchas" style="flex: 1; width: 100%; background: #1a1a1a;"></div>
     </div>
-</div></main><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module" src="app.js"></script>
 <script type="module" src="maps.js"></script>
 </body>
