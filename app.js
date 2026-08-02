@@ -216,10 +216,13 @@ if (window.location.pathname.includes('jugadores.html')) {
                 lista.innerHTML += `
                 <article style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:12px; padding:20px; margin-bottom:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <strong style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem;">
+                        
+                        <!-- AQUÍ ESTÁ LA MAGIA: Agregamos onclick="abrirPerfilJugador('${d.uid}')" y cursor:pointer -->
+                        <strong onclick="abrirPerfilJugador('${d.uid}')" style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem; cursor:pointer; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#fff'" title="Ver Tarjeta FUT">
                             <i class="ph-fill ph-user-circle" style="font-size:1.8rem; color:var(--primary-green);"></i> 
                             ${d.nombreJugador || d.nombre || 'Jugador'}
                         </strong>
+                        
                         <span style="font-size:0.75rem; color:var(--text-muted);">${fechaTexto}</span>
                     </div>
                     <p style="margin:5px 0; font-size:0.95rem; color:#ddd;">
