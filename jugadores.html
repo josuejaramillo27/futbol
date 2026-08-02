@@ -1,9 +1,197 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#080B0A"><title>Partidos | APP FUTBOL</title><link rel="icon" type="image/png" href="logo-chalacapp-nav.png"><script src="https://unpkg.com/@phosphor-icons/web"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="discovery.css"></head><body><header class="topbar"><a class="brand" href="index.html" style="display: flex; align-items: center; gap: 10px;">
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#080B0A"><title>Partidos | APP FUTBOL</title><link rel="icon" type="image/png" href="logo-chalacapp-nav.png"><script src="https://unpkg.com/@phosphor-icons/web"></script><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="discovery.css"><style>
+    /* ==========================================
+       ESTILOS DE LA TARJETA DE JUGADOR (FUT STYLE)
+       ========================================== */
+    .player-card-container {
+        background: linear-gradient(135deg, rgba(20,25,22,1) 0%, rgba(10,15,12,1) 100%);
+        border: 1px solid rgba(46, 204, 113, 0.3);
+        border-radius: 16px;
+        padding: 15px;
+        display: flex;
+        gap: 15px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .player-card-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(46, 204, 113, 0.15);
+        border-color: rgba(46, 204, 113, 0.8);
+    }
+
+    /* Brillo de fondo */
+    .player-card-container::before {
+        content: '';
+        position: absolute;
+        top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(46,204,113,0.05) 0%, transparent 60%);
+        z-index: 0;
+    }
+
+    .player-avatar-wrapper {
+        position: relative;
+        z-index: 1;
+        width: 80px;
+        height: 100px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid rgba(255,255,255,0.05);
+        padding-right: 15px;
+    }
+
+    .player-photo {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--primary-green);
+        background: #000;
+    }
+
+    .player-rating {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #f1c40f; /* Color oro */
+        margin-top: 5px;
+        line-height: 1;
+    }
+
+    .player-pos {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        font-weight: bold;
+    }
+
+    .player-info {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .player-name {
+        font-size: 1.1rem;
+        color: #fff;
+        margin: 0 0 4px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .verified-badge {
+        color: #1DA1F2; /* Azul check verificado */
+        font-size: 0.9rem;
+    }
+
+    .player-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .stat-pill {
+        background: rgba(255,255,255,0.05);
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        color: #ccc;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .post-message {
+        font-size: 0.85rem;
+        color: #aaa;
+        font-style: italic;
+        margin: 0;
+        border-top: 1px dashed rgba(255,255,255,0.1);
+        padding-top: 8px;
+    }
+
+    .btn-edit-profile {
+        width: 100%;
+        margin-bottom: 20px;
+        background: rgba(46, 204, 113, 0.1);
+        border: 1px dashed var(--primary-green);
+        color: var(--primary-green);
+    }
+</style></head><body><header class="topbar"><a class="brand" href="index.html" style="display: flex; align-items: center; gap: 10px;">
     <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 32px; width: auto; object-fit: contain;">
     <span style="font-size: 1.3rem; letter-spacing: 1px;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.9rem; vertical-align: middle;">JUGADORES</b></span>
 </a><a href="index.html" class="topbar-link"><i class="ph-bold ph-arrow-left"></i><span>Volver</span></a></header><main>
 <section class="hero-section" style="min-height:280px;padding-top:35px;padding-bottom:35px"><div class="hero-copy"><div class="eyebrow"><span></span> COMUNIDAD EN TIEMPO REAL</div><h1 style="font-size:clamp(2rem,5vw,3.2rem)">Encuentra tu<br><strong>próximo partido.</strong></h1><p>Completa tu equipo, busca jugadores o encuentra retadores cerca de ti.</p></div><div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-three"></i></div></section>
 <section class="community-banner"><div class="community-icon"><i class="ph-fill ph-megaphone"></i></div><div class="community-copy"><span class="mini-label">PARTIDOS ABIERTOS</span><h2>¿Te falta uno para jugar?</h2><p>Publica tu necesidad y conecta con jugadores de la comunidad.</p></div><button id="btn-login-google" class="btn community-btn" style="width:auto;background:#F5F7F6;color:#101311;box-shadow:none"><i class="ph-bold ph-google-logo"></i> Publicar</button></section>
 <section class="card" style="max-width:760px;margin:0 auto 28px;padding:20px"><form id="form-anuncio" style="display:none"><div class="filter-row" style="grid-template-columns:1fr 1fr"><label class="filter-field"><span>Busco</span><select id="tipo-anuncio"><option value="jugador">Me falta un jugador</option><option value="equipo">Busco equipo</option><option value="retadores">Busco retadores</option></select></label><label class="filter-field"><span>Modalidad</span><select id="modalidad-anuncio"><option>Fútbol 5</option><option>Fútbol 6</option><option>Fútbol 7</option><option>Fútbol 8</option><option>Fútbol 9</option><option>Fútbol 10</option><option>Fútbol 11</option></select></label></div><textarea id="texto-anuncio" rows="3" maxlength="280" placeholder="Ej: Nos falta arquero para hoy a las 8 PM en Piura..." required></textarea><div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><small style="color:var(--text-dim);font-size:.68rem"><i class="ph-bold ph-shield-check"></i> Tu nombre se muestra como Nombre + inicial.</small><button type="submit" class="btn" style="width:auto;white-space:nowrap">Publicar <i class="ph-bold ph-paper-plane-tilt"></i></button></div></form><div id="login-hint" style="text-align:center;color:var(--text-muted);font-size:.76rem"><i class="ph-bold ph-lock-key" style="color:var(--primary-green)"></i> Inicia sesión con Google para publicar.</div></section>
-<section style="max-width:900px;margin:0 auto"><div class="section-heading"><div><div class="eyebrow"><span></span> AHORA MISMO</div><h2>Partidos abiertos</h2><p>Publicaciones recientes de la comunidad.</p></div><div class="live-indicator"><span></span> En vivo</div></div><div id="lista-jugadores" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:13px"><p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Cargando partidos...</p></div></section></main><script type="module" src="app.js"></script></body></html>
+<section style="max-width:900px;margin:0 auto"><div class="section-heading"><div><div class="eyebrow"><span></span> AHORA MISMO</div><h2>Partidos abiertos</h2><p>Publicaciones recientes de la comunidad.</p></div><div class="live-indicator"><span></span> En vivo</div></div><div id="lista-jugadores" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:13px"><p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Cargando partidos...</p></div></section><!-- Modal: Editar Tarjeta de Jugador -->
+<div id="modal-perfil-jugador" class="modal-oculto">
+    <div class="modal-contenido" style="max-width: 450px;">
+        <button id="cerrar-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+        <span class="mini-label">TU FUT CARD</span>
+        <h2>Edita tu Perfil</h2>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+            Estos datos solo serán visibles cuando publiques en la Bolsa de Jugadores.
+        </p>
+        
+        <form id="form-editar-perfil">
+            <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
+                <img id="preview-avatar" src="https://ui-avatars.com/api/?name=Jugador&background=2ecc71&color=fff" alt="Preview" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-green);">
+                <div style="flex: 1;">
+                    <label style="margin-bottom: 5px;">Sube tu mejor foto</label>
+                    <input type="file" id="perfil-foto" accept="image/*" style="padding: 8px;">
+                </div>
+            </div>
+
+            <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
+                <label class="filter-field">
+                    <span>Deporte Principal</span>
+                    <select id="perfil-deporte">
+                        <option>Fútbol</option>
+                        <option>Vóley</option>
+                        <option>Básquet</option>
+                    </select>
+                </label>
+                <label class="filter-field">
+                    <span>Posición</span>
+                    <select id="perfil-posicion">
+                        <option value="DEL">Delantero (DEL)</option>
+                        <option value="MED">Mediocampista (MED)</option>
+                        <option value="DEF">Defensa (DEF)</option>
+                        <option value="ARQ">Arquero (ARQ)</option>
+                        <option value="LIB">Libre / Polifuncional</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                <label class="filter-field">
+                    <span>Departamento / Ciudad</span>
+                    <input type="text" id="perfil-ciudad" placeholder="Ej: Piura, Castilla..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                </label>
+                <label class="filter-field">
+                    <span>Pierna / Mano Hábil</span>
+                    <select id="perfil-habilidad">
+                        <option>Diestro</option>
+                        <option>Zurdo</option>
+                        <option>Ambidiestro</option>
+                    </select>
+                </label>
+            </div>
+
+            <button type="button" class="btn hero-primary" style="width: 100%; margin-top: 25px;">
+                <i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta
+            </button>
+        </form>
+    </div>
+</div></main><script type="module" src="app.js"></script></body></html>
