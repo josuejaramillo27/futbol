@@ -70,7 +70,7 @@
         .player-rating {
             font-size: 1.2rem;
             font-weight: 900;
-            color: #f1c40f; /* Color oro */
+            color: #f1c40f; 
             margin-top: 5px;
             line-height: 1;
         }
@@ -101,7 +101,7 @@
         }
 
         .verified-badge {
-            color: #1DA1F2; /* Azul check verificado */
+            color: #1DA1F2; 
             font-size: 0.9rem;
         }
 
@@ -133,20 +133,49 @@
             padding-top: 8px;
         }
 
+        /* Botón de editar perfil (con hover arreglado) */
         .btn-edit-profile {
-        width: 100%;
-        margin-bottom: 20px;
-        background: rgba(46, 204, 113, 0.1);
-        border: 1px dashed var(--primary-green);
-        color: var(--primary-green);
-        transition: all 0.3s ease;
-    }
+            width: 100%;
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px dashed var(--primary-green);
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
 
-    .btn-edit-profile:hover {
-        background: var(--primary-green) !important;
-        color: #080B0A !important; /* Letras oscuras al pasar el mouse */
-        border: 1px solid var(--primary-green);
-    }
+        .btn-edit-profile:hover {
+            background: var(--primary-green) !important;
+            color: #080B0A !important;
+            border: 1px solid var(--primary-green);
+        }
+
+        /* Estilos personalizados para el Input de Archivo (Foto) */
+        input[type="file"] {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #aaa;
+            padding: 8px;
+            width: 100%;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        input[type="file"]::file-selector-button {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--primary-green);
+            border: 1px solid var(--primary-green);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]::file-selector-button:hover {
+            background: var(--primary-green);
+            color: #080b0a;
+        }
     </style>
 </head>
 <body>
@@ -168,6 +197,13 @@
             <p>Completa tu equipo, busca jugadores o encuentra retadores cerca de ti.</p>
         </div>
         <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-three"></i></div>
+    </section>
+
+    <!-- BOTÓN DE CONFIGURAR PERFIL (MOVIDO ARRIBA) -->
+    <section style="max-width:760px; margin: 0 auto 20px; padding: 0 20px;">
+        <button id="btn-abrir-perfil" class="btn btn-edit-profile">
+            <i class="ph-bold ph-user-circle"></i> Configurar mi Tarjeta de Jugador
+        </button>
     </section>
 
     <!-- BANNER PARA PUBLICAR -->
@@ -217,15 +253,10 @@
         </div>
     </section>
 
-    <!-- BOLSA DE JUGADORES Y CONFIGURACIÓN DE TARJETA -->
+    <!-- BOLSA DE JUGADORES LISTA -->
     <section style="max-width:900px; margin: 0 auto;">
         
-        <!-- Botón para abrir el editor de perfil posicionado arriba -->
-        <button id="btn-abrir-perfil" class="btn btn-edit-profile">
-            <i class="ph-bold ph-user-circle"></i> Configurar mi Tarjeta de Jugador
-        </button>
-
-        <div class="section-heading" style="margin-top: 10px;">
+        <div class="section-heading">
             <div>
                 <div class="eyebrow"><span></span> AHORA MISMO</div>
                 <h2>Bolsa de Jugadores</h2>
@@ -234,7 +265,7 @@
             <div class="live-indicator"><span></span> En vivo</div>
         </div>
 
-        <!-- LISTA DE PUBLICACIONES (AQUÍ FIREBASE CARGARÁ LAS TARJETAS) -->
+        <!-- LISTA DE PUBLICACIONES -->
         <div id="lista-jugadores" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
             <p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Cargando partidos...</p>
         </div>
@@ -255,7 +286,8 @@
                     <img id="preview-avatar" src="https://ui-avatars.com/api/?name=Jugador&background=2ecc71&color=fff" alt="Preview" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-green);">
                     <div style="flex: 1;">
                         <label style="margin-bottom: 5px;">Sube tu mejor foto</label>
-                        <input type="file" id="perfil-foto" accept="image/*" style="padding: 8px;">
+                        <!-- El input de archivo ahora se verá genial -->
+                        <input type="file" id="perfil-foto" accept="image/*">
                     </div>
                 </div>
 
@@ -295,7 +327,6 @@
                     </label>
                 </div>
 
-                <!-- EL ID DE GUARDADO AHORA ESTÁ AQUÍ -->
                 <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;">
                     <i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta
                 </button>
@@ -336,7 +367,6 @@
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
         if (user) {
-            // Ponemos la foto de su Gmail en el círculo del preview
             document.getElementById('preview-avatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=2ecc71&color=fff`;
         }
     });
@@ -344,18 +374,16 @@
     // 2. Al presionar "Configurar mi Tarjeta"
     if (btnAbrirPerfil) {
         btnAbrirPerfil.addEventListener('click', async () => {
-            // Si no hay sesión, abrimos la ventana de Google
             if (!currentUser) {
                 try {
                     const result = await signInWithPopup(auth, provider);
                     currentUser = result.user;
                 } catch (error) {
                     console.error("Cancelado o error en Google:", error);
-                    return; // Si cancela, no abrimos el modal
+                    return; 
                 }
             }
             
-            // Buscar si ya había guardado datos antes en la base de datos
             const docRef = doc(db, "jugadores_perfiles", currentUser.uid);
             const docSnap = await getDoc(docRef);
             
@@ -367,7 +395,6 @@
                 document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
             }
             
-            // Mostrar la ventana emergente
             modalPerfil.classList.add('mostrar');
         });
     }
@@ -381,29 +408,25 @@
         btnGuardarPerfil.addEventListener('click', async () => {
             if (!currentUser) return;
             
-            // Animación de carga
             btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> Guardando en servidor...';
             btnGuardarPerfil.disabled = true;
             
-            // Armamos el paquete de datos
             const perfilData = {
                 uid: currentUser.uid,
                 nombre: currentUser.displayName,
-                foto: currentUser.photoURL, // Su foto real de Google
+                foto: currentUser.photoURL,
                 deporte: document.getElementById('perfil-deporte').value,
                 posicion: document.getElementById('perfil-posicion').value,
                 ciudad: document.getElementById('perfil-ciudad').value,
                 habilidad: document.getElementById('perfil-habilidad').value,
-                verificado: true // ¡Check azul automático por usar Google!
+                verificado: true
             };
 
             try {
-                // Guardamos en Firebase (Sobrescribe o crea uno nuevo)
                 await setDoc(doc(db, "jugadores_perfiles", currentUser.uid), perfilData);
                 
                 btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-check"></i> ¡Tarjeta Guardada!';
                 
-                // Cerramos el modal después de 1.5 segundos
                 setTimeout(() => {
                     modalPerfil.classList.remove('mostrar');
                     btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta';
