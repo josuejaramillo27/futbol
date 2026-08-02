@@ -134,12 +134,19 @@
         }
 
         .btn-edit-profile {
-            width: 100%;
-            margin-bottom: 20px;
-            background: rgba(46, 204, 113, 0.1);
-            border: 1px dashed var(--primary-green);
-            color: var(--primary-green);
-        }
+        width: 100%;
+        margin-bottom: 20px;
+        background: rgba(46, 204, 113, 0.1);
+        border: 1px dashed var(--primary-green);
+        color: var(--primary-green);
+        transition: all 0.3s ease;
+    }
+
+    .btn-edit-profile:hover {
+        background: var(--primary-green) !important;
+        color: #080B0A !important; /* Letras oscuras al pasar el mouse */
+        border: 1px solid var(--primary-green);
+    }
     </style>
 </head>
 <body>
@@ -213,12 +220,12 @@
     <!-- BOLSA DE JUGADORES Y CONFIGURACIÓN DE TARJETA -->
     <section style="max-width:900px; margin: 0 auto;">
         
-        <!-- Botón para abrir el editor de perfil -->
+        <!-- Botón para abrir el editor de perfil posicionado arriba -->
         <button id="btn-abrir-perfil" class="btn btn-edit-profile">
             <i class="ph-bold ph-user-circle"></i> Configurar mi Tarjeta de Jugador
         </button>
 
-        <div class="section-heading">
+        <div class="section-heading" style="margin-top: 10px;">
             <div>
                 <div class="eyebrow"><span></span> AHORA MISMO</div>
                 <h2>Bolsa de Jugadores</h2>
