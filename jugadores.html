@@ -147,41 +147,6 @@
             color: #080B0A !important;
             border: 1px solid var(--primary-green);
         }
-
-        /* Estilos personalizados para el Input de Archivo (Foto) */
-        input[type="file"] {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: #aaa;
-            /* Aquí está la magia: 15px de espacio a la derecha para que no choque con la curva */
-            padding: 6px 15px 6px 6px; 
-            width: 100%;
-            font-size: 0.8rem;
-            cursor: pointer;
-            
-            /* Evita que el texto rompa el diseño y le pone "..." si es muy largo */
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        input[type="file"]::file-selector-button {
-            background: rgba(46, 204, 113, 0.15);
-            color: var(--primary-green);
-            border: 1px solid var(--primary-green);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 12px;
-            transition: all 0.3s ease;
-        }
-
-        input[type="file"]::file-selector-button:hover {
-            background: var(--primary-green);
-            color: #080b0a;
-        }
     </style>
 </head>
 <body>
@@ -288,12 +253,11 @@
             </p>
             
             <form id="form-editar-perfil">
-                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center;">
-                    <img id="preview-avatar" src="https://ui-avatars.com/api/?name=Jugador&background=2ecc71&color=fff" alt="Preview" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-green);">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;">
+                    <img id="preview-avatar" src="https://ui-avatars.com/api/?name=Jugador&background=2ecc71&color=fff" alt="Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-green);">
                     <div style="flex: 1;">
-                        <label style="margin-bottom: 5px;">Sube tu mejor foto</label>
-                        <!-- El input de archivo ahora se verá genial -->
-                        <input type="file" id="perfil-foto" accept="image/*">
+                        <p style="margin: 0; font-size: 0.95rem; color: #fff; font-weight: bold;"><i class="ph-bold ph-google-logo" style="color: #1DA1F2;"></i> Foto vinculada</p>
+                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">Usamos tu foto de perfil de Google por seguridad y confianza.</p>
                     </div>
                 </div>
 
