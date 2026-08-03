@@ -152,6 +152,49 @@
         </div>
 
     </section>
+    <div id="modal-crear-comunidad" class="modal-oculto">
+        <div class="modal-contenido" style="max-width: 450px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
+            <button id="cerrar-crear-comunidad" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label">NUEVO GRUPO OFICIAL</span>
+            <h2>Registra tu Comunidad</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+                Llena estos datos. Enviaremos tu solicitud por WhatsApp para verificar y habilitar tu comunidad.
+            </p>
+            
+            <form id="form-nueva-comunidad">
+                <div class="filter-row" style="grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px;">
+                    <label class="filter-field">
+                        <span>Nombre de la Comunidad</span>
+                        <input type="text" id="reg-com-nombre" required placeholder="Ej: Los Peloteros de Piura" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                    </label>
+                </div>
+                <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                    <label class="filter-field">
+                        <span>Deporte</span>
+                        <select id="reg-com-deporte">
+                            <option>Fútbol</option>
+                            <option>Vóley</option>
+                            <option>Básquet</option>
+                        </select>
+                    </label>
+                    <label class="filter-field">
+                        <span>Ciudad / Distrito</span>
+                        <input type="text" id="reg-com-ciudad" required placeholder="Ej: Castilla" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                    </label>
+                </div>
+                <div class="filter-row" style="grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
+                    <label class="filter-field">
+                        <span>Breve Descripción</span>
+                        <textarea id="reg-com-desc" required rows="2" placeholder="Ej: Jugamos todos los jueves de forma amateur..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;"></textarea>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn hero-primary" style="width: 100%;">
+                    <i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud
+                </button>
+            </form>
+        </div>
+    </div>
 </main>
 
 <script type="module">
@@ -179,11 +222,31 @@
         currentUser = user;
     });
 
-    // 1. Funcionalidad: Botón de WhatsApp para líderes
+    // 1. Funcionalidad: Abrir Modal y Enviar por WhatsApp
+    const modalCrearComunidad = document.getElementById('modal-crear-comunidad');
+    
     document.getElementById('btn-crear-comunidad').addEventListener('click', () => {
-        const tuNumero = "51953066853"; // <-- CAMBIA ESTO POR TU NÚMERO
-        const mensaje = "Hola CHALACAPP ⚽, soy organizador de un grupo deportivo y me gustaría registrar mi comunidad en la aplicación.";
+        modalCrearComunidad.classList.add('mostrar');
+    });
+
+    document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => {
+        modalCrearComunidad.classList.remove('mostrar');
+    });
+
+    document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const nombre = document.getElementById('reg-com-nombre').value;
+        const deporte = document.getElementById('reg-com-deporte').value;
+        const ciudad = document.getElementById('reg-com-ciudad').value;
+        const desc = document.getElementById('reg-com-desc').value;
+        
+        const tuNumero = "51999999999"; // <-- CAMBIA ESTO POR TU NÚMERO
+        const mensaje = `Hola CHALACAPP ⚽, solicito registrar mi comunidad.\n\n*Nombre:* ${nombre}\n*Deporte:* ${deporte}\n*Ubicación:* ${ciudad}\n*Descripción:* ${desc}\n\nQuedo a la espera de la habilitación.`;
+        
         window.open(`https://wa.me/${tuNumero}?text=${encodeURIComponent(mensaje)}`, '_blank');
+        modalCrearComunidad.classList.remove('mostrar');
+        e.target.reset();
     });
 
     // 2. Cargar comunidades desde Firebase
