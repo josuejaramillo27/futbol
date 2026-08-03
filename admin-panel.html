@@ -3,74 +3,481 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin | CHALACAPP</title>
+    <meta name="theme-color" content="#080B0A">
+    <title>Panel Admin Master | CHALACAPP</title>
+    
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <link rel="stylesheet" href="styles.css">
+    
     <style>
-        .master-grid { display: grid; gap: 15px; margin-top: 20px; }
-        .master-card { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 15px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 14px; gap: 15px; }
-        .master-card.pending { border-left: 4px solid var(--warning); }
-        .master-card.approved { border-left: 4px solid var(--primary-green); }
-        .master-card.rejected { border-left: 4px solid var(--danger); opacity: 0.6; }
-        .master-info h3 { margin: 0; font-size: 1.1rem; }
-        .master-info p { margin: 3px 0; font-size: 0.8rem; color: var(--text-muted); }
-        .master-actions { display: flex; gap: 10px; }
-        .master-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
-        .master-filters input, .master-filters select { width: auto; flex: 1; min-width: 200px; padding: 10px; border-radius: 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--border-color); color: #fff; }
+        :root {
+            --primary-green: #2ecc71;
+            --bg-dark: #080B0A;
+            --sidebar-bg: #121614;
+            --text-main: #ffffff;
+            --text-muted: #aaaaaa;
+            --border-color: rgba(255,255,255,0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 0 20px 30px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .brand img { height: 35px; }
+        .brand span { font-size: 1.2rem; font-weight: 900; letter-spacing: 1px; }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding: 0 15px;
+            flex: 1;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--primary-green);
+        }
+
+        .sidebar-link i { font-size: 1.3rem; }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.mostrar { display: block; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* TABLES */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 15px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+
+        /* BOTONES */
+        .btn {
+            background: #222;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: #000;
+            border: none;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        /* MODALES */
+        .modal-oculto {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-oculto.mostrar { display: flex; }
+
+        .modal-contenido {
+            background: #111;
+            padding: 30px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-cerrar {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: none; border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem; cursor: pointer;
+        }
+
+        /* FORMULARIOS */
+        .form-group { margin-bottom: 15px; }
+        .form-group label {
+            display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px;
+        }
+        .form-control {
+            width: 100%; padding: 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            color: #fff; border-radius: 8px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="brand" style="display: flex; align-items: center; gap: 10px;">
-    <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 32px; width: auto; object-fit: contain;">
-    <span style="font-size: 1.3rem; letter-spacing: 1px;">CHALACAPP <b style="color: #e74c3c; font-size: 0.9rem; vertical-align: middle;">MASTER</b></span>
-</div>
-        <button id="btn-logout" class="btn btn-outline" style="width: auto; padding: 8px 15px;"><i class="ph-bold ph-sign-out"></i> Salir</button>
-    </header>
 
-    <main style="max-width: 1000px;">
-        <section>
-            <div class="eyebrow"><span></span> CENTRO DE CONTROL GLOBAL</div>
-            <h1>Gestión de <strong>Dueños</strong></h1>
-            <p>Aprueba, rechaza o audita las canchas registradas en la plataforma.</p>
-        </section>
+    <aside class="sidebar">
+        <div class="brand">
+            <img src="logo-chalacapp-nav.png" alt="Logo">
+            <span>ADMIN MASTER</span>
+        </div>
+        
+        <nav class="sidebar-menu">
+            <a class="sidebar-link active" data-target="tab-dashboard">
+                <i class="ph-bold ph-squares-four"></i> Inicio
+            </a>
+            <a class="sidebar-link" data-target="tab-usuarios">
+                <i class="ph-bold ph-users"></i> Usuarios
+            </a>
+            <a class="sidebar-link" data-target="tab-canchas">
+                <i class="ph-bold ph-map-pin"></i> Canchas
+            </a>
+            <a class="sidebar-link" data-target="tab-reservas">
+                <i class="ph-bold ph-calendar-check"></i> Reservas
+            </a>
+            <a class="sidebar-link" data-target="tab-comunidades">
+                <i class="ph-bold ph-shield-checkered"></i> Comunidades
+            </a>
+        </nav>
+        
+        <div style="margin-top: auto; padding: 0 15px;">
+            <button id="btn-logout" class="btn" style="width: 100%;">
+                <i class="ph-bold ph-sign-out"></i> Salir
+            </button>
+        </div>
+    </aside>
 
-        <section class="master-filters">
-            <input type="text" id="search-input" placeholder="Buscar por nombre, correo, complejo o DNI...">
-            <select id="filter-status">
-    <option value="all">Todos los registros</option>
-    <option value="pending">Cuentas Pendientes</option>
-    <option value="pending_review">⚠️ Solicitudes de Publicación de Cancha</option>
-    <option value="approved">Cuentas Aprobadas</option>
-    <option value="rejected">Cuentas Rechazadas</option>
-</select>
-        </section>
+    <main class="main-content">
+        
+        <div id="tab-dashboard" class="tab-content mostrar">
+            <h2>Bienvenido, Admin</h2>
+            <p style="color: var(--text-muted);">Selecciona una opción en el menú lateral para gestionar la plataforma.</p>
+        </div>
 
-        <section>
-            <div id="owners-list" class="master-grid">
-                <div style="text-align: center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap"></i> Cargando solicitudes...</div>
+        <div id="tab-usuarios" class="tab-content">
+            <h2>Gestión de Usuarios</h2>
+            <div class="card"><p style="color: var(--text-muted);">Aquí aparecerá tu lista de usuarios...</p></div>
+        </div>
+
+        <div id="tab-canchas" class="tab-content">
+            <h2>Gestión de Canchas</h2>
+            <div class="card"><p style="color: var(--text-muted);">Aquí aparecerá tu lista de canchas...</p></div>
+        </div>
+
+        <div id="tab-reservas" class="tab-content">
+            <h2>Reservas de la plataforma</h2>
+            <div class="card"><p style="color: var(--text-muted);">Aquí aparecerán las reservas...</p></div>
+        </div>
+
+        <div id="tab-comunidades" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Gestión de Comunidades</h2>
+                <button id="btn-abrir-crear-comunidad" class="btn btn-primary">
+                    <i class="ph-bold ph-plus"></i> Nueva Comunidad
+                </button>
             </div>
-        </section>
+
+            <div class="card" style="overflow-x: auto; padding: 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Comunidad</th>
+                            <th>Deporte / Categoría</th>
+                            <th>Ubicación</th>
+                            <th>Líder</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-lista-comunidades">
+                        <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Selecciona la pestaña para cargar...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </main>
 
-    <div id="modal-details" class="modal-oculto">
-        <div class="modal-contenido" style="padding: 25px; max-width: 500px;">
-            <button id="close-modal" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-            <h2 id="det-complejo">Complejo Deportivo</h2>
-            <hr style="border: 1px solid var(--border-color); margin: 15px 0;">
-            <p><strong>Dueño:</strong> <span id="det-nombre"></span></p>
-            <p><strong>DNI/Doc:</strong> <span id="det-dni"></span></p>
-            <p><strong>Email:</strong> <span id="det-email"></span></p>
-            <p><strong>Teléfono:</strong> <span id="det-telefono"></span></p>
-            <p><strong>Dirección:</strong> <span id="det-direccion"></span></p>
-            <p><strong>Estado Actual:</strong> <span id="det-estado" style="text-transform: uppercase; font-weight: bold;"></span></p>
+    <div id="modal-admin-comunidad" class="modal-oculto">
+        <div class="modal-contenido">
+            <button id="cerrar-admin-comunidad" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+            <h2 style="margin-top: 0;">Alta de Comunidad</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Acepta y registra un grupo para que aparezca en la app.</p>
             
-            <div id="modal-actions" style="display: flex; gap: 10px; margin-top: 25px;">
+            <form id="form-admin-comunidad">
+                <div class="form-group">
+                    <label>Nombre de la Comunidad</label>
+                    <input type="text" id="admin-com-nombre" class="form-control" required placeholder="Ej: Liga Piura Centro">
                 </div>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Deporte</label>
+                        <select id="admin-com-deporte" class="form-control" required>
+                            <option>Fútbol</option>
+                            <option>Vóley</option>
+                            <option>Básquet</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Categoría</label>
+                        <input type="text" id="admin-com-categoria" class="form-control" required placeholder="Ej: Libre / Amateur">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Ciudad</label>
+                        <input type="text" id="admin-com-ciudad" class="form-control" required placeholder="Ej: Piura">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>WhatsApp del Líder</label>
+                        <input type="text" id="admin-com-wsp" class="form-control" required placeholder="Ej: 51999999999">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label>Breve Descripción</label>
+                    <textarea id="admin-com-desc" rows="3" class="form-control" required placeholder="Describe la comunidad..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="ph-bold ph-check"></i> Publicar Comunidad
+                </button>
+            </form>
         </div>
     </div>
 
-    <script type="module" src="admin-panel.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // 1. Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
+            authDomain: "app-futbol-acd0f.firebaseapp.com",
+            projectId: "app-futbol-acd0f",
+            storageBucket: "app-futbol-acd0f.firebasestorage.app",
+            messagingSenderId: "223446110165",
+            appId: "1:223446110165:web:219afce6a9dac03203f75c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // 2. Sistema de Pestañas (Navegación)
+        const links = document.querySelectorAll('.sidebar-link');
+        const tabs = document.querySelectorAll('.tab-content');
+
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Quitar activo a todos
+                links.forEach(l => l.classList.remove('active'));
+                tabs.forEach(t => t.classList.remove('mostrar'));
+                
+                // Activar el seleccionado
+                link.classList.add('active');
+                const targetId = link.getAttribute('data-target');
+                document.getElementById(targetId).classList.add('mostrar');
+
+                // Si entramos a la pestaña de comunidades, cargar datos
+                if (targetId === 'tab-comunidades') {
+                    cargarComunidadesAdmin();
+                }
+            });
+        });
+
+        // 3. Cerrar Sesión
+        document.getElementById('btn-logout')?.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                window.location.href = 'index.html';
+            });
+        });
+
+        // ==========================================
+        // LÓGICA DE COMUNIDADES
+        // ==========================================
+        const modalComunidad = document.getElementById('modal-admin-comunidad');
+        const formComunidad = document.getElementById('form-admin-comunidad');
+
+        // Abrir/Cerrar Modal
+        document.getElementById('btn-abrir-crear-comunidad').addEventListener('click', () => {
+            modalComunidad.classList.add('mostrar');
+        });
+        document.getElementById('cerrar-admin-comunidad').addEventListener('click', () => {
+            modalComunidad.classList.remove('mostrar');
+        });
+
+        // Función para cargar las comunidades desde Firebase
+        async function cargarComunidadesAdmin() {
+            const tbody = document.getElementById('admin-lista-comunidades');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando base de datos...</td></tr>';
+            
+            try {
+                const q = query(collection(db, 'comunidades'));
+                const snap = await getDocs(q);
+                
+                tbody.innerHTML = '';
+                
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--text-muted);">No hay comunidades creadas aún.</td></tr>';
+                    return;
+                }
+
+                snap.forEach(docSnap => {
+                    const c = docSnap.data();
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight: bold; color: #fff;">
+                                <i class="ph-fill ph-shield-checkered" style="color: var(--primary-green);"></i> ${c.nombre}
+                            </td>
+                            <td>${c.deporte} / ${c.categoria}</td>
+                            <td><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</td>
+                            <td><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider}</td>
+                            <td>
+                                <button class="btn btn-danger btn-borrar-comunidad" data-id="${docSnap.id}" style="padding: 6px 10px; font-size: 0.8rem;">
+                                    <i class="ph-bold ph-trash"></i> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                // Funcionalidad para eliminar comunidad
+                document.querySelectorAll('.btn-borrar-comunidad').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if(confirm('¿Eliminar esta comunidad definitivamente? Esta acción no se puede deshacer.')) {
+                            const btnReal = e.target.closest('.btn-borrar-comunidad');
+                            const idEliminar = btnReal.getAttribute('data-id');
+                            
+                            btnReal.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>';
+                            try {
+                                await deleteDoc(doc(db, 'comunidades', idEliminar));
+                                cargarComunidadesAdmin(); // Refrescar la tabla automáticamente
+                            } catch (error) {
+                                alert("Error al eliminar. Revisa tus permisos.");
+                            }
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Error cargando comunidades:", error);
+                tbody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Error de conexión.</td></tr>';
+            }
+        }
+
+        // Función para guardar (crear) una nueva comunidad
+        formComunidad.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btnSubmit = formComunidad.querySelector('button[type="submit"]');
+            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
+            btnSubmit.disabled = true;
+
+            const nuevaComunidad = {
+                nombre: document.getElementById('admin-com-nombre').value,
+                deporte: document.getElementById('admin-com-deporte').value,
+                categoria: document.getElementById('admin-com-categoria').value,
+                ciudad: document.getElementById('admin-com-ciudad').value,
+                whatsappLider: document.getElementById('admin-com-wsp').value,
+                descripcion: document.getElementById('admin-com-desc').value,
+                miembros: 0
+            };
+
+            try {
+                await addDoc(collection(db, 'comunidades'), nuevaComunidad);
+                alert('¡Comunidad publicada exitosamente!');
+                modalComunidad.classList.remove('mostrar');
+                formComunidad.reset();
+                cargarComunidadesAdmin(); // Refrescar tabla
+            } catch (error) {
+                console.error(error);
+                alert('Error al publicar. Asegúrate de tener rol "admin" en Firestore.');
+            } finally {
+                btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Publicar Comunidad';
+                btnSubmit.disabled = false;
+            }
+        });
+    </script>
 </body>
 </html>
