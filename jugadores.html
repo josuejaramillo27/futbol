@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
-    <title>Partidos | APP FUTBOL</title>
+    <title>Partidos | CHALACAPP</title>
     
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
     
@@ -67,19 +67,12 @@
             background: #000;
         }
 
-        .player-rating {
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: #f1c40f; 
-            margin-top: 5px;
-            line-height: 1;
-        }
-
         .player-pos {
-            font-size: 0.7rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            color: var(--text-muted);
+            color: var(--primary-green);
             font-weight: bold;
+            margin-top: 8px;
         }
 
         .player-info {
@@ -100,11 +93,6 @@
             gap: 6px;
         }
 
-        .verified-badge {
-            color: #1DA1F2; 
-            font-size: 0.9rem;
-        }
-
         .player-stats {
             display: flex;
             flex-wrap: wrap;
@@ -122,15 +110,6 @@
             align-items: center;
             gap: 4px;
             border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .post-message {
-            font-size: 0.85rem;
-            color: #aaa;
-            font-style: italic;
-            margin: 0;
-            border-top: 1px dashed rgba(255,255,255,0.1);
-            padding-top: 8px;
         }
 
         /* Botón de editar perfil (con hover arreglado) */
@@ -154,7 +133,7 @@
 <header class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100;">
     <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
         <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 30px; width: auto; object-fit: contain;">
-        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
+        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.8rem; vertical-align: middle;">JUGADORES</b></span>
     </a>
     
     <nav style="display: flex; gap: 20px; align-items: center;">
@@ -162,19 +141,18 @@
             <i class="ph-bold ph-map-pin" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
         </a>
-        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
             <i class="ph-bold ph-users" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
         </a>
         <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
             <i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">LIGAS</span>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span>
         </a>
     </nav>
 </header>
 
 <main>
-    <!-- HERO DE COMUNIDAD -->
     <section class="hero-section" style="min-height:280px;padding-top:35px;padding-bottom:35px">
         <div class="hero-copy">
             <div class="eyebrow"><span></span> COMUNIDAD EN TIEMPO REAL</div>
@@ -184,14 +162,12 @@
         <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-three"></i></div>
     </section>
 
-    <!-- BOTÓN DE CONFIGURAR PERFIL (MOVIDO ARRIBA) -->
     <section style="max-width:760px; margin: 0 auto 20px; padding: 0 20px;">
         <button id="btn-abrir-perfil" class="btn btn-edit-profile">
             <i class="ph-bold ph-user-circle"></i> Configurar mi Tarjeta de Jugador
         </button>
     </section>
 
-    <!-- BANNER PARA PUBLICAR -->
     <section class="community-banner">
         <div class="community-icon"><i class="ph-fill ph-megaphone"></i></div>
         <div class="community-copy">
@@ -204,7 +180,6 @@
         </button>
     </section>
 
-    <!-- FORMULARIO DE PUBLICACIÓN OCULTO -->
     <section class="card" style="max-width:760px;margin:0 auto 28px;padding:20px">
         <form id="form-anuncio" style="display:none">
             <div class="filter-row" style="grid-template-columns:1fr 1fr">
@@ -238,9 +213,7 @@
         </div>
     </section>
 
-    <!-- BOLSA DE JUGADORES LISTA -->
     <section style="max-width:900px; margin: 0 auto;">
-        
         <div class="section-heading">
             <div>
                 <div class="eyebrow"><span></span> AHORA MISMO</div>
@@ -250,13 +223,11 @@
             <div class="live-indicator"><span></span> En vivo</div>
         </div>
 
-        <!-- LISTA DE PUBLICACIONES -->
         <div id="lista-jugadores" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
             <p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Cargando partidos...</p>
         </div>
     </section>
 
-    <!-- Modal: Editar Tarjeta de Jugador -->
     <div id="modal-perfil-jugador" class="modal-oculto">
         <div class="modal-contenido" style="max-width: 450px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
             <button id="cerrar-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
@@ -317,13 +288,12 @@
             </form>
         </div>
     </div>
-    <!-- Modal: Ver Perfil Público de un Jugador -->
+
     <div id="modal-ver-perfil" class="modal-oculto">
         <div class="modal-contenido" style="max-width: 400px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
             <button id="cerrar-ver-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
             <span class="mini-label">PERFIL DEL JUGADOR</span>
             
-            <!-- Aquí inyectaremos la FUT Card del jugador con Javascript -->
             <div id="contenido-perfil-publico" style="margin-top: 15px;">
                 <p style="text-align:center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap"></i> Cargando datos...</p>
             </div>
@@ -333,7 +303,6 @@
 
 <script type="module" src="app.js"></script>
 
-<!-- SCRIPT REAL: GOOGLE LOGIN Y GUARDADO DE PERFIL -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -357,9 +326,13 @@
     const modalPerfil = document.getElementById('modal-perfil-jugador');
     const btnCerrarPerfil = document.getElementById('cerrar-perfil');
     const btnGuardarPerfil = document.getElementById('btn-guardar-perfil');
+    
+    const modalVerPerfil = document.getElementById('modal-ver-perfil');
+    const btnCerrarVerPerfil = document.getElementById('cerrar-ver-perfil');
+    const contenedorPerfil = document.getElementById('contenido-perfil-publico');
+
     let currentUser = null;
 
-    // 1. Escuchar si el usuario ya inició sesión
     onAuthStateChanged(auth, (user) => {
         currentUser = user;
         if (user) {
@@ -367,7 +340,6 @@
         }
     });
 
-    // 2. Al presionar "Configurar mi Tarjeta"
     if (btnAbrirPerfil) {
         btnAbrirPerfil.addEventListener('click', async () => {
             if (!currentUser) {
@@ -399,7 +371,6 @@
         btnCerrarPerfil.addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
     }
 
-    // 3. Al presionar "Guardar Tarjeta"
     if (btnGuardarPerfil) {
         btnGuardarPerfil.addEventListener('click', async () => {
             if (!currentUser) return;
@@ -415,12 +386,11 @@
                 posicion: document.getElementById('perfil-posicion').value,
                 ciudad: document.getElementById('perfil-ciudad').value,
                 habilidad: document.getElementById('perfil-habilidad').value,
-                verificado: true
+                verificado: false
             };
 
             try {
                 await setDoc(doc(db, "jugadores_perfiles", currentUser.uid), perfilData);
-                
                 btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-check"></i> ¡Tarjeta Guardada!';
                 
                 setTimeout(() => {
@@ -436,26 +406,19 @@
             }
         });
     }
-    // ==========================================
-    // SISTEMA PARA VER EL PERFIL DE OTROS JUGADORES
-    // ==========================================
-    const modalVerPerfil = document.getElementById('modal-ver-perfil');
-    const btnCerrarVerPerfil = document.getElementById('cerrar-ver-perfil');
-    const contenedorPerfil = document.getElementById('contenido-perfil-publico');
 
+    // Ver perfil público de otros jugadores
     if (btnCerrarVerPerfil) {
         btnCerrarVerPerfil.addEventListener('click', () => {
             modalVerPerfil.classList.remove('mostrar');
         });
     }
 
-    // Esta función la llamaremos desde app.js cuando hagan clic en una foto
     window.abrirPerfilJugador = async (jugadorUid) => {
         modalVerPerfil.classList.add('mostrar');
-        contenedorPerfil.innerHTML = '<p style="text-align:center; color: #aaa;">Cargando perfil...</p>';
+        contenedorPerfil.innerHTML = '<p style="text-align:center; color: #aaa;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando perfil...</p>';
 
         try {
-            // Buscamos los datos en la colección de perfiles
             const docRef = doc(db, "jugadores_perfiles", jugadorUid);
             const docSnap = await getDoc(docRef);
 
@@ -466,10 +429,10 @@
                     <div class="player-card-container">
                         <div class="player-avatar-wrapper">
                             <img src="${data.foto || 'https://ui-avatars.com/api/?name=' + data.nombre}" alt="Avatar" class="player-photo">
-                            <span class="player-pos" style="margin-top: 10px; font-size: 0.9rem;">${data.posicion || '---'}</span>
+                            <span class="player-pos">${data.posicion || '---'}</span>
                         </div>
                         <div class="player-info">
-                            <h3 class="player-name">${data.nombre} ${data.verificado ? '<i class="ph-fill ph-seal-check verified-badge"></i>' : ''}</h3>
+                            <h3 class="player-name">${data.nombre}</h3>
                             <div class="player-stats">
                                 <span class="stat-pill"><i class="ph-bold ph-map-pin"></i> ${data.ciudad || 'No especificado'}</span>
                                 <span class="stat-pill"><i class="ph-bold ph-soccer-ball"></i> ${data.deporte || 'Fútbol'}</span>
