@@ -101,12 +101,23 @@
 </head>
 <body>
 
-<header class="topbar">
-    <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 10px;">
+<header class="topbar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 15px 20px;">
+    <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
         <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 32px; width: auto; object-fit: contain;">
-        <span style="font-size: 1.3rem; letter-spacing: 1px;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.9rem; vertical-align: middle;">LIGAS</b></span>
+        <span style="font-size: 1.3rem; letter-spacing: 1px; color: #fff; font-weight: bold;">CHALACAPP</span>
     </a>
-    <a href="index.html" class="topbar-link"><i class="ph-bold ph-arrow-left"></i><span>Volver</span></a>
+    
+    <nav style="display: flex; gap: 15px; align-items: center;">
+        <a href="index.html" class="topbar-link" style="display: flex; align-items: center; gap: 5px; color: #aaa; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-map-pin" style="font-size: 1.2rem;"></i> <span class="nav-text">Canchas</span>
+        </a>
+        <a href="jugadores.html" class="topbar-link" style="display: flex; align-items: center; gap: 5px; color: #aaa; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-users" style="font-size: 1.2rem;"></i> <span class="nav-text">Bolsa</span>
+        </a>
+        <a href="comunidades.html" class="topbar-link" style="display: flex; align-items: center; gap: 5px; color: #aaa; text-decoration: none; font-size: 0.9rem; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-shield-checkered" style="font-size: 1.2rem;"></i> <span class="nav-text">Ligas</span>
+        </a>
+    </nav>
 </header>
 
 <main>
