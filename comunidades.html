@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080B0A">
+    <title>Comunidades | CHALACAPP</title>
+    
+    <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="discovery.css">
+    
+    <style>
+        /* Estilos de la Tarjeta de Comunidad */
+        .community-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .community-card:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.1);
+        }
+
+        .community-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .community-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary-green);
+        }
+
+        .community-title {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .community-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: rgba(0,0,0,0.5);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #ccc;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-join {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--primary-green);
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
+
+        .btn-join:hover {
+            background: var(--primary-green);
+            color: #000;
+        }
+
+        /* Banner para Crear Comunidad */
+        .create-community-banner {
+            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+            border: 1px dashed var(--primary-green);
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 10px;">
+        <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 32px; width: auto; object-fit: contain;">
+        <span style="font-size: 1.3rem; letter-spacing: 1px;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.9rem; vertical-align: middle;">LIGAS</b></span>
+    </a>
+    <a href="index.html" class="topbar-link"><i class="ph-bold ph-arrow-left"></i><span>Volver</span></a>
+</header>
+
+<main>
+    <section class="hero-section" style="min-height:250px; padding-top:35px; padding-bottom:35px">
+        <div class="hero-copy">
+            <div class="eyebrow"><span></span> JUEGA TODAS LAS SEMANAS</div>
+            <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Únete a una<br><strong>Comunidad local.</strong></h1>
+            <p>Encuentra grupos verificados en tu ciudad y asegura tu partido fijo.</p>
+        </div>
+        <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-four"></i></div>
+    </section>
+
+    <section style="max-width:900px; margin: 0 auto; padding: 0 20px;">
+        
+        <div class="create-community-banner">
+            <h3 style="color: #fff; margin: 0 0 10px 0;"><i class="ph-fill ph-crown" style="color: #f1c40f;"></i> ¿Eres líder de un grupo deportivo?</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Digitaliza tu liga, encuentra retadores y facilita la gestión de tus jugadores.</p>
+            <button id="btn-crear-comunidad" class="btn hero-primary" style="width: auto; padding: 10px 25px;">
+                <i class="ph-bold ph-whatsapp-logo"></i> Solicitar registro de mi comunidad
+            </button>
+        </div>
+
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow"><span></span> GRUPOS OFICIALES</div>
+                <h2>Comunidades Verificadas</h2>
+            </div>
+        </div>
+
+        <div id="lista-comunidades" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 50px;">
+            <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando comunidades...</p>
+        </div>
+
+    </section>
+</main>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
+        authDomain: "app-futbol-acd0f.firebaseapp.com",
+        projectId: "app-futbol-acd0f",
+        storageBucket: "app-futbol-acd0f.firebasestorage.app",
+        messagingSenderId: "223446110165",
+        appId: "1:223446110165:web:219afce6a9dac03203f75c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+    });
+
+    // 1. Funcionalidad: Botón de WhatsApp para líderes
+    document.getElementById('btn-crear-comunidad').addEventListener('click', () => {
+        const tuNumero = "51953066853"; // <-- CAMBIA ESTO POR TU NÚMERO
+        const mensaje = "Hola CHALACAPP ⚽, soy organizador de un grupo deportivo y me gustaría registrar mi comunidad en la aplicación.";
+        window.open(`https://wa.me/${tuNumero}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    });
+
+    // 2. Cargar comunidades desde Firebase
+    async function cargarComunidades() {
+        const contenedor = document.getElementById('lista-comunidades');
+        try {
+            const q = query(collection(db, 'comunidades'));
+            const snap = await getDocs(q);
+            
+            contenedor.innerHTML = ''; // Limpiamos el "Cargando..."
+
+            if (snap.empty) {
+                contenedor.innerHTML = `
+                    <div style="text-align:center; padding: 40px; grid-column:1/-1; background:rgba(0,0,0,0.3); border-radius:12px;">
+                        <i class="ph-fill ph-users-three" style="font-size: 3rem; color: #555;"></i>
+                        <p style="color: #aaa; margin-top: 10px;">Aún no hay comunidades registradas en tu zona.</p>
+                    </div>`;
+                return;
+            }
+
+            snap.forEach(docSnap => {
+                const c = docSnap.data();
+                
+                contenedor.innerHTML += `
+                    <div class="community-card">
+                        <div class="community-header">
+                            <div class="community-logo">
+                                <i class="ph-fill ph-shield-checkered" style="font-size: 2rem; color: var(--primary-green);"></i>
+                            </div>
+                            <div>
+                                <h3 class="community-title">${c.nombre} <i class="ph-fill ph-seal-check" style="color: #1DA1F2;" title="Verificada"></i></h3>
+                                <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">${c.deporte} · ${c.categoria}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="community-stats">
+                            <span class="stat-badge"><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</span>
+                            <span class="stat-badge"><i class="ph-bold ph-users"></i> ${c.miembros || '15+'} Miembros</span>
+                        </div>
+                        
+                        <p style="font-size: 0.9rem; color: #ccc; margin-bottom: 20px; line-height: 1.4;">${c.descripcion}</p>
+                        
+                        <button class="btn btn-join" onclick="solicitarIngreso('${docSnap.id}', '${c.nombre}', '${c.whatsappLider}')">
+                            <i class="ph-bold ph-hand-waving"></i> Solicitar Ingreso
+                        </button>
+                    </div>
+                `;
+            });
+        } catch (error) {
+            console.error("Error al cargar comunidades:", error);
+            contenedor.innerHTML = '<p style="color: red; text-align:center; grid-column:1/-1;">Error de conexión.</p>';
+        }
+    }
+
+    // 3. Funcionalidad: Unirse a una comunidad
+    window.solicitarIngreso = async (comunidadId, nombreComunidad, wspLider) => {
+        if (!currentUser) {
+            alert("Debes iniciar sesión con Google para solicitar unirte a una comunidad.");
+            try {
+                const result = await signInWithPopup(auth, provider);
+                currentUser = result.user;
+            } catch (error) { return; }
+        }
+
+        if (confirm(`¿Enviar solicitud para unirte a ${nombreComunidad}?`)) {
+            // Aquí puedes abrir el WhatsApp del líder de esa comunidad automáticamente
+            const msj = `Hola, soy ${currentUser.displayName}. Encontré tu comunidad "${nombreComunidad}" en CHALACAPP y me gustaría unirme al grupo.`;
+            window.open(`https://wa.me/${wspLider}?text=${encodeURIComponent(msj)}`, '_blank');
+        }
+    };
+
+    // Inicializar
+    cargarComunidades();
+</script>
+</body>
+</html>
