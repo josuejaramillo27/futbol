@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="discovery.css">
     
     <style>
-        /* Pestañas de navegación interna */
         .tabs-container {
             display: flex; gap: 10px; margin-bottom: 25px;
             border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;
@@ -24,51 +23,41 @@
             cursor: pointer; padding: 8px 18px; border-radius: 8px;
             transition: all 0.3s ease;
         }
-
         .tab-btn:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.05); }
-
         .tab-btn.active {
             color: var(--primary-green) !important;
             background: rgba(46, 204, 113, 0.12) !important;
             border: 1px solid rgba(46, 204, 113, 0.3);
         }
 
-        /* Tarjeta de Comunidad pública */
         .community-card {
             background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%);
             border: 1px solid rgba(46, 204, 113, 0.25);
             border-radius: 16px; padding: 20px; transition: all 0.3s ease;
             cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-
         .community-card:hover {
             border-color: var(--primary-green); transform: translateY(-4px);
             box-shadow: 0 10px 25px rgba(46, 204, 113, 0.15);
         }
 
         .sport-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        
         .sport-tag {
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
             padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ddd; font-weight: 600;
         }
 
-        /* Hub de la Comunidad (Modal Full Screen) */
+        /* Hub de la Comunidad */
         .hub-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #080B0A; z-index: 200; overflow-y: auto;
         }
-
         .hub-modal.mostrar { display: block; }
-
         .hub-header-banner {
             background: linear-gradient(180deg, rgba(20, 30, 24, 0.95) 0%, rgba(8, 11, 10, 1) 100%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            padding: 25px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 25px 20px 20px;
         }
-
         .hub-content-container { max-width: 900px; margin: 0 auto; padding: 25px 20px 50px; }
-
         .hub-card-box {
             background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px; padding: 20px; margin-bottom: 20px;
@@ -80,27 +69,20 @@
             color: var(--primary-green); border: 1px dashed var(--primary-green);
             transition: all 0.3s ease;
         }
-
         .btn-crear-compacto:hover { background: var(--primary-green) !important; color: #080b0a !important; }
 
-        /* ESTILOS DE PÍLDORA REGLADA PARA LOS BOTONES DE DEPORTES */
         .btn-sport-chip {
-            width: auto !important;
-            min-width: auto !important;
-            max-width: max-content !important;
-            flex: 0 0 auto !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            padding: 8px 20px !important;
-            border-radius: 30px !important;
-            font-size: 0.85rem !important;
-            font-weight: 800 !important;
-            letter-spacing: 0.5px !important;
-            cursor: pointer !important;
-            transition: all 0.25s ease !important;
-            box-shadow: none !important;
-            margin: 0 !important;
+            width: auto !important; min-width: auto !important; max-width: max-content !important;
+            flex: 0 0 auto !important; display: inline-flex !important; align-items: center !important;
+            justify-content: center !important; padding: 8px 20px !important; border-radius: 30px !important;
+            font-size: 0.85rem !important; font-weight: 800 !important; letter-spacing: 0.5px !important;
+            cursor: pointer !important; transition: all 0.25s ease !important; box-shadow: none !important; margin: 0 !important;
+        }
+
+        /* Lista de Solicitudes */
+        .solicitud-item {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px;
         }
     </style>
 </head>
@@ -151,6 +133,9 @@
     <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
 </main>
 
+<!-- ========================================== -->
+<!-- HUB DE LA COMUNIDAD                        -->
+<!-- ========================================== -->
 <div id="hub-comunidad" class="hub-modal">
     <div class="hub-header-banner">
         <div style="max-width: 900px; margin: 0 auto;">
@@ -165,7 +150,6 @@
                         <p id="hub-ubicacion" style="margin: 3px 0 0 0; color: var(--text-muted); font-size: 0.85rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
                     </div>
                 </div>
-                
                 <button id="cerrar-hub" class="btn" style="width: auto !important; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;">
                     <i class="ph-bold ph-arrow-left"></i> Volver
                 </button>
@@ -194,12 +178,8 @@
                 <h3 style="margin: 0; color: #fff; font-size: 1.1rem;"><i class="ph-bold ph-soccer-ball" style="color: var(--primary-green);"></i> Partidos Próximos</h3>
                 <span style="font-size: 0.75rem; color: var(--text-muted);">Actualizado en vivo</span>
             </div>
-
             <div id="hub-lista-partidos">
-                <div style="text-align: center; padding: 30px 10px;">
-                    <i class="ph-bold ph-whistle" style="font-size: 2.8rem; color: #444;"></i>
-                    <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados para este deporte en este momento.</p>
-                </div>
+                <!-- Se llena con Javascript -->
             </div>
         </div>
 
@@ -216,72 +196,73 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- MODALES (CREAR COMUNIDAD, PARTIDO, MIEMBROS) -->
+<!-- ========================================== -->
+
+<!-- Modal: Crear Comunidad (WhatsApp) -->
 <div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
         <h2 style="margin-top:0; color:#fff;">Registra tu Comunidad</h2>
         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Enviaremos la información al administrador para que valide y active tu liga.</p>
-        
         <form id="form-nueva-comunidad">
             <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga / grupo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
-            
             <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deportes que practican (separados por coma):</label>
             <input type="text" id="reg-com-deporte" required placeholder="Ej: Fútbol, Vóley, Básquet" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
-            
             <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px; box-sizing: border-box;">
-            
-            <button type="submit" class="btn hero-primary" style="width:100%;">
-                <i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud
-            </button>
+            <button type="submit" class="btn hero-primary" style="width:100%;"><i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud</button>
         </form>
     </div>
 </div>
+
+<!-- Modal: Organizar Partido -->
 <div id="modal-nuevo-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-nuevo-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        
         <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-calendar-plus"></i> Organizar Partido</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Crea el evento para que los miembros puedan separar su cupo.</p>
-        
         <form id="form-nuevo-partido">
             <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deporte</label>
-            <select id="np-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-                </select>
-            
+            <select id="np-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
             <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                <div style="flex: 1;">
-                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha</label>
-                    <input type="date" id="np-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
-                </div>
-                <div style="flex: 1;">
-                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Hora</label>
-                    <input type="time" id="np-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
-                </div>
+                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha</label><input type="date" id="np-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Hora</label><input type="time" id="np-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
             </div>
-
             <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Lugar / Cancha</label>
             <input type="text" id="np-lugar" required placeholder="Ej: Sintética El Golazo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
-            
             <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                <div style="flex: 1;">
-                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Cupos Totales</label>
-                    <input type="number" id="np-cupos" required placeholder="Ej: 14" min="2" max="100" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
-                </div>
-                <div style="flex: 2;">
-                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Costo e Instrucciones</label>
-                    <input type="text" id="np-precio" required placeholder="Ej: S/15 - Yape al 999..." style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
-                </div>
+                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Cupos Totales</label><input type="number" id="np-cupos" required placeholder="14" min="2" max="100" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+                <div style="flex: 2;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Costo e Instrucciones</label><input type="text" id="np-precio" required placeholder="Ej: S/15 - Yape al 999..." style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
             </div>
-            
-            <button type="submit" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;">
-                <i class="ph-bold ph-check-circle"></i> Publicar Partido
-            </button>
+            <button type="submit" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;"><i class="ph-bold ph-check-circle"></i> Publicar Partido</button>
         </form>
     </div>
 </div>
+
+<!-- Modal: Ver Miembros y Solicitudes -->
+<div id="modal-miembros" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1002; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
+        <button id="cerrar-miembros" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <h2 style="margin-top:0; color:#fff;"><i class="ph-fill ph-users"></i> Miembros</h2>
+        
+        <div class="tabs-container" style="margin-bottom: 15px;">
+            <button class="tab-btn active" id="tab-solicitudes">Nuevas Solicitudes</button>
+            <button class="tab-btn" id="tab-activos">Lista Oficial</button>
+        </div>
+
+        <div id="panel-solicitudes" style="overflow-y: auto; flex: 1;">
+            <p style="color:var(--text-muted); text-align:center;">Cargando solicitudes...</p>
+        </div>
+        <div id="panel-activos" style="display:none; overflow-y: auto; flex: 1;">
+            <p style="color:var(--text-muted); text-align:center;">Cargando miembros...</p>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, addDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // IMPORTANTE: Se agregó updateDoc, arrayUnion y doc para poder modificar listas de Firebase
+    import { getFirestore, collection, getDocs, query, addDoc, where, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -300,9 +281,10 @@
     let currentUser = null;
     let comunidadActivaId = null; 
     
-    // Variables globales para el control de acceso en los partidos
     window.soyLiderGlobal = false;
     window.soyMiembroGlobal = false;
+    window.comunidadActivaNombre = '';
+    window.comunidadActivaWsp = '';
 
     const PALETA_DEPORTES_EXTRA = ['#00d2d3','#ff9ff3','#ff6b6b','#1dd1a1','#feca57','#54a0ff','#5f27cd','#ff9f43','#10ac84','#ee5253'];
     function obtenerColorDeporte(nombreDeporte) {
@@ -314,13 +296,12 @@
         if (str.includes('tenis') || str.includes('pádel') || str.includes('padel')) return '#f1c40f'; 
         if (str.includes('natación') || str.includes('natacion') || str.includes('acuát')) return '#0984e3'; 
         if (str.includes('atletismo') || str.includes('run')) return '#e74c3c'; 
-
         let hash = 0;
         for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
         return PALETA_DEPORTES_EXTRA[Math.abs(hash) % PALETA_DEPORTES_EXTRA.length];
     }
 
-    // Pestañas
+    // Pestañas Principales
     const btnMisComunidades = document.getElementById('tab-mis-comunidades');
     const btnExplorar = document.getElementById('tab-explorar');
     const listaMisComunidades = document.getElementById('lista-mis-comunidades');
@@ -333,69 +314,6 @@
     btnExplorar.addEventListener('click', () => {
         btnExplorar.classList.add('active'); btnMisComunidades.classList.remove('active');
         listaExplorar.style.display = 'grid'; listaMisComunidades.style.display = 'none';
-    });
-
-    // Crear Partido (Modal)
-    const modalNuevoPartido = document.getElementById('modal-nuevo-partido');
-    const formNuevoPartido = document.getElementById('form-nuevo-partido');
-
-    document.getElementById('btn-nuevo-partido').addEventListener('click', () => modalNuevoPartido.style.display = 'flex');
-    document.getElementById('cerrar-nuevo-partido').addEventListener('click', () => modalNuevoPartido.style.display = 'none');
-
-    formNuevoPartido.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btnSubmit = e.target.querySelector('button[type="submit"]');
-        btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
-        btnSubmit.disabled = true;
-
-        const nuevoPartido = {
-            comunidadId: comunidadActivaId,
-            creadorUid: currentUser.uid,
-            deporte: document.getElementById('np-deporte').value,
-            fecha: document.getElementById('np-fecha').value,
-            hora: document.getElementById('np-hora').value,
-            lugar: document.getElementById('np-lugar').value,
-            cuposTotales: parseInt(document.getElementById('np-cupos').value),
-            cuposOcupados: 0,
-            precioInstrucciones: document.getElementById('np-precio').value,
-            estado: 'abierto',
-            fechaCreacion: new Date().toISOString()
-        };
-
-        try {
-            await addDoc(collection(db, 'partidos'), nuevoPartido);
-            alert("¡Golazo! Partido publicado.");
-            modalNuevoPartido.style.display = 'none';
-            formNuevoPartido.reset();
-            
-            const botones = document.querySelectorAll('.btn-sport-chip');
-            botones.forEach(b => { if (b.textContent.trim() === nuevoPartido.deporte) b.click(); });
-            
-        } catch (error) {
-            console.error("Error al publicar:", error);
-            alert("Ocurrió un error al guardar el partido.");
-        } finally {
-            btnSubmit.innerHTML = '<i class="ph-bold ph-check-circle"></i> Publicar Partido';
-            btnSubmit.disabled = false;
-        }
-    });
-
-    document.getElementById('btn-ver-miembros').addEventListener('click', () => alert("Aquí aparecerá la lista de jugadores."));
-
-    // Modal Whatsapp Crear Comunidad
-    const modalCrear = document.getElementById('modal-crear-comunidad');
-    document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
-    document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
-    
-    document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const n = document.getElementById('reg-com-nombre').value;
-        const d = document.getElementById('reg-com-deporte').value;
-        const c = document.getElementById('reg-com-ciudad').value;
-        const msj = `Hola CHALACAPP ⚽, solicito registrar mi comunidad.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}`;
-        window.open(`https://wa.me/51999999999?text=${encodeURIComponent(msj)}`, '_blank');
-        modalCrear.style.display = 'none';
-        e.target.reset();
     });
 
     onAuthStateChanged(auth, async (user) => {
@@ -424,7 +342,6 @@
                 const soyLider = currentUser && (currentUser.uid === c.liderUid);
                 const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
 
-                // NOTA IMPORTANTE: Ahora pasamos soyMiembro a la función abrirHubComunidad
                 const htmlTarjeta = `
                     <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${c.deporte}', ${soyLider}, '${c.whatsappLider || ''}', ${soyMiembro})">
                         <div style="display:flex; align-items:center; gap:15px;">
@@ -446,7 +363,6 @@
 
             if(!tengoComunidades) listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Aún no estás en ninguna comunidad. Pasa a la pestaña "Explorar".</p>';
             if(!hayParaExplorar) listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">No hay más comunidades públicas por el momento.</p>';
-
         } catch (error) { console.error("Error:", error); }
     }
 
@@ -471,34 +387,27 @@
         try {
             const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId));
             const snap = await getDocs(q);
-            
             let htmlTarjetas = '';
             
             snap.forEach(docSnap => {
                 const p = docSnap.data();
-                
                 if (p.deporte === nombreDeporte) {
                     const cuposLibres = p.cuposTotales - (p.cuposOcupados || 0);
                     const colorFondoBoton = cuposLibres > 0 ? colorPrincipal : '#555';
                     const textoBoton = cuposLibres > 0 ? 'Separar mi cupo' : 'Agotado';
                     
                     let fechaAmigable = p.fecha;
-                    try {
-                        const partes = p.fecha.split('-'); 
-                        fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`;
-                    } catch(e){}
+                    try { const partes = p.fecha.split('-'); fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`; } catch(e){}
 
-                    // CONTROL DE ACCESO: ¿Qué botón le mostramos al usuario?
+                    // CONTROL DE ACCESO (Lógica Visual)
                     let botonAccion = '';
                     if (window.soyLiderGlobal) {
-                        // Es el Líder
                         botonAccion = `<button class="btn" style="width: 100%; background: #f1c40f; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('En el próximo paso: Aquí verás la lista de inscritos para este partido.')"><i class="ph-bold ph-users-three"></i> Gestionar Lista</button>`;
                     } else if (window.soyMiembroGlobal) {
-                        // Es Miembro
                         botonAccion = `<button class="btn" style="width: 100%; background: ${colorFondoBoton}; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('En el próximo paso: Este botón registrará tu asistencia.')"><i class="ph-bold ph-ticket"></i> ${textoBoton}</button>`;
                     } else {
-                        // Es visitante (Explorando)
-                        botonAccion = `<button class="btn" style="width: 100%; background: rgba(255,255,255,0.05); color: #888; font-weight: bold; border: 1px dashed rgba(255,255,255,0.2); font-size: 0.85rem; cursor: not-allowed;" disabled><i class="ph-bold ph-lock-key"></i> Únete a la comunidad para jugar</button>`;
+                        // LA MAGIA DE LA DOBLE ACCIÓN:
+                        botonAccion = `<button class="btn" style="width: 100%; background: rgba(255,255,255,0.05); color: #fff; font-weight: bold; border: 1px dashed rgba(255,255,255,0.3); font-size: 0.85rem;" onclick="enviarSolicitudIngreso()"><i class="ph-bold ph-hand-waving"></i> Enviar Solicitud para Jugar</button>`;
                     }
 
                     htmlTarjetas += `
@@ -512,11 +421,9 @@
                                     <strong style="color: #fff; font-size: 1rem;">${cuposLibres}</strong> / ${p.cuposTotales} libres
                                 </div>
                             </div>
-                            
                             <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid ${colorPrincipal};">
                                 <p style="margin: 0; color: #ddd; font-size: 0.85rem;"><strong style="color:#fff;">Costo / Instrucciones:</strong> ${p.precioInstrucciones}</p>
                             </div>
-                            
                             ${botonAccion}
                         </div>
                     `;
@@ -530,26 +437,56 @@
                         <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados de ${nombreDeporte} por el momento.</p>
                     </div>
                 `;
-            } else {
-                listaPartidos.innerHTML = htmlTarjetas;
+            } else { listaPartidos.innerHTML = htmlTarjetas; }
+        } catch (error) { console.error("Error al obtener partidos:", error); }
+    };
+
+    // ==========================================
+    // FUNCIÓN DOBLE ACCIÓN (ENVIAR SOLICITUD)
+    // ==========================================
+    window.enviarSolicitudIngreso = async function() {
+        if (!currentUser) return alert("Inicia sesión para poder unirte.");
+        
+        try {
+            // 1. Escribimos la solicitud silenciosamente en la base de datos
+            // Primero verificamos si ya existe para no hacer spam
+            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('usuarioUid', '==', currentUser.uid));
+            const snap = await getDocs(q);
+            
+            if (snap.empty) {
+                await addDoc(collection(db, 'solicitudes_comunidad'), {
+                    comunidadId: comunidadActivaId,
+                    usuarioUid: currentUser.uid,
+                    nombreUsuario: currentUser.displayName || 'Jugador',
+                    fotoUsuario: currentUser.photoURL || 'https://ui-avatars.com/api/?name=Jugador',
+                    estado: 'pendiente',
+                    fecha: new Date().toISOString()
+                });
             }
 
+            // 2. Disparamos WhatsApp al líder para notificarle de inmediato
+            const numClean = String(window.comunidadActivaWsp || '').replace(/\D/g, '');
+            if (numClean) {
+                const msj = `Hola! Soy ${currentUser.displayName}. Acabo de mandar una solicitud por CHALACAPP para unirme a tu comunidad "${window.comunidadActivaNombre}". ¡Acéptame para poder separar mi cupo en los partidos!`;
+                window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(msj)}`, '_blank');
+            } else {
+                alert("¡Tu solicitud se guardó en el sistema! El líder te aceptará pronto.");
+            }
         } catch (error) {
-            console.error("Error al obtener partidos:", error);
-            listaPartidos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar los partidos.</p>';
+            console.error(error);
+            alert("No pudimos enviar tu solicitud. Verifica tu conexión.");
         }
     };
 
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
-    // Actualizamos la función para que reciba 'soyMiembro'
     window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp, soyMiembro) => {
         comunidadActivaId = id; 
-        
-        // Guardamos los roles en las variables globales para que seleccionarDeporte sepa qué hacer
         window.soyLiderGlobal = esLider;
         window.soyMiembroGlobal = soyMiembro;
+        window.comunidadActivaNombre = nombre;
+        window.comunidadActivaWsp = wsp;
 
         document.getElementById('hub-nombre').textContent = nombre;
         document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
@@ -566,14 +503,12 @@
         const contenedorFiltros = document.getElementById('hub-deportes-filtros');
         const selectDeporteModal = document.getElementById('np-deporte'); 
         
-        contenedorFiltros.innerHTML = '';
-        selectDeporteModal.innerHTML = ''; 
+        contenedorFiltros.innerHTML = ''; selectDeporteModal.innerHTML = ''; 
         
         deportesArray.forEach((dep, index) => {
             const isFirst = index === 0;
             const nombreDeporte = dep.trim();
             if (!nombreDeporte) return;
-
             const colorPrincipal = obtenerColorDeporte(nombreDeporte);
             const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)';
             const color = isFirst ? '#000' : '#fff';
@@ -588,12 +523,117 @@
         });
 
         hubModal.classList.add('mostrar');
-
         setTimeout(() => {
             const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip');
             if(primerBotonDeporte) primerBotonDeporte.click();
         }, 150);
     };
+
+    // ==========================================
+    // PANEL DEL LÍDER (GESTIÓN DE MIEMBROS)
+    // ==========================================
+    const modalMiembros = document.getElementById('modal-miembros');
+    
+    document.getElementById('btn-ver-miembros').addEventListener('click', () => {
+        modalMiembros.style.display = 'flex';
+        cargarSolicitudes();
+    });
+    document.getElementById('cerrar-miembros').addEventListener('click', () => modalMiembros.style.display = 'none');
+
+    // Control Tabs Miembros
+    const btnTabSol = document.getElementById('tab-solicitudes');
+    const btnTabActivos = document.getElementById('tab-activos');
+    const panelSol = document.getElementById('panel-solicitudes');
+    const panelActivos = document.getElementById('panel-activos');
+
+    btnTabSol.addEventListener('click', () => {
+        btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active');
+        panelSol.style.display = 'block'; panelActivos.style.display = 'none';
+    });
+    btnTabActivos.addEventListener('click', () => {
+        btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active');
+        panelActivos.style.display = 'block'; panelSol.style.display = 'none';
+    });
+
+    window.cargarSolicitudes = async function() {
+        panelSol.innerHTML = '<p style="color:var(--text-muted); text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando...</p>';
+        try {
+            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'pendiente'));
+            const snap = await getDocs(q);
+            let html = '';
+            
+            snap.forEach(d => {
+                const s = d.data();
+                html += `
+                    <div class="solicitud-item">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #555;">
+                            <span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span>
+                        </div>
+                        <button class="btn" style="width:auto !important; padding:6px 12px; background:#2ecc71; color:#000; border:none; border-radius:6px;" onclick="aceptarJugador('${d.id}', '${s.usuarioUid}')">
+                            <i class="ph-bold ph-check"></i> Aceptar
+                        </button>
+                    </div>
+                `;
+            });
+            panelSol.innerHTML = html || '<p style="color:var(--text-muted); text-align:center;">No hay solicitudes nuevas.</p>';
+        } catch (e) {
+            console.error(e);
+            panelSol.innerHTML = '<p style="color:red; text-align:center;">Error al cargar datos.</p>';
+        }
+    };
+
+    window.aceptarJugador = async function(idSolicitud, uidJugador) {
+        try {
+            // 1. Cambiamos el estado de la solicitud para que desaparezca de pendientes
+            await updateDoc(doc(db, 'solicitudes_comunidad', idSolicitud), { estado: 'aceptada' });
+            
+            // 2. Metemos el UID del jugador al array oficial de miembros en la comunidad
+            await updateDoc(doc(db, 'comunidades', comunidadActivaId), {
+                miembros_uids: arrayUnion(uidJugador)
+            });
+            
+            alert("¡Jugador aceptado! Ahora pertenece a la comunidad.");
+            cargarSolicitudes(); // Refrescar lista
+        } catch (e) {
+            console.error(e);
+            alert("Error al aceptar jugador. Comprueba que tienes los permisos correctos.");
+        }
+    };
+
+    // (Opcional) Funcionalidades Restantes: Nuevo Partido, Registrar Comunidad...
+    document.getElementById('btn-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'flex');
+    document.getElementById('cerrar-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'none');
+
+    document.getElementById('form-nuevo-partido').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; btnSubmit.disabled = true;
+        const nuevoPartido = {
+            comunidadId: comunidadActivaId, creadorUid: currentUser.uid, deporte: document.getElementById('np-deporte').value,
+            fecha: document.getElementById('np-fecha').value, hora: document.getElementById('np-hora').value,
+            lugar: document.getElementById('np-lugar').value, cuposTotales: parseInt(document.getElementById('np-cupos').value),
+            cuposOcupados: 0, precioInstrucciones: document.getElementById('np-precio').value, estado: 'abierto', fechaCreacion: new Date().toISOString()
+        };
+        try {
+            await addDoc(collection(db, 'partidos'), nuevoPartido);
+            alert("¡Golazo! Partido publicado.");
+            document.getElementById('modal-nuevo-partido').style.display = 'none'; e.target.reset();
+            const botones = document.querySelectorAll('.btn-sport-chip');
+            botones.forEach(b => { if (b.textContent.trim() === nuevoPartido.deporte) b.click(); });
+        } catch (error) { console.error("Error al publicar:", error); } 
+        finally { btnSubmit.innerHTML = '<i class="ph-bold ph-check-circle"></i> Publicar Partido'; btnSubmit.disabled = false; }
+    });
+
+    const modalCrear = document.getElementById('modal-crear-comunidad');
+    document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
+    document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
+    document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const n = document.getElementById('reg-com-nombre').value, d = document.getElementById('reg-com-deporte').value, c = document.getElementById('reg-com-ciudad').value;
+        window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}`)}`, '_blank');
+        modalCrear.style.display = 'none'; e.target.reset();
+    });
 </script>
 </body>
 </html>
