@@ -285,7 +285,11 @@
                     <label>Nombre de la Comunidad</label>
                     <input type="text" id="admin-com-nombre" class="form-control" required placeholder="Ej: Liga Piura Centro">
                 </div>
-                
+                <div class="form-group">
+    <label>ID del Líder (UID de Google del Creador)</label>
+    <input type="text" id="admin-com-lider-uid" class="form-control" required placeholder="Pega el UID de Google del líder">
+    <small style="color: var(--text-muted); font-size: 0.75rem;">Tip: Puedes ver tu propio UID en la pestaña Usuarios de este panel.</small>
+</div>
                 <div style="display: flex; gap: 15px;">
                     <div class="form-group" style="flex: 1;">
                         <label>Deporte</label>
@@ -460,6 +464,7 @@
                 categoria: document.getElementById('admin-com-categoria').value,
                 ciudad: document.getElementById('admin-com-ciudad').value,
                 whatsappLider: document.getElementById('admin-com-wsp').value,
+                liderUid: document.getElementById('admin-com-lider-uid').value.trim(),
                 descripcion: document.getElementById('admin-com-desc').value,
                 miembros: 0
             };
