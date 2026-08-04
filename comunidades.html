@@ -16,7 +16,6 @@
             display: flex; gap: 10px; margin-bottom: 25px;
             border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;
         }
-        
         .tab-btn {
             background: transparent; border: 1px solid transparent;
             color: #888; font-size: 0.95rem; font-weight: 700;
@@ -29,7 +28,6 @@
             background: rgba(46, 204, 113, 0.12) !important;
             border: 1px solid rgba(46, 204, 113, 0.3);
         }
-
         .community-card {
             background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%);
             border: 1px solid rgba(46, 204, 113, 0.25);
@@ -40,7 +38,6 @@
             border-color: var(--primary-green); transform: translateY(-4px);
             box-shadow: 0 10px 25px rgba(46, 204, 113, 0.15);
         }
-
         .sport-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
         .sport-tag {
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
@@ -79,7 +76,7 @@
             cursor: pointer !important; transition: all 0.25s ease !important; box-shadow: none !important; margin: 0 !important;
         }
 
-        /* Lista de Solicitudes */
+        /* Listas de Solicitudes y Jugadores */
         .solicitud-item {
             display: flex; justify-content: space-between; align-items: center;
             background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px;
@@ -197,10 +194,10 @@
 </div>
 
 <!-- ========================================== -->
-<!-- MODALES (CREAR COMUNIDAD, PARTIDO, MIEMBROS) -->
+<!-- MODALES Y FORMULARIOS -->
 <!-- ========================================== -->
 
-<!-- Modal: Crear Comunidad (WhatsApp) -->
+<!-- Modal: Crear Comunidad -->
 <div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -208,7 +205,7 @@
         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Enviaremos la información al administrador para que valide y active tu liga.</p>
         <form id="form-nueva-comunidad">
             <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga / grupo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
-            <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deportes que practican (separados por coma):</label>
+            <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deportes (separados por coma):</label>
             <input type="text" id="reg-com-deporte" required placeholder="Ej: Fútbol, Vóley, Básquet" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
             <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px; box-sizing: border-box;">
             <button type="submit" class="btn hero-primary" style="width:100%;"><i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud</button>
@@ -239,7 +236,7 @@
     </div>
 </div>
 
-<!-- Modal: Ver Miembros y Solicitudes -->
+<!-- Modal: Ver Miembros de la Comunidad -->
 <div id="modal-miembros" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1002; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
         <button id="cerrar-miembros" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -250,19 +247,28 @@
             <button class="tab-btn" id="tab-activos">Lista Oficial</button>
         </div>
 
-        <div id="panel-solicitudes" style="overflow-y: auto; flex: 1;">
-            <p style="color:var(--text-muted); text-align:center;">Cargando solicitudes...</p>
-        </div>
-        <div id="panel-activos" style="display:none; overflow-y: auto; flex: 1;">
-            <p style="color:var(--text-muted); text-align:center;">Cargando miembros...</p>
+        <div id="panel-solicitudes" style="overflow-y: auto; flex: 1;"></div>
+        <div id="panel-activos" style="display:none; overflow-y: auto; flex: 1;"></div>
+    </div>
+</div>
+
+<!-- NUEVO MODAL: LISTA DE ASISTENTES AL PARTIDO -->
+<div id="modal-lista-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1003; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:400px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
+        <button id="cerrar-lista-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-clipboard-text"></i> Asistentes</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Jugadores que han separado su cupo para este partido.</p>
+        
+        <div id="panel-inscritos" style="overflow-y: auto; flex: 1; padding-right: 5px;">
+            <!-- Se llena con Javascript -->
         </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    // IMPORTANTE: Se agregó updateDoc, arrayUnion y doc para poder modificar listas de Firebase
-    import { getFirestore, collection, getDocs, query, addDoc, where, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // IMPORTANTE: ¡Agregamos increment y getDoc para la lógica del partido!
+    import { getFirestore, collection, getDocs, query, addDoc, where, doc, updateDoc, arrayUnion, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -280,7 +286,6 @@
     
     let currentUser = null;
     let comunidadActivaId = null; 
-    
     window.soyLiderGlobal = false;
     window.soyMiembroGlobal = false;
     window.comunidadActivaNombre = '';
@@ -327,18 +332,15 @@
             listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Inicia sesión para explorar ligas.</p>';
             return;
         }
-
         try {
             const snap = await getDocs(query(collection(db, 'comunidades')));
-            listaMisComunidades.innerHTML = '';
-            listaExplorar.innerHTML = '';
+            listaMisComunidades.innerHTML = ''; listaExplorar.innerHTML = '';
             let tengoComunidades = false; let hayParaExplorar = false;
 
             snap.forEach(docSnap => {
                 const c = docSnap.data(); c.id = docSnap.id;
                 const deportesArray = (c.deporte || 'Fútbol').split(',').map(d => d.trim());
                 const tagsHTML = deportesArray.map(d => `<span class="sport-tag">${d}</span>`).join('');
-                
                 const soyLider = currentUser && (currentUser.uid === c.liderUid);
                 const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
 
@@ -367,22 +369,15 @@
     }
 
     // ==========================================
-    // CARGAR PARTIDOS EN LA CARTELERA (CON CONTROL DE ACCESO)
+    // CARGAR PARTIDOS EN LA CARTELERA (CON LÓGICA DE INSCRIPCIÓN)
     // ==========================================
     window.seleccionarDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
         const botones = document.querySelectorAll('.btn-sport-chip');
-        botones.forEach(b => {
-            b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)';
-        });
+        botones.forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; });
         btnElement.style.background = colorPrincipal; btnElement.style.color = '#000'; btnElement.style.border = `1px solid ${colorPrincipal}`;
 
         const listaPartidos = document.getElementById('hub-lista-partidos');
-        listaPartidos.innerHTML = `
-            <div style="text-align: center; padding: 30px;">
-                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:${colorPrincipal};"></i>
-                <p style="color:var(--text-muted); margin-top:10px; font-size:0.9rem;">Buscando partidos de ${nombreDeporte}...</p>
-            </div>
-        `;
+        listaPartidos.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:${colorPrincipal};"></i></div>`;
         
         try {
             const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId));
@@ -393,20 +388,26 @@
                 const p = docSnap.data();
                 if (p.deporte === nombreDeporte) {
                     const cuposLibres = p.cuposTotales - (p.cuposOcupados || 0);
-                    const colorFondoBoton = cuposLibres > 0 ? colorPrincipal : '#555';
-                    const textoBoton = cuposLibres > 0 ? 'Separar mi cupo' : 'Agotado';
                     
+                    // ¿El jugador actual ya está inscrito en la lista de este partido?
+                    const estaInscrito = p.inscritos && p.inscritos.some(jugador => jugador.uid === currentUser.uid);
+
                     let fechaAmigable = p.fecha;
                     try { const partes = p.fecha.split('-'); fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`; } catch(e){}
 
-                    // CONTROL DE ACCESO (Lógica Visual)
+                    // CONTROL DE ACCESO INTELIGENTE (BOTONES)
                     let botonAccion = '';
                     if (window.soyLiderGlobal) {
-                        botonAccion = `<button class="btn" style="width: 100%; background: #f1c40f; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('En el próximo paso: Aquí verás la lista de inscritos para este partido.')"><i class="ph-bold ph-users-three"></i> Gestionar Lista</button>`;
+                        botonAccion = `<button class="btn" style="width: 100%; background: #f1c40f; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="abrirGestionLista('${docSnap.id}')"><i class="ph-bold ph-users-three"></i> Gestionar Lista</button>`;
                     } else if (window.soyMiembroGlobal) {
-                        botonAccion = `<button class="btn" style="width: 100%; background: ${colorFondoBoton}; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('En el próximo paso: Este botón registrará tu asistencia.')"><i class="ph-bold ph-ticket"></i> ${textoBoton}</button>`;
+                        if (estaInscrito) {
+                            botonAccion = `<button class="btn" style="width: 100%; background: #222; color: #fff; font-weight: bold; border: 1px solid ${colorPrincipal}; font-size: 0.9rem;" disabled><i class="ph-bold ph-check-circle" style="color: ${colorPrincipal};"></i> Ya estás inscrito</button>`;
+                        } else if (cuposLibres > 0) {
+                            botonAccion = `<button class="btn" style="width: 100%; background: ${colorPrincipal}; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="separarCupoPartido('${docSnap.id}', '${nombreDeporte}', '${colorPrincipal}')"><i class="ph-bold ph-ticket"></i> Separar mi cupo</button>`;
+                        } else {
+                            botonAccion = `<button class="btn" style="width: 100%; background: #444; color: #999; font-weight: bold; border: none; font-size: 0.9rem;" disabled><i class="ph-bold ph-x-circle"></i> Cupos Agotados</button>`;
+                        }
                     } else {
-                        // LA MAGIA DE LA DOBLE ACCIÓN:
                         botonAccion = `<button class="btn" style="width: 100%; background: rgba(255,255,255,0.05); color: #fff; font-weight: bold; border: 1px dashed rgba(255,255,255,0.3); font-size: 0.85rem;" onclick="enviarSolicitudIngreso()"><i class="ph-bold ph-hand-waving"></i> Enviar Solicitud para Jugar</button>`;
                     }
 
@@ -430,140 +431,142 @@
                 }
             });
 
-            if (htmlTarjetas === '') {
-                listaPartidos.innerHTML = `
-                    <div style="text-align: center; padding: 30px 10px;">
-                        <i class="ph-bold ph-whistle" style="font-size: 2.5rem; color: #444;"></i>
-                        <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados de ${nombreDeporte} por el momento.</p>
-                    </div>
-                `;
-            } else { listaPartidos.innerHTML = htmlTarjetas; }
+            listaPartidos.innerHTML = htmlTarjetas || `<div style="text-align: center; padding: 30px 10px;"><i class="ph-bold ph-whistle" style="font-size: 2.5rem; color: #444;"></i><p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados de ${nombreDeporte} por el momento.</p></div>`;
         } catch (error) { console.error("Error al obtener partidos:", error); }
     };
 
     // ==========================================
-    // FUNCIÓN DOBLE ACCIÓN (ENVIAR SOLICITUD)
+    // FUNCIÓN: SEPARAR CUPO (RESTADOR DE ASIENTOS)
     // ==========================================
-    window.enviarSolicitudIngreso = async function() {
-        if (!currentUser) return alert("Inicia sesión para poder unirte.");
+    window.separarCupoPartido = async function(partidoId, nombreDeporte, colorPrincipal) {
+        if (!confirm("¿Estás seguro que deseas separar un cupo para este partido? Asegúrate de cumplir con las instrucciones de pago del organizador.")) return;
         
         try {
-            // 1. Escribimos la solicitud silenciosamente en la base de datos
-            // Primero verificamos si ya existe para no hacer spam
+            await updateDoc(doc(db, 'partidos', partidoId), {
+                cuposOcupados: increment(1), // Le suma 1 al contador
+                inscritos: arrayUnion({      // Agrega al jugador al array del partido
+                    uid: currentUser.uid,
+                    nombreUsuario: currentUser.displayName || 'Jugador',
+                    fotoUsuario: currentUser.photoURL || 'https://ui-avatars.com/api/?name=Jugador'
+                })
+            });
+            alert("¡Cupo separado con éxito! Nos vemos en la cancha.");
+            
+            // Recargar la vista de este deporte para ver el botón actualizado a "Ya inscrito"
+            const btnActivo = Array.from(document.querySelectorAll('.btn-sport-chip')).find(b => b.textContent.trim() === nombreDeporte);
+            if(btnActivo) btnActivo.click();
+        } catch (e) {
+            console.error(e);
+            alert("Ocurrió un error al intentar separar tu cupo. Quizás alguien te ganó el último lugar.");
+        }
+    }
+
+    // ==========================================
+    // FUNCIÓN: EL MODAL DORADO DEL LÍDER (VER ASISTENTES)
+    // ==========================================
+    const modalListaPartido = document.getElementById('modal-lista-partido');
+    document.getElementById('cerrar-lista-partido').addEventListener('click', () => modalListaPartido.style.display = 'none');
+
+    window.abrirGestionLista = async function(partidoId) {
+        modalListaPartido.style.display = 'flex';
+        const panelInscritos = document.getElementById('panel-inscritos');
+        panelInscritos.innerHTML = '<p style="color:var(--text-muted); text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando lista...</p>';
+        
+        try {
+            const docSnap = await getDoc(doc(db, 'partidos', partidoId));
+            if (docSnap.exists()) {
+                const p = docSnap.data();
+                let html = '';
+                
+                if (p.inscritos && p.inscritos.length > 0) {
+                    p.inscritos.forEach((jugador, index) => {
+                        html += `
+                            <div class="solicitud-item" style="border-left: 3px solid #f1c40f;">
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #ccc; font-weight: bold;">
+                                        ${index + 1}
+                                    </div>
+                                    <img src="${jugador.fotoUsuario}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid #f1c40f;">
+                                    <span style="color:#fff; font-weight:bold; font-size:0.95rem;">${jugador.nombreUsuario}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    panelInscritos.innerHTML = html;
+                } else {
+                    panelInscritos.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="ph-bold ph-ghost" style="font-size: 2.5rem; color: #444;"></i><p style="color:var(--text-muted); margin-top: 10px;">Aún no hay jugadores inscritos en este partido.</p></div>';
+                }
+            }
+        } catch(e) {
+            console.error(e);
+            panelInscritos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar la lista.</p>';
+        }
+    }
+
+    // Funciones Base
+    window.enviarSolicitudIngreso = async function() {
+        if (!currentUser) return alert("Inicia sesión para poder unirte.");
+        try {
             const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('usuarioUid', '==', currentUser.uid));
             const snap = await getDocs(q);
-            
             if (snap.empty) {
                 await addDoc(collection(db, 'solicitudes_comunidad'), {
-                    comunidadId: comunidadActivaId,
-                    usuarioUid: currentUser.uid,
-                    nombreUsuario: currentUser.displayName || 'Jugador',
-                    fotoUsuario: currentUser.photoURL || 'https://ui-avatars.com/api/?name=Jugador',
-                    estado: 'pendiente',
-                    fecha: new Date().toISOString()
+                    comunidadId: comunidadActivaId, usuarioUid: currentUser.uid, nombreUsuario: currentUser.displayName || 'Jugador',
+                    fotoUsuario: currentUser.photoURL || 'https://ui-avatars.com/api/?name=Jugador', estado: 'pendiente', fecha: new Date().toISOString()
                 });
             }
-
-            // 2. Disparamos WhatsApp al líder para notificarle de inmediato
             const numClean = String(window.comunidadActivaWsp || '').replace(/\D/g, '');
             if (numClean) {
-                const msj = `Hola! Soy ${currentUser.displayName}. Acabo de mandar una solicitud por CHALACAPP para unirme a tu comunidad "${window.comunidadActivaNombre}". ¡Acéptame para poder separar mi cupo en los partidos!`;
-                window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(msj)}`, '_blank');
-            } else {
-                alert("¡Tu solicitud se guardó en el sistema! El líder te aceptará pronto.");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("No pudimos enviar tu solicitud. Verifica tu conexión.");
-        }
+                window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(`Hola! Soy ${currentUser.displayName}. Acabo de mandar una solicitud por CHALACAPP para unirme a tu comunidad "${window.comunidadActivaNombre}". ¡Acéptame para poder jugar!`)}`, '_blank');
+            } else { alert("¡Tu solicitud se guardó en el sistema! El líder te aceptará pronto."); }
+        } catch (error) { console.error(error); alert("Error al enviar solicitud."); }
     };
 
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
     window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp, soyMiembro) => {
-        comunidadActivaId = id; 
-        window.soyLiderGlobal = esLider;
-        window.soyMiembroGlobal = soyMiembro;
-        window.comunidadActivaNombre = nombre;
-        window.comunidadActivaWsp = wsp;
+        comunidadActivaId = id; window.soyLiderGlobal = esLider; window.soyMiembroGlobal = soyMiembro;
+        window.comunidadActivaNombre = nombre; window.comunidadActivaWsp = wsp;
 
-        document.getElementById('hub-nombre').textContent = nombre;
-        document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
-        document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none';
-        document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
-
+        document.getElementById('hub-nombre').textContent = nombre; document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
+        document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none'; document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
         const btnWa = document.getElementById('btn-unirse-wa');
-        if (wsp) {
-            const numClean = String(wsp).replace(/\D/g, '');
-            btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme al grupo de WhatsApp de la comunidad " + nombre)}`, '_blank');
-        } else { btnWa.onclick = () => alert("Esta comunidad no tiene un link directo configurado."); }
+        if (wsp) { const numClean = String(wsp).replace(/\D/g, ''); btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme al grupo de WhatsApp de la comunidad " + nombre)}`, '_blank'); } 
+        else { btnWa.onclick = () => alert("Sin link directo configurado."); }
 
         const deportesArray = deportesRaw.split(',');
         const contenedorFiltros = document.getElementById('hub-deportes-filtros');
         const selectDeporteModal = document.getElementById('np-deporte'); 
-        
         contenedorFiltros.innerHTML = ''; selectDeporteModal.innerHTML = ''; 
         
         deportesArray.forEach((dep, index) => {
-            const isFirst = index === 0;
-            const nombreDeporte = dep.trim();
-            if (!nombreDeporte) return;
+            const isFirst = index === 0; const nombreDeporte = dep.trim(); if (!nombreDeporte) return;
             const colorPrincipal = obtenerColorDeporte(nombreDeporte);
-            const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)';
-            const color = isFirst ? '#000' : '#fff';
-            const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
-            
-            contenedorFiltros.innerHTML += `
-                <button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">
-                    ${nombreDeporte}
-                </button>
-            `;
+            const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)'; const color = isFirst ? '#000' : '#fff'; const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
+            contenedorFiltros.innerHTML += `<button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">${nombreDeporte}</button>`;
             selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
         });
-
         hubModal.classList.add('mostrar');
-        setTimeout(() => {
-            const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip');
-            if(primerBotonDeporte) primerBotonDeporte.click();
-        }, 150);
+        setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
 
-    // ==========================================
     // PANEL DEL LÍDER (GESTIÓN DE MIEMBROS)
-    // ==========================================
     const modalMiembros = document.getElementById('modal-miembros');
-    
-    document.getElementById('btn-ver-miembros').addEventListener('click', () => {
-        modalMiembros.style.display = 'flex';
-        cargarSolicitudes();
-    });
+    document.getElementById('btn-ver-miembros').addEventListener('click', () => { modalMiembros.style.display = 'flex'; cargarSolicitudes(); });
     document.getElementById('cerrar-miembros').addEventListener('click', () => modalMiembros.style.display = 'none');
 
-    // Control Tabs Miembros
-    const btnTabSol = document.getElementById('tab-solicitudes');
-    const btnTabActivos = document.getElementById('tab-activos');
-    const panelSol = document.getElementById('panel-solicitudes');
-    const panelActivos = document.getElementById('panel-activos');
+    const btnTabSol = document.getElementById('tab-solicitudes'); const btnTabActivos = document.getElementById('tab-activos');
+    const panelSol = document.getElementById('panel-solicitudes'); const panelActivos = document.getElementById('panel-activos');
 
-    btnTabSol.addEventListener('click', () => {
-        btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active');
-        panelSol.style.display = 'block'; panelActivos.style.display = 'none';
-    });
-    
-    btnTabActivos.addEventListener('click', () => {
-        btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active');
-        panelActivos.style.display = 'block'; panelSol.style.display = 'none';
-        cargarMiembrosActivos(); // <--- ¡AQUÍ ESTÁ LA FUNCIÓN QUE FALTABA LLAMAR!
-    });
+    btnTabSol.addEventListener('click', () => { btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active'); panelSol.style.display = 'block'; panelActivos.style.display = 'none'; });
+    btnTabActivos.addEventListener('click', () => { btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active'); panelActivos.style.display = 'block'; panelSol.style.display = 'none'; cargarMiembrosActivos(); });
 
     window.cargarSolicitudes = async function() {
         panelSol.innerHTML = '<p style="color:var(--text-muted); text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando...</p>';
         try {
             const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'pendiente'));
-            const snap = await getDocs(q);
-            let html = '';
-            
+            const snap = await getDocs(q); let html = '';
             snap.forEach(d => {
                 const s = d.data();
                 html += `
@@ -572,28 +575,18 @@
                             <img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #555;">
                             <span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span>
                         </div>
-                        <button class="btn" style="width:auto !important; padding:6px 12px; background:#2ecc71; color:#000; border:none; border-radius:6px;" onclick="aceptarJugador('${d.id}', '${s.usuarioUid}')">
-                            <i class="ph-bold ph-check"></i> Aceptar
-                        </button>
-                    </div>
-                `;
+                        <button class="btn" style="width:auto !important; padding:6px 12px; background:#2ecc71; color:#000; border:none; border-radius:6px;" onclick="aceptarJugador('${d.id}', '${s.usuarioUid}')"><i class="ph-bold ph-check"></i> Aceptar</button>
+                    </div>`;
             });
             panelSol.innerHTML = html || '<p style="color:var(--text-muted); text-align:center;">No hay solicitudes nuevas.</p>';
-        } catch (e) {
-            console.error(e);
-            panelSol.innerHTML = '<p style="color:red; text-align:center;">Error al cargar datos.</p>';
-        }
+        } catch (e) { panelSol.innerHTML = '<p style="color:red; text-align:center;">Error al cargar datos.</p>'; }
     };
 
-    // --- ESTA ES LA FUNCIÓN NUEVA QUE DIBUJA LA LISTA OFICIAL ---
     window.cargarMiembrosActivos = async function() {
         panelActivos.innerHTML = '<p style="color:var(--text-muted); text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando miembros...</p>';
         try {
-            // Buscamos a todos los que tienen estado 'aceptada' en esta comunidad
             const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'aceptada'));
-            const snap = await getDocs(q);
-            let html = '';
-            
+            const snap = await getDocs(q); let html = '';
             snap.forEach(d => {
                 const s = d.data();
                 html += `
@@ -602,42 +595,26 @@
                             <img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid var(--primary-green);">
                             <span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span>
                         </div>
-                        <span style="color: var(--primary-green); font-size: 0.75rem; font-weight: bold; background: rgba(46, 204, 113, 0.1); padding: 4px 8px; border-radius: 4px;">
-                            <i class="ph-bold ph-check-circle"></i> Miembro
-                        </span>
-                    </div>
-                `;
+                        <span style="color: var(--primary-green); font-size: 0.75rem; font-weight: bold; background: rgba(46, 204, 113, 0.1); padding: 4px 8px; border-radius: 4px;"><i class="ph-bold ph-check-circle"></i> Miembro</span>
+                    </div>`;
             });
             panelActivos.innerHTML = html || '<p style="color:var(--text-muted); text-align:center;">Aún no hay miembros aceptados.</p>';
-        } catch (e) {
-            console.error(e);
-            panelActivos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar miembros.</p>';
-        }
+        } catch (e) { panelActivos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar miembros.</p>'; }
     };
 
     window.aceptarJugador = async function(idSolicitud, uidJugador) {
         try {
             await updateDoc(doc(db, 'solicitudes_comunidad', idSolicitud), { estado: 'aceptada' });
-            
-            await updateDoc(doc(db, 'comunidades', comunidadActivaId), {
-                miembros_uids: arrayUnion(uidJugador)
-            });
-            
-            alert("¡Jugador aceptado! Ahora pertenece a la comunidad.");
-            cargarSolicitudes(); 
-        } catch (e) {
-            console.error(e);
-            alert("Error al aceptar jugador. Verifica la consola.");
-        }
+            await updateDoc(doc(db, 'comunidades', comunidadActivaId), { miembros_uids: arrayUnion(uidJugador) });
+            alert("¡Jugador aceptado! Ahora pertenece a la comunidad."); cargarSolicitudes(); 
+        } catch (e) { alert("Error al aceptar jugador. Verifica la consola."); }
     };
 
-    // (Opcional) Funcionalidades Restantes: Nuevo Partido, Registrar Comunidad...
+    // Crear Partido (Modal)
     document.getElementById('btn-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'flex');
     document.getElementById('cerrar-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'none');
-
     document.getElementById('form-nuevo-partido').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]');
         btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; btnSubmit.disabled = true;
         const nuevoPartido = {
             comunidadId: comunidadActivaId, creadorUid: currentUser.uid, deporte: document.getElementById('np-deporte').value,
@@ -651,8 +628,7 @@
             document.getElementById('modal-nuevo-partido').style.display = 'none'; e.target.reset();
             const botones = document.querySelectorAll('.btn-sport-chip');
             botones.forEach(b => { if (b.textContent.trim() === nuevoPartido.deporte) b.click(); });
-        } catch (error) { console.error("Error al publicar:", error); } 
-        finally { btnSubmit.innerHTML = '<i class="ph-bold ph-check-circle"></i> Publicar Partido'; btnSubmit.disabled = false; }
+        } catch (error) { alert("Ocurrió un error al guardar el partido."); } finally { btnSubmit.innerHTML = '<i class="ph-bold ph-check-circle"></i> Publicar Partido'; btnSubmit.disabled = false; }
     });
 
     const modalCrear = document.getElementById('modal-crear-comunidad');
