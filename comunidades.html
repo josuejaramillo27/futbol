@@ -29,6 +29,11 @@
         .btn-crear-compacto:hover { background: var(--primary-green) !important; color: #080b0a !important; }
         .btn-sport-chip { width: auto !important; min-width: auto !important; max-width: max-content !important; flex: 0 0 auto !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 8px 20px !important; border-radius: 30px !important; font-size: 0.85rem !important; font-weight: 800 !important; letter-spacing: 0.5px !important; cursor: pointer !important; transition: all 0.25s ease !important; box-shadow: none !important; margin: 0 !important; }
         .solicitud-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
+        
+        /* Estilos para el formulario de resultados */
+        .resultado-jugador-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .resultado-jugador-row input[type="number"] { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; text-align: center; }
+        .resultado-jugador-row input[type="radio"] { width: 20px; height: 20px; accent-color: #f1c40f; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -63,9 +68,6 @@
     <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
 </main>
 
-<!-- ========================================== -->
-<!-- HUB DE LA COMUNIDAD -->
-<!-- ========================================== -->
 <div id="hub-comunidad" class="hub-modal">
     <div class="hub-header-banner">
         <div style="max-width: 900px; margin: 0 auto;">
@@ -96,7 +98,7 @@
         </div>
         <div class="hub-card-box">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="margin: 0; color: #fff; font-size: 1.1rem;"><i class="ph-bold ph-soccer-ball" style="color: var(--primary-green);"></i> Partidos Próximos</h3>
+                <h3 style="margin: 0; color: #fff; font-size: 1.1rem;"><i class="ph-bold ph-soccer-ball" style="color: var(--primary-green);"></i> Partidos Programados</h3>
                 <span style="font-size: 0.75rem; color: var(--text-muted);">Actualizado en vivo</span>
             </div>
             <div id="hub-lista-partidos"></div>
@@ -111,11 +113,6 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODALES Y FORMULARIOS -->
-<!-- ========================================== -->
-
-<!-- Modal: Crear Comunidad -->
 <div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -131,17 +128,18 @@
     </div>
 </div>
 
-<!-- Modal: Organizar Partido -->
 <div id="modal-nuevo-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;">
         <button id="cerrar-nuevo-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
         <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-calendar-plus"></i> Organizar Partido</h2>
         <form id="form-nuevo-partido">
             <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deporte</label>
             <select id="np-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
-            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha</label><input type="date" id="np-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="flex: 2;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha</label><input type="date" id="np-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
                 <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Hora</label><input type="time" id="np-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Duración (Min)</label><input type="number" id="np-duracion" required value="60" min="30" max="180" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
             </div>
             
             <div style="display: flex; gap: 15px; margin-bottom: 15px;">
@@ -158,22 +156,20 @@
     </div>
 </div>
 
-<!-- NUEVO MODAL: EDITAR PARTIDO -->
 <div id="modal-editar-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1005; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #3498db; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-editar-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
         <h2 style="margin-top:0; color:#3498db;"><i class="ph-fill ph-pencil-simple"></i> Editar Partido</h2>
         <form id="form-editar-partido">
-            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha</label><input type="date" id="ep-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="flex: 2;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha</label><input type="date" id="ep-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
                 <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Hora</label><input type="time" id="ep-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Duración</label><input type="number" id="ep-duracion" required min="30" max="180" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
             </div>
-            
             <div style="display: flex; gap: 15px; margin-bottom: 15px;">
                 <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Lugar / Cancha</label><input type="text" id="ep-lugar" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing: border-box;"></div>
-                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Link Maps (Opcional)</label><input type="url" id="ep-maps" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing: border-box;"></div>
+                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Link Maps</label><input type="url" id="ep-maps" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing: border-box;"></div>
             </div>
-            
             <div style="display: flex; gap: 15px; margin-bottom: 25px;">
                 <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Cupos Totales</label><input type="number" id="ep-cupos" required min="2" max="100" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
                 <div style="flex: 2;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Costo e Instrucciones</label><input type="text" id="ep-precio" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
@@ -183,7 +179,6 @@
     </div>
 </div>
 
-<!-- Modal: Ver Miembros de la Comunidad -->
 <div id="modal-miembros" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1002; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
         <button id="cerrar-miembros" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -197,15 +192,36 @@
     </div>
 </div>
 
-<!-- Modal: Lista de Asistentes al Partido (AHORA CON LIBERAR CUPO) -->
 <div id="modal-lista-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1003; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:400px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
         <button id="cerrar-lista-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
         <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-clipboard-text"></i> Asistentes</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Jugadores que han separado su cupo para este partido.</p>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Jugadores que separaron su cupo para este partido.</p>
         <div id="panel-inscritos" style="overflow-y: auto; flex: 1; padding-right: 5px;"></div>
     </div>
 </div>
+
+<div id="modal-resultados-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1006; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:600px; position:relative; border:1px solid #2ecc71; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; display: flex; flex-direction: column;">
+        <button id="cerrar-resultados-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <h2 style="margin-top:0; color:#2ecc71;"><i class="ph-fill ph-trophy"></i> Tercer Tiempo</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:15px;">El partido ha finalizado. Registra las estadísticas para el Ranking.</p>
+        
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 10px;">
+            <div style="font-size:0.75rem; color:#aaa; font-weight:bold;">JUGADOR</div>
+            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">GOLES</div>
+            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">ASIST.</div>
+            <div style="font-size:0.75rem; color:#f1c40f; font-weight:bold; text-align:center;">⭐ MVP</div>
+        </div>
+
+        <form id="form-resultados-partido" style="overflow-y: auto; flex: 1;">
+            <div id="lista-resultados-jugadores">
+                </div>
+            <button type="submit" class="btn" style="width:100%; background:#2ecc71; color:#000; font-weight:bold; margin-top: 20px;"><i class="ph-bold ph-floppy-disk"></i> Guardar Resultados Oficiales</button>
+        </form>
+    </div>
+</div>
+
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -227,8 +243,9 @@
     
     let currentUser = null;
     let comunidadActivaId = null; 
-    let partidoEditarId = null; // Guardará el ID del partido que estamos editando
-    window.deporteActivoGlobal = ''; // Guardará el deporte que estamos viendo en pantalla
+    let partidoEditarId = null; 
+    let partidoResultadosId = null; // Para guardar resultados
+    window.deporteActivoGlobal = ''; 
 
     window.soyLiderGlobal = false; window.soyMiembroGlobal = false;
     window.comunidadActivaNombre = ''; window.comunidadActivaWsp = '';
@@ -284,9 +301,9 @@
         } catch (error) { console.error("Error:", error); }
     }
 
-    // CARGAR PARTIDOS 
+    // CARGAR PARTIDOS Y DETECTAR TIEMPO
     window.seleccionarDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
-        window.deporteActivoGlobal = nombreDeporte; // Lo guardamos para refrescar luego
+        window.deporteActivoGlobal = nombreDeporte; 
 
         document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; });
         btnElement.style.background = colorPrincipal; btnElement.style.color = '#000'; btnElement.style.border = `1px solid ${colorPrincipal}`;
@@ -297,44 +314,69 @@
         try {
             const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId));
             const snap = await getDocs(q); let htmlTarjetas = '';
+            const ahora = new Date();
             
             snap.forEach(docSnap => {
                 const p = docSnap.data();
                 if (p.deporte === nombreDeporte) {
+                    // LÓGICA DE TIEMPO Y ESTADOS
+                    let partidoYaPaso = false;
+                    try {
+                        const [year, month, day] = p.fecha.split('-');
+                        const [hour, minute] = p.hora.split(':');
+                        const fechaInicio = new Date(year, month - 1, day, hour, minute);
+                        const duracionMs = (p.duracion || 60) * 60000; 
+                        const fechaFin = new Date(fechaInicio.getTime() + duracionMs);
+                        if (ahora > fechaFin) partidoYaPaso = true;
+                    } catch(e){}
+
                     const cuposLibres = p.cuposTotales - (p.cuposOcupados || 0);
                     const estaInscrito = p.inscritos && p.inscritos.some(j => j.uid === currentUser.uid);
                     let fechaAmigable = p.fecha; try { const partes = p.fecha.split('-'); fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`; } catch(e){}
 
-                    // TEXTO Y LINK A MAPS
-                    let htmlLugar = '';
-                    if (p.linkMaps && p.linkMaps.trim() !== '') {
-                        htmlLugar = `<a href="${p.linkMaps}" target="_blank" style="color: #3498db; text-decoration: underline; font-weight: bold;">${p.lugar}</a> <span style="font-size:0.75rem; color:#f1c40f; font-weight:bold; margin-left: 8px;">👈 PRESIONA PARA VER LA DIRECCIÓN</span>`;
-                    } else {
-                        htmlLugar = p.lugar;
-                    }
+                    let htmlLugar = p.linkMaps && p.linkMaps.trim() !== '' ? `<a href="${p.linkMaps}" target="_blank" style="color: #3498db; text-decoration: underline; font-weight: bold;">${p.lugar}</a> <span style="font-size:0.75rem; color:#f1c40f; font-weight:bold; margin-left: 8px;">👈 PRESIONA PARA VER LA DIRECCIÓN</span>` : p.lugar;
 
                     let botonAccion = '';
-                    if (window.soyLiderGlobal) {
-                        botonAccion = `
-                            <div style="display: flex; gap: 8px; width: 100%;">
-                                <button class="btn" style="flex: 1; padding: 8px 0; background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid #e74c3c; font-weight: bold; border-radius: 8px;" onclick="eliminarPartido('${docSnap.id}')" title="Eliminar"><i class="ph-bold ph-trash"></i></button>
-                                <button class="btn" style="flex: 1; padding: 8px 0; background: transparent; color: ${colorPrincipal}; border: 1px solid ${colorPrincipal}; font-weight: bold; font-size: 0.9rem;" onclick="abrirEditarPartido('${docSnap.id}')"><i class="ph-bold ph-pencil-simple"></i> Editar</button>
-                                <button class="btn" style="flex: 1; padding: 8px 0; background: #f1c40f; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="abrirGestionLista('${docSnap.id}')"><i class="ph-bold ph-users-three"></i> Lista</button>
-                            </div>
-                        `;
-                    } else if (window.soyMiembroGlobal) {
-                        if (estaInscrito) botonAccion = `<button class="btn" style="width:100%; background:#222; color:#fff; font-weight:bold; border:1px solid ${colorPrincipal}; font-size:0.9rem;" disabled><i class="ph-bold ph-check-circle" style="color:${colorPrincipal};"></i> Ya estás inscrito</button>`;
-                        else if (cuposLibres > 0) botonAccion = `<button class="btn" style="width:100%; background:${colorPrincipal}; color:#000; font-weight:bold; border:none; font-size:0.9rem;" onclick="separarCupoPartido('${docSnap.id}')"><i class="ph-bold ph-ticket"></i> Separar mi cupo</button>`;
-                        else botonAccion = `<button class="btn" style="width:100%; background:#444; color:#999; font-weight:bold; border:none; font-size:0.9rem;" disabled><i class="ph-bold ph-x-circle"></i> Cupos Agotados</button>`;
-                    } else {
-                        botonAccion = `<button class="btn" style="width:100%; background:rgba(255,255,255,0.05); color:#fff; font-weight:bold; border:1px dashed rgba(255,255,255,0.3); font-size:0.85rem;" onclick="enviarSolicitudIngreso()"><i class="ph-bold ph-hand-waving"></i> Enviar Solicitud para Jugar</button>`;
+
+                    // SI EL PARTIDO YA TERMINÓ
+                    if (partidoYaPaso) {
+                        if (p.estado === 'finalizado') {
+                            botonAccion = `<div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px dashed #2ecc71;"><i class="ph-bold ph-check-circle"></i> Resultados Publicados</div>`;
+                        } else {
+                            if (window.soyLiderGlobal) {
+                                botonAccion = `<button class="btn" style="width:100%; background:#2ecc71; color:#000; font-weight:bold; border:none; font-size:0.95rem; padding: 12px;" onclick="abrirResultadosPartido('${docSnap.id}')"><i class="ph-bold ph-pencil-line"></i> 📝 Cargar Resultados Oficiales</button>`;
+                            } else {
+                                botonAccion = `<div style="background: rgba(255,255,255,0.05); color: #aaa; text-align: center; padding: 10px; border-radius: 8px; font-size: 0.85rem;"><i class="ph-bold ph-hourglass-high"></i> Partido finalizado. Esperando resultados del organizador...</div>`;
+                            }
+                        }
+                    } 
+                    // SI EL PARTIDO AÚN NO TERMINA
+                    else {
+                        if (window.soyLiderGlobal) {
+                            botonAccion = `
+                                <div style="display: flex; gap: 8px; width: 100%;">
+                                    <button class="btn" style="flex: 1; padding: 8px 0; background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid #e74c3c; font-weight: bold; border-radius: 8px;" onclick="eliminarPartido('${docSnap.id}')" title="Eliminar"><i class="ph-bold ph-trash"></i></button>
+                                    <button class="btn" style="flex: 1; padding: 8px 0; background: transparent; color: ${colorPrincipal}; border: 1px solid ${colorPrincipal}; font-weight: bold; font-size: 0.9rem;" onclick="abrirEditarPartido('${docSnap.id}')"><i class="ph-bold ph-pencil-simple"></i> Editar</button>
+                                    <button class="btn" style="flex: 1; padding: 8px 0; background: #f1c40f; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="abrirGestionLista('${docSnap.id}')"><i class="ph-bold ph-users-three"></i> Lista</button>
+                                </div>
+                            `;
+                        } else if (window.soyMiembroGlobal) {
+                            if (estaInscrito) botonAccion = `<button class="btn" style="width:100%; background:#222; color:#fff; font-weight:bold; border:1px solid ${colorPrincipal}; font-size:0.9rem;" disabled><i class="ph-bold ph-check-circle" style="color:${colorPrincipal};"></i> Ya estás inscrito</button>`;
+                            else if (cuposLibres > 0) botonAccion = `<button class="btn" style="width:100%; background:${colorPrincipal}; color:#000; font-weight:bold; border:none; font-size:0.9rem;" onclick="separarCupoPartido('${docSnap.id}')"><i class="ph-bold ph-ticket"></i> Separar mi cupo</button>`;
+                            else botonAccion = `<button class="btn" style="width:100%; background:#444; color:#999; font-weight:bold; border:none; font-size:0.9rem;" disabled><i class="ph-bold ph-x-circle"></i> Cupos Agotados</button>`;
+                        } else {
+                            botonAccion = `<button class="btn" style="width:100%; background:rgba(255,255,255,0.05); color:#fff; font-weight:bold; border:1px dashed rgba(255,255,255,0.3); font-size:0.85rem;" onclick="enviarSolicitudIngreso()"><i class="ph-bold ph-hand-waving"></i> Enviar Solicitud para Jugar</button>`;
+                        }
                     }
 
+                    // TÍTULO CAMBIA SI FINALIZÓ
+                    const badgeEstado = partidoYaPaso && p.estado !== 'finalizado' ? `<span style="background: #e74c3c; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; vertical-align: middle; margin-left: 8px;">FINALIZADO</span>` : '';
+
                     htmlTarjetas += `
-                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; margin-bottom: 15px; text-align: left; transition: all 0.3s ease;">
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; margin-bottom: 15px; text-align: left; transition: all 0.3s ease; opacity: ${partidoYaPaso ? '0.7' : '1'};">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                                 <div>
-                                    <h4 style="margin: 0; color: ${colorPrincipal}; font-size: 1.15rem;"><i class="ph-bold ph-calendar-blank"></i> ${fechaAmigable} - ${p.hora}</h4>
+                                    <h4 style="margin: 0; color: ${colorPrincipal}; font-size: 1.15rem;"><i class="ph-bold ph-calendar-blank"></i> ${fechaAmigable} - ${p.hora} ${badgeEstado}</h4>
                                     <p style="margin: 4px 0 0 0; color: #fff; font-size: 0.9rem;"><i class="ph-bold ph-map-pin"></i> ${htmlLugar}</p>
                                 </div>
                                 <div style="background: rgba(255,255,255,0.05); color: #ccc; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1);">
@@ -369,11 +411,18 @@
         } catch (e) { alert("Error al intentar separar tu cupo."); }
     }
 
-    // ==========================================
-    // FUNCIÓN: EDITAR PARTIDO (LÍDER)
-    // ==========================================
+    // ELIMINAR PARTIDO
+    window.eliminarPartido = async function(partidoId) {
+        if (!confirm("🚨 ¿Estás seguro que deseas ELIMINAR este partido por completo? Esta acción no se puede deshacer.")) return;
+        try {
+            await deleteDoc(doc(db, 'partidos', partidoId));
+            alert("Partido eliminado correctamente.");
+            refrescarPartidosActuales(); 
+        } catch (e) { console.error(e); alert("Error al intentar eliminar el partido."); }
+    }
+
+    // EDITAR PARTIDO
     document.getElementById('cerrar-editar-partido').addEventListener('click', () => document.getElementById('modal-editar-partido').style.display = 'none');
-    
     window.abrirEditarPartido = async function(partidoId) {
         partidoEditarId = partidoId;
         try {
@@ -382,15 +431,15 @@
                 const p = pSnap.data();
                 document.getElementById('ep-fecha').value = p.fecha;
                 document.getElementById('ep-hora').value = p.hora;
+                document.getElementById('ep-duracion').value = p.duracion || 60;
                 document.getElementById('ep-lugar').value = p.lugar;
                 document.getElementById('ep-maps').value = p.linkMaps || '';
                 document.getElementById('ep-cupos').value = p.cuposTotales;
                 document.getElementById('ep-precio').value = p.precioInstrucciones;
                 document.getElementById('modal-editar-partido').style.display = 'flex';
             }
-        } catch(e) { console.error(e); alert("Error al cargar datos del partido."); }
+        } catch(e) { alert("Error al cargar datos del partido."); }
     }
-
     document.getElementById('form-editar-partido').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btnSubmit = e.target.querySelector('button[type="submit"]');
@@ -399,6 +448,7 @@
             await updateDoc(doc(db, 'partidos', partidoEditarId), {
                 fecha: document.getElementById('ep-fecha').value,
                 hora: document.getElementById('ep-hora').value,
+                duracion: parseInt(document.getElementById('ep-duracion').value),
                 lugar: document.getElementById('ep-lugar').value,
                 linkMaps: document.getElementById('ep-maps').value,
                 cuposTotales: parseInt(document.getElementById('ep-cupos').value),
@@ -407,13 +457,88 @@
             alert("¡Partido actualizado correctamente!");
             document.getElementById('modal-editar-partido').style.display = 'none';
             refrescarPartidosActuales();
-        } catch (error) { alert("Error al actualizar el partido."); } 
+        } catch (error) { alert("Error al actualizar."); } 
         finally { btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Cambios'; btnSubmit.disabled = false; }
     });
 
-    // ==========================================
-    // FUNCIÓN: GESTIONAR LISTA Y LIBERAR CUPO
-    // ==========================================
+    // CARGAR RESULTADOS (TERCER TIEMPO)
+    const modalResultados = document.getElementById('modal-resultados-partido');
+    document.getElementById('cerrar-resultados-partido').addEventListener('click', () => modalResultados.style.display = 'none');
+    
+    window.abrirResultadosPartido = async function(partidoId) {
+        partidoResultadosId = partidoId;
+        modalResultados.style.display = 'flex';
+        const listaJugadores = document.getElementById('lista-resultados-jugadores');
+        listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando jugadores...</p>';
+        
+        try {
+            const pSnap = await getDoc(doc(db, 'partidos', partidoId));
+            if(pSnap.exists()){
+                const p = pSnap.data();
+                let html = '';
+                if(p.inscritos && p.inscritos.length > 0){
+                    p.inscritos.forEach((j, index) => {
+                        html += `
+                            <div class="resultado-jugador-row" data-uid="${j.uid}">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #555;">
+                                    <span style="color:#fff; font-size:0.85rem; font-weight:bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${j.nombreUsuario}</span>
+                                </div>
+                                <input type="number" class="res-goles" min="0" value="0">
+                                <input type="number" class="res-asist" min="0" value="0">
+                                <div style="text-align:center;">
+                                    <input type="radio" name="res-mvp" value="${j.uid}" ${index === 0 ? 'checked' : ''}>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    listaJugadores.innerHTML = html;
+                } else {
+                    listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Nadie asistió al partido.</p>';
+                }
+            }
+        } catch(e){
+            listaJugadores.innerHTML = '<p style="color:red; text-align:center;">Error al cargar jugadores.</p>';
+        }
+    };
+
+    document.getElementById('form-resultados-partido').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...'; btnSubmit.disabled = true;
+        
+        const resultados = [];
+        let mvpUid = null;
+        
+        document.querySelectorAll('.resultado-jugador-row').forEach(row => {
+            const uid = row.getAttribute('data-uid');
+            const goles = parseInt(row.querySelector('.res-goles').value) || 0;
+            const asistencias = parseInt(row.querySelector('.res-asist').value) || 0;
+            const esMvp = row.querySelector('input[type="radio"]').checked;
+            
+            if(esMvp) mvpUid = uid;
+            
+            resultados.push({ uid, goles, asistencias, mvp: esMvp });
+        });
+
+        try {
+            await updateDoc(doc(db, 'partidos', partidoResultadosId), {
+                estado: 'finalizado',
+                resultadosOficiales: resultados,
+                mvp: mvpUid
+            });
+            alert("¡Resultados oficiales guardados! Los jugadores ya sumaron puntos en su historial.");
+            modalResultados.style.display = 'none';
+            refrescarPartidosActuales();
+        } catch (error) {
+            console.error(error);
+            alert("Error al guardar resultados.");
+        } finally {
+            btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Resultados Oficiales'; btnSubmit.disabled = false;
+        }
+    });
+
+    // GESTIONAR LISTA
     const modalListaPartido = document.getElementById('modal-lista-partido');
     document.getElementById('cerrar-lista-partido').addEventListener('click', () => modalListaPartido.style.display = 'none');
     
@@ -427,7 +552,6 @@
                 const p = docSnap.data(); let html = '';
                 if (p.inscritos && p.inscritos.length > 0) {
                     p.inscritos.forEach((jugador, index) => {
-                        // SE AÑADIÓ EL BOTÓN LIBERAR AQUÍ
                         html += `
                             <div class="solicitud-item" style="border-left: 3px solid #f1c40f;">
                                 <div style="display:flex; align-items:center; gap:12px;">
@@ -444,46 +568,20 @@
         } catch(e) { panelInscritos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar lista.</p>'; }
     }
 
-    // LÓGICA DE LIBERAR CUPO (Sacar a un jugador del partido)
     window.liberarCupoJugador = async function(partidoId, uidJugador, nombre) {
         if (!confirm(`¿Seguro que deseas liberar el cupo de ${nombre}?`)) return;
         try {
-            const pRef = doc(db, 'partidos', partidoId);
-            const pSnap = await getDoc(pRef);
+            const pRef = doc(db, 'partidos', partidoId); const pSnap = await getDoc(pRef);
             if(pSnap.exists()){
                 const data = pSnap.data();
-                // Filtramos la lista sacando a este jugador
                 const inscritosActualizados = data.inscritos.filter(j => j.uid !== uidJugador);
-                
-                await updateDoc(pRef, {
-                    inscritos: inscritosActualizados,
-                    cuposOcupados: increment(-1) // Restamos un cupo ocupado
-                });
-                
-                alert("Cupo liberado con éxito.");
-                abrirGestionLista(partidoId); // Refresca la ventana de la lista
-                refrescarPartidosActuales(); // Refresca la tarjeta en el fondo
+                await updateDoc(pRef, { inscritos: inscritosActualizados, cuposOcupados: increment(-1) });
+                alert("Cupo liberado con éxito."); abrirGestionLista(partidoId); refrescarPartidosActuales(); 
             }
-        } catch(e) {
-            console.error(e);
-            alert("Error al liberar el cupo.");
-        }
+        } catch(e) { alert("Error al liberar el cupo."); }
     }
 
-    window.enviarSolicitudIngreso = async function() {
-        if (!currentUser) return alert("Inicia sesión para poder unirte.");
-        try {
-            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('usuarioUid', '==', currentUser.uid));
-            const snap = await getDocs(q);
-            if (snap.empty) {
-                await addDoc(collection(db, 'solicitudes_comunidad'), { comunidadId: comunidadActivaId, usuarioUid: currentUser.uid, nombreUsuario: currentUser.displayName || 'Jugador', fotoUsuario: currentUser.photoURL || 'https://ui-avatars.com/api/?name=Jugador', estado: 'pendiente', fecha: new Date().toISOString() });
-            }
-            const numClean = String(window.comunidadActivaWsp || '').replace(/\D/g, '');
-            if (numClean) window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(`Hola! Soy ${currentUser.displayName}. Acabo de mandar una solicitud por CHALACAPP para unirme a tu comunidad "${window.comunidadActivaNombre}". ¡Acéptame para poder jugar!`)}`, '_blank');
-            else alert("Tu solicitud se guardó correctamente.");
-        } catch (error) { alert("Error al enviar solicitud."); }
-    };
-
+    // NAVEGACIÓN Y APERTURA DE COMUNIDAD
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
@@ -507,74 +605,7 @@
         setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
 
-    // GESTIÓN DE MIEMBROS (CON ELIMINAR)
-    const modalMiembros = document.getElementById('modal-miembros');
-    document.getElementById('btn-ver-miembros').addEventListener('click', () => { modalMiembros.style.display = 'flex'; cargarSolicitudes(); });
-    document.getElementById('cerrar-miembros').addEventListener('click', () => modalMiembros.style.display = 'none');
-    const btnTabSol = document.getElementById('tab-solicitudes'); const btnTabActivos = document.getElementById('tab-activos');
-    const panelSol = document.getElementById('panel-solicitudes'); const panelActivos = document.getElementById('panel-activos');
-
-    btnTabSol.addEventListener('click', () => { btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active'); panelSol.style.display = 'block'; panelActivos.style.display = 'none'; });
-    btnTabActivos.addEventListener('click', () => { btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active'); panelActivos.style.display = 'block'; panelSol.style.display = 'none'; cargarMiembrosActivos(); });
-
-    window.cargarSolicitudes = async function() {
-        panelSol.innerHTML = '<p style="color:#aaa; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando...</p>';
-        try {
-            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'pendiente'));
-            const snap = await getDocs(q); let html = '';
-            snap.forEach(d => {
-                const s = d.data();
-                html += `
-                    <div class="solicitud-item">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #555;">
-                            <span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span>
-                        </div>
-                        <button class="btn" style="width:auto !important; padding:6px 12px; background:#2ecc71; color:#000; border:none; border-radius:6px;" onclick="aceptarJugador('${d.id}', '${s.usuarioUid}')"><i class="ph-bold ph-check"></i> Aceptar</button>
-                    </div>`;
-            });
-            panelSol.innerHTML = html || '<p style="color:#aaa; text-align:center;">No hay solicitudes nuevas.</p>';
-        } catch (e) { panelSol.innerHTML = '<p style="color:red; text-align:center;">Error al cargar datos.</p>'; }
-    };
-
-    window.cargarMiembrosActivos = async function() {
-        panelActivos.innerHTML = '<p style="color:#aaa; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando miembros...</p>';
-        try {
-            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'aceptada'));
-            const snap = await getDocs(q); let html = '';
-            snap.forEach(d => {
-                const s = d.data();
-                html += `
-                    <div class="solicitud-item">
-                        <div style="display:flex; align-items:center; gap:12px;">
-                            <img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid var(--primary-green);">
-                            <span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span>
-                        </div>
-                        <button class="btn" style="width:auto !important; padding:6px 10px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.8rem;" onclick="eliminarJugador('${d.id}', '${s.usuarioUid}', '${s.nombreUsuario}')"><i class="ph-bold ph-trash"></i> Eliminar</button>
-                    </div>`;
-            });
-            panelActivos.innerHTML = html || '<p style="color:#aaa; text-align:center;">Aún no hay miembros aceptados.</p>';
-        } catch (e) { panelActivos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar miembros.</p>'; }
-    };
-
-    window.aceptarJugador = async function(idSolicitud, uidJugador) {
-        try {
-            await updateDoc(doc(db, 'solicitudes_comunidad', idSolicitud), { estado: 'aceptada' });
-            await updateDoc(doc(db, 'comunidades', comunidadActivaId), { miembros_uids: arrayUnion(uidJugador) });
-            alert("¡Jugador aceptado!"); cargarSolicitudes(); 
-        } catch (e) { alert("Error al aceptar jugador."); }
-    };
-
-    window.eliminarJugador = async function(idSolicitud, uidJugador, nombre) {
-        if (!confirm(`¿Estás seguro que deseas eliminar a ${nombre} de la comunidad?`)) return;
-        try {
-            await deleteDoc(doc(db, 'solicitudes_comunidad', idSolicitud));
-            await updateDoc(doc(db, 'comunidades', comunidadActivaId), { miembros_uids: arrayRemove(uidJugador) });
-            alert("Jugador eliminado correctamente de la comunidad."); cargarMiembrosActivos();
-        } catch (e) { alert("Error al eliminar al jugador."); }
-    };
-
-    // FORMULARIOS NUEVO PARTIDO Y NUEVA COMUNIDAD
+    // FORMULARIOS NUEVO PARTIDO
     document.getElementById('btn-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'flex');
     document.getElementById('cerrar-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'none');
     document.getElementById('form-nuevo-partido').addEventListener('submit', async (e) => {
@@ -582,7 +613,7 @@
         btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; btnSubmit.disabled = true;
         const nuevoPartido = {
             comunidadId: comunidadActivaId, creadorUid: currentUser.uid, deporte: document.getElementById('np-deporte').value,
-            fecha: document.getElementById('np-fecha').value, hora: document.getElementById('np-hora').value,
+            fecha: document.getElementById('np-fecha').value, hora: document.getElementById('np-hora').value, duracion: parseInt(document.getElementById('np-duracion').value),
             lugar: document.getElementById('np-lugar').value, linkMaps: document.getElementById('np-maps').value, 
             cuposTotales: parseInt(document.getElementById('np-cupos').value), cuposOcupados: 0, 
             precioInstrucciones: document.getElementById('np-precio').value, estado: 'abierto', fechaCreacion: new Date().toISOString()
@@ -595,12 +626,67 @@
         } catch (error) { alert("Ocurrió un error al guardar el partido."); } finally { btnSubmit.innerHTML = '<i class="ph-bold ph-check-circle"></i> Publicar Partido'; btnSubmit.disabled = false; }
     });
 
+    // RESTO DE FUNCIONES (Miembros, Solicitudes, etc - Mantenidas iguales)
+    const modalMiembros = document.getElementById('modal-miembros');
+    document.getElementById('btn-ver-miembros').addEventListener('click', () => { modalMiembros.style.display = 'flex'; cargarSolicitudes(); });
+    document.getElementById('cerrar-miembros').addEventListener('click', () => modalMiembros.style.display = 'none');
+    const btnTabSol = document.getElementById('tab-solicitudes'); const btnTabActivos = document.getElementById('tab-activos');
+    const panelSol = document.getElementById('panel-solicitudes'); const panelActivos = document.getElementById('panel-activos');
+    btnTabSol.addEventListener('click', () => { btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active'); panelSol.style.display = 'block'; panelActivos.style.display = 'none'; });
+    btnTabActivos.addEventListener('click', () => { btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active'); panelActivos.style.display = 'block'; panelSol.style.display = 'none'; cargarMiembrosActivos(); });
+
+    window.cargarSolicitudes = async function() {
+        panelSol.innerHTML = '<p style="color:#aaa; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando...</p>';
+        try {
+            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'pendiente'));
+            const snap = await getDocs(q); let html = '';
+            snap.forEach(d => {
+                const s = d.data();
+                html += `<div class="solicitud-item"><div style="display:flex; align-items:center; gap:12px;"><img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #555;"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span></div><button class="btn" style="width:auto !important; padding:6px 12px; background:#2ecc71; color:#000; border:none; border-radius:6px;" onclick="aceptarJugador('${d.id}', '${s.usuarioUid}')"><i class="ph-bold ph-check"></i> Aceptar</button></div>`;
+            });
+            panelSol.innerHTML = html || '<p style="color:#aaa; text-align:center;">No hay solicitudes nuevas.</p>';
+        } catch (e) { panelSol.innerHTML = '<p style="color:red; text-align:center;">Error al cargar datos.</p>'; }
+    };
+
+    window.cargarMiembrosActivos = async function() {
+        panelActivos.innerHTML = '<p style="color:#aaa; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando miembros...</p>';
+        try {
+            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'aceptada'));
+            const snap = await getDocs(q); let html = '';
+            snap.forEach(d => {
+                const s = d.data();
+                html += `<div class="solicitud-item"><div style="display:flex; align-items:center; gap:12px;"><img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid var(--primary-green);"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span></div><button class="btn" style="width:auto !important; padding:6px 10px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.8rem;" onclick="eliminarJugador('${d.id}', '${s.usuarioUid}', '${s.nombreUsuario}')"><i class="ph-bold ph-trash"></i> Eliminar</button></div>`;
+            });
+            panelActivos.innerHTML = html || '<p style="color:#aaa; text-align:center;">Aún no hay miembros aceptados.</p>';
+        } catch (e) { panelActivos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar miembros.</p>'; }
+    };
+
+    window.aceptarJugador = async function(idSolicitud, uidJugador) {
+        try { await updateDoc(doc(db, 'solicitudes_comunidad', idSolicitud), { estado: 'aceptada' }); await updateDoc(doc(db, 'comunidades', comunidadActivaId), { miembros_uids: arrayUnion(uidJugador) }); alert("¡Jugador aceptado!"); cargarSolicitudes(); } catch (e) { alert("Error al aceptar."); }
+    };
+
+    window.eliminarJugador = async function(idSolicitud, uidJugador, nombre) {
+        if (!confirm(`¿Eliminar a ${nombre} de la comunidad?`)) return;
+        try { await deleteDoc(doc(db, 'solicitudes_comunidad', idSolicitud)); await updateDoc(doc(db, 'comunidades', comunidadActivaId), { miembros_uids: arrayRemove(uidJugador) }); alert("Jugador eliminado."); cargarMiembrosActivos(); } catch (e) { alert("Error."); }
+    };
+
+    window.enviarSolicitudIngreso = async function() {
+        if (!currentUser) return alert("Inicia sesión para poder unirte.");
+        try {
+            const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('usuarioUid', '==', currentUser.uid));
+            const snap = await getDocs(q);
+            if (snap.empty) { await addDoc(collection(db, 'solicitudes_comunidad'), { comunidadId: comunidadActivaId, usuarioUid: currentUser.uid, nombreUsuario: currentUser.displayName || 'Jugador', fotoUsuario: currentUser.photoURL || 'https://ui-avatars.com/api/?name=Jugador', estado: 'pendiente', fecha: new Date().toISOString() }); }
+            const numClean = String(window.comunidadActivaWsp || '').replace(/\D/g, '');
+            if (numClean) window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(`Hola! Soy ${currentUser.displayName}. Acabo de mandar solicitud en CHALACAPP para unirme a "${window.comunidadActivaNombre}". ¡Acéptame para jugar!`)}`, '_blank');
+            else alert("Tu solicitud se guardó correctamente.");
+        } catch (error) { alert("Error al enviar solicitud."); }
+    };
+
     const modalCrear = document.getElementById('modal-crear-comunidad');
     document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
     document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
     document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const n = document.getElementById('reg-com-nombre').value, d = document.getElementById('reg-com-deporte').value, c = document.getElementById('reg-com-ciudad').value;
+        e.preventDefault(); const n = document.getElementById('reg-com-nombre').value, d = document.getElementById('reg-com-deporte').value, c = document.getElementById('reg-com-ciudad').value;
         window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}`)}`, '_blank');
         modalCrear.style.display = 'none'; e.target.reset();
     });
