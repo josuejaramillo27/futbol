@@ -281,8 +281,8 @@
 </div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    // IMPORTANTE: Hemos agregado 'addDoc' para poder guardar nuevos partidos
-    import { getFirestore, collection, getDocs, query, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // IMPORTANTE: Se agregó 'where' para filtrar partidos por comunidad
+    import { getFirestore, collection, getDocs, query, addDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -298,9 +298,8 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     let currentUser = null;
-    let comunidadActivaId = null; // Variable clave para saber dónde guardar el partido
+    let comunidadActivaId = null; 
 
-    // PALETA DE COLORES DINÁMICA
     const PALETA_DEPORTES_EXTRA = ['#00d2d3','#ff9ff3','#ff6b6b','#1dd1a1','#feca57','#54a0ff','#5f27cd','#ff9f43','#10ac84','#ee5253'];
     function obtenerColorDeporte(nombreDeporte) {
         if (!nombreDeporte) return '#2ecc71';
@@ -317,7 +316,7 @@
         return PALETA_DEPORTES_EXTRA[Math.abs(hash) % PALETA_DEPORTES_EXTRA.length];
     }
 
-    // NAVEGACIÓN PESTAÑAS
+    // Pestañas
     const btnMisComunidades = document.getElementById('tab-mis-comunidades');
     const btnExplorar = document.getElementById('tab-explorar');
     const listaMisComunidades = document.getElementById('lista-mis-comunidades');
@@ -327,23 +326,18 @@
         btnMisComunidades.classList.add('active'); btnExplorar.classList.remove('active');
         listaMisComunidades.style.display = 'grid'; listaExplorar.style.display = 'none';
     });
-
     btnExplorar.addEventListener('click', () => {
         btnExplorar.classList.add('active'); btnMisComunidades.classList.remove('active');
         listaExplorar.style.display = 'grid'; listaMisComunidades.style.display = 'none';
     });
 
-    // ==========================================
-    // LÓGICA DE CREACIÓN DE PARTIDOS (EL MOTOR)
-    // ==========================================
+    // Crear Partido (Modal)
     const modalNuevoPartido = document.getElementById('modal-nuevo-partido');
     const formNuevoPartido = document.getElementById('form-nuevo-partido');
 
-    // Abrir y cerrar el modal del nuevo partido
     document.getElementById('btn-nuevo-partido').addEventListener('click', () => modalNuevoPartido.style.display = 'flex');
     document.getElementById('cerrar-nuevo-partido').addEventListener('click', () => modalNuevoPartido.style.display = 'none');
 
-    // Procesar y guardar el partido en Firebase
     formNuevoPartido.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btnSubmit = e.target.querySelector('button[type="submit"]');
@@ -366,22 +360,24 @@
 
         try {
             await addDoc(collection(db, 'partidos'), nuevoPartido);
-            alert("¡Golazo! El partido ha sido publicado exitosamente.");
+            alert("¡Golazo! Partido publicado.");
             modalNuevoPartido.style.display = 'none';
             formNuevoPartido.reset();
-            // En el próximo paso haremos que el partido aparezca visualmente de inmediato
+            
+            // Recargar automáticamente la pestaña del deporte donde creaste el partido
+            const botones = document.querySelectorAll('.btn-sport-chip');
+            botones.forEach(b => { if (b.textContent.trim() === nuevoPartido.deporte) b.click(); });
+            
         } catch (error) {
-            console.error("Error al publicar el partido:", error);
-            alert("Ocurrió un error al guardar el partido. Inténtalo de nuevo.");
+            console.error("Error al publicar:", error);
+            alert("Ocurrió un error al guardar el partido.");
         } finally {
             btnSubmit.innerHTML = '<i class="ph-bold ph-check-circle"></i> Publicar Partido';
             btnSubmit.disabled = false;
         }
     });
 
-    document.getElementById('btn-ver-miembros').addEventListener('click', () => {
-        alert("Aquí se desplegará la lista de jugadores inscritos en tu comunidad.");
-    });
+    document.getElementById('btn-ver-miembros').addEventListener('click', () => alert("Aquí aparecerá la lista de jugadores."));
 
     // Modal Whatsapp Crear Comunidad
     const modalCrear = document.getElementById('modal-crear-comunidad');
@@ -449,7 +445,11 @@
         } catch (error) { console.error("Error:", error); }
     }
 
-    window.seleccionarDeporte = function(btnElement, nombreDeporte, colorPrincipal) {
+    // ==========================================
+    // CARGAR PARTIDOS EN LA CARTELERA VIRTUAL
+    // ==========================================
+    window.seleccionarDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
+        // Estilos visuales
         const botones = document.querySelectorAll('.btn-sport-chip');
         botones.forEach(b => {
             b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)';
@@ -463,21 +463,75 @@
                 <p style="color:var(--text-muted); margin-top:10px; font-size:0.9rem;">Buscando partidos de ${nombreDeporte}...</p>
             </div>
         `;
-        setTimeout(() => {
-            listaPartidos.innerHTML = `
-                <div style="text-align: center; padding: 30px 10px;">
-                    <i class="ph-bold ph-whistle" style="font-size: 2.5rem; color: #444;"></i>
-                    <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados de ${nombreDeporte} por el momento.</p>
-                </div>
-            `;
-        }, 500);
+        
+        try {
+            // Buscamos los partidos de la comunidad activa
+            const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId));
+            const snap = await getDocs(q);
+            
+            let htmlTarjetas = '';
+            
+            snap.forEach(docSnap => {
+                const p = docSnap.data();
+                
+                // Filtramos por el deporte de esta pestaña
+                if (p.deporte === nombreDeporte) {
+                    const cuposLibres = p.cuposTotales - (p.cuposOcupados || 0);
+                    const colorFondoBoton = cuposLibres > 0 ? colorPrincipal : '#555';
+                    const textoBoton = cuposLibres > 0 ? 'Separar mi cupo' : 'Agotado';
+                    
+                    // Formatear la fecha
+                    let fechaAmigable = p.fecha;
+                    try {
+                        const partes = p.fecha.split('-'); // 2026-10-15
+                        fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                    } catch(e){}
+
+                    htmlTarjetas += `
+                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; margin-bottom: 15px; text-align: left; transition: all 0.3s ease;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <h4 style="margin: 0; color: ${colorPrincipal}; font-size: 1.15rem;"><i class="ph-bold ph-calendar-blank"></i> ${fechaAmigable} - ${p.hora}</h4>
+                                    <p style="margin: 4px 0 0 0; color: #fff; font-size: 0.9rem;"><i class="ph-bold ph-map-pin"></i> ${p.lugar}</p>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.05); color: #ccc; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1);">
+                                    <strong style="color: #fff; font-size: 1rem;">${cuposLibres}</strong> / ${p.cuposTotales} libres
+                                </div>
+                            </div>
+                            
+                            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid ${colorPrincipal};">
+                                <p style="margin: 0; color: #ddd; font-size: 0.85rem;"><strong style="color:#fff;">Costo / Instrucciones:</strong> ${p.precioInstrucciones}</p>
+                            </div>
+                            
+                            <button class="btn" style="width: 100%; background: ${colorFondoBoton}; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('¡Perfecto! En el Paso 3, este botón restará 1 cupo y agregará tu nombre a la lista del organizador.')">
+                                <i class="ph-bold ph-ticket"></i> ${textoBoton}
+                            </button>
+                        </div>
+                    `;
+                }
+            });
+
+            if (htmlTarjetas === '') {
+                listaPartidos.innerHTML = `
+                    <div style="text-align: center; padding: 30px 10px;">
+                        <i class="ph-bold ph-whistle" style="font-size: 2.5rem; color: #444;"></i>
+                        <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados de ${nombreDeporte} por el momento.</p>
+                    </div>
+                `;
+            } else {
+                listaPartidos.innerHTML = htmlTarjetas;
+            }
+
+        } catch (error) {
+            console.error("Error al obtener partidos:", error);
+            listaPartidos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar los partidos.</p>';
+        }
     };
 
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
     window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp) => {
-        // Guardamos el ID de la comunidad en la variable global para el momento de crear el partido
         comunidadActivaId = id; 
 
         document.getElementById('hub-nombre').textContent = nombre;
@@ -493,17 +547,16 @@
 
         const deportesArray = deportesRaw.split(',');
         const contenedorFiltros = document.getElementById('hub-deportes-filtros');
-        const selectDeporteModal = document.getElementById('np-deporte'); // El select del formulario
+        const selectDeporteModal = document.getElementById('np-deporte'); 
         
         contenedorFiltros.innerHTML = '';
-        selectDeporteModal.innerHTML = ''; // Limpiamos opciones anteriores
+        selectDeporteModal.innerHTML = ''; 
         
         deportesArray.forEach((dep, index) => {
             const isFirst = index === 0;
             const nombreDeporte = dep.trim();
             if (!nombreDeporte) return;
 
-            // 1. Llenar los botones dinámicos
             const colorPrincipal = obtenerColorDeporte(nombreDeporte);
             const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)';
             const color = isFirst ? '#000' : '#fff';
@@ -514,12 +567,17 @@
                     ${nombreDeporte}
                 </button>
             `;
-
-            // 2. Llenar el Dropdown del Formulario "Nuevo Partido"
             selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
         });
 
         hubModal.classList.add('mostrar');
+
+        // TRUCO DE EXPERIENCIA DE USUARIO: Simular un clic en la primera pestaña 
+        // para que los partidos carguen solos sin que el usuario tenga que dar clic.
+        setTimeout(() => {
+            const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip');
+            if(primerBotonDeporte) primerBotonDeporte.click();
+        }, 150);
     };
 </script>
 </body>
