@@ -12,90 +12,92 @@
     <link rel="stylesheet" href="discovery.css">
     
     <style>
-        /* Estilos de la Tarjeta de Comunidad */
+        /* Estilos de las pestañas de navegación interna */
+        .tabs-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-green);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--primary-green);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Tarjetas de comunidad */
         .community-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(46, 204, 113, 0.2);
             border-radius: 16px;
             padding: 20px;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            cursor: pointer;
         }
 
         .community-card:hover {
             border-color: var(--primary-green);
             transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.1);
+            background: rgba(46, 204, 113, 0.05);
         }
 
-        .community-header {
+        .sport-tags {
             display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .community-logo {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: #1a1a1a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid var(--primary-green);
-        }
-
-        .community-title {
-            margin: 0;
-            font-size: 1.2rem;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .community-stats {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-top: 10px;
             flex-wrap: wrap;
         }
 
-        .stat-badge {
-            background: rgba(0,0,0,0.5);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: #ccc;
-            border: 1px solid rgba(255,255,255,0.1);
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .sport-tag {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #fff;
         }
 
-        .btn-join {
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--primary-green);
-            color: var(--primary-green);
-            transition: all 0.3s ease;
+        /* Hub de la Comunidad (Modal Full Screen) */
+        .hub-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark);
+            z-index: 200;
+            overflow-y: auto;
         }
 
-        .btn-join:hover {
-            background: var(--primary-green);
-            color: #000;
+        .hub-modal.mostrar {
+            display: block;
         }
 
-        /* Banner para Crear Comunidad */
-        .create-community-banner {
-            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
-            border: 1px dashed var(--primary-green);
-            border-radius: 16px;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 30px;
+        .hub-header {
+            background: linear-gradient(135deg, rgba(20,25,22,1) 0%, rgba(10,15,12,1) 100%);
+            padding: 30px 20px;
+            border-bottom: 1px solid var(--primary-green);
+            position: relative;
         }
     </style>
 </head>
@@ -116,94 +118,101 @@
             <i class="ph-bold ph-users" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
         </a>
-        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
             <i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span>
         </a>
     </nav>
 </header>
 
-<main>
-    <section class="hero-section" style="min-height:250px; padding-top:35px; padding-bottom:35px">
-        <div class="hero-copy">
-            <div class="eyebrow"><span></span> JUEGA TODAS LAS SEMANAS</div>
-            <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Únete a una<br><strong>Comunidad local.</strong></h1>
-            <p>Encuentra grupos verificados en tu ciudad y asegura tu partido fijo.</p>
-        </div>
-        <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-four"></i></div>
-    </section>
+<main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 1.8rem;">Comunidades</h1>
+        <button id="btn-solicitar-creacion" class="btn" style="background: rgba(46, 204, 113, 0.1); color: var(--primary-green); border: 1px dashed var(--primary-green);">
+            <i class="ph-bold ph-plus"></i> Registrar la mía
+        </button>
+    </div>
 
-    <section style="max-width:900px; margin: 0 auto; padding: 0 20px;">
-        
-        <div class="create-community-banner">
-            <h3 style="color: #fff; margin: 0 0 10px 0;"><i class="ph-fill ph-crown" style="color: #f1c40f;"></i> ¿Tienes una comunidad deportiva?</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Digitaliza tu liga, encuentra retadores y facilita la gestión de tus jugadores.</p>
-            <button id="btn-crear-comunidad" class="btn hero-primary" style="width: auto; padding: 10px 25px;">
-                <i class="ph-bold ph-whatsapp-logo"></i> Solicitar registro de mi comunidad
-            </button>
+    <div class="tabs-container">
+        <button class="tab-btn active" id="tab-mis-comunidades">Mis Comunidades</button>
+        <button class="tab-btn" id="tab-explorar">Explorar</button>
+    </div>
+
+    <div id="lista-mis-comunidades" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        <p style="color: var(--text-muted); grid-column: 1/-1;">Inicia sesión para ver tus comunidades o espera mientras cargamos...</p>
+    </div>
+
+    <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
         </div>
 
-        <div class="section-heading">
+</main>
+
+<div id="hub-comunidad" class="hub-modal">
+    <div class="hub-header">
+        <button id="cerrar-hub" class="btn-cerrar" style="top: 20px; right: 20px;"><i class="ph-bold ph-arrow-left"></i> Volver</button>
+        <div style="display: flex; align-items: center; gap: 15px; margin-top: 20px;">
+            <div style="width: 70px; height: 70px; background: #000; border: 2px solid var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                <i class="ph-fill ph-shield-checkered" style="font-size: 2.5rem; color: var(--primary-green);"></i>
+            </div>
             <div>
-                <div class="eyebrow"><span></span> GRUPOS OFICIALES</div>
-                <h2>Comunidades Verificadas</h2>
+                <h2 id="hub-nombre" style="margin: 0; font-size: 1.8rem;">Cargando...</h2>
+                <p id="hub-ubicacion" style="margin: 5px 0 0 0; color: var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ...</p>
+            </div>
+        </div>
+        
+        <div id="hub-deportes-filtros" style="display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; padding-bottom: 5px;">
+            </div>
+    </div>
+
+    <div style="padding: 20px; max-width: 900px; margin: 0 auto;">
+        
+        <div id="hub-panel-lider" style="display: none; background: rgba(241, 196, 15, 0.1); border: 1px dashed #f1c40f; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
+            <h3 style="color: #f1c40f; margin: 0 0 15px 0;"><i class="ph-fill ph-crown"></i> Panel de Administración</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn" style="background: #f1c40f; color: #000; border: none;"><i class="ph-bold ph-calendar-plus"></i> Organizar Partido</button>
+                <button class="btn btn-outline"><i class="ph-bold ph-users"></i> Ver Miembros</button>
             </div>
         </div>
 
-        <div id="lista-comunidades" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 50px;">
-            <p style="text-align:center; color:var(--text-muted); grid-column:1/-1;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando comunidades...</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">Partidos Disponibles</h3>
         </div>
 
-    </section>
-    <div id="modal-crear-comunidad" class="modal-oculto">
-        <div class="modal-contenido" style="max-width: 450px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
-            <button id="cerrar-crear-comunidad" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-            <span class="mini-label">NUEVO GRUPO OFICIAL</span>
-            <h2>Registra tu Comunidad</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-                Llena estos datos. Enviaremos tu solicitud por WhatsApp para verificar y habilitar tu comunidad.
-            </p>
-            
-            <form id="form-nueva-comunidad">
-                <div class="filter-row" style="grid-template-columns: 1fr; gap: 15px; margin-bottom: 15px;">
-                    <label class="filter-field">
-                        <span>Nombre de la Comunidad</span>
-                        <input type="text" id="reg-com-nombre" required placeholder="Ej: Los Peloteros de Piura" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </label>
-                </div>
-                <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-                    <label class="filter-field">
-                        <span>Deporte</span>
-                        <select id="reg-com-deporte">
-                            <option>Fútbol</option>
-                            <option>Vóley</option>
-                            <option>Básquet</option>
-                        </select>
-                    </label>
-                    <label class="filter-field">
-                        <span>Ciudad / Distrito</span>
-                        <input type="text" id="reg-com-ciudad" required placeholder="Ej: Castilla" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </label>
-                </div>
-                <div class="filter-row" style="grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px;">
-                    <label class="filter-field">
-                        <span>Breve Descripción</span>
-                        <textarea id="reg-com-desc" required rows="2" placeholder="Ej: Jugamos todos los jueves de forma amateur..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;"></textarea>
-                    </label>
-                </div>
-
-                <button type="submit" class="btn hero-primary" style="width: 100%;">
-                    <i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud
-                </button>
-            </form>
+        <div id="hub-lista-partidos">
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; text-align: center;">
+                <i class="ph-bold ph-whistle" style="font-size: 3rem; color: var(--text-muted);"></i>
+                <p style="color: var(--text-muted);">No hay partidos organizados para este deporte aún.</p>
+            </div>
         </div>
     </div>
-</main>
+</div>
+
+<div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
+    <div class="modal-contenido" style="background:#111; padding:30px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid var(--border-color);">
+        <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem;"><i class="ph-bold ph-x"></i></button>
+        <h2 style="margin-top:0;">Registra tu Comunidad</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Se enviará por WhatsApp al administrador para su validación.</p>
+        
+        <form id="form-nueva-comunidad">
+            <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu grupo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            
+            <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: #aaa;">Deportes que practican:</p>
+            <input type="text" id="reg-com-deporte" required placeholder="Ej: Fútbol Mixto, Vóley..." style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            
+            <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            
+            <button type="submit" class="btn hero-primary" style="width:100%;">
+                <i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud
+            </button>
+        </form>
+    </div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
@@ -217,112 +226,142 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
     let currentUser = null;
 
-    onAuthStateChanged(auth, (user) => {
-        currentUser = user;
+    // Control de pestañas (Mis Comunidades vs Explorar)
+    const btnMisComunidades = document.getElementById('tab-mis-comunidades');
+    const btnExplorar = document.getElementById('tab-explorar');
+    const listaMisComunidades = document.getElementById('lista-mis-comunidades');
+    const listaExplorar = document.getElementById('lista-explorar');
+
+    btnMisComunidades.addEventListener('click', () => {
+        btnMisComunidades.classList.add('active');
+        btnExplorar.classList.remove('active');
+        listaMisComunidades.style.display = 'grid';
+        listaExplorar.style.display = 'none';
     });
 
-    // 1. Funcionalidad: Abrir Modal y Enviar por WhatsApp
-    const modalCrearComunidad = document.getElementById('modal-crear-comunidad');
+    btnExplorar.addEventListener('click', () => {
+        btnExplorar.classList.add('active');
+        btnMisComunidades.classList.remove('active');
+        listaExplorar.style.display = 'grid';
+        listaMisComunidades.style.display = 'none';
+    });
+
+    // Control del Formulario de Whatsapp
+    const modalCrear = document.getElementById('modal-crear-comunidad');
+    document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
+    document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
     
-    document.getElementById('btn-crear-comunidad').addEventListener('click', () => {
-        modalCrearComunidad.classList.add('mostrar');
-    });
-
-    document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => {
-        modalCrearComunidad.classList.remove('mostrar');
-    });
-
     document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        const nombre = document.getElementById('reg-com-nombre').value;
-        const deporte = document.getElementById('reg-com-deporte').value;
-        const ciudad = document.getElementById('reg-com-ciudad').value;
-        const desc = document.getElementById('reg-com-desc').value;
-        
-        const tuNumero = "51953066853"; // <-- CAMBIA ESTO POR TU NÚMERO
-        const mensaje = `Hola CHALACAPP ⚽, solicito registrar mi comunidad.\n\n*Nombre:* ${nombre}\n*Deporte:* ${deporte}\n*Ubicación:* ${ciudad}\n*Descripción:* ${desc}\n\nQuedo a la espera de la habilitación.`;
-        
-        window.open(`https://wa.me/${tuNumero}?text=${encodeURIComponent(mensaje)}`, '_blank');
-        modalCrearComunidad.classList.remove('mostrar');
+        const n = document.getElementById('reg-com-nombre').value;
+        const d = document.getElementById('reg-com-deporte').value;
+        const c = document.getElementById('reg-com-ciudad').value;
+        const msj = `Hola CHALACAPP ⚽, solicito registrar mi comunidad.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}`;
+        window.open(`https://wa.me/51999999999?text=${encodeURIComponent(msj)}`, '_blank');
+        modalCrear.style.display = 'none';
         e.target.reset();
     });
 
-    // 2. Cargar comunidades desde Firebase
-    async function cargarComunidades() {
-        const contenedor = document.getElementById('lista-comunidades');
-        try {
-            const q = query(collection(db, 'comunidades'));
-            const snap = await getDocs(q);
-            
-            contenedor.innerHTML = ''; // Limpiamos el "Cargando..."
+    // Lógica principal
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        cargarComunidades();
+    });
 
-            if (snap.empty) {
-                contenedor.innerHTML = `
-                    <div style="text-align:center; padding: 40px; grid-column:1/-1; background:rgba(0,0,0,0.3); border-radius:12px;">
-                        <i class="ph-fill ph-users-three" style="font-size: 3rem; color: #555;"></i>
-                        <p style="color: #aaa; margin-top: 10px;">Aún no hay comunidades registradas en tu zona.</p>
-                    </div>`;
-                return;
-            }
+    async function cargarComunidades() {
+        if (!currentUser) {
+            listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">Inicia sesión para ver tus comunidades.</p>';
+            listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">Inicia sesión para explorar ligas.</p>';
+            return;
+        }
+
+        try {
+            const snap = await getDocs(query(collection(db, 'comunidades')));
+            listaMisComunidades.innerHTML = '';
+            listaExplorar.innerHTML = '';
+
+            let tengoComunidades = false;
+            let hayParaExplorar = false;
 
             snap.forEach(docSnap => {
                 const c = docSnap.data();
+                c.id = docSnap.id;
                 
-                contenedor.innerHTML += `
-                    <div class="community-card">
-                        <div class="community-header">
-                            <div class="community-logo">
-                                <i class="ph-fill ph-shield-checkered" style="font-size: 2rem; color: var(--primary-green);"></i>
+                // MULTI-DEPORTE: Convertimos el string de deportes en etiquetas separadas
+                const deportesArray = (c.deporte || 'Fútbol').split(',').map(d => d.trim());
+                const tagsHTML = deportesArray.map(d => `<span class="sport-tag">${d}</span>`).join('');
+
+                // LOGICA: ¿Pertenezco a esta comunidad? (Líder o en arreglo de miembros)
+                // Por ahora asumimos que solo eres parte si eres el líder, 
+                // en la Fase 2 agregaremos la lógica de miembros regulares.
+                const soyLider = currentUser.uid === c.liderUid;
+                const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
+
+                const htmlTarjeta = `
+                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${deportesArray.join(',')}', ${soyLider})">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="width:50px; height:50px; background:#111; border: 1px solid var(--primary-green); border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                                <i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>
                             </div>
                             <div>
-                                <h3 class="community-title">${c.nombre} <i class="ph-fill ph-seal-check" style="color: #1DA1F2;" title="Verificada"></i></h3>
-                                <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">${c.deporte} · ${c.categoria}</p>
+                                <h3 style="margin:0; font-size:1.2rem;">${c.nombre} ${soyLider ? '<i class="ph-fill ph-crown" style="color:#f1c40f;" title="Eres Líder"></i>' : ''}</h3>
+                                <p style="margin:2px 0 0 0; font-size:0.8rem; color:var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</p>
                             </div>
                         </div>
-                        
-                        <div class="community-stats">
-                            <span class="stat-badge"><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</span>
-                            <span class="stat-badge"><i class="ph-bold ph-users"></i> ${c.miembros || '15+'} Miembros</span>
-                        </div>
-                        
-                        <p style="font-size: 0.9rem; color: #ccc; margin-bottom: 20px; line-height: 1.4;">${c.descripcion}</p>
-                        
-                        <button class="btn btn-join" onclick="solicitarIngreso('${docSnap.id}', '${c.nombre}', '${c.whatsappLider}')">
-                            <i class="ph-bold ph-hand-waving"></i> Solicitar Ingreso
-                        </button>
+                        <div class="sport-tags">${tagsHTML}</div>
                     </div>
                 `;
+
+                if (soyMiembro) {
+                    listaMisComunidades.innerHTML += htmlTarjeta;
+                    tengoComunidades = true;
+                } else {
+                    listaExplorar.innerHTML += htmlTarjeta;
+                    hayParaExplorar = true;
+                }
             });
+
+            if(!tengoComunidades) listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">No estás en ninguna comunidad. ¡Busca una en Explorar!</p>';
+            if(!hayParaExplorar) listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">No hay más comunidades disponibles por ahora.</p>';
+
         } catch (error) {
-            console.error("Error al cargar comunidades:", error);
-            contenedor.innerHTML = '<p style="color: red; text-align:center; grid-column:1/-1;">Error de conexión.</p>';
+            console.error("Error:", error);
         }
     }
 
-    // 3. Funcionalidad: Unirse a una comunidad
-    window.solicitarIngreso = async (comunidadId, nombreComunidad, wspLider) => {
-        if (!currentUser) {
-            alert("Debes iniciar sesión con Google para solicitar unirte a una comunidad.");
-            try {
-                const result = await signInWithPopup(auth, provider);
-                currentUser = result.user;
-            } catch (error) { return; }
-        }
+    // Funcionalidad del HUB (Abrir la comunidad por dentro)
+    const hubModal = document.getElementById('hub-comunidad');
+    document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
-        if (confirm(`¿Enviar solicitud para unirte a ${nombreComunidad}?`)) {
-            // Aquí puedes abrir el WhatsApp del líder de esa comunidad automáticamente
-            const msj = `Hola, soy ${currentUser.displayName}. Encontré tu comunidad "${nombreComunidad}" en CHALACAPP y me gustaría unirme al grupo.`;
-            window.open(`https://wa.me/${wspLider}?text=${encodeURIComponent(msj)}`, '_blank');
-        }
+    window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider) => {
+        document.getElementById('hub-nombre').textContent = nombre;
+        document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin"></i> ${ciudad}`;
+        
+        // Mostrar panel de administración solo si es líder
+        document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none';
+
+        // Generar pestañas de deportes
+        const deportesArray = deportesRaw.split(',');
+        const contenedorFiltros = document.getElementById('hub-deportes-filtros');
+        contenedorFiltros.innerHTML = '';
+        
+        deportesArray.forEach((dep, index) => {
+            const btnClass = index === 0 ? 'btn btn-primary' : 'btn btn-outline';
+            const bgColor = index === 0 ? 'var(--primary-green)' : 'transparent';
+            const textColor = index === 0 ? '#000' : 'var(--primary-green)';
+            
+            contenedorFiltros.innerHTML += `
+                <button class="btn" style="background:${bgColor}; color:${textColor}; border:1px solid var(--primary-green); padding:5px 15px; border-radius:20px; white-space:nowrap;">
+                    ${dep}
+                </button>
+            `;
+        });
+
+        // Mostrar el modal
+        hubModal.classList.add('mostrar');
     };
-
-    // Inicializar
-    cargarComunidades();
 </script>
 </body>
 </html>
