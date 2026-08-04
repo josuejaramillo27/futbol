@@ -12,79 +12,77 @@
     <link rel="stylesheet" href="discovery.css">
     
     <style>
-        /* Estilos de las pestañas de navegación interna */
+        /* Estilos de las pestañas internas (Corregido contraste) */
         .tabs-container {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 12px;
         }
         
         .tab-btn {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            font-weight: bold;
+            background: transparent;
+            border: 1px solid transparent;
+            color: #888;
+            font-size: 0.95rem;
+            font-weight: 700;
             cursor: pointer;
-            padding: 5px 10px;
+            padding: 8px 18px;
+            border-radius: 8px;
             transition: all 0.3s ease;
-            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         .tab-btn.active {
-            color: var(--primary-green);
+            color: var(--primary-green) !important;
+            background: rgba(46, 204, 113, 0.12) !important;
+            border: 1px solid rgba(46, 204, 113, 0.3);
         }
 
-        .tab-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -11px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--primary-green);
-            border-radius: 3px 3px 0 0;
-        }
-
-        /* Tarjetas de comunidad */
+        /* Tarjetas de comunidad públicas */
         .community-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(46, 204, 113, 0.2);
+            background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%);
+            border: 1px solid rgba(46, 204, 113, 0.25);
             border-radius: 16px;
             padding: 20px;
             transition: all 0.3s ease;
             cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
 
         .community-card:hover {
             border-color: var(--primary-green);
-            transform: translateY(-3px);
-            background: rgba(46, 204, 113, 0.05);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.15);
         }
 
         .sport-tags {
             display: flex;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 12px;
             flex-wrap: wrap;
         }
 
         .sport-tag {
-            background: rgba(255,255,255,0.1);
-            padding: 4px 8px;
-            border-radius: 4px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
             font-size: 0.75rem;
-            color: #fff;
+            color: #ddd;
         }
 
-        /* Hub de la Comunidad (Modal Full Screen) */
+        /* Hub de la Comunidad (Modal estilizado en modo oscuro premium) */
         .hub-modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-dark);
+            background: #080B0A;
             z-index: 200;
             overflow-y: auto;
         }
@@ -93,11 +91,42 @@
             display: block;
         }
 
-        .hub-header {
-            background: linear-gradient(135deg, rgba(20,25,22,1) 0%, rgba(10,15,12,1) 100%);
-            padding: 30px 20px;
-            border-bottom: 1px solid var(--primary-green);
+        .hub-header-banner {
+            background: linear-gradient(180deg, rgba(20, 30, 24, 0.95) 0%, rgba(8, 11, 10, 1) 100%);
+            border-bottom: 1px solid rgba(46, 204, 113, 0.2);
+            padding: 30px 20px 20px;
             position: relative;
+        }
+
+        .hub-content-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 25px 20px 50px;
+        }
+
+        .hub-card-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* Botón de solicitar creación compacto */
+        .btn-crear-compacto {
+            width: auto !important;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            background: rgba(46, 204, 113, 0.1);
+            color: var(--primary-green);
+            border: 1px dashed var(--primary-green);
+            transition: all 0.3s ease;
+        }
+
+        .btn-crear-compacto:hover {
+            background: var(--primary-green) !important;
+            color: #080b0a !important;
         }
     </style>
 </head>
@@ -125,22 +154,25 @@
     </nav>
 </header>
 
-<main style="max-width: 900px; margin: 0 auto; padding: 20px;">
+<main style="max-width: 900px; margin: 0 auto; padding: 25px 20px;">
     
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h1 style="margin: 0; font-size: 1.8rem;">Comunidades</h1>
-        <button id="btn-solicitar-creacion" class="btn" style="background: rgba(46, 204, 113, 0.1); color: var(--primary-green); border: 1px dashed var(--primary-green);">
-            <i class="ph-bold ph-plus"></i> Registrar la mía
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
+        <div>
+            <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Comunidades</h1>
+            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Encuentra pichangas fijas o gestiona tus grupos deportivos.</p>
+        </div>
+        <button id="btn-solicitar-creacion" class="btn btn-crear-compacto">
+            <i class="ph-bold ph-plus-circle"></i> Registrar la mía
         </button>
     </div>
 
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-mis-comunidades">Mis Comunidades</button>
-        <button class="tab-btn" id="tab-explorar">Explorar</button>
+        <button class="tab-btn" id="tab-explorar">Explorar Comunidades</button>
     </div>
 
     <div id="lista-mis-comunidades" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-        <p style="color: var(--text-muted); grid-column: 1/-1;">Inicia sesión para ver tus comunidades o espera mientras cargamos...</p>
+        <p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p>
     </div>
 
     <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
@@ -149,58 +181,82 @@
 </main>
 
 <div id="hub-comunidad" class="hub-modal">
-    <div class="hub-header">
-        <button id="cerrar-hub" class="btn-cerrar" style="top: 20px; right: 20px;"><i class="ph-bold ph-arrow-left"></i> Volver</button>
-        <div style="display: flex; align-items: center; gap: 15px; margin-top: 20px;">
-            <div style="width: 70px; height: 70px; background: #000; border: 2px solid var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
-                <i class="ph-fill ph-shield-checkered" style="font-size: 2.5rem; color: var(--primary-green);"></i>
+    
+    <div class="hub-header-banner">
+        <div style="max-width: 900px; margin: 0 auto; position: relative;">
+            <button id="cerrar-hub" class="btn" style="position: absolute; top: 0; right: 0; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 14px; font-size: 0.85rem; border-radius: 8px;">
+                <i class="ph-bold ph-arrow-left"></i> Volver
+            </button>
+
+            <div style="display: flex; align-items: center; gap: 18px; margin-top: 10px;">
+                <div style="width: 65px; height: 65px; background: #000; border: 2px solid var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2);">
+                    <i class="ph-fill ph-shield-checkered" style="font-size: 2.2rem; color: var(--primary-green);"></i>
+                </div>
+                <div>
+                    <h2 id="hub-nombre" style="margin: 0; font-size: 1.6rem; color: #fff;">Cargando...</h2>
+                    <p id="hub-ubicacion" style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
+                </div>
             </div>
-            <div>
-                <h2 id="hub-nombre" style="margin: 0; font-size: 1.8rem;">Cargando...</h2>
-                <p id="hub-ubicacion" style="margin: 5px 0 0 0; color: var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ...</p>
-            </div>
+
+            <div id="hub-deportes-filtros" style="display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; padding-bottom: 5px;">
+                </div>
         </div>
-        
-        <div id="hub-deportes-filtros" style="display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; padding-bottom: 5px;">
-            </div>
     </div>
 
-    <div style="padding: 20px; max-width: 900px; margin: 0 auto;">
+    <div class="hub-content-container">
         
-        <div id="hub-panel-lider" style="display: none; background: rgba(241, 196, 15, 0.1); border: 1px dashed #f1c40f; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-            <h3 style="color: #f1c40f; margin: 0 0 15px 0;"><i class="ph-fill ph-crown"></i> Panel de Administración</h3>
+        <div id="hub-panel-lider" style="display: none; background: linear-gradient(135deg, rgba(241, 196, 15, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%); border: 1px dashed #f1c40f; padding: 20px; border-radius: 14px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h3 style="color: #f1c40f; margin: 0; font-size: 1.1rem;"><i class="ph-fill ph-crown"></i> Panel de Administración del Líder</h3>
+                <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241, 196, 15, 0.15); padding: 3px 8px; border-radius: 4px;">Modo Organizador</span>
+            </div>
+            <p style="margin: 0 0 15px 0; color: #ccc; font-size: 0.85rem;">Crea nuevos partidos y administra las inscripciones de tus jugadores.</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn" style="background: #f1c40f; color: #000; border: none;"><i class="ph-bold ph-calendar-plus"></i> Organizar Partido</button>
-                <button class="btn btn-outline"><i class="ph-bold ph-users"></i> Ver Miembros</button>
+                <button class="btn" style="background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Organizar Nuevo Partido</button>
+                <button class="btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Lista de Miembros</button>
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0;">Partidos Disponibles</h3>
-        </div>
+        <div class="hub-card-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3 style="margin: 0; color: #fff; font-size: 1.1rem;"><i class="ph-bold ph-soccer-ball" style="color: var(--primary-green);"></i> Partidos Próximos</h3>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Actualizado en vivo</span>
+            </div>
 
-        <div id="hub-lista-partidos">
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; text-align: center;">
-                <i class="ph-bold ph-whistle" style="font-size: 3rem; color: var(--text-muted);"></i>
-                <p style="color: var(--text-muted);">No hay partidos organizados para este deporte aún.</p>
+            <div id="hub-lista-partidos">
+                <div style="text-align: center; padding: 30px 10px;">
+                    <i class="ph-bold ph-whistle" style="font-size: 2.8rem; color: #444;"></i>
+                    <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados para este deporte en este momento.</p>
+                </div>
             </div>
         </div>
+
+        <div id="hub-link-whatsapp-box" class="hub-card-box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h4 style="margin: 0; color: #fff;"><i class="ph-bold ph-whatsapp-logo" style="color: #25D366;"></i> Grupo Oficial de WhatsApp</h4>
+                <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Únete al chat general de la comunidad para conversar con otros miembros.</p>
+            </div>
+            <button id="btn-unirse-wa" class="btn" style="background: #25D366; color: #000; border: none; font-weight: bold; width: auto;">
+                Unirme al Chat <i class="ph-bold ph-arrow-square-out"></i>
+            </button>
+        </div>
+
     </div>
 </div>
 
-<div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; align-items:center; justify-content:center;">
-    <div class="modal-contenido" style="background:#111; padding:30px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid var(--border-color);">
-        <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0;">Registra tu Comunidad</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Se enviará por WhatsApp al administrador para su validación.</p>
+<div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+        <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <h2 style="margin-top:0; color:#fff;">Registra tu Comunidad</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Enviaremos la información al administrador para que valide y active tu liga.</p>
         
         <form id="form-nueva-comunidad">
-            <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu grupo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga / grupo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
             
-            <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: #aaa;">Deportes que practican:</p>
-            <input type="text" id="reg-com-deporte" required placeholder="Ej: Fútbol Mixto, Vóley..." style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deportes que practican (separados por coma):</label>
+            <input type="text" id="reg-com-deporte" required placeholder="Ej: Fútbol, Vóley Mixto" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
             
-            <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px; box-sizing: border-box;">
             
             <button type="submit" class="btn hero-primary" style="width:100%;">
                 <i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud
@@ -228,7 +284,7 @@
     const auth = getAuth(app);
     let currentUser = null;
 
-    // Control de pestañas (Mis Comunidades vs Explorar)
+    // Control de pestañas
     const btnMisComunidades = document.getElementById('tab-mis-comunidades');
     const btnExplorar = document.getElementById('tab-explorar');
     const listaMisComunidades = document.getElementById('lista-mis-comunidades');
@@ -272,8 +328,8 @@
 
     async function cargarComunidades() {
         if (!currentUser) {
-            listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">Inicia sesión para ver tus comunidades.</p>';
-            listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">Inicia sesión para explorar ligas.</p>';
+            listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Inicia sesión para ver tus comunidades.</p>';
+            listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Inicia sesión para explorar ligas.</p>';
             return;
         }
 
@@ -289,25 +345,22 @@
                 const c = docSnap.data();
                 c.id = docSnap.id;
                 
-                // MULTI-DEPORTE: Convertimos el string de deportes en etiquetas separadas
                 const deportesArray = (c.deporte || 'Fútbol').split(',').map(d => d.trim());
                 const tagsHTML = deportesArray.map(d => `<span class="sport-tag">${d}</span>`).join('');
 
-                // LOGICA: ¿Pertenezco a esta comunidad? (Líder o en arreglo de miembros)
-                // Por ahora asumimos que solo eres parte si eres el líder, 
-                // en la Fase 2 agregaremos la lógica de miembros regulares.
-                const soyLider = currentUser.uid === c.liderUid;
+                // Detectamos si soy el líder o si mi UID está en los miembros
+                const soyLider = currentUser && (currentUser.uid === c.liderUid);
                 const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
 
                 const htmlTarjeta = `
-                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${deportesArray.join(',')}', ${soyLider})">
+                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${deportesArray.join(',')}', ${soyLider}, '${c.whatsappLider || ''}')">
                         <div style="display:flex; align-items:center; gap:15px;">
-                            <div style="width:50px; height:50px; background:#111; border: 1px solid var(--primary-green); border-radius:10px; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:50px; height:50px; background:#111; border: 1px solid var(--primary-green); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>
                             </div>
                             <div>
-                                <h3 style="margin:0; font-size:1.2rem;">${c.nombre} ${soyLider ? '<i class="ph-fill ph-crown" style="color:#f1c40f;" title="Eres Líder"></i>' : ''}</h3>
-                                <p style="margin:2px 0 0 0; font-size:0.8rem; color:var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</p>
+                                <h3 style="margin:0; font-size:1.15rem; color:#fff;">${c.nombre} ${soyLider ? '<i class="ph-fill ph-crown" style="color:#f1c40f;" title="Eres Líder"></i>' : ''}</h3>
+                                <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</p>
                             </div>
                         </div>
                         <div class="sport-tags">${tagsHTML}</div>
@@ -323,24 +376,33 @@
                 }
             });
 
-            if(!tengoComunidades) listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">No estás en ninguna comunidad. ¡Busca una en Explorar!</p>';
-            if(!hayParaExplorar) listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center;">No hay más comunidades disponibles por ahora.</p>';
+            if(!tengoComunidades) listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Aún no estás en ninguna comunidad. Pasa a la pestaña "Explorar" para solicitar ingreso.</p>';
+            if(!hayParaExplorar) listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">No hay más comunidades públicas por el momento.</p>';
 
         } catch (error) {
             console.error("Error:", error);
         }
     }
 
-    // Funcionalidad del HUB (Abrir la comunidad por dentro)
+    // Funcionalidad del HUB (Abrir comunidad por dentro)
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
-    window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider) => {
+    window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp) => {
         document.getElementById('hub-nombre').textContent = nombre;
-        document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin"></i> ${ciudad}`;
+        document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
         
-        // Mostrar panel de administración solo si es líder
+        // Mostrar panel de administración solo si eres Líder
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none';
+
+        // Configurar botón de WhatsApp del chat general
+        const btnWa = document.getElementById('btn-unirse-wa');
+        if (wsp) {
+            const numClean = String(wsp).replace(/\D/g, '');
+            btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme al grupo de WhatsApp de la comunidad " + nombre)}`, '_blank');
+        } else {
+            btnWa.onclick = () => alert("Esta comunidad no tiene un link directo configurado.");
+        }
 
         // Generar pestañas de deportes
         const deportesArray = deportesRaw.split(',');
@@ -348,18 +410,20 @@
         contenedorFiltros.innerHTML = '';
         
         deportesArray.forEach((dep, index) => {
-            const btnClass = index === 0 ? 'btn btn-primary' : 'btn btn-outline';
-            const bgColor = index === 0 ? 'var(--primary-green)' : 'transparent';
-            const textColor = index === 0 ? '#000' : 'var(--primary-green)';
+            const isFirst = index === 0;
+            const btnClass = isFirst ? 'btn' : 'btn';
+            const bg = isFirst ? 'var(--primary-green)' : 'rgba(255,255,255,0.05)';
+            const color = isFirst ? '#000' : '#fff';
+            const border = isFirst ? '1px solid var(--primary-green)' : '1px solid rgba(255,255,255,0.1)';
             
             contenedorFiltros.innerHTML += `
-                <button class="btn" style="background:${bgColor}; color:${textColor}; border:1px solid var(--primary-green); padding:5px 15px; border-radius:20px; white-space:nowrap;">
+                <button class="${btnClass}" style="background:${bg}; color:${color}; border:${border}; padding:6px 16px; border-radius:20px; white-space:nowrap; font-size:0.85rem; font-weight:bold;">
                     ${dep}
                 </button>
             `;
         });
 
-        // Mostrar el modal
+        // Abrir ventana
         hubModal.classList.add('mostrar');
     };
 </script>
