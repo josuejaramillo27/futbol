@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="discovery.css">
     
     <style>
+        /* Pestañas de navegación interna */
         .tabs-container {
             display: flex; gap: 10px; margin-bottom: 25px;
             border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;
@@ -32,6 +33,7 @@
             border: 1px solid rgba(46, 204, 113, 0.3);
         }
 
+        /* Tarjeta de Comunidad pública */
         .community-card {
             background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%);
             border: 1px solid rgba(46, 204, 113, 0.25);
@@ -48,10 +50,10 @@
         
         .sport-tag {
             background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-            padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ddd;
+            padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ddd; font-weight: 600;
         }
 
-        /* Hub de la Comunidad */
+        /* Hub de la Comunidad (Modal Full Screen) */
         .hub-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #080B0A; z-index: 200; overflow-y: auto;
@@ -61,8 +63,8 @@
 
         .hub-header-banner {
             background: linear-gradient(180deg, rgba(20, 30, 24, 0.95) 0%, rgba(8, 11, 10, 1) 100%);
-            border-bottom: 1px solid rgba(46, 204, 113, 0.2);
-            padding: 30px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px 20px 20px;
         }
 
         .hub-content-container { max-width: 900px; margin: 0 auto; padding: 25px 20px 50px; }
@@ -80,6 +82,26 @@
         }
 
         .btn-crear-compacto:hover { background: var(--primary-green) !important; color: #080b0a !important; }
+
+        /* ESTILOS DE PÍLDORA REGLADA PARA LOS BOTONES DE DEPORTES */
+        .btn-sport-chip {
+            width: auto !important;
+            min-width: auto !important;
+            max-width: max-content !important;
+            flex: 0 0 auto !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 8px 20px !important;
+            border-radius: 30px !important;
+            font-size: 0.85rem !important;
+            font-weight: 800 !important;
+            letter-spacing: 0.5px !important;
+            cursor: pointer !important;
+            transition: all 0.25s ease !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+        }
     </style>
 </head>
 <body>
@@ -129,33 +151,27 @@
     <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
 </main>
 
-<!-- ========================================== -->
-<!-- HUB DE LA COMUNIDAD (INTERIOR ELEGANTE)    -->
-<!-- ========================================== -->
 <div id="hub-comunidad" class="hub-modal">
     <div class="hub-header-banner">
         <div style="max-width: 900px; margin: 0 auto;">
             
-            <!-- CONTENEDOR FLEX: Resuelve el problema del botón Volver -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
-                <!-- Escudo y Título -->
-                <div style="display: flex; align-items: center; gap: 18px;">
-                    <div style="width: 65px; height: 65px; background: #000; border: 2px solid var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2);">
-                        <i class="ph-fill ph-shield-checkered" style="font-size: 2.2rem; color: var(--primary-green);"></i>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 60px; height: 60px; background: #000; border: 2px solid var(--primary-green); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2);">
+                        <i class="ph-fill ph-shield-checkered" style="font-size: 2rem; color: var(--primary-green);"></i>
                     </div>
                     <div>
-                        <h2 id="hub-nombre" style="margin: 0; font-size: 1.6rem; color: #fff;">Cargando...</h2>
-                        <p id="hub-ubicacion" style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
+                        <h2 id="hub-nombre" style="margin: 0; font-size: 1.5rem; color: #fff; font-weight: 800;">Cargando...</h2>
+                        <p id="hub-ubicacion" style="margin: 3px 0 0 0; color: var(--text-muted); font-size: 0.85rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
                     </div>
                 </div>
                 
-                <!-- Botón Volver bien posicionado -->
-                <button id="cerrar-hub" class="btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; flex-shrink: 0;">
+                <button id="cerrar-hub" class="btn" style="width: auto !important; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;">
                     <i class="ph-bold ph-arrow-left"></i> Volver
                 </button>
             </div>
 
-            <div id="hub-deportes-filtros" style="display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; padding-bottom: 5px;"></div>
+            <div id="hub-deportes-filtros" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch;"></div>
         </div>
     </div>
 
@@ -168,8 +184,8 @@
             </div>
             <p style="margin: 0 0 15px 0; color: #ccc; font-size: 0.85rem;">Crea nuevos partidos y administra las inscripciones de tus jugadores.</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="btn-nuevo-partido" class="btn" style="background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Nuevo Partido</button>
-                <button id="btn-ver-miembros" class="btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
+                <button id="btn-nuevo-partido" class="btn" style="width: auto !important; background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Nuevo Partido</button>
+                <button id="btn-ver-miembros" class="btn" style="width: auto !important; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
             </div>
         </div>
 
@@ -192,7 +208,7 @@
                 <h4 style="margin: 0; color: #fff;"><i class="ph-bold ph-whatsapp-logo" style="color: #25D366;"></i> Grupo Oficial de WhatsApp</h4>
                 <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Únete al chat general de la comunidad para conversar con otros miembros.</p>
             </div>
-            <button id="btn-unirse-wa" class="btn" style="background: #25D366; color: #000; border: none; font-weight: bold; width: auto;">
+            <button id="btn-unirse-wa" class="btn" style="background: #25D366; color: #000; border: none; font-weight: bold; width: auto !important;">
                 Unirme al Chat <i class="ph-bold ph-arrow-square-out"></i>
             </button>
         </div>
@@ -210,7 +226,7 @@
             <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga / grupo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
             
             <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deportes que practican (separados por coma):</label>
-            <input type="text" id="reg-com-deporte" required placeholder="Ej: Fútbol, Vóley Mixto" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            <input type="text" id="reg-com-deporte" required placeholder="Ej: Fútbol, Vóley, Básquet" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
             
             <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px; box-sizing: border-box;">
             
@@ -240,7 +256,41 @@
     const auth = getAuth(app);
     let currentUser = null;
 
-    // Pestañas
+    // PALETA DE COLORES DINÁMICA PARA CUALQUIER DEPORTE
+    const PALETA_DEPORTES_EXTRA = [
+        '#00d2d3', // Cian
+        '#ff9ff3', // Rosado
+        '#ff6b6b', // Coral
+        '#1dd1a1', // Turquesa
+        '#feca57', // Amarillo dorado
+        '#54a0ff', // Azul eléctrico
+        '#5f27cd', // Violeta
+        '#ff9f43', // Naranja claro
+        '#10ac84', // Verde menta
+        '#ee5253'  // Rojo intenso
+    ];
+
+    function obtenerColorDeporte(nombreDeporte) {
+        if (!nombreDeporte) return '#2ecc71';
+        const str = nombreDeporte.trim().toLowerCase();
+
+        if (str.includes('fútbol') || str.includes('futbol') || str.includes('futsal')) return '#2ecc71'; // Verde
+        if (str.includes('básquet') || str.includes('basquet') || str.includes('baloncesto')) return '#e67e22'; // Naranja
+        if (str.includes('vóley') || str.includes('voley') || str.includes('voleibol')) return '#9b59b6'; // Morado / Magenta
+        if (str.includes('tenis') || str.includes('pádel') || str.includes('padel')) return '#f1c40f'; // Amarillo
+        if (str.includes('natación') || str.includes('natacion') || str.includes('acuát')) return '#0984e3'; // Azul
+        if (str.includes('atletismo') || str.includes('run')) return '#e74c3c'; // Rojo
+
+        // Hash para cualquier otro deporte
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const index = Math.abs(hash) % PALETA_DEPORTES_EXTRA.length;
+        return PALETA_DEPORTES_EXTRA[index];
+    }
+
+    // Pestañas principales
     const btnMisComunidades = document.getElementById('tab-mis-comunidades');
     const btnExplorar = document.getElementById('tab-explorar');
     const listaMisComunidades = document.getElementById('lista-mis-comunidades');
@@ -262,10 +312,10 @@
 
     // Eventos Panel Líder
     document.getElementById('btn-nuevo-partido').addEventListener('click', () => {
-        alert("¡Excelente! En la siguiente fase programaremos el formulario para crear el partido (Costo, Fecha y Cupos).");
+        alert("¡Excelente! En el siguiente paso programaremos la creación del partido con cupos y costo.");
     });
     document.getElementById('btn-ver-miembros').addEventListener('click', () => {
-        alert("Aquí aparecerá la lista de jugadores que pertenecen a tu comunidad.");
+        alert("Aquí se desplegará la lista de jugadores inscritos en tu comunidad.");
     });
 
     // Modal Whatsapp
@@ -346,38 +396,35 @@
         }
     }
 
-    // Funcionalidad interactiva de los Deportes (Colores)
+    // Cambio de deporte al hacer clic
     window.seleccionarDeporte = function(btnElement, nombreDeporte, colorPrincipal) {
-        // 1. Quitar estilos activos a todos
-        const botones = document.querySelectorAll('.btn-filtro-deporte');
+        const botones = document.querySelectorAll('.btn-sport-chip');
         botones.forEach(b => {
             b.style.background = 'rgba(255,255,255,0.05)';
             b.style.color = '#fff';
-            b.style.border = '1px solid rgba(255,255,255,0.1)';
+            b.style.border = '1px solid rgba(255,255,255,0.12)';
         });
         
-        // 2. Aplicar estilos activos al botón clickeado
         btnElement.style.background = colorPrincipal;
         btnElement.style.color = '#000';
         btnElement.style.border = `1px solid ${colorPrincipal}`;
 
-        // 3. Simular la carga de partidos para ese deporte
         const listaPartidos = document.getElementById('hub-lista-partidos');
         listaPartidos.innerHTML = `
             <div style="text-align: center; padding: 30px;">
-                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.5rem; color:${colorPrincipal};"></i>
-                <p style="color:var(--text-muted); margin-top:10px;">Buscando partidos de ${nombreDeporte}...</p>
+                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:${colorPrincipal};"></i>
+                <p style="color:var(--text-muted); margin-top:10px; font-size:0.9rem;">Buscando partidos de ${nombreDeporte}...</p>
             </div>
         `;
         
         setTimeout(() => {
             listaPartidos.innerHTML = `
                 <div style="text-align: center; padding: 30px 10px;">
-                    <i class="ph-bold ph-whistle" style="font-size: 2.8rem; color: #444;"></i>
+                    <i class="ph-bold ph-whistle" style="font-size: 2.5rem; color: #444;"></i>
                     <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados de ${nombreDeporte} por el momento.</p>
                 </div>
             `;
-        }, 800);
+        }, 500);
     };
 
     // Funcionalidad del HUB
@@ -388,7 +435,6 @@
         document.getElementById('hub-nombre').textContent = nombre;
         document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
         
-        // Mostrar panel del Líder o el Link de Whatsapp
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none';
         document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
 
@@ -400,7 +446,7 @@
             btnWa.onclick = () => alert("Esta comunidad no tiene un link directo configurado.");
         }
 
-        // Generar pestañas de deportes interactivos
+        // Pestañas de deportes dinámicas
         const deportesArray = deportesRaw.split(',');
         const contenedorFiltros = document.getElementById('hub-deportes-filtros');
         contenedorFiltros.innerHTML = '';
@@ -408,21 +454,16 @@
         deportesArray.forEach((dep, index) => {
             const isFirst = index === 0;
             const nombreDeporte = dep.trim();
-            const nombreStr = nombreDeporte.toLowerCase();
-            
-            // Asignar colores por defecto basados en el deporte
-            let colorPrincipal = 'var(--primary-green)'; // Verde para fútbol por defecto
-            if (nombreStr.includes('básquet') || nombreStr.includes('basquet')) { colorPrincipal = '#e67e22'; } // Naranja
-            else if (nombreStr.includes('vóley') || nombreStr.includes('voley')) { colorPrincipal = '#9b59b6'; } // Morado
-            else if (nombreStr.includes('tenis')) { colorPrincipal = '#f1c40f'; } // Amarillo
+            if (!nombreDeporte) return;
+
+            const colorPrincipal = obtenerColorDeporte(nombreDeporte);
 
             const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)';
             const color = isFirst ? '#000' : '#fff';
-            const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.1)';
+            const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
             
-            // Aquí inyectamos el botón con el evento onclick
             contenedorFiltros.innerHTML += `
-                <button class="btn btn-filtro-deporte" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border}; padding:6px 16px; border-radius:20px; white-space:nowrap; font-size:0.85rem; font-weight:bold; transition: all 0.3s ease;">
+                <button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">
                     ${nombreDeporte}
                 </button>
             `;
