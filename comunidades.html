@@ -62,7 +62,7 @@
         .hub-header-banner {
             background: linear-gradient(180deg, rgba(20, 30, 24, 0.95) 0%, rgba(8, 11, 10, 1) 100%);
             border-bottom: 1px solid rgba(46, 204, 113, 0.2);
-            padding: 30px 20px 20px; position: relative;
+            padding: 30px 20px 20px;
         }
 
         .hub-content-container { max-width: 900px; margin: 0 auto; padding: 25px 20px 50px; }
@@ -129,21 +129,30 @@
     <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
 </main>
 
+<!-- ========================================== -->
+<!-- HUB DE LA COMUNIDAD (INTERIOR ELEGANTE)    -->
+<!-- ========================================== -->
 <div id="hub-comunidad" class="hub-modal">
     <div class="hub-header-banner">
-        <div style="max-width: 900px; margin: 0 auto; position: relative;">
+        <div style="max-width: 900px; margin: 0 auto;">
             
-            <button id="cerrar-hub" class="btn" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; z-index: 10;">
-                <i class="ph-bold ph-arrow-left"></i> Volver
-            </button>
-
-            <div style="display: flex; align-items: center; gap: 18px; margin-top: 15px;">
-                <div style="width: 65px; height: 65px; background: #000; border: 2px solid var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2);">
-                    <i class="ph-fill ph-shield-checkered" style="font-size: 2.2rem; color: var(--primary-green);"></i>
+            <!-- CONTENEDOR FLEX: Resuelve el problema del botón Volver -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
+                <!-- Escudo y Título -->
+                <div style="display: flex; align-items: center; gap: 18px;">
+                    <div style="width: 65px; height: 65px; background: #000; border: 2px solid var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2);">
+                        <i class="ph-fill ph-shield-checkered" style="font-size: 2.2rem; color: var(--primary-green);"></i>
+                    </div>
+                    <div>
+                        <h2 id="hub-nombre" style="margin: 0; font-size: 1.6rem; color: #fff;">Cargando...</h2>
+                        <p id="hub-ubicacion" style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
+                    </div>
                 </div>
-                <div style="padding-right: 90px;"> <h2 id="hub-nombre" style="margin: 0; font-size: 1.6rem; color: #fff;">Cargando...</h2>
-                    <p id="hub-ubicacion" style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
-                </div>
+                
+                <!-- Botón Volver bien posicionado -->
+                <button id="cerrar-hub" class="btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; flex-shrink: 0;">
+                    <i class="ph-bold ph-arrow-left"></i> Volver
+                </button>
             </div>
 
             <div id="hub-deportes-filtros" style="display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; padding-bottom: 5px;"></div>
@@ -159,8 +168,8 @@
             </div>
             <p style="margin: 0 0 15px 0; color: #ccc; font-size: 0.85rem;">Crea nuevos partidos y administra las inscripciones de tus jugadores.</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn" style="background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Nuevo Partido</button>
-                <button class="btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
+                <button id="btn-nuevo-partido" class="btn" style="background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Nuevo Partido</button>
+                <button id="btn-ver-miembros" class="btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
             </div>
         </div>
 
@@ -251,6 +260,14 @@
         listaMisComunidades.style.display = 'none';
     });
 
+    // Eventos Panel Líder
+    document.getElementById('btn-nuevo-partido').addEventListener('click', () => {
+        alert("¡Excelente! En la siguiente fase programaremos el formulario para crear el partido (Costo, Fecha y Cupos).");
+    });
+    document.getElementById('btn-ver-miembros').addEventListener('click', () => {
+        alert("Aquí aparecerá la lista de jugadores que pertenecen a tu comunidad.");
+    });
+
     // Modal Whatsapp
     const modalCrear = document.getElementById('modal-crear-comunidad');
     document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
@@ -329,6 +346,40 @@
         }
     }
 
+    // Funcionalidad interactiva de los Deportes (Colores)
+    window.seleccionarDeporte = function(btnElement, nombreDeporte, colorPrincipal) {
+        // 1. Quitar estilos activos a todos
+        const botones = document.querySelectorAll('.btn-filtro-deporte');
+        botones.forEach(b => {
+            b.style.background = 'rgba(255,255,255,0.05)';
+            b.style.color = '#fff';
+            b.style.border = '1px solid rgba(255,255,255,0.1)';
+        });
+        
+        // 2. Aplicar estilos activos al botón clickeado
+        btnElement.style.background = colorPrincipal;
+        btnElement.style.color = '#000';
+        btnElement.style.border = `1px solid ${colorPrincipal}`;
+
+        // 3. Simular la carga de partidos para ese deporte
+        const listaPartidos = document.getElementById('hub-lista-partidos');
+        listaPartidos.innerHTML = `
+            <div style="text-align: center; padding: 30px;">
+                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.5rem; color:${colorPrincipal};"></i>
+                <p style="color:var(--text-muted); margin-top:10px;">Buscando partidos de ${nombreDeporte}...</p>
+            </div>
+        `;
+        
+        setTimeout(() => {
+            listaPartidos.innerHTML = `
+                <div style="text-align: center; padding: 30px 10px;">
+                    <i class="ph-bold ph-whistle" style="font-size: 2.8rem; color: #444;"></i>
+                    <p style="color: var(--text-muted); margin-top: 10px; font-size: 0.9rem;">No hay partidos programados de ${nombreDeporte} por el momento.</p>
+                </div>
+            `;
+        }, 800);
+    };
+
     // Funcionalidad del HUB
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
@@ -337,10 +388,8 @@
         document.getElementById('hub-nombre').textContent = nombre;
         document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
         
-        // 1. Mostrar u ocultar Panel de Líder
+        // Mostrar panel del Líder o el Link de Whatsapp
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none';
-
-        // 2. Mostrar u ocultar link de WhatsApp (El líder no lo ve)
         document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
 
         const btnWa = document.getElementById('btn-unirse-wa');
@@ -351,7 +400,7 @@
             btnWa.onclick = () => alert("Esta comunidad no tiene un link directo configurado.");
         }
 
-        // 3. Generar pestañas de deportes con COLORES INTELIGENTES
+        // Generar pestañas de deportes interactivos
         const deportesArray = deportesRaw.split(',');
         const contenedorFiltros = document.getElementById('hub-deportes-filtros');
         contenedorFiltros.innerHTML = '';
@@ -367,13 +416,13 @@
             else if (nombreStr.includes('vóley') || nombreStr.includes('voley')) { colorPrincipal = '#9b59b6'; } // Morado
             else if (nombreStr.includes('tenis')) { colorPrincipal = '#f1c40f'; } // Amarillo
 
-            const btnClass = 'btn';
             const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)';
             const color = isFirst ? '#000' : '#fff';
             const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.1)';
             
+            // Aquí inyectamos el botón con el evento onclick
             contenedorFiltros.innerHTML += `
-                <button class="${btnClass}" style="background:${bg}; color:${color}; border:${border}; padding:6px 16px; border-radius:20px; white-space:nowrap; font-size:0.85rem; font-weight:bold; transition: all 0.3s ease;">
+                <button class="btn btn-filtro-deporte" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border}; padding:6px 16px; border-radius:20px; white-space:nowrap; font-size:0.85rem; font-weight:bold; transition: all 0.3s ease;">
                     ${nombreDeporte}
                 </button>
             `;
