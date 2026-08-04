@@ -236,10 +236,53 @@
         </form>
     </div>
 </div>
+<div id="modal-nuevo-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+        <button id="cerrar-nuevo-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        
+        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-calendar-plus"></i> Organizar Partido</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Crea el evento para que los miembros puedan separar su cupo.</p>
+        
+        <form id="form-nuevo-partido">
+            <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deporte</label>
+            <select id="np-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
+                </select>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <div style="flex: 1;">
+                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha</label>
+                    <input type="date" id="np-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                </div>
+                <div style="flex: 1;">
+                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Hora</label>
+                    <input type="time" id="np-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                </div>
+            </div>
 
+            <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Lugar / Cancha</label>
+            <input type="text" id="np-lugar" required placeholder="Ej: Sintética El Golazo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing: border-box;">
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                <div style="flex: 1;">
+                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Cupos Totales</label>
+                    <input type="number" id="np-cupos" required placeholder="Ej: 14" min="2" max="100" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                </div>
+                <div style="flex: 2;">
+                    <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Costo e Instrucciones</label>
+                    <input type="text" id="np-precio" required placeholder="Ej: S/15 - Yape al 999..." style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;">
+                <i class="ph-bold ph-check-circle"></i> Publicar Partido
+            </button>
+        </form>
+    </div>
+</div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    // IMPORTANTE: Hemos agregado 'addDoc' para poder guardar nuevos partidos
+    import { getFirestore, collection, getDocs, query, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -255,70 +298,92 @@
     const db = getFirestore(app);
     const auth = getAuth(app);
     let currentUser = null;
+    let comunidadActivaId = null; // Variable clave para saber dónde guardar el partido
 
-    // PALETA DE COLORES DINÁMICA PARA CUALQUIER DEPORTE
-    const PALETA_DEPORTES_EXTRA = [
-        '#00d2d3', // Cian
-        '#ff9ff3', // Rosado
-        '#ff6b6b', // Coral
-        '#1dd1a1', // Turquesa
-        '#feca57', // Amarillo dorado
-        '#54a0ff', // Azul eléctrico
-        '#5f27cd', // Violeta
-        '#ff9f43', // Naranja claro
-        '#10ac84', // Verde menta
-        '#ee5253'  // Rojo intenso
-    ];
-
+    // PALETA DE COLORES DINÁMICA
+    const PALETA_DEPORTES_EXTRA = ['#00d2d3','#ff9ff3','#ff6b6b','#1dd1a1','#feca57','#54a0ff','#5f27cd','#ff9f43','#10ac84','#ee5253'];
     function obtenerColorDeporte(nombreDeporte) {
         if (!nombreDeporte) return '#2ecc71';
         const str = nombreDeporte.trim().toLowerCase();
+        if (str.includes('fútbol') || str.includes('futbol') || str.includes('futsal')) return '#2ecc71'; 
+        if (str.includes('básquet') || str.includes('basquet') || str.includes('baloncesto')) return '#e67e22'; 
+        if (str.includes('vóley') || str.includes('voley') || str.includes('voleibol')) return '#9b59b6'; 
+        if (str.includes('tenis') || str.includes('pádel') || str.includes('padel')) return '#f1c40f'; 
+        if (str.includes('natación') || str.includes('natacion') || str.includes('acuát')) return '#0984e3'; 
+        if (str.includes('atletismo') || str.includes('run')) return '#e74c3c'; 
 
-        if (str.includes('fútbol') || str.includes('futbol') || str.includes('futsal')) return '#2ecc71'; // Verde
-        if (str.includes('básquet') || str.includes('basquet') || str.includes('baloncesto')) return '#e67e22'; // Naranja
-        if (str.includes('vóley') || str.includes('voley') || str.includes('voleibol')) return '#9b59b6'; // Morado / Magenta
-        if (str.includes('tenis') || str.includes('pádel') || str.includes('padel')) return '#f1c40f'; // Amarillo
-        if (str.includes('natación') || str.includes('natacion') || str.includes('acuát')) return '#0984e3'; // Azul
-        if (str.includes('atletismo') || str.includes('run')) return '#e74c3c'; // Rojo
-
-        // Hash para cualquier otro deporte
         let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const index = Math.abs(hash) % PALETA_DEPORTES_EXTRA.length;
-        return PALETA_DEPORTES_EXTRA[index];
+        for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+        return PALETA_DEPORTES_EXTRA[Math.abs(hash) % PALETA_DEPORTES_EXTRA.length];
     }
 
-    // Pestañas principales
+    // NAVEGACIÓN PESTAÑAS
     const btnMisComunidades = document.getElementById('tab-mis-comunidades');
     const btnExplorar = document.getElementById('tab-explorar');
     const listaMisComunidades = document.getElementById('lista-mis-comunidades');
     const listaExplorar = document.getElementById('lista-explorar');
 
     btnMisComunidades.addEventListener('click', () => {
-        btnMisComunidades.classList.add('active');
-        btnExplorar.classList.remove('active');
-        listaMisComunidades.style.display = 'grid';
-        listaExplorar.style.display = 'none';
+        btnMisComunidades.classList.add('active'); btnExplorar.classList.remove('active');
+        listaMisComunidades.style.display = 'grid'; listaExplorar.style.display = 'none';
     });
 
     btnExplorar.addEventListener('click', () => {
-        btnExplorar.classList.add('active');
-        btnMisComunidades.classList.remove('active');
-        listaExplorar.style.display = 'grid';
-        listaMisComunidades.style.display = 'none';
+        btnExplorar.classList.add('active'); btnMisComunidades.classList.remove('active');
+        listaExplorar.style.display = 'grid'; listaMisComunidades.style.display = 'none';
     });
 
-    // Eventos Panel Líder
-    document.getElementById('btn-nuevo-partido').addEventListener('click', () => {
-        alert("¡Excelente! En el siguiente paso programaremos la creación del partido con cupos y costo.");
+    // ==========================================
+    // LÓGICA DE CREACIÓN DE PARTIDOS (EL MOTOR)
+    // ==========================================
+    const modalNuevoPartido = document.getElementById('modal-nuevo-partido');
+    const formNuevoPartido = document.getElementById('form-nuevo-partido');
+
+    // Abrir y cerrar el modal del nuevo partido
+    document.getElementById('btn-nuevo-partido').addEventListener('click', () => modalNuevoPartido.style.display = 'flex');
+    document.getElementById('cerrar-nuevo-partido').addEventListener('click', () => modalNuevoPartido.style.display = 'none');
+
+    // Procesar y guardar el partido en Firebase
+    formNuevoPartido.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
+        btnSubmit.disabled = true;
+
+        const nuevoPartido = {
+            comunidadId: comunidadActivaId,
+            creadorUid: currentUser.uid,
+            deporte: document.getElementById('np-deporte').value,
+            fecha: document.getElementById('np-fecha').value,
+            hora: document.getElementById('np-hora').value,
+            lugar: document.getElementById('np-lugar').value,
+            cuposTotales: parseInt(document.getElementById('np-cupos').value),
+            cuposOcupados: 0,
+            precioInstrucciones: document.getElementById('np-precio').value,
+            estado: 'abierto',
+            fechaCreacion: new Date().toISOString()
+        };
+
+        try {
+            await addDoc(collection(db, 'partidos'), nuevoPartido);
+            alert("¡Golazo! El partido ha sido publicado exitosamente.");
+            modalNuevoPartido.style.display = 'none';
+            formNuevoPartido.reset();
+            // En el próximo paso haremos que el partido aparezca visualmente de inmediato
+        } catch (error) {
+            console.error("Error al publicar el partido:", error);
+            alert("Ocurrió un error al guardar el partido. Inténtalo de nuevo.");
+        } finally {
+            btnSubmit.innerHTML = '<i class="ph-bold ph-check-circle"></i> Publicar Partido';
+            btnSubmit.disabled = false;
+        }
     });
+
     document.getElementById('btn-ver-miembros').addEventListener('click', () => {
         alert("Aquí se desplegará la lista de jugadores inscritos en tu comunidad.");
     });
 
-    // Modal Whatsapp
+    // Modal Whatsapp Crear Comunidad
     const modalCrear = document.getElementById('modal-crear-comunidad');
     document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
     document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
@@ -350,17 +415,12 @@
             const snap = await getDocs(query(collection(db, 'comunidades')));
             listaMisComunidades.innerHTML = '';
             listaExplorar.innerHTML = '';
-
-            let tengoComunidades = false;
-            let hayParaExplorar = false;
+            let tengoComunidades = false; let hayParaExplorar = false;
 
             snap.forEach(docSnap => {
-                const c = docSnap.data();
-                c.id = docSnap.id;
-                
+                const c = docSnap.data(); c.id = docSnap.id;
                 const deportesArray = (c.deporte || 'Fútbol').split(',').map(d => d.trim());
                 const tagsHTML = deportesArray.map(d => `<span class="sport-tag">${d}</span>`).join('');
-
                 const soyLider = currentUser && (currentUser.uid === c.liderUid);
                 const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
 
@@ -379,35 +439,22 @@
                     </div>
                 `;
 
-                if (soyMiembro) {
-                    listaMisComunidades.innerHTML += htmlTarjeta;
-                    tengoComunidades = true;
-                } else {
-                    listaExplorar.innerHTML += htmlTarjeta;
-                    hayParaExplorar = true;
-                }
+                if (soyMiembro) { listaMisComunidades.innerHTML += htmlTarjeta; tengoComunidades = true; } 
+                else { listaExplorar.innerHTML += htmlTarjeta; hayParaExplorar = true; }
             });
 
             if(!tengoComunidades) listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Aún no estás en ninguna comunidad. Pasa a la pestaña "Explorar".</p>';
             if(!hayParaExplorar) listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">No hay más comunidades públicas por el momento.</p>';
 
-        } catch (error) {
-            console.error("Error:", error);
-        }
+        } catch (error) { console.error("Error:", error); }
     }
 
-    // Cambio de deporte al hacer clic
     window.seleccionarDeporte = function(btnElement, nombreDeporte, colorPrincipal) {
         const botones = document.querySelectorAll('.btn-sport-chip');
         botones.forEach(b => {
-            b.style.background = 'rgba(255,255,255,0.05)';
-            b.style.color = '#fff';
-            b.style.border = '1px solid rgba(255,255,255,0.12)';
+            b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)';
         });
-        
-        btnElement.style.background = colorPrincipal;
-        btnElement.style.color = '#000';
-        btnElement.style.border = `1px solid ${colorPrincipal}`;
+        btnElement.style.background = colorPrincipal; btnElement.style.color = '#000'; btnElement.style.border = `1px solid ${colorPrincipal}`;
 
         const listaPartidos = document.getElementById('hub-lista-partidos');
         listaPartidos.innerHTML = `
@@ -416,7 +463,6 @@
                 <p style="color:var(--text-muted); margin-top:10px; font-size:0.9rem;">Buscando partidos de ${nombreDeporte}...</p>
             </div>
         `;
-        
         setTimeout(() => {
             listaPartidos.innerHTML = `
                 <div style="text-align: center; padding: 30px 10px;">
@@ -427,14 +473,15 @@
         }, 500);
     };
 
-    // Funcionalidad del HUB
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
     window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp) => {
+        // Guardamos el ID de la comunidad en la variable global para el momento de crear el partido
+        comunidadActivaId = id; 
+
         document.getElementById('hub-nombre').textContent = nombre;
         document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
-        
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none';
         document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
 
@@ -442,22 +489,22 @@
         if (wsp) {
             const numClean = String(wsp).replace(/\D/g, '');
             btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme al grupo de WhatsApp de la comunidad " + nombre)}`, '_blank');
-        } else {
-            btnWa.onclick = () => alert("Esta comunidad no tiene un link directo configurado.");
-        }
+        } else { btnWa.onclick = () => alert("Esta comunidad no tiene un link directo configurado."); }
 
-        // Pestañas de deportes dinámicas
         const deportesArray = deportesRaw.split(',');
         const contenedorFiltros = document.getElementById('hub-deportes-filtros');
+        const selectDeporteModal = document.getElementById('np-deporte'); // El select del formulario
+        
         contenedorFiltros.innerHTML = '';
+        selectDeporteModal.innerHTML = ''; // Limpiamos opciones anteriores
         
         deportesArray.forEach((dep, index) => {
             const isFirst = index === 0;
             const nombreDeporte = dep.trim();
             if (!nombreDeporte) return;
 
+            // 1. Llenar los botones dinámicos
             const colorPrincipal = obtenerColorDeporte(nombreDeporte);
-
             const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)';
             const color = isFirst ? '#000' : '#fff';
             const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
@@ -467,6 +514,9 @@
                     ${nombreDeporte}
                 </button>
             `;
+
+            // 2. Llenar el Dropdown del Formulario "Nuevo Partido"
+            selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
         });
 
         hubModal.classList.add('mostrar');
