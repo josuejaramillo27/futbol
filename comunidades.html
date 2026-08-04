@@ -12,31 +12,19 @@
     <link rel="stylesheet" href="discovery.css">
     
     <style>
-        /* Estilos de las pestañas internas (Corregido contraste) */
         .tabs-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 12px;
+            display: flex; gap: 10px; margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;
         }
         
         .tab-btn {
-            background: transparent;
-            border: 1px solid transparent;
-            color: #888;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-            padding: 8px 18px;
-            border-radius: 8px;
+            background: transparent; border: 1px solid transparent;
+            color: #888; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; padding: 8px 18px; border-radius: 8px;
             transition: all 0.3s ease;
         }
 
-        .tab-btn:hover {
-            color: #ffffff !important;
-            background: rgba(255, 255, 255, 0.05);
-        }
+        .tab-btn:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.05); }
 
         .tab-btn.active {
             color: var(--primary-green) !important;
@@ -44,90 +32,54 @@
             border: 1px solid rgba(46, 204, 113, 0.3);
         }
 
-        /* Tarjetas de comunidad públicas */
         .community-card {
             background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%);
             border: 1px solid rgba(46, 204, 113, 0.25);
-            border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border-radius: 16px; padding: 20px; transition: all 0.3s ease;
+            cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
 
         .community-card:hover {
-            border-color: var(--primary-green);
-            transform: translateY(-4px);
+            border-color: var(--primary-green); transform: translateY(-4px);
             box-shadow: 0 10px 25px rgba(46, 204, 113, 0.15);
         }
 
-        .sport-tags {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
+        .sport-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        
         .sport-tag {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: #ddd;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ddd;
         }
 
-        /* Hub de la Comunidad (Modal estilizado en modo oscuro premium) */
+        /* Hub de la Comunidad */
         .hub-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #080B0A;
-            z-index: 200;
-            overflow-y: auto;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #080B0A; z-index: 200; overflow-y: auto;
         }
 
-        .hub-modal.mostrar {
-            display: block;
-        }
+        .hub-modal.mostrar { display: block; }
 
         .hub-header-banner {
             background: linear-gradient(180deg, rgba(20, 30, 24, 0.95) 0%, rgba(8, 11, 10, 1) 100%);
             border-bottom: 1px solid rgba(46, 204, 113, 0.2);
-            padding: 30px 20px 20px;
-            position: relative;
+            padding: 30px 20px 20px; position: relative;
         }
 
-        .hub-content-container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 25px 20px 50px;
-        }
+        .hub-content-container { max-width: 900px; margin: 0 auto; padding: 25px 20px 50px; }
 
         .hub-card-box {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; padding: 20px; margin-bottom: 20px;
         }
 
-        /* Botón de solicitar creación compacto */
         .btn-crear-compacto {
-            width: auto !important;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            background: rgba(46, 204, 113, 0.1);
-            color: var(--primary-green);
-            border: 1px dashed var(--primary-green);
+            width: auto !important; padding: 8px 16px; font-size: 0.85rem;
+            white-space: nowrap; background: rgba(46, 204, 113, 0.1);
+            color: var(--primary-green); border: 1px dashed var(--primary-green);
             transition: all 0.3s ease;
         }
 
-        .btn-crear-compacto:hover {
-            background: var(--primary-green) !important;
-            color: #080b0a !important;
-        }
+        .btn-crear-compacto:hover { background: var(--primary-green) !important; color: #080b0a !important; }
     </style>
 </head>
 <body>
@@ -155,11 +107,10 @@
 </header>
 
 <main style="max-width: 900px; margin: 0 auto; padding: 25px 20px;">
-    
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
         <div>
             <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Comunidades</h1>
-            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Encuentra pichangas fijas o gestiona tus grupos deportivos.</p>
+            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Encuentra pichangas fijas o gestiona tus grupos.</p>
         </div>
         <button id="btn-solicitar-creacion" class="btn btn-crear-compacto">
             <i class="ph-bold ph-plus-circle"></i> Registrar la mía
@@ -175,31 +126,27 @@
         <p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p>
     </div>
 
-    <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-        </div>
-
+    <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
 </main>
 
 <div id="hub-comunidad" class="hub-modal">
-    
     <div class="hub-header-banner">
         <div style="max-width: 900px; margin: 0 auto; position: relative;">
-            <button id="cerrar-hub" class="btn" style="position: absolute; top: 0; right: 0; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 14px; font-size: 0.85rem; border-radius: 8px;">
+            
+            <button id="cerrar-hub" class="btn" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; z-index: 10;">
                 <i class="ph-bold ph-arrow-left"></i> Volver
             </button>
 
-            <div style="display: flex; align-items: center; gap: 18px; margin-top: 10px;">
+            <div style="display: flex; align-items: center; gap: 18px; margin-top: 15px;">
                 <div style="width: 65px; height: 65px; background: #000; border: 2px solid var(--primary-green); border-radius: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2);">
                     <i class="ph-fill ph-shield-checkered" style="font-size: 2.2rem; color: var(--primary-green);"></i>
                 </div>
-                <div>
-                    <h2 id="hub-nombre" style="margin: 0; font-size: 1.6rem; color: #fff;">Cargando...</h2>
+                <div style="padding-right: 90px;"> <h2 id="hub-nombre" style="margin: 0; font-size: 1.6rem; color: #fff;">Cargando...</h2>
                     <p id="hub-ubicacion" style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
                 </div>
             </div>
 
-            <div id="hub-deportes-filtros" style="display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; padding-bottom: 5px;">
-                </div>
+            <div id="hub-deportes-filtros" style="display: flex; gap: 10px; margin-top: 25px; overflow-x: auto; padding-bottom: 5px;"></div>
         </div>
     </div>
 
@@ -212,8 +159,8 @@
             </div>
             <p style="margin: 0 0 15px 0; color: #ccc; font-size: 0.85rem;">Crea nuevos partidos y administra las inscripciones de tus jugadores.</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button class="btn" style="background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Organizar Nuevo Partido</button>
-                <button class="btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Lista de Miembros</button>
+                <button class="btn" style="background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Nuevo Partido</button>
+                <button class="btn" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
             </div>
         </div>
 
@@ -284,7 +231,7 @@
     const auth = getAuth(app);
     let currentUser = null;
 
-    // Control de pestañas
+    // Pestañas
     const btnMisComunidades = document.getElementById('tab-mis-comunidades');
     const btnExplorar = document.getElementById('tab-explorar');
     const listaMisComunidades = document.getElementById('lista-mis-comunidades');
@@ -304,7 +251,7 @@
         listaMisComunidades.style.display = 'none';
     });
 
-    // Control del Formulario de Whatsapp
+    // Modal Whatsapp
     const modalCrear = document.getElementById('modal-crear-comunidad');
     document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
     document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
@@ -320,7 +267,6 @@
         e.target.reset();
     });
 
-    // Lógica principal
     onAuthStateChanged(auth, async (user) => {
         currentUser = user;
         cargarComunidades();
@@ -348,12 +294,11 @@
                 const deportesArray = (c.deporte || 'Fútbol').split(',').map(d => d.trim());
                 const tagsHTML = deportesArray.map(d => `<span class="sport-tag">${d}</span>`).join('');
 
-                // Detectamos si soy el líder o si mi UID está en los miembros
                 const soyLider = currentUser && (currentUser.uid === c.liderUid);
                 const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
 
                 const htmlTarjeta = `
-                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${deportesArray.join(',')}', ${soyLider}, '${c.whatsappLider || ''}')">
+                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${c.deporte}', ${soyLider}, '${c.whatsappLider || ''}')">
                         <div style="display:flex; align-items:center; gap:15px;">
                             <div style="width:50px; height:50px; background:#111; border: 1px solid var(--primary-green); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>
@@ -376,7 +321,7 @@
                 }
             });
 
-            if(!tengoComunidades) listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Aún no estás en ninguna comunidad. Pasa a la pestaña "Explorar" para solicitar ingreso.</p>';
+            if(!tengoComunidades) listaMisComunidades.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">Aún no estás en ninguna comunidad. Pasa a la pestaña "Explorar".</p>';
             if(!hayParaExplorar) listaExplorar.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1; text-align:center; padding: 20px;">No hay más comunidades públicas por el momento.</p>';
 
         } catch (error) {
@@ -384,7 +329,7 @@
         }
     }
 
-    // Funcionalidad del HUB (Abrir comunidad por dentro)
+    // Funcionalidad del HUB
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
@@ -392,10 +337,12 @@
         document.getElementById('hub-nombre').textContent = nombre;
         document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
         
-        // Mostrar panel de administración solo si eres Líder
+        // 1. Mostrar u ocultar Panel de Líder
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none';
 
-        // Configurar botón de WhatsApp del chat general
+        // 2. Mostrar u ocultar link de WhatsApp (El líder no lo ve)
+        document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
+
         const btnWa = document.getElementById('btn-unirse-wa');
         if (wsp) {
             const numClean = String(wsp).replace(/\D/g, '');
@@ -404,26 +351,34 @@
             btnWa.onclick = () => alert("Esta comunidad no tiene un link directo configurado.");
         }
 
-        // Generar pestañas de deportes
+        // 3. Generar pestañas de deportes con COLORES INTELIGENTES
         const deportesArray = deportesRaw.split(',');
         const contenedorFiltros = document.getElementById('hub-deportes-filtros');
         contenedorFiltros.innerHTML = '';
         
         deportesArray.forEach((dep, index) => {
             const isFirst = index === 0;
-            const btnClass = isFirst ? 'btn' : 'btn';
-            const bg = isFirst ? 'var(--primary-green)' : 'rgba(255,255,255,0.05)';
+            const nombreDeporte = dep.trim();
+            const nombreStr = nombreDeporte.toLowerCase();
+            
+            // Asignar colores por defecto basados en el deporte
+            let colorPrincipal = 'var(--primary-green)'; // Verde para fútbol por defecto
+            if (nombreStr.includes('básquet') || nombreStr.includes('basquet')) { colorPrincipal = '#e67e22'; } // Naranja
+            else if (nombreStr.includes('vóley') || nombreStr.includes('voley')) { colorPrincipal = '#9b59b6'; } // Morado
+            else if (nombreStr.includes('tenis')) { colorPrincipal = '#f1c40f'; } // Amarillo
+
+            const btnClass = 'btn';
+            const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)';
             const color = isFirst ? '#000' : '#fff';
-            const border = isFirst ? '1px solid var(--primary-green)' : '1px solid rgba(255,255,255,0.1)';
+            const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.1)';
             
             contenedorFiltros.innerHTML += `
-                <button class="${btnClass}" style="background:${bg}; color:${color}; border:${border}; padding:6px 16px; border-radius:20px; white-space:nowrap; font-size:0.85rem; font-weight:bold;">
-                    ${dep}
+                <button class="${btnClass}" style="background:${bg}; color:${color}; border:${border}; padding:6px 16px; border-radius:20px; white-space:nowrap; font-size:0.85rem; font-weight:bold; transition: all 0.3s ease;">
+                    ${nombreDeporte}
                 </button>
             `;
         });
 
-        // Abrir ventana
         hubModal.classList.add('mostrar');
     };
 </script>
