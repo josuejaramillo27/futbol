@@ -281,7 +281,6 @@
 </div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    // IMPORTANTE: Se agregó 'where' para filtrar partidos por comunidad
     import { getFirestore, collection, getDocs, query, addDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -297,8 +296,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
+    
     let currentUser = null;
     let comunidadActivaId = null; 
+    
+    // Variables globales para el control de acceso en los partidos
+    window.soyLiderGlobal = false;
+    window.soyMiembroGlobal = false;
 
     const PALETA_DEPORTES_EXTRA = ['#00d2d3','#ff9ff3','#ff6b6b','#1dd1a1','#feca57','#54a0ff','#5f27cd','#ff9f43','#10ac84','#ee5253'];
     function obtenerColorDeporte(nombreDeporte) {
@@ -364,7 +368,6 @@
             modalNuevoPartido.style.display = 'none';
             formNuevoPartido.reset();
             
-            // Recargar automáticamente la pestaña del deporte donde creaste el partido
             const botones = document.querySelectorAll('.btn-sport-chip');
             botones.forEach(b => { if (b.textContent.trim() === nuevoPartido.deporte) b.click(); });
             
@@ -417,11 +420,13 @@
                 const c = docSnap.data(); c.id = docSnap.id;
                 const deportesArray = (c.deporte || 'Fútbol').split(',').map(d => d.trim());
                 const tagsHTML = deportesArray.map(d => `<span class="sport-tag">${d}</span>`).join('');
+                
                 const soyLider = currentUser && (currentUser.uid === c.liderUid);
                 const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
 
+                // NOTA IMPORTANTE: Ahora pasamos soyMiembro a la función abrirHubComunidad
                 const htmlTarjeta = `
-                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${c.deporte}', ${soyLider}, '${c.whatsappLider || ''}')">
+                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${c.deporte}', ${soyLider}, '${c.whatsappLider || ''}', ${soyMiembro})">
                         <div style="display:flex; align-items:center; gap:15px;">
                             <div style="width:50px; height:50px; background:#111; border: 1px solid var(--primary-green); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                                 <i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>
@@ -446,10 +451,9 @@
     }
 
     // ==========================================
-    // CARGAR PARTIDOS EN LA CARTELERA VIRTUAL
+    // CARGAR PARTIDOS EN LA CARTELERA (CON CONTROL DE ACCESO)
     // ==========================================
     window.seleccionarDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
-        // Estilos visuales
         const botones = document.querySelectorAll('.btn-sport-chip');
         botones.forEach(b => {
             b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)';
@@ -465,7 +469,6 @@
         `;
         
         try {
-            // Buscamos los partidos de la comunidad activa
             const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId));
             const snap = await getDocs(q);
             
@@ -474,18 +477,29 @@
             snap.forEach(docSnap => {
                 const p = docSnap.data();
                 
-                // Filtramos por el deporte de esta pestaña
                 if (p.deporte === nombreDeporte) {
                     const cuposLibres = p.cuposTotales - (p.cuposOcupados || 0);
                     const colorFondoBoton = cuposLibres > 0 ? colorPrincipal : '#555';
                     const textoBoton = cuposLibres > 0 ? 'Separar mi cupo' : 'Agotado';
                     
-                    // Formatear la fecha
                     let fechaAmigable = p.fecha;
                     try {
-                        const partes = p.fecha.split('-'); // 2026-10-15
+                        const partes = p.fecha.split('-'); 
                         fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`;
                     } catch(e){}
+
+                    // CONTROL DE ACCESO: ¿Qué botón le mostramos al usuario?
+                    let botonAccion = '';
+                    if (window.soyLiderGlobal) {
+                        // Es el Líder
+                        botonAccion = `<button class="btn" style="width: 100%; background: #f1c40f; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('En el próximo paso: Aquí verás la lista de inscritos para este partido.')"><i class="ph-bold ph-users-three"></i> Gestionar Lista</button>`;
+                    } else if (window.soyMiembroGlobal) {
+                        // Es Miembro
+                        botonAccion = `<button class="btn" style="width: 100%; background: ${colorFondoBoton}; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('En el próximo paso: Este botón registrará tu asistencia.')"><i class="ph-bold ph-ticket"></i> ${textoBoton}</button>`;
+                    } else {
+                        // Es visitante (Explorando)
+                        botonAccion = `<button class="btn" style="width: 100%; background: rgba(255,255,255,0.05); color: #888; font-weight: bold; border: 1px dashed rgba(255,255,255,0.2); font-size: 0.85rem; cursor: not-allowed;" disabled><i class="ph-bold ph-lock-key"></i> Únete a la comunidad para jugar</button>`;
+                    }
 
                     htmlTarjetas += `
                         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; margin-bottom: 15px; text-align: left; transition: all 0.3s ease;">
@@ -503,9 +517,7 @@
                                 <p style="margin: 0; color: #ddd; font-size: 0.85rem;"><strong style="color:#fff;">Costo / Instrucciones:</strong> ${p.precioInstrucciones}</p>
                             </div>
                             
-                            <button class="btn" style="width: 100%; background: ${colorFondoBoton}; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="alert('¡Perfecto! En el Paso 3, este botón restará 1 cupo y agregará tu nombre a la lista del organizador.')">
-                                <i class="ph-bold ph-ticket"></i> ${textoBoton}
-                            </button>
+                            ${botonAccion}
                         </div>
                     `;
                 }
@@ -531,8 +543,13 @@
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
-    window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp) => {
+    // Actualizamos la función para que reciba 'soyMiembro'
+    window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp, soyMiembro) => {
         comunidadActivaId = id; 
+        
+        // Guardamos los roles en las variables globales para que seleccionarDeporte sepa qué hacer
+        window.soyLiderGlobal = esLider;
+        window.soyMiembroGlobal = soyMiembro;
 
         document.getElementById('hub-nombre').textContent = nombre;
         document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
@@ -572,8 +589,6 @@
 
         hubModal.classList.add('mostrar');
 
-        // TRUCO DE EXPERIENCIA DE USUARIO: Simular un clic en la primera pestaña 
-        // para que los partidos carguen solos sin que el usuario tenga que dar clic.
         setTimeout(() => {
             const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip');
             if(primerBotonDeporte) primerBotonDeporte.click();
