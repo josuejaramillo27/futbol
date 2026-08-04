@@ -308,7 +308,7 @@
                     // TEXTO Y LINK A MAPS
                     let htmlLugar = '';
                     if (p.linkMaps && p.linkMaps.trim() !== '') {
-                        htmlLugar = `<span style="font-size:0.75rem; color:#f1c40f; font-weight:bold;">👉 PRESIONA PARA VER DIRECCIÓN: </span> <a href="${p.linkMaps}" target="_blank" style="color: #3498db; text-decoration: underline; font-weight: bold;">${p.lugar}</a>`;
+                        htmlLugar = `<a href="${p.linkMaps}" target="_blank" style="color: #3498db; text-decoration: underline; font-weight: bold;">${p.lugar}</a> <span style="font-size:0.75rem; color:#f1c40f; font-weight:bold; margin-left: 8px;">👈 PRESIONA PARA VER LA DIRECCIÓN</span>`;
                     } else {
                         htmlLugar = p.lugar;
                     }
