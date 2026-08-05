@@ -79,10 +79,21 @@
         <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 30px; width: auto; object-fit: contain;">
         <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.8rem; vertical-align: middle;">COMUNIDADES</b></span>
     </a>
+    
+    <!-- MENÚ DE NAVEGACIÓN CON EFECTOS HOVER RESTAURADOS -->
     <nav style="display: flex; gap: 20px; align-items: center;">
-        <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa;"><i class="ph-bold ph-map-pin" style="font-size: 1.3rem;"></i><span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span></a>
-        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa;"><i class="ph-bold ph-users" style="font-size: 1.3rem;"></i><span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span></a>
-        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);"><i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i><span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span></a>
+        <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-map-pin" style="font-size: 1.3rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
+        </a>
+        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-users" style="font-size: 1.3rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
+        </a>
+        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
+            <i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span>
+        </a>
     </nav>
 </header>
 
@@ -113,6 +124,7 @@
     <div class="hub-header-banner">
         <div style="max-width: 900px; margin: 0 auto;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
+                <!-- SECCIÓN EDITABLE: LOGO DE LA COMUNIDAD -->
                 <div style="display: flex; align-items: center; gap: 15px;">
                     <div id="btn-cambiar-logo" style="width: 60px; height: 60px; background: #000; border: 2px solid var(--primary-green); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2); position: relative; overflow: hidden; transition: all 0.3s ease;">
                         <img id="img-logo-comunidad" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
@@ -713,25 +725,24 @@
             ranking.sort((a,b) => b.score - a.score); 
             const sieteIdeal = ranking.slice(0, 7); 
             
-            // OBTENER POSICIONES DESDE LA COLECCIÓN CORRECTA (jugadores_perfiles)
             for (let j of sieteIdeal) {
                 try {
                     const uSnap = await getDoc(doc(db, 'jugadores_perfiles', j.uid));
                     if (uSnap.exists()) { 
-                        j.posicion = uSnap.data().posicion || 'MED'; 
+                        const data = uSnap.data();
+                        j.posicion = data.posicion || data.posicionPrincipal || data.posicion_principal || 'MED'; 
                     } 
                     else { j.posicion = 'MED'; }
                 } catch(e) { j.posicion = 'MED'; }
             }
 
-            // AGRUPAR POR LÍNEAS EN LA CANCHA (Tolerante a valores cortos ARQ, DEF, DEL)
             const lineas = { fwd: [], mid: [], def: [], gk: [] };
             sieteIdeal.forEach(j => {
                 const p = String(j.posicion || '').toUpperCase();
                 if (p.includes('ARQ') || p.includes('PORTERO') || p.includes('GK')) lineas.gk.push(j);
                 else if (p.includes('DEF') || p.includes('ZAGUERO') || p.includes('CENTRAL')) lineas.def.push(j);
                 else if (p.includes('DEL') || p.includes('PUNTA') || p.includes('ATACANTE')) lineas.fwd.push(j);
-                else lineas.mid.push(j); // Si es MED, LIB o no coincide
+                else lineas.mid.push(j); 
             });
 
             const generarCarta = (j) => `
@@ -748,7 +759,7 @@
                 <div class="ranking-podium">
                     <div class="podium-card"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
                     <div class="podium-card"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
-                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asist.</span></p></div>
+                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asistencias</span></p></div>
                 </div>
 
                 <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
