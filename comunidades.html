@@ -63,7 +63,7 @@
             50% { transform: scale(1.3); opacity: 0.8; filter: drop-shadow(0 0 8px #f1c40f); }
             100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px #e74c3c); }
         }
-        .alerta-reto { display: inline-block; animation: parpadeoFuego 1s infinite; margin-left: 5px; font-size: 1.1rem; }
+        .alerta-reto { display: inline-block; animation: parpadeoFuego 1s infinite; pointer-events: none; }
         
         /* ESTILOS DE INSIGNIAS DE JUGADOR */
         .insignia-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #fff; display: flex; align-items: center; gap: 6px; font-weight: bold; }
@@ -86,9 +86,11 @@
             <i class="ph-bold ph-users" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
         </a>
-        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
+        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green); position: relative;">
             <i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES <span id="nav-alerta-reto" style="display:none;" class="alerta-reto">🔥</span></span>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span>
+            <!-- Fueguito flotante para no deformar en celular -->
+            <span id="nav-alerta-reto" style="display:none; position:absolute; top:-8px; right:-12px; font-size:1.1rem; z-index:10;" class="alerta-reto">🔥</span>
         </a>
     </nav>
 </header>
@@ -105,7 +107,10 @@
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-mis-comunidades">Mis Comunidades</button>
         <button class="tab-btn" id="tab-explorar">Explorar Comunidades</button>
-        <button class="tab-btn tab-btn-reto" id="tab-retos" style="border: 1px dashed rgba(231, 76, 60, 0.4);">⚔️ Zona de Retos <span id="tab-alerta-reto" style="display:none;" class="alerta-reto">🔥</span></button>
+        <button class="tab-btn tab-btn-reto" id="tab-retos" style="border: 1px dashed rgba(231, 76, 60, 0.4); position: relative;">
+            ⚔️ Zona de Retos 
+            <span id="tab-alerta-reto" style="display:none; position:absolute; top:-10px; right:-10px; font-size:1.1rem; z-index:10;" class="alerta-reto">🔥</span>
+        </button>
     </div>
 
     <div id="lista-mis-comunidades" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"><p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p></div>
@@ -403,20 +408,14 @@
         escucharRetosActivos();
     });
 
-    // MAGIA: ESCUCHADOR DE RETOS PARA LA ANIMACIÓN 🔥
     function escucharRetosActivos() {
         if(unsubscribeRetos) unsubscribeRetos();
         unsubscribeRetos = onSnapshot(query(collection(db, 'retos_comunidades'), where('estado', '==', 'buscando_rival')), (snap) => {
             let hayRetosNuevos = false;
             snap.forEach(doc => {
-                // Solo alerta si el reto NO es mío
-                if (currentUser && doc.data().liderUid !== currentUser.uid) {
-                    hayRetosNuevos = true;
-                } else if (!currentUser) {
-                    hayRetosNuevos = true;
-                }
+                if (currentUser && doc.data().liderUid !== currentUser.uid) { hayRetosNuevos = true; } 
+                else if (!currentUser) { hayRetosNuevos = true; }
             });
-
             const navAlerta = document.getElementById('nav-alerta-reto');
             const tabAlerta = document.getElementById('tab-alerta-reto');
             if(navAlerta && tabAlerta) {
@@ -440,9 +439,7 @@
                 const soyLider = currentUser.uid === c.liderUid;
                 const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
 
-                let visualLogo = c.logo 
-                    ? `<img src="${c.logo}" style="width:100%; height:100%; object-fit:cover;">` 
-                    : `<i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>`;
+                let visualLogo = c.logo ? `<img src="${c.logo}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>`;
 
                 const htmlTarjeta = `
                     <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${c.deporte}', ${soyLider}, '${c.whatsappLider || ''}', ${soyMiembro}, '${c.logo || ''}')">
@@ -462,7 +459,7 @@
         } catch (error) { console.error("Error:", error); }
     }
 
-    // CARGAR PARTIDOS Y RELOJ INTELIGENTE
+    // CARGAR PARTIDOS 
     window.seleccionarDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
         window.deporteActivoGlobal = nombreDeporte; 
         document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-bold ph-soccer-ball" style="color:${colorPrincipal};"></i> Cartelera de Partidos</h3>`;
@@ -587,7 +584,7 @@
         } catch(e) { alert("Error."); }
     };
 
-    // LOGICA ZONA DE RETOS (CON ESPADAS)
+    // LOGICA ZONA DE RETOS
     document.getElementById('btn-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'flex'; });
     document.getElementById('cerrar-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'none'; });
     
@@ -638,7 +635,7 @@
         const snap = await getDocs(q);
         if (snap.empty) return alert("🚨 Solo los líderes de comunidad pueden aceptar retos.");
         
-        if (!confirm(`¿Aceptar el reto de ${nombreComunidadRival}? Serás redirigido a WhatsApp para coordinar.`)) return;
+        if (!confirm(`¿Aceptar el reto de ${nombreComunidadRival}? Serás redirigido a WhatsApp para coordinar la seña.`)) return;
 
         try {
             await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'coordinando', rivalUid: currentUser.uid });
@@ -717,7 +714,6 @@
         setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
 
-    // MAGIA: MOSTRAR EL 7 IDEAL Y PERFILES EXPANDIDOS
     window.mostrarRankingComunidad = async function() { 
         document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); 
         const btnRanking = document.getElementById('btn-ranking-tab'); btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none'; 
@@ -753,7 +749,7 @@
                     const uSnap = await getDoc(doc(db, 'jugadores_perfiles', j.uid));
                     if (uSnap.exists()) { j.posicion = uSnap.data().posicion || uSnap.data().posicionPrincipal || 'MED'; } else { j.posicion = 'MED'; }
                 } catch(e) { j.posicion = 'MED'; }
-                window.statsGlobales[j.uid].posicion = j.posicion; // Guardar en memoria para el modal
+                window.statsGlobales[j.uid].posicion = j.posicion; 
             }
 
             const lineas = { fwd: [], mid: [], def: [], gk: [] };
@@ -765,7 +761,6 @@
                 else lineas.mid.push(j); 
             });
 
-            // AHORA LAS CARTAS TIENEN UN ONCLICK PARA ABRIR EL PERFIL
             const generarCarta = (j) => `
                 <div class="player-pitch-card" onclick="verPerfilExpandido('${j.uid}')">
                     <div class="player-pitch-photo-container">
@@ -798,7 +793,6 @@
         } catch(e) { console.error(e); panelRanking.innerHTML = '<p style="color:red; text-align:center;">Error al armar el equipo ideal.</p>'; } 
     }
 
-    // LOGICA DEL SALÓN DE TROFEOS (MODAL PERFIL)
     document.getElementById('cerrar-perfil-expandido').addEventListener('click', () => {
         document.getElementById('modal-perfil-expandido').style.display = 'none';
     });
@@ -815,9 +809,7 @@
         document.getElementById('pe-goles').innerText = j.goles;
         document.getElementById('pe-asist').innerText = j.asist;
 
-        // CALCULO DE INSIGNIAS AUTOMÁTICAS
         let insigniasHTML = '';
-
         if(j.partidos >= 20) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-diamond" style="color: #00d2d3;"></i> Leyenda</div>`;
         else if(j.partidos >= 10) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-medal" style="color: #f1c40f;"></i> Franquicia</div>`;
         else if(j.partidos >= 3) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-medal" style="color: #bdc3c7;"></i> Convocado Fijo</div>`;
@@ -831,7 +823,6 @@
         document.getElementById('modal-perfil-expandido').style.display = 'flex';
     };
 
-    // EL RESTO ES EL CÓDIGO INTACTO DE RESULTADOS Y EDICIÓN
     const modalResultados = document.getElementById('modal-resultados-partido'); document.getElementById('cerrar-resultados-partido').addEventListener('click', () => modalResultados.style.display = 'none');
     window.abrirResultadosPartido = async function(partidoId) { partidoResultadosId = partidoId; modalResultados.style.display = 'flex'; const listaJugadores = document.getElementById('lista-resultados-jugadores'); listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando...</p>'; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); let html = ''; if(p.inscritos && p.inscritos.length > 0){ p.inscritos.forEach((j, index) => { html += `<div class="resultado-jugador-row" data-uid="${j.uid}" style="grid-template-columns: 2fr 1fr 1fr;"><div style="display:flex; align-items:center; gap:8px;"><img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #555;"><span style="color:#fff; font-size:0.85rem; font-weight:bold;">${j.nombreUsuario}</span></div><input type="number" class="res-goles" min="0" value="0"><input type="number" class="res-asist" min="0" value="0"></div>`; }); listaJugadores.innerHTML = html; } else { listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Nadie asistió.</p>'; } } } catch(e){ listaJugadores.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } };
     document.getElementById('form-resultados-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; const resultados = []; document.querySelectorAll('.resultado-jugador-row').forEach(row => { const uid = row.getAttribute('data-uid'); const goles = parseInt(row.querySelector('.res-goles').value) || 0; const asistencias = parseInt(row.querySelector('.res-asist').value) || 0; resultados.push({ uid, goles, asistencias, mvp: false }); }); try { await updateDoc(doc(db, 'partidos', partidoResultadosId), { estado: 'votando_mvp', resultadosOficiales: resultados, votosMVP: {}, hanVotado: [] }); alert("¡Stats guardadas! Urnas abiertas."); modalResultados.style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Publicar Stats y Abrir Votación MVP'; btnSubmit.disabled = false; } });
@@ -839,7 +830,7 @@
     window.abrirGestionLista = async function(partidoId) { modalListaPartido.style.display = 'flex'; const panelInscritos = document.getElementById('panel-inscritos'); panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando lista...</p>'; try { const docSnap = await getDoc(doc(db, 'partidos', partidoId)); if (docSnap.exists()) { const p = docSnap.data(); let html = ''; if (p.inscritos && p.inscritos.length > 0) { p.inscritos.forEach((jugador, index) => { let btnCapitan = ''; if (p.capitanUid === jugador.uid) { btnCapitan = `<span style="background: rgba(241, 196, 15, 0.2); color: #f1c40f; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px;"><i class="ph-fill ph-star"></i> Capitán</span><button class="btn" style="padding:4px 8px; background:transparent; color:#888; border:1px solid #888; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', null, '${jugador.nombreUsuario}')">Quitar</button>`; } else { btnCapitan = `<button class="btn" style="padding:4px 8px; background:transparent; color:#f1c40f; border:1px solid #f1c40f; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')">Hacer Capitán</button>`; } html += `<div class="solicitud-item" style="border-left: 3px solid #f1c40f; flex-wrap: wrap;"><div style="display:flex; align-items:center; gap:12px; margin-bottom: 5px;"><div style="width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #ccc; font-weight: bold;">${index + 1}</div><img src="${jugador.fotoUsuario}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid #f1c40f;"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${jugador.nombreUsuario}</span></div><div style="display: flex; align-items: center;">${btnCapitan}<button class="btn" style="padding:4px 8px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.75rem;" onclick="liberarCupoJugador('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')"><i class="ph-bold ph-x"></i> Liberar</button></div></div>`; }); panelInscritos.innerHTML = html; } else { panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Aún no hay jugadores inscritos.</p>'; } } } catch(e) { panelInscritos.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } }
     window.asignarCapitan = async function(partidoId, uidJugador, nombre) { try { await updateDoc(doc(db, 'partidos', partidoId), { capitanUid: uidJugador }); alert(uidJugador ? `¡${nombre} ahora es el Capitán!` : `Permisos removidos.`); abrirGestionLista(partidoId); refrescarPartidosActuales(); } catch(e) { alert("Error."); } }
     window.liberarCupoJugador = async function(partidoId, uidJugador, nombre) { if (!confirm(`¿Liberar a ${nombre}?`)) return; try { const pRef = doc(db, 'partidos', partidoId); const pSnap = await getDoc(pRef); if(pSnap.exists()){ const data = pSnap.data(); const inscritosActualizados = data.inscritos.filter(j => j.uid !== uidJugador); await updateDoc(pRef, { inscritos: inscritosActualizados, cuposOcupados: increment(-1) }); alert("Cupo liberado."); abrirGestionLista(partidoId); refrescarPartidosActuales(); } } catch(e) { alert("Error."); } }
-    const modalCrear = document.getElementById('modal-crear-comunidad'); document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex'); document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none'); document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => { e.preventDefault(); const n = document.getElementById('reg-com-nombre').value; const d = document.getElementById('reg-com-deporte').value; const c = document.getElementById('reg-com-ciudad').value; const l = document.getElementById('reg-com-link').value; window.open(`https://wa.me/51961341323?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad y obtener el check de verificado ✅.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}\n*Link de Verificación:* ${l}`)}`, '_blank'); modalCrear.style.display = 'none'; e.target.reset(); });
+    const modalCrear = document.getElementById('modal-crear-comunidad'); document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex'); document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none'); document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => { e.preventDefault(); const n = document.getElementById('reg-com-nombre').value; const d = document.getElementById('reg-com-deporte').value; const c = document.getElementById('reg-com-ciudad').value; const l = document.getElementById('reg-com-link').value; window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad y obtener el check de verificado ✅.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}\n*Link de Verificación:* ${l}`)}`, '_blank'); modalCrear.style.display = 'none'; e.target.reset(); });
     document.getElementById('cerrar-editar-partido').addEventListener('click', () => document.getElementById('modal-editar-partido').style.display = 'none'); window.abrirEditarPartido = async function(partidoId) { partidoEditarId = partidoId; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); document.getElementById('ep-fecha').value = p.fecha; document.getElementById('ep-hora').value = p.hora; document.getElementById('ep-duracion').value = p.duracion || 60; document.getElementById('ep-lugar').value = p.lugar; document.getElementById('ep-maps').value = p.linkMaps || ''; document.getElementById('ep-cupos').value = p.cuposTotales; document.getElementById('ep-precio').value = p.precioInstrucciones; document.getElementById('modal-editar-partido').style.display = 'flex'; } } catch(e) { alert("Error."); } }
     document.getElementById('form-editar-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; try { await updateDoc(doc(db, 'partidos', partidoEditarId), { fecha: document.getElementById('ep-fecha').value, hora: document.getElementById('ep-hora').value, duracion: parseInt(document.getElementById('ep-duracion').value), lugar: document.getElementById('ep-lugar').value, linkMaps: document.getElementById('ep-maps').value, cuposTotales: parseInt(document.getElementById('ep-cupos').value), precioInstrucciones: document.getElementById('ep-precio').value }); alert("¡Actualizado!"); document.getElementById('modal-editar-partido').style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Guardar Cambios'; btnSubmit.disabled = false; } });
     const modalMiembros = document.getElementById('modal-miembros'); document.getElementById('btn-ver-miembros').addEventListener('click', () => { modalMiembros.style.display = 'flex'; cargarSolicitudes(); }); document.getElementById('cerrar-miembros').addEventListener('click', () => modalMiembros.style.display = 'none'); const btnTabSol = document.getElementById('tab-solicitudes'); const btnTabActivos = document.getElementById('tab-activos'); const panelSol = document.getElementById('panel-solicitudes'); const panelActivos = document.getElementById('panel-activos'); btnTabSol.addEventListener('click', () => { btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active'); panelSol.style.display = 'block'; panelActivos.style.display = 'none'; }); btnTabActivos.addEventListener('click', () => { btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active'); panelActivos.style.display = 'block'; panelSol.style.display = 'none'; cargarMiembrosActivos(); });
