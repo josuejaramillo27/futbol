@@ -4,72 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
-    <title>Comunidades | CHALACAPP</title>
+    <title>Partidos | CHALACAPP</title>
     
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
+    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="discovery.css">
     
     <style>
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: wrap; }
-        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: all 0.3s ease; }
-        .tab-btn:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.05); }
-        .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
-        
-        .tab-btn-reto { color: #e74c3c !important; }
-        .tab-btn-reto.active { background: rgba(231, 76, 60, 0.12) !important; border: 1px solid rgba(231, 76, 60, 0.4) !important; }
-
-        .community-card { background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%); border: 1px solid rgba(46, 204, 113, 0.25); border-radius: 16px; padding: 20px; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-        .community-card:hover { border-color: var(--primary-green); transform: translateY(-4px); box-shadow: 0 10px 25px rgba(46, 204, 113, 0.15); }
-        .sport-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-        .sport-tag { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ddd; font-weight: 600; }
-        .hub-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #080B0A; z-index: 200; overflow-y: auto; }
-        .hub-modal.mostrar { display: block; }
-        .hub-header-banner { background: linear-gradient(180deg, rgba(20, 30, 24, 0.95) 0%, rgba(8, 11, 10, 1) 100%); border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding: 25px 20px 20px; }
-        .hub-content-container { max-width: 900px; margin: 0 auto; padding: 25px 20px 50px; }
-        .hub-card-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; margin-bottom: 20px; }
-        .btn-crear-compacto { width: auto !important; padding: 8px 16px; font-size: 0.85rem; white-space: nowrap; background: rgba(46, 204, 113, 0.1); color: var(--primary-green); border: 1px dashed var(--primary-green); transition: all 0.3s ease; }
-        .btn-crear-compacto:hover { background: var(--primary-green) !important; color: #080b0a !important; }
-        .btn-sport-chip { width: auto !important; min-width: auto !important; max-width: max-content !important; flex: 0 0 auto !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 8px 20px !important; border-radius: 30px !important; font-size: 0.85rem !important; font-weight: 800 !important; letter-spacing: 0.5px !important; cursor: pointer !important; transition: all 0.25s ease !important; box-shadow: none !important; margin: 0 !important; }
-        .solicitud-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .resultado-jugador-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .resultado-jugador-row input[type="number"] { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; text-align: center; }
-        .resultado-jugador-row input[type="radio"] { width: 20px; height: 20px; accent-color: #f1c40f; cursor: pointer; }
-        
-        .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
-        .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
-        
-        /* MAGIA: ESTILOS DEL CAMPO VERDE CÉSPED */
-        .soccer-pitch {
+        /* ==========================================
+           ESTILOS DE LA TARJETA DE JUGADOR (FUT STYLE)
+           ========================================== */
+        .player-card-container {
+            background: linear-gradient(135deg, rgba(20,25,22,1) 0%, rgba(10,15,12,1) 100%);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            gap: 15px;
             position: relative;
-            background: repeating-linear-gradient(0deg, #1b4924, #1b4924 10%, #153c1d 10%, #153c1d 20%);
-            border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 12px;
-            padding: 15px 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .player-card-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(46, 204, 113, 0.15);
+            border-color: rgba(46, 204, 113, 0.8);
+        }
+
+        /* Brillo de fondo */
+        .player-card-container::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(46,204,113,0.05) 0%, transparent 60%);
+            z-index: 0;
+        }
+
+        .player-avatar-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 80px;
+            height: 100px;
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
-            height: 480px;
-            overflow: hidden;
-            margin-top: 15px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding-right: 15px;
         }
-        .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
-        .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
-        .pitch-circle { top: 50%; left: 50%; width: 100px; height: 100px; border-radius: 50%; transform: translate(-50%, -50%); }
-        .pitch-box-top { top: 0; left: 20%; width: 60%; height: 18%; border-top: none; }
-        .pitch-box-bottom { bottom: 0; left: 20%; width: 60%; height: 18%; border-bottom: none; }
-        .pitch-goal-top { top: 0; left: 35%; width: 30%; height: 6%; border-top: none; }
-        .pitch-goal-bottom { bottom: 0; left: 35%; width: 30%; height: 6%; border-bottom: none; }
-        
-        .formation-row { display: flex; justify-content: center; gap: 15px; z-index: 10; position: relative; min-height: 70px; flex-wrap: wrap; align-items: center; }
-        .player-pitch-card { display: flex; flex-direction: column; align-items: center; transition: transform 0.3s ease; position: relative; cursor: pointer; }
-        .player-pitch-card:hover { transform: scale(1.1); z-index: 20; }
-        .player-pitch-photo-container { position: relative; width: 55px; height: 65px; display: flex; justify-content: center; }
-        .player-pitch-card img { width: 100%; height: 100%; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; border: 2px solid #f1c40f; background: #111; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
-        .player-pitch-score { position: absolute; top: -5px; right: -8px; background: #f1c40f; color: #000; border-radius: 50%; width: 22px; height: 22px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 2px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        .player-pitch-name { background: rgba(0,0,0,0.85); color: #fff; font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; margin-top: -10px; font-weight: bold; text-transform: uppercase; white-space: nowrap; max-width: 70px; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(255,255,255,0.2); z-index: 2; text-shadow: 1px 1px 2px #000; }
+
+        .player-photo {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary-green);
+            background: #000;
+        }
+
+        .player-pos {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--primary-green);
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .player-info {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            color: #fff;
+            margin: 0 0 4px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .player-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .stat-pill {
+            background: rgba(255,255,255,0.05);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Botón de editar perfil (con hover arreglado) */
+        .btn-edit-profile {
+            width: 100%;
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px dashed var(--primary-green);
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit-profile:hover {
+            background: var(--primary-green) !important;
+            color: #080B0A !important;
+            border: 1px solid var(--primary-green);
+        }
     </style>
 </head>
 <body>
@@ -77,248 +133,180 @@
 <header class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100;">
     <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
         <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 30px; width: auto; object-fit: contain;">
-        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.8rem; vertical-align: middle;">COMUNIDADES</b></span>
+        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.8rem; vertical-align: middle;">JUGADORES</b></span>
     </a>
     
-    <!-- MENÚ DE NAVEGACIÓN CON EFECTOS HOVER RESTAURADOS -->
     <nav style="display: flex; gap: 20px; align-items: center;">
         <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
             <i class="ph-bold ph-map-pin" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
         </a>
-        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
             <i class="ph-bold ph-users" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
         </a>
-        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
+        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
             <i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span>
         </a>
     </nav>
 </header>
 
-<main style="max-width: 900px; margin: 0 auto; padding: 25px 20px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-        <div>
-            <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Comunidades</h1>
-            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Encuentra pichangas fijas o lanza retos.</p>
+<main>
+    <section class="hero-section" style="min-height:280px;padding-top:35px;padding-bottom:35px">
+        <div class="hero-copy">
+            <div class="eyebrow"><span></span> COMUNIDAD EN TIEMPO REAL</div>
+            <h1 style="font-size:clamp(2rem,5vw,3.2rem)">Encuentra tu<br><strong>próximo partido.</strong></h1>
+            <p>Completa tu equipo, busca jugadores o encuentra retadores cerca de ti.</p>
         </div>
-        <button id="btn-solicitar-creacion" class="btn btn-crear-compacto"><i class="ph-bold ph-plus-circle"></i> Registrar la mía</button>
-    </div>
-    
-    <div class="tabs-container">
-        <button class="tab-btn active" id="tab-mis-comunidades">Mis Comunidades</button>
-        <button class="tab-btn" id="tab-explorar">Explorar Comunidades</button>
-        <button class="tab-btn tab-btn-reto" id="tab-retos" style="border: 1px dashed rgba(231, 76, 60, 0.4);"><i class="ph-bold ph-swords"></i> Zona de Retos</button>
-    </div>
+        <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-three"></i></div>
+    </section>
 
-    <div id="lista-mis-comunidades" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"><p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p></div>
-    <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
-    <div id="lista-retos" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
-</main>
+    <section style="max-width:760px; margin: 0 auto 20px; padding: 0 20px;">
+        <button id="btn-abrir-perfil" class="btn btn-edit-profile">
+            <i class="ph-bold ph-user-circle"></i> Configurar mi Tarjeta de Jugador
+        </button>
+    </section>
 
-<!-- ========================================== -->
-<!-- HUB DE LA COMUNIDAD -->
-<!-- ========================================== -->
-<div id="hub-comunidad" class="hub-modal">
-    <div class="hub-header-banner">
-        <div style="max-width: 900px; margin: 0 auto;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
-                <!-- SECCIÓN EDITABLE: LOGO DE LA COMUNIDAD -->
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div id="btn-cambiar-logo" style="width: 60px; height: 60px; background: #000; border: 2px solid var(--primary-green); border-radius: 14px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 15px rgba(46,204,113,0.2); position: relative; overflow: hidden; transition: all 0.3s ease;">
-                        <img id="img-logo-comunidad" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
-                        <i id="icon-logo-comunidad" class="ph-fill ph-shield-checkered" style="font-size: 2rem; color: var(--primary-green);"></i>
-                        <div id="overlay-logo" style="position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); color: #fff; font-size: 0.6rem; text-align: center; padding: 3px 0; display: none; font-weight: bold;">EDITAR</div>
-                        <input type="file" id="input-logo-comunidad" accept="image/*" style="display: none;">
-                    </div>
-                    <div>
-                        <h2 id="hub-nombre" style="margin: 0; font-size: 1.5rem; color: #fff; font-weight: 800;">Cargando...</h2>
-                        <p id="hub-ubicacion" style="margin: 3px 0 0 0; color: var(--text-muted); font-size: 0.85rem;"><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ...</p>
+    <section class="community-banner">
+        <div class="community-icon"><i class="ph-fill ph-megaphone"></i></div>
+        <div class="community-copy">
+            <span class="mini-label">PARTIDOS ABIERTOS</span>
+            <h2>¿Te falta uno para jugar?</h2>
+            <p>Publica tu necesidad y conecta con jugadores de la comunidad.</p>
+        </div>
+        <button id="btn-login-google" class="btn community-btn" style="width:auto;background:#F5F7F6;color:#101311;box-shadow:none">
+            <i class="ph-bold ph-google-logo"></i> Publicar
+        </button>
+    </section>
+
+    <section class="card" style="max-width:760px;margin:0 auto 28px;padding:20px">
+        <form id="form-anuncio" style="display:none">
+            <div class="filter-row" style="grid-template-columns:1fr 1fr">
+                <label class="filter-field"><span>Busco</span>
+                    <select id="tipo-anuncio">
+                        <option value="jugador">Me falta un jugador</option>
+                        <option value="equipo">Busco equipo</option>
+                        <option value="retadores">Busco retadores</option>
+                    </select>
+                </label>
+                <label class="filter-field"><span>Modalidad</span>
+                    <select id="modalidad-anuncio">
+                        <option>Fútbol 5</option>
+                        <option>Fútbol 6</option>
+                        <option>Fútbol 7</option>
+                        <option>Fútbol 8</option>
+                        <option>Fútbol 9</option>
+                        <option>Fútbol 10</option>
+                        <option>Fútbol 11</option>
+                    </select>
+                </label>
+            </div>
+            <textarea id="texto-anuncio" rows="3" maxlength="280" placeholder="Ej: Nos falta arquero para hoy a las 8 PM en Piura..." required></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <small style="color:var(--text-dim);font-size:.68rem"><i class="ph-bold ph-shield-check"></i> Tu nombre se muestra como Nombre + inicial.</small>
+                <button type="submit" class="btn" style="width:auto;white-space:nowrap">Publicar <i class="ph-bold ph-paper-plane-tilt"></i></button>
+            </div>
+        </form>
+        <div id="login-hint" style="text-align:center;color:var(--text-muted);font-size:.76rem">
+            <i class="ph-bold ph-lock-key" style="color:var(--primary-green)"></i> Inicia sesión con Google para publicar.
+        </div>
+    </section>
+
+    <section style="max-width:900px; margin: 0 auto;">
+        <div class="section-heading">
+            <div>
+                <div class="eyebrow"><span></span> AHORA MISMO</div>
+                <h2>Bolsa de Jugadores</h2>
+                <p>Conecta con la comunidad y arma tu partido.</p>
+            </div>
+            <div class="live-indicator"><span></span> En vivo</div>
+        </div>
+
+        <div id="lista-jugadores" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+            <p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Cargando partidos...</p>
+        </div>
+    </section>
+
+    <div id="modal-perfil-jugador" class="modal-oculto">
+        <div class="modal-contenido" style="max-width: 450px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
+            <button id="cerrar-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label">TU FUT CARD</span>
+            <h2>Edita tu Perfil</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+                Estos datos solo serán visibles cuando publiques en la Bolsa de Jugadores.
+            </p>
+            
+            <form id="form-editar-perfil">
+                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;">
+                    <img id="preview-avatar" src="https://ui-avatars.com/api/?name=Jugador&background=2ecc71&color=fff" alt="Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-green);">
+                    <div style="flex: 1;">
+                        <p style="margin: 0; font-size: 0.95rem; color: #fff; font-weight: bold;"><i class="ph-bold ph-google-logo" style="color: #1DA1F2;"></i> Foto vinculada</p>
+                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">Usamos tu foto de perfil de Google por seguridad y confianza.</p>
                     </div>
                 </div>
-                <button id="cerrar-hub" class="btn" style="width: auto !important; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;"><i class="ph-bold ph-arrow-left"></i> Volver</button>
-            </div>
-            <div id="hub-deportes-filtros" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; -webkit-overflow-scrolling: touch;"></div>
+
+                <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <label class="filter-field">
+                        <span>Deporte Principal</span>
+                        <select id="perfil-deporte">
+                            <option>Fútbol</option>
+                            <option>Vóley</option>
+                            <option>Básquet</option>
+                        </select>
+                    </label>
+                    <label class="filter-field">
+                        <span>Posición</span>
+                        <select id="perfil-posicion">
+                            <option value="DEL">Delantero (DEL)</option>
+                            <option value="MED">Mediocampista (MED)</option>
+                            <option value="DEF">Defensa (DEF)</option>
+                            <option value="ARQ">Arquero (ARQ)</option>
+                            <option value="LIB">Libre / Polifuncional</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <label class="filter-field">
+                        <span>Departamento / Ciudad</span>
+                        <input type="text" id="perfil-ciudad" placeholder="Ej: Piura, Castilla..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                    </label>
+                    <label class="filter-field">
+                        <span>Pierna / Mano Hábil</span>
+                        <select id="perfil-habilidad">
+                            <option>Diestro</option>
+                            <option>Zurdo</option>
+                            <option>Ambidiestro</option>
+                        </select>
+                    </label>
+                </div>
+
+                <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;">
+                    <i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta
+                </button>
+            </form>
         </div>
     </div>
-    <div class="hub-content-container">
-        <div id="hub-panel-lider" style="display: none; background: linear-gradient(135deg, rgba(241, 196, 15, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%); border: 1px dashed #f1c40f; padding: 20px; border-radius: 14px; margin-bottom: 25px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="color: #f1c40f; margin: 0; font-size: 1.1rem;"><i class="ph-fill ph-crown"></i> Panel del Líder</h3>
-                <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241, 196, 15, 0.15); padding: 3px 8px; border-radius: 4px;">Organizador</span>
-            </div>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="btn-nuevo-partido" class="btn" style="width: auto !important; background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Partido Interno</button>
-                <button id="btn-lanzar-reto" class="btn" style="width: auto !important; background: #e74c3c; color: #fff; border: none; font-weight: bold;"><i class="ph-bold ph-swords"></i> Lanzar Reto</button>
-                <button id="btn-ver-miembros" class="btn" style="width: auto !important; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
+
+    <div id="modal-ver-perfil" class="modal-oculto">
+        <div class="modal-contenido" style="max-width: 400px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
+            <button id="cerrar-ver-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label">PERFIL DEL JUGADOR</span>
+            
+            <div id="contenido-perfil-publico" style="margin-top: 15px;">
+                <p style="text-align:center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap"></i> Cargando datos...</p>
             </div>
         </div>
-        
-        <div id="hub-titulo-seccion" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0; color: #fff; font-size: 1.1rem;"><i class="ph-bold ph-soccer-ball" style="color: var(--primary-green);"></i> Cartelera de Partidos</h3>
-            <span style="font-size: 0.75rem; color: var(--text-muted);">Actualizado en vivo</span>
-        </div>
-        
-        <div class="hub-card-box" style="padding: 0; background: transparent; border: none;">
-            <div id="hub-lista-partidos"></div>
-            <div id="hub-panel-ranking" style="display: none;"></div>
-        </div>
-
-        <div id="hub-link-whatsapp-box" class="hub-card-box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-            <div>
-                <h4 style="margin: 0; color: #fff;"><i class="ph-bold ph-whatsapp-logo" style="color: #25D366;"></i> Grupo Oficial de WhatsApp</h4>
-                <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Únete al chat general de la comunidad.</p>
-            </div>
-            <button id="btn-unirse-wa" class="btn" style="background: #25D366; color: #000; border: none; font-weight: bold; width: auto !important;">Unirme al Chat <i class="ph-bold ph-arrow-square-out"></i></button>
-        </div>
     </div>
-</div>
+</main>
 
-<!-- ========================================== -->
-<!-- MODALES Y FORMULARIOS -->
-<!-- ========================================== -->
-
-<!-- MODAL: REGISTRAR COMUNIDAD (CON LINK DE VERIFICACIÓN) -->
-<div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
-        <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#fff;">Registra tu Comunidad</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Incluye un link para verificar que tu equipo es real y poder habilitarte para los Retos Públicos.</p>
-        <form id="form-nueva-comunidad">
-            <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga o equipo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-            <input type="text" id="reg-com-deporte" required placeholder="Deportes (Fútbol, Vóley)" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-            <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-            <input type="url" id="reg-com-link" required placeholder="Link de Instagram/Facebook para verificar" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px;">
-            <button type="submit" class="btn hero-primary" style="width:100%;"><i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud</button>
-        </form>
-    </div>
-</div>
-
-<div id="modal-nuevo-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;">
-        <button id="cerrar-nuevo-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-calendar-plus"></i> Partido Interno</h2>
-        <form id="form-nuevo-partido">
-            <select id="np-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div style="flex: 2;"><input type="date" id="np-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 1;"><input type="time" id="np-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 1;"><input type="number" id="np-duracion" required value="60" min="30" max="180" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;" title="Minutos"></div>
-            </div>
-            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                <div style="flex: 1;"><input type="text" id="np-lugar" required placeholder="Lugar / Cancha" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 1;"><input type="url" id="np-maps" placeholder="Link Maps" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-            </div>
-            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                <div style="flex: 1;"><input type="number" id="np-cupos" required placeholder="Cupos" min="2" max="100" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 2;"><input type="text" id="np-precio" required placeholder="Precio/Yape" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-            </div>
-            <button type="submit" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;"><i class="ph-bold ph-check-circle"></i> Publicar</button>
-        </form>
-    </div>
-</div>
-
-<div id="modal-lanzar-reto" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #e74c3c; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
-        <button id="cerrar-lanzar-reto" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#e74c3c;"><i class="ph-fill ph-swords"></i> Lanzar Reto</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Desafía a otras comunidades. Podrán aceptar y coordinar contigo por WhatsApp.</p>
-        <form id="form-lanzar-reto">
-            <select id="lr-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
-            <select id="lr-formato" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-                <option value="5 vs 5">5 vs 5</option>
-                <option value="6 vs 6">6 vs 6</option>
-                <option value="7 vs 7">7 vs 7</option>
-                <option value="8 vs 8">8 vs 8</option>
-                <option value="9 vs 9">9 vs 9</option>
-                <option value="11 vs 11">11 vs 11</option>
-            </select>
-            <div style="display: flex; gap: 10px; margin-bottom: 25px;">
-                <div style="flex: 2;"><input type="date" id="lr-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
-                <div style="flex: 1;"><input type="time" id="lr-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
-            </div>
-            <button type="submit" class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold;"><i class="ph-bold ph-megaphone"></i> Publicar Reto</button>
-        </form>
-    </div>
-</div>
-
-<div id="modal-editar-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1005; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #3498db; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
-        <button id="cerrar-editar-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#3498db;"><i class="ph-fill ph-pencil-simple"></i> Editar Partido</h2>
-        <form id="form-editar-partido">
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <div style="flex: 2;"><input type="date" id="ep-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 1;"><input type="time" id="ep-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 1;"><input type="number" id="ep-duracion" required min="30" max="180" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;" title="Minutos"></div>
-            </div>
-            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                <div style="flex: 1;"><input type="text" id="ep-lugar" required placeholder="Lugar" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 1;"><input type="url" id="ep-maps" placeholder="Link Maps" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-            </div>
-            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
-                <div style="flex: 1;"><input type="number" id="ep-cupos" required placeholder="Cupos" min="2" max="100" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-                <div style="flex: 2;"><input type="text" id="ep-precio" required placeholder="Precio" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
-            </div>
-            <button type="submit" class="btn" style="width:100%; background:#3498db; color:#fff; font-weight:bold;"><i class="ph-bold ph-floppy-disk"></i> Guardar Cambios</button>
-        </form>
-    </div>
-</div>
-
-<div id="modal-miembros" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1002; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
-        <button id="cerrar-miembros" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#fff;"><i class="ph-fill ph-users"></i> Miembros</h2>
-        <div class="tabs-container" style="margin-bottom: 15px;">
-            <button class="tab-btn active" id="tab-solicitudes">Nuevas Solicitudes</button>
-            <button class="tab-btn" id="tab-activos">Lista Oficial</button>
-        </div>
-        <div id="panel-solicitudes" style="overflow-y: auto; flex: 1;"></div>
-        <div id="panel-activos" style="display:none; overflow-y: auto; flex: 1;"></div>
-    </div>
-</div>
-
-<div id="modal-lista-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1003; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 80vh; display: flex; flex-direction: column;">
-        <button id="cerrar-lista-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-clipboard-text"></i> Asistentes</h2>
-        <div id="panel-inscritos" style="overflow-y: auto; flex: 1; padding-right: 5px;"></div>
-    </div>
-</div>
-
-<div id="modal-resultados-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1006; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:600px; position:relative; border:1px solid #2ecc71; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; display: flex; flex-direction: column;">
-        <button id="cerrar-resultados-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#2ecc71;"><i class="ph-fill ph-trophy"></i> Tercer Tiempo</h2>
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 10px;">
-            <div style="font-size:0.75rem; color:#aaa; font-weight:bold;">JUGADOR</div>
-            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">GOLES</div>
-            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">ASIST.</div>
-        </div>
-        <form id="form-resultados-partido" style="overflow-y: auto; flex: 1;">
-            <div id="lista-resultados-jugadores"></div>
-            <button type="submit" class="btn" style="width:100%; background:#2ecc71; color:#000; font-weight:bold; margin-top: 20px;"><i class="ph-bold ph-floppy-disk"></i> Publicar Stats y Abrir Votación MVP</button>
-        </form>
-    </div>
-</div>
-
-<div id="modal-votacion-mvp" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1007; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; display: flex; flex-direction: column;">
-        <button id="cerrar-votacion-mvp" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-star"></i> Votación MVP</h2>
-        <div id="lista-candidatos-mvp" style="overflow-y: auto; flex: 1;"></div>
-        <div id="panel-admin-votacion" style="display:none; margin-top: 15px;">
-            <button class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold;" onclick="cerrarUrnaMVP()"><i class="ph-bold ph-lock-key"></i> Cerrar Votaciones y Finalizar</button>
-        </div>
-    </div>
-</div>
-
+<script type="module" src="app.js"></script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, addDoc, where, doc, updateDoc, arrayUnion, arrayRemove, increment, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
@@ -330,488 +318,142 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
     const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    const btnAbrirPerfil = document.getElementById('btn-abrir-perfil');
+    const modalPerfil = document.getElementById('modal-perfil-jugador');
+    const btnCerrarPerfil = document.getElementById('cerrar-perfil');
+    const btnGuardarPerfil = document.getElementById('btn-guardar-perfil');
     
+    const modalVerPerfil = document.getElementById('modal-ver-perfil');
+    const btnCerrarVerPerfil = document.getElementById('cerrar-ver-perfil');
+    const contenedorPerfil = document.getElementById('contenido-perfil-publico');
+
     let currentUser = null;
-    let comunidadActivaId = null; 
-    let partidoEditarId = null; 
-    let partidoResultadosId = null; 
-    let partidoVotacionId = null;
-    let unsubscribeMVP = null;
-    window.deporteActivoGlobal = ''; 
 
-    window.soyLiderGlobal = false; window.soyMiembroGlobal = false;
-    window.comunidadActivaNombre = ''; window.comunidadActivaWsp = '';
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if (user) {
+            document.getElementById('preview-avatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=2ecc71&color=fff`;
+        }
+    });
 
-    const PALETA_DEPORTES_EXTRA = ['#00d2d3','#ff9ff3','#ff6b6b','#1dd1a1','#feca57','#54a0ff','#5f27cd','#ff9f43','#10ac84','#ee5253'];
-    function obtenerColorDeporte(nombreDeporte) {
-        if (!nombreDeporte) return '#2ecc71';
-        const str = nombreDeporte.trim().toLowerCase();
-        if (str.includes('fútbol') || str.includes('futbol') || str.includes('futsal')) return '#2ecc71'; 
-        if (str.includes('básquet') || str.includes('basquet') || str.includes('baloncesto')) return '#e67e22'; 
-        if (str.includes('vóley') || str.includes('voley') || str.includes('voleibol')) return '#9b59b6'; 
-        return PALETA_DEPORTES_EXTRA[Math.abs(str.charCodeAt(0)) % PALETA_DEPORTES_EXTRA.length];
+    if (btnAbrirPerfil) {
+        btnAbrirPerfil.addEventListener('click', async () => {
+            if (!currentUser) {
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    currentUser = result.user;
+                } catch (error) {
+                    console.error("Cancelado o error en Google:", error);
+                    return; 
+                }
+            }
+            
+            const docRef = doc(db, "jugadores_perfiles", currentUser.uid);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('perfil-deporte').value = data.deporte || 'Fútbol';
+                document.getElementById('perfil-posicion').value = data.posicion || 'DEL';
+                document.getElementById('perfil-ciudad').value = data.ciudad || '';
+                document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
+            }
+            
+            modalPerfil.classList.add('mostrar');
+        });
     }
 
-    const btnTabMis = document.getElementById('tab-mis-comunidades'); 
-    const btnTabExplorar = document.getElementById('tab-explorar');
-    const btnTabRetos = document.getElementById('tab-retos');
-    const listaMisComunidades = document.getElementById('lista-mis-comunidades'); 
-    const listaExplorar = document.getElementById('lista-explorar');
-    const listaRetos = document.getElementById('lista-retos');
+    if (btnCerrarPerfil) {
+        btnCerrarPerfil.addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
+    }
 
-    btnTabMis.addEventListener('click', () => { 
-        btnTabMis.classList.add('active'); btnTabExplorar.classList.remove('active'); btnTabRetos.classList.remove('active');
-        listaMisComunidades.style.display = 'grid'; listaExplorar.style.display = 'none'; listaRetos.style.display = 'none';
-    });
-    btnTabExplorar.addEventListener('click', () => { 
-        btnTabExplorar.classList.add('active'); btnTabMis.classList.remove('active'); btnTabRetos.classList.remove('active');
-        listaExplorar.style.display = 'grid'; listaMisComunidades.style.display = 'none'; listaRetos.style.display = 'none';
-    });
-    btnTabRetos.addEventListener('click', () => { 
-        btnTabRetos.classList.add('active'); btnTabMis.classList.remove('active'); btnTabExplorar.classList.remove('active');
-        listaRetos.style.display = 'grid'; listaMisComunidades.style.display = 'none'; listaExplorar.style.display = 'none';
-        cargarRetosGlobales();
-    });
-
-    onAuthStateChanged(auth, async (user) => { currentUser = user; cargarComunidades(); });
-
-    async function cargarComunidades() {
-        if (!currentUser) return;
-        try {
-            const snap = await getDocs(query(collection(db, 'comunidades')));
-            listaMisComunidades.innerHTML = ''; listaExplorar.innerHTML = '';
-            let tengo = false; let exploro = false;
+    if (btnGuardarPerfil) {
+        btnGuardarPerfil.addEventListener('click', async () => {
+            if (!currentUser) return;
             
-            snap.forEach(docSnap => {
-                const c = docSnap.data(); c.id = docSnap.id;
-                const deportesArray = (c.deporte || 'Fútbol').split(',').map(d => d.trim());
-                const tagsHTML = deportesArray.map(d => `<span class="sport-tag">${d}</span>`).join('');
-                const soyLider = currentUser.uid === c.liderUid;
-                const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
+            btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> Guardando en servidor...';
+            btnGuardarPerfil.disabled = true;
+            
+            const perfilData = {
+                uid: currentUser.uid,
+                nombre: currentUser.displayName,
+                foto: currentUser.photoURL,
+                deporte: document.getElementById('perfil-deporte').value,
+                posicion: document.getElementById('perfil-posicion').value,
+                ciudad: document.getElementById('perfil-ciudad').value,
+                habilidad: document.getElementById('perfil-habilidad').value,
+                verificado: false
+            };
 
-                let visualLogo = c.logo 
-                    ? `<img src="${c.logo}" style="width:100%; height:100%; object-fit:cover;">` 
-                    : `<i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>`;
+            try {
+                await setDoc(doc(db, "jugadores_perfiles", currentUser.uid), perfilData);
+                btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-check"></i> ¡Tarjeta Guardada!';
+                
+                setTimeout(() => {
+                    modalPerfil.classList.remove('mostrar');
+                    btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta';
+                    btnGuardarPerfil.disabled = false;
+                }, 1500);
+                
+            } catch (error) {
+                console.error("Error guardando perfil:", error);
+                btnGuardarPerfil.innerHTML = 'Error al guardar';
+                btnGuardarPerfil.disabled = false;
+            }
+        });
+    }
 
-                const htmlTarjeta = `
-                    <div class="community-card" onclick="abrirHubComunidad('${c.id}', '${c.nombre}', '${c.ciudad}', '${c.deporte}', ${soyLider}, '${c.whatsappLider || ''}', ${soyMiembro}, '${c.logo || ''}')">
-                        <div style="display:flex; align-items:center; gap:15px;">
-                            <div style="width:50px; height:50px; background:#111; border: 1px solid var(--primary-green); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
-                                ${visualLogo}
-                            </div>
-                            <div><h3 style="margin:0; font-size:1.15rem; color:#fff;">${c.nombre} ${soyLider ? '<i class="ph-fill ph-crown" style="color:#f1c40f;"></i>' : ''}</h3><p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</p></div>
+    // Ver perfil público de otros jugadores
+    if (btnCerrarVerPerfil) {
+        btnCerrarVerPerfil.addEventListener('click', () => {
+            modalVerPerfil.classList.remove('mostrar');
+        });
+    }
+
+    window.abrirPerfilJugador = async (jugadorUid) => {
+        modalVerPerfil.classList.add('mostrar');
+        contenedorPerfil.innerHTML = '<p style="text-align:center; color: #aaa;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando perfil...</p>';
+
+        try {
+            const docRef = doc(db, "jugadores_perfiles", jugadorUid);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                
+                contenedorPerfil.innerHTML = `
+                    <div class="player-card-container">
+                        <div class="player-avatar-wrapper">
+                            <img src="${data.foto || 'https://ui-avatars.com/api/?name=' + data.nombre}" alt="Avatar" class="player-photo">
+                            <span class="player-pos">${data.posicion || '---'}</span>
                         </div>
-                        <div class="sport-tags">${tagsHTML}</div>
-                    </div>`;
-                if (soyMiembro) { listaMisComunidades.innerHTML += htmlTarjeta; tengo = true; } 
-                else { listaExplorar.innerHTML += htmlTarjeta; exploro = true; }
-            });
-            if(!tengo) listaMisComunidades.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center; padding: 20px;">Aún no estás en ninguna comunidad.</p>';
-            if(!exploro) listaExplorar.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center; padding: 20px;">No hay comunidades públicas nuevas.</p>';
-        } catch (error) { console.error("Error:", error); }
-    }
-
-    // CARGAR PARTIDOS Y RELOJ INTELIGENTE
-    window.seleccionarDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
-        window.deporteActivoGlobal = nombreDeporte; 
-        document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-bold ph-soccer-ball" style="color:${colorPrincipal};"></i> Cartelera de Partidos</h3>`;
-        document.getElementById('hub-panel-ranking').style.display = 'none';
-        const listaPartidos = document.getElementById('hub-lista-partidos');
-        listaPartidos.style.display = 'block';
-
-        document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; });
-        btnElement.style.background = colorPrincipal; btnElement.style.color = '#000'; btnElement.style.border = `1px solid ${colorPrincipal}`;
-
-        listaPartidos.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:${colorPrincipal};"></i></div>`;
-        
-        try {
-            const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId));
-            const snap = await getDocs(q); let htmlTarjetas = '';
-            const ahora = new Date();
-            
-            snap.forEach(docSnap => {
-                const p = docSnap.data();
-                if (p.deporte === nombreDeporte) {
-                    let partidoYaPaso = false;
-                    try {
-                        const [year, month, day] = p.fecha.split('-'); const [hour, minute] = p.hora.split(':');
-                        const fechaInicio = new Date(year, month - 1, day, hour, minute);
-                        const duracionMs = (p.duracion || 60) * 60000; 
-                        if (ahora > new Date(fechaInicio.getTime() + duracionMs)) partidoYaPaso = true;
-                    } catch(e){}
-
-                    const cuposLibres = p.cuposTotales - (p.cuposOcupados || 0);
-                    const estaInscrito = p.inscritos && p.inscritos.some(j => j.uid === currentUser.uid);
-                    let fechaAmigable = p.fecha; try { const partes = p.fecha.split('-'); fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`; } catch(e){}
-
-                    let htmlLugar = p.linkMaps && p.linkMaps.trim() !== '' ? `<a href="${p.linkMaps}" target="_blank" style="color: #3498db; text-decoration: underline; font-weight: bold;">${p.lugar}</a> <span style="font-size:0.75rem; color:#f1c40f; font-weight:bold; margin-left: 8px;">👈 PRESIONA PARA VER LA DIRECCIÓN</span>` : p.lugar;
-
-                    let botonAccion = '';
-                    const esCapitan = p.capitanUid === currentUser.uid;
-
-                    if (partidoYaPaso) {
-                        if (p.estado === 'finalizado') {
-                            botonAccion = `<div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px dashed #2ecc71;"><i class="ph-bold ph-check-circle"></i> Resultados Publicados</div>`;
-                        } else if (p.estado === 'votando_mvp') {
-                            botonAccion = `<button class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold; border:none; font-size:0.95rem; padding: 12px;" onclick="abrirVotacionMVP('${docSnap.id}')"><i class="ph-fill ph-chart-bar"></i> 🗳️ Encuesta MVP en Vivo</button>`;
-                        } else {
-                            if (window.soyLiderGlobal || esCapitan) {
-                                botonAccion = `<button class="btn" style="width:100%; background:#2ecc71; color:#000; font-weight:bold; border:none; font-size:0.95rem; padding: 12px;" onclick="abrirResultadosPartido('${docSnap.id}')"><i class="ph-bold ph-pencil-line"></i> 📝 Cargar Resultados Oficiales</button>`;
-                            } else {
-                                botonAccion = `<div style="background: rgba(255,255,255,0.05); color: #aaa; text-align: center; padding: 10px; border-radius: 8px; font-size: 0.85rem;"><i class="ph-bold ph-hourglass-high"></i> Partido finalizado. Esperando resultados...</div>`;
-                            }
-                        }
-                    } 
-                    else {
-                        if (window.soyLiderGlobal) {
-                            botonAccion = `<div style="display: flex; gap: 8px; width: 100%;"><button class="btn" style="flex: 1; padding: 8px 0; background: rgba(231, 76, 60, 0.1); color: #e74c3c; border: 1px solid #e74c3c; font-weight: bold; border-radius: 8px;" onclick="eliminarPartido('${docSnap.id}')" title="Eliminar"><i class="ph-bold ph-trash"></i></button><button class="btn" style="flex: 1; padding: 8px 0; background: transparent; color: ${colorPrincipal}; border: 1px solid ${colorPrincipal}; font-weight: bold; font-size: 0.9rem;" onclick="abrirEditarPartido('${docSnap.id}')"><i class="ph-bold ph-pencil-simple"></i> Editar</button><button class="btn" style="flex: 1; padding: 8px 0; background: #f1c40f; color: #000; font-weight: bold; border: none; font-size: 0.9rem;" onclick="abrirGestionLista('${docSnap.id}')"><i class="ph-bold ph-users-three"></i> Lista</button></div>`;
-                        } else if (window.soyMiembroGlobal) {
-                            if (estaInscrito) botonAccion = `<button class="btn" style="width:100%; background:#222; color:#fff; font-weight:bold; border:1px solid ${colorPrincipal}; font-size:0.9rem;" disabled><i class="ph-bold ph-check-circle" style="color:${colorPrincipal};"></i> Ya estás inscrito</button>`;
-                            else if (cuposLibres > 0) botonAccion = `<button class="btn" style="width:100%; background:${colorPrincipal}; color:#000; font-weight:bold; border:none; font-size:0.9rem;" onclick="separarCupoPartido('${docSnap.id}')"><i class="ph-bold ph-ticket"></i> Separar mi cupo</button>`;
-                            else botonAccion = `<button class="btn" style="width:100%; background:#444; color:#999; font-weight:bold; border:none; font-size:0.9rem;" disabled><i class="ph-bold ph-x-circle"></i> Cupos Agotados</button>`;
-                        } else {
-                            botonAccion = `<button class="btn" style="width:100%; background:rgba(255,255,255,0.05); color:#fff; font-weight:bold; border:1px dashed rgba(255,255,255,0.3); font-size:0.85rem;" onclick="enviarSolicitudIngreso()"><i class="ph-bold ph-hand-waving"></i> Enviar Solicitud para Jugar</button>`;
-                        }
-                    }
-
-                    const badgeEstado = partidoYaPaso && p.estado !== 'finalizado' && p.estado !== 'votando_mvp' ? `<span style="background: #e74c3c; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.6rem; vertical-align: middle; margin-left: 8px;">FINALIZADO</span>` : '';
-
-                    htmlTarjetas += `
-                        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px; margin-bottom: 15px; text-align: left; transition: all 0.3s ease; opacity: ${partidoYaPaso ? '0.7' : '1'};">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-                                <div><h4 style="margin: 0; color: ${colorPrincipal}; font-size: 1.15rem;"><i class="ph-bold ph-calendar-blank"></i> ${fechaAmigable} - ${p.hora} ${badgeEstado}</h4><p style="margin: 4px 0 0 0; color: #fff; font-size: 0.9rem;"><i class="ph-bold ph-map-pin"></i> ${htmlLugar}</p></div>
-                                <div style="background: rgba(255,255,255,0.05); color: #ccc; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.1);"><strong style="color: #fff; font-size: 1rem;">${cuposLibres}</strong> / ${p.cuposTotales} libres</div>
+                        <div class="player-info">
+                            <h3 class="player-name">${data.nombre}</h3>
+                            <div class="player-stats">
+                                <span class="stat-pill"><i class="ph-bold ph-map-pin"></i> ${data.ciudad || 'No especificado'}</span>
+                                <span class="stat-pill"><i class="ph-bold ph-soccer-ball"></i> ${data.deporte || 'Fútbol'}</span>
+                                <span class="stat-pill">${data.habilidad || 'Diestro'}</span>
                             </div>
-                            <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid ${colorPrincipal};"><p style="margin: 0; color: #ddd; font-size: 0.85rem;"><strong style="color:#fff;">Costo / Instrucciones:</strong> ${p.precioInstrucciones}</p></div>
-                            ${botonAccion}
-                        </div>`;
-                }
-            });
-            listaPartidos.innerHTML = htmlTarjetas || `<div style="text-align:center; padding:30px 10px;"><i class="ph-bold ph-whistle" style="font-size:2.5rem; color:#444;"></i><p style="color:#aaa; margin-top:10px;">No hay partidos programados por el momento.</p></div>`;
-        } catch (error) { console.error("Error al obtener partidos:", error); }
-    };
-
-    function refrescarPartidosActuales() { const btnActivo = Array.from(document.querySelectorAll('.btn-sport-chip')).find(b => b.textContent.trim() === window.deporteActivoGlobal); if(btnActivo) btnActivo.click(); }
-
-    window.separarCupoPartido = async function(partidoId) { if (!confirm("¿Seguro que deseas separar un cupo?")) return; try { await updateDoc(doc(db, 'partidos', partidoId), { cuposOcupados: increment(1), inscritos: arrayUnion({ uid: currentUser.uid, nombreUsuario: currentUser.displayName || 'Jugador', fotoUsuario: currentUser.photoURL || 'avatar' }) }); alert("¡Cupo separado con éxito!"); refrescarPartidosActuales(); } catch (e) { alert("Error."); } }
-    window.eliminarPartido = async function(partidoId) { if (!confirm("🚨 ¿ELIMINAR este partido?")) return; try { await deleteDoc(doc(db, 'partidos', partidoId)); alert("Eliminado."); refrescarPartidosActuales(); } catch (e) { alert("Error."); } }
-
-    // ENCUESTA MVP EN VIVO
-    document.getElementById('cerrar-votacion-mvp').addEventListener('click', () => { document.getElementById('modal-votacion-mvp').style.display = 'none'; if(unsubscribeMVP) { unsubscribeMVP(); unsubscribeMVP = null; } });
-    window.abrirVotacionMVP = async function(partidoId) {
-        partidoVotacionId = partidoId; document.getElementById('modal-votacion-mvp').style.display = 'flex';
-        const listaCandidatos = document.getElementById('lista-candidatos-mvp'); listaCandidatos.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando encuesta...</p>';
-        const pSnap = await getDoc(doc(db, 'partidos', partidoId)); const pData = pSnap.data();
-        const esAdmin = window.soyLiderGlobal || pData.capitanUid === currentUser.uid;
-        document.getElementById('panel-admin-votacion').style.display = esAdmin ? 'block' : 'none';
-
-        if(unsubscribeMVP) unsubscribeMVP();
-        unsubscribeMVP = onSnapshot(doc(db, 'partidos', partidoId), (docSnap) => {
-            if(!docSnap.exists()) return; const p = docSnap.data();
-            if(p.estado === 'finalizado'){
-                listaCandidatos.innerHTML = `<div style="text-align:center; padding: 30px;"><i class="ph-fill ph-trophy" style="font-size:4rem; color:#f1c40f;"></i><h3 style="color:#fff; margin:10px 0;">Votación Cerrada</h3><p style="color:#aaa;">El MVP ya fue coronado.</p></div>`;
-                document.getElementById('panel-admin-votacion').style.display = 'none'; return;
-            }
-            const yaVote = p.hanVotado && p.hanVotado.includes(currentUser.uid); let html = '';
-            let totalVotos = 0; if(p.votosMVP) { Object.values(p.votosMVP).forEach(v => totalVotos += v); }
-            p.inscritos.forEach(j => {
-                const votos = (p.votosMVP && p.votosMVP[j.uid]) ? p.votosMVP[j.uid] : 0;
-                const porcentaje = totalVotos === 0 ? 0 : Math.round((votos / totalVotos) * 100);
-                const canVote = !yaVote && j.uid !== currentUser.uid;
-                const btnHtml = canVote ? `<button class="btn" style="padding:4px 10px; background:transparent; color:#f1c40f; border:1px solid #f1c40f; border-radius:6px; font-size:0.75rem;" onclick="votarJugador('${j.uid}')">Votar</button>` : '';
-                html += `<div style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin-bottom: 10px;"><div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><div style="display:flex; align-items:center; gap:8px;"><img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #f1c40f;"><span style="color:#fff; font-size:0.9rem; font-weight:bold;">${j.nombreUsuario}</span></div><div style="display:flex; align-items:center; gap: 10px;"><span style="color:#f1c40f; font-weight:bold;">${votos} <i class="ph-fill ph-star"></i></span>${btnHtml}</div></div><div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 10px; height: 8px; overflow: hidden;"><div style="width: ${porcentaje}%; background: #f1c40f; height: 100%; border-radius: 10px; transition: width 0.5s ease;"></div></div></div>`;
-            });
-            listaCandidatos.innerHTML = html;
-        });
-    };
-    window.votarJugador = async function(candidatoUid) { if(!confirm("¿Votar por este jugador? Tu voto es secreto y definitivo.")) return; try { await updateDoc(doc(db, 'partidos', partidoVotacionId), { [`votosMVP.${candidatoUid}`]: increment(1), hanVotado: arrayUnion(currentUser.uid) }); } catch(e) { alert("Error al votar."); } };
-    window.cerrarUrnaMVP = async function() {
-        if(!confirm("¿Cerrar las votaciones y finalizar el partido?")) return;
-        try {
-            const pRef = doc(db, 'partidos', partidoVotacionId); const pSnap = await getDoc(pRef); const p = pSnap.data();
-            let mvpUid = null; let maxVotos = -1;
-            if(p.votosMVP) { for (const [uid, votos] of Object.entries(p.votosMVP)) { if (votos > maxVotos) { maxVotos = votos; mvpUid = uid; } } }
-            await updateDoc(pRef, { estado: 'finalizado', mvp: mvpUid }); alert("¡Partido finalizado!");
-            document.getElementById('modal-votacion-mvp').style.display = 'none'; if(unsubscribeMVP) unsubscribeMVP(); refrescarPartidosActuales();
-        } catch(e) { alert("Error."); }
-    };
-
-    // LOGICA ZONA DE RETOS
-    document.getElementById('btn-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'flex'; });
-    document.getElementById('cerrar-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'none'; });
-    
-    document.getElementById('form-lanzar-reto').addEventListener('submit', async (e) => {
-        e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Publicando...'; btnSubmit.disabled = true;
-        const nuevoReto = {
-            comunidadId: comunidadActivaId, nombreComunidad: window.comunidadActivaNombre, liderUid: currentUser.uid, whatsappLider: window.comunidadActivaWsp, deporte: document.getElementById('lr-deporte').value, formato: document.getElementById('lr-formato').value, fecha: document.getElementById('lr-fecha').value, hora: document.getElementById('lr-hora').value, estado: 'buscando_rival', fechaCreacion: new Date().toISOString()
-        };
-        try { await addDoc(collection(db, 'retos_comunidades'), nuevoReto); alert("¡Reto lanzado!"); document.getElementById('modal-lanzar-reto').style.display = 'none'; e.target.reset(); if(document.getElementById('tab-retos').classList.contains('active')) { window.cargarRetosGlobales(); } } catch(err) { alert("Error."); } finally { btnSubmit.innerHTML = 'Publicar Reto'; btnSubmit.disabled = false; }
-    });
-
-    window.cargarRetosGlobales = async function() {
-        const listaRetos = document.getElementById('lista-retos'); listaRetos.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center; padding: 30px;">Cargando clásicos...</p>';
-        try {
-            const q = query(collection(db, 'retos_comunidades')); const snap = await getDocs(q); let html = '';
-            snap.forEach(docSnap => {
-                const r = docSnap.data(); 
-                if (r.estado === 'buscando_rival' || (r.estado === 'coordinando' && currentUser && r.liderUid === currentUser.uid)) {
-                    let fechaAmigable = r.fecha; try { const partes = r.fecha.split('-'); fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`; } catch(e){}
-                    const soyCreador = currentUser && r.liderUid === currentUser.uid;
-                    let btnAccion = '';
-                    
-                    if (soyCreador) {
-                        if (r.estado === 'buscando_rival') {
-                            btnAccion = `<button class="btn" style="width:100%; background:rgba(231,76,60,0.1); color:#e74c3c; border:1px solid #e74c3c; font-size:0.85rem;" disabled><i class="ph-bold ph-hourglass"></i> Esperando Rival</button>`;
-                        } else if (r.estado === 'coordinando') {
-                            btnAccion = `
-                                <div style="display:flex; gap:8px;">
-                                    <button class="btn" style="flex:1; background:#2ecc71; color:#000; font-weight:bold; border:none; font-size:0.8rem;" onclick="oficializarReto('${docSnap.id}')"><i class="ph-bold ph-check"></i> Oficializar</button>
-                                    <button class="btn" style="flex:1; background:#e74c3c; color:#fff; font-weight:bold; border:none; font-size:0.8rem;" onclick="rechazarReto('${docSnap.id}')"><i class="ph-bold ph-x"></i> Rechazar</button>
-                                </div>
-                            `;
-                        }
-                    } else {
-                        btnAccion = `<button class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold; border:none; font-size:0.85rem;" onclick="prepararAceptarReto('${docSnap.id}', '${r.whatsappLider}', '${r.nombreComunidad}')"><i class="ph-bold ph-sword"></i> Aceptar Reto</button>`;
-                    }
-
-                    html += `<div class="community-card" style="border-color: rgba(231, 76, 60, 0.4);"><div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;"><div><h3 style="margin:0; font-size:1.1rem; color:#fff;"><i class="ph-fill ph-shield-checkered" style="color:#e74c3c;"></i> ${r.nombreComunidad}</h3><p style="margin:3px 0 0 0; font-size:0.8rem; color:#aaa;">${r.estado === 'coordinando' ? 'Coordinando seña...' : 'Busca rival'}</p></div><span style="background:rgba(231,76,60,0.1); color:#e74c3c; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; border: 1px solid rgba(231,76,60,0.3);">${r.formato}</span></div><div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:8px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;"><span style="color:#f1c40f; font-size:0.85rem; font-weight:bold;"><i class="ph-fill ph-trophy"></i> ${r.deporte}</span><span style="color:#fff; font-size:0.85rem;"><i class="ph-bold ph-calendar-blank"></i> ${fechaAmigable} - ${r.hora}</span></div>${btnAccion}</div>`;
-                }
-            });
-            listaRetos.innerHTML = html || '<div style="grid-column:1/-1; text-align:center; padding: 40px;"><p style="color:#aaa;">No hay retos activos.</p></div>';
-        } catch(e) { listaRetos.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar retos.</p>'; }
-    }
-
-    // ACEPTAR EL RETO Y ABRIR WHATSAPP
-    window.prepararAceptarReto = async function(retoId, wspLider, nombreComunidadRival) {
-        if (!currentUser) return alert("Debes iniciar sesión.");
-        const q = query(collection(db, 'comunidades'), where('liderUid', '==', currentUser.uid));
-        const snap = await getDocs(q);
-        if (snap.empty) return alert("🚨 Solo los líderes de comunidad pueden aceptar retos.");
-        
-        if (!confirm(`¿Aceptar el reto de ${nombreComunidadRival}? Serás redirigido a WhatsApp para coordinar la seña.`)) return;
-
-        try {
-            await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'coordinando', rivalUid: currentUser.uid });
-            const numClean = String(wspLider || '').replace(/\D/g, '');
-            if (numClean) {
-                window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(`¡Hola! Vimos tu reto en la Zona de Retos de CHALACAPP. Somos un equipo serio y queremos aceptar el clásico. ¿Dónde y a qué hora jugamos? Te paso la seña si es necesario.`)}`, '_blank');
+                        </div>
+                    </div>
+                `;
             } else {
-                alert("Reto aceptado, pero el líder rival no configuró su WhatsApp.");
+                contenedorPerfil.innerHTML = `
+                    <div style="text-align:center; padding: 20px;">
+                        <i class="ph-fill ph-user-circle" style="font-size: 3rem; color: #555;"></i>
+                        <p style="color: #aaa; margin-top: 10px;">Este jugador aún no ha configurado su Tarjeta FUT.</p>
+                    </div>
+                `;
             }
-            cargarRetosGlobales();
-        } catch (e) { alert("Error al aceptar el reto."); }
-    }
-
-    // OFICIALIZAR O RECHAZAR
-    window.oficializarReto = async function(retoId) {
-        if(!confirm("¿Seguro que el rival ya pagó la seña y quieres hacer el clásico OFICIAL?")) return;
-        try { await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'oficial' }); alert("¡Clásico oficializado!"); cargarRetosGlobales(); } catch(e) { alert("Error."); }
-    }
-    window.rechazarReto = async function(retoId) {
-        if(!confirm("¿El rival no era serio? El reto volverá a publicarse.")) return;
-        try { await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'buscando_rival', rivalUid: null }); alert("Reto devuelto a la cartelera."); cargarRetosGlobales(); } catch(e) { alert("Error."); }
-    }
-
-
-    // CARGA DE LOGOS PROPIOS 
-    document.getElementById('btn-cambiar-logo').addEventListener('click', () => {
-        if (window.soyLiderGlobal) { document.getElementById('input-logo-comunidad').click(); }
-    });
-
-    document.getElementById('input-logo-comunidad').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            const img = new Image();
-            img.onload = async function() {
-                const canvas = document.createElement('canvas'); const MAX_WIDTH = 250; const MAX_HEIGHT = 250;
-                let width = img.width; let height = img.height;
-                if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
-                else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
-                canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.85); 
-                try {
-                    document.getElementById('img-logo-comunidad').src = dataUrl;
-                    document.getElementById('img-logo-comunidad').style.display = 'block';
-                    document.getElementById('icon-logo-comunidad').style.display = 'none';
-                    await updateDoc(doc(db, 'comunidades', comunidadActivaId), { logo: dataUrl });
-                    cargarComunidades(); 
-                } catch(err) { alert("Error al subir el logo."); }
-            }
-            img.src = event.target.result;
+        } catch (error) {
+            console.error("Error al cargar perfil:", error);
+            contenedorPerfil.innerHTML = '<p style="color: red; text-align:center;">Error al cargar datos.</p>';
         }
-        reader.readAsDataURL(file);
-    });
-
-    const hubModal = document.getElementById('hub-comunidad');
-    document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
-
-    window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp, soyMiembro, logoUrl) => {
-        comunidadActivaId = id; window.soyLiderGlobal = esLider; window.soyMiembroGlobal = soyMiembro; window.comunidadActivaNombre = nombre; window.comunidadActivaWsp = wsp;
-        document.getElementById('hub-nombre').textContent = nombre; document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
-        document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none'; document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
-        
-        const imgLogo = document.getElementById('img-logo-comunidad');
-        const iconLogo = document.getElementById('icon-logo-comunidad');
-        const overlayLogo = document.getElementById('overlay-logo');
-        
-        if (logoUrl && logoUrl !== 'undefined') {
-            imgLogo.src = logoUrl; imgLogo.style.display = 'block'; iconLogo.style.display = 'none';
-        } else {
-            imgLogo.style.display = 'none'; iconLogo.style.display = 'block';
-        }
-
-        if (esLider) {
-            overlayLogo.style.display = 'block';
-            document.getElementById('btn-cambiar-logo').style.cursor = 'pointer';
-        } else {
-            overlayLogo.style.display = 'none';
-            document.getElementById('btn-cambiar-logo').style.cursor = 'default';
-        }
-
-        const btnWa = document.getElementById('btn-unirse-wa');
-        if (wsp) { const numClean = String(wsp).replace(/\D/g, ''); btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme a la comunidad " + nombre)}`, '_blank'); } 
-        else btnWa.onclick = () => alert("Sin link configurado.");
-
-        const deportesArray = deportesRaw.split(','); const contenedorFiltros = document.getElementById('hub-deportes-filtros'); const selectDeporteModal = document.getElementById('np-deporte'); 
-        const selectRetoModal = document.getElementById('lr-deporte');
-        contenedorFiltros.innerHTML = ''; selectDeporteModal.innerHTML = ''; selectRetoModal.innerHTML = '';
-        
-        deportesArray.forEach((dep, index) => {
-            const isFirst = index === 0; const nombreDeporte = dep.trim(); if (!nombreDeporte) return;
-            const colorPrincipal = obtenerColorDeporte(nombreDeporte); const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)'; const color = isFirst ? '#000' : '#fff'; const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
-            contenedorFiltros.innerHTML += `<button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">${nombreDeporte}</button>`;
-            selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
-            selectRetoModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
-        });
-        contenedorFiltros.innerHTML += `<button id="btn-ranking-tab" class="btn btn-sport-chip" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed #f1c40f; margin-left: 10px !important;" onclick="mostrarRankingComunidad()">🏆 Ranking</button>`;
-
-        hubModal.classList.add('mostrar');
-        setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
-
-    // MAGIA: MOSTRAR EL 7 IDEAL EN LA CANCHA Y RECONOCER POSICIONES CORRECTAMENTE
-    window.mostrarRankingComunidad = async function() { 
-        document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); 
-        const btnRanking = document.getElementById('btn-ranking-tab'); btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none'; 
-        document.getElementById('hub-lista-partidos').style.display = 'none'; const panelRanking = document.getElementById('hub-panel-ranking'); panelRanking.style.display = 'block'; document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#f1c40f; font-size:1.1rem;"><i class="ph-fill ph-trophy"></i> Salón de la Fama</h3>`; 
-        panelRanking.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:#f1c40f;"></i><p style="color:#aaa; margin-top:10px;">Calculando estadísticas y alineando el equipo...</p></div>`; 
-        
-        try { 
-            const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'finalizado')); 
-            const snap = await getDocs(q); let stats = {}; 
-            
-            snap.forEach(docSnap => { 
-                const p = docSnap.data(); 
-                if(p.resultadosOficiales) { 
-                    p.resultadosOficiales.forEach(res => { 
-                        if(!stats[res.uid]) { 
-                            const infoJugador = p.inscritos.find(j => j.uid === res.uid) || { nombreUsuario: 'Jugador', fotoUsuario: 'avatar' }; 
-                            stats[res.uid] = { uid: res.uid, nombre: infoJugador.nombreUsuario, foto: infoJugador.fotoUsuario, goles: 0, asist: 0, mvp: 0, partidos: 0, score: 0 }; 
-                        } 
-                        stats[res.uid].partidos += 1; stats[res.uid].goles += res.goles || 0; stats[res.uid].asist += res.asistencias || 0; if(p.mvp === res.uid) stats[res.uid].mvp += 1; 
-                    }); 
-                } 
-            }); 
-            
-            let ranking = Object.values(stats); 
-            ranking.forEach(j => { j.score = (j.partidos * 10) + (j.goles * 5) + (j.asist * 3) + (j.mvp * 15); }); 
-            if(ranking.length === 0) { panelRanking.innerHTML = `<div style="text-align:center; padding:30px 10px;"><p style="color:#aaa;">Aún no hay estadísticas suficientes para armar el equipo ideal.</p></div>`; return; } 
-            
-            const goleador = [...ranking].sort((a,b) => b.goles - a.goles)[0]; const asistidor = [...ranking].sort((a,b) => b.asist - a.asist)[0]; const franquicia = [...ranking].sort((a,b) => b.mvp - a.mvp)[0]; 
-            ranking.sort((a,b) => b.score - a.score); 
-            const sieteIdeal = ranking.slice(0, 7); 
-            
-            for (let j of sieteIdeal) {
-                try {
-                    const uSnap = await getDoc(doc(db, 'jugadores_perfiles', j.uid));
-                    if (uSnap.exists()) { 
-                        const data = uSnap.data();
-                        j.posicion = data.posicion || data.posicionPrincipal || data.posicion_principal || 'MED'; 
-                    } 
-                    else { j.posicion = 'MED'; }
-                } catch(e) { j.posicion = 'MED'; }
-            }
-
-            const lineas = { fwd: [], mid: [], def: [], gk: [] };
-            sieteIdeal.forEach(j => {
-                const p = String(j.posicion || '').toUpperCase();
-                if (p.includes('ARQ') || p.includes('PORTERO') || p.includes('GK')) lineas.gk.push(j);
-                else if (p.includes('DEF') || p.includes('ZAGUERO') || p.includes('CENTRAL')) lineas.def.push(j);
-                else if (p.includes('DEL') || p.includes('PUNTA') || p.includes('ATACANTE')) lineas.fwd.push(j);
-                else lineas.mid.push(j); 
-            });
-
-            const generarCarta = (j) => `
-                <div class="player-pitch-card">
-                    <div class="player-pitch-photo-container">
-                        <img src="${j.foto}">
-                        <div class="player-pitch-score">${j.score}</div>
-                    </div>
-                    <div class="player-pitch-name">${j.nombre.split(' ')[0]}</div>
-                </div>
-            `;
-
-            let htmlRanking = `
-                <div class="ranking-podium">
-                    <div class="podium-card"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
-                    <div class="podium-card"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
-                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asistencias</span></p></div>
-                </div>
-
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
-                    <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic; letter-spacing: 1px;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El 7 Ideal (Team of the Month)</h3>
-                    
-                    <div class="soccer-pitch">
-                        <div class="pitch-line pitch-center"></div>
-                        <div class="pitch-line pitch-circle"></div>
-                        <div class="pitch-line pitch-box-top"></div>
-                        <div class="pitch-line pitch-box-bottom"></div>
-                        <div class="pitch-line pitch-goal-top"></div>
-                        <div class="pitch-line pitch-goal-bottom"></div>
-
-                        <div class="formation-row">${lineas.fwd.map(generarCarta).join('')}</div>
-                        <div class="formation-row">${lineas.mid.map(generarCarta).join('')}</div>
-                        <div class="formation-row">${lineas.def.map(generarCarta).join('')}</div>
-                        <div class="formation-row">${lineas.gk.map(generarCarta).join('')}</div>
-                    </div>
-                </div>
-            `;
-            
-            panelRanking.innerHTML = htmlRanking; 
-        } catch(e) { console.error(e); panelRanking.innerHTML = '<p style="color:red; text-align:center;">Error al armar el equipo ideal.</p>'; } 
-    }
-    
-    // Resultados
-    const modalResultados = document.getElementById('modal-resultados-partido'); document.getElementById('cerrar-resultados-partido').addEventListener('click', () => modalResultados.style.display = 'none');
-    window.abrirResultadosPartido = async function(partidoId) { partidoResultadosId = partidoId; modalResultados.style.display = 'flex'; const listaJugadores = document.getElementById('lista-resultados-jugadores'); listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando...</p>'; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); let html = ''; if(p.inscritos && p.inscritos.length > 0){ p.inscritos.forEach((j, index) => { html += `<div class="resultado-jugador-row" data-uid="${j.uid}" style="grid-template-columns: 2fr 1fr 1fr;"><div style="display:flex; align-items:center; gap:8px;"><img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #555;"><span style="color:#fff; font-size:0.85rem; font-weight:bold;">${j.nombreUsuario}</span></div><input type="number" class="res-goles" min="0" value="0"><input type="number" class="res-asist" min="0" value="0"></div>`; }); listaJugadores.innerHTML = html; } else { listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Nadie asistió.</p>'; } } } catch(e){ listaJugadores.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } };
-    document.getElementById('form-resultados-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; const resultados = []; document.querySelectorAll('.resultado-jugador-row').forEach(row => { const uid = row.getAttribute('data-uid'); const goles = parseInt(row.querySelector('.res-goles').value) || 0; const asistencias = parseInt(row.querySelector('.res-asist').value) || 0; resultados.push({ uid, goles, asistencias, mvp: false }); }); try { await updateDoc(doc(db, 'partidos', partidoResultadosId), { estado: 'votando_mvp', resultadosOficiales: resultados, votosMVP: {}, hanVotado: [] }); alert("¡Stats guardadas! Urnas abiertas."); modalResultados.style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Publicar Stats y Abrir Votación MVP'; btnSubmit.disabled = false; } });
-    
-    // Gestión Lista
-    const modalListaPartido = document.getElementById('modal-lista-partido'); document.getElementById('cerrar-lista-partido').addEventListener('click', () => modalListaPartido.style.display = 'none');
-    window.abrirGestionLista = async function(partidoId) { modalListaPartido.style.display = 'flex'; const panelInscritos = document.getElementById('panel-inscritos'); panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando lista...</p>'; try { const docSnap = await getDoc(doc(db, 'partidos', partidoId)); if (docSnap.exists()) { const p = docSnap.data(); let html = ''; if (p.inscritos && p.inscritos.length > 0) { p.inscritos.forEach((jugador, index) => { let btnCapitan = ''; if (p.capitanUid === jugador.uid) { btnCapitan = `<span style="background: rgba(241, 196, 15, 0.2); color: #f1c40f; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px;"><i class="ph-fill ph-star"></i> Capitán</span><button class="btn" style="padding:4px 8px; background:transparent; color:#888; border:1px solid #888; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', null, '${jugador.nombreUsuario}')">Quitar</button>`; } else { btnCapitan = `<button class="btn" style="padding:4px 8px; background:transparent; color:#f1c40f; border:1px solid #f1c40f; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')">Hacer Capitán</button>`; } html += `<div class="solicitud-item" style="border-left: 3px solid #f1c40f; flex-wrap: wrap;"><div style="display:flex; align-items:center; gap:12px; margin-bottom: 5px;"><div style="width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #ccc; font-weight: bold;">${index + 1}</div><img src="${jugador.fotoUsuario}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid #f1c40f;"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${jugador.nombreUsuario}</span></div><div style="display: flex; align-items: center;">${btnCapitan}<button class="btn" style="padding:4px 8px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.75rem;" onclick="liberarCupoJugador('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')"><i class="ph-bold ph-x"></i> Liberar</button></div></div>`; }); panelInscritos.innerHTML = html; } else { panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Aún no hay jugadores inscritos.</p>'; } } } catch(e) { panelInscritos.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } }
-    window.asignarCapitan = async function(partidoId, uidJugador, nombre) { try { await updateDoc(doc(db, 'partidos', partidoId), { capitanUid: uidJugador }); alert(uidJugador ? `¡${nombre} ahora es el Capitán!` : `Permisos removidos.`); abrirGestionLista(partidoId); refrescarPartidosActuales(); } catch(e) { alert("Error."); } }
-    window.liberarCupoJugador = async function(partidoId, uidJugador, nombre) { if (!confirm(`¿Liberar a ${nombre}?`)) return; try { const pRef = doc(db, 'partidos', partidoId); const pSnap = await getDoc(pRef); if(pSnap.exists()){ const data = pSnap.data(); const inscritosActualizados = data.inscritos.filter(j => j.uid !== uidJugador); await updateDoc(pRef, { inscritos: inscritosActualizados, cuposOcupados: increment(-1) }); alert("Cupo liberado."); abrirGestionLista(partidoId); refrescarPartidosActuales(); } } catch(e) { alert("Error."); } }
-
-    // FUNCIONES DEL MODAL CREAR COMUNIDAD
-    const modalCrear = document.getElementById('modal-crear-comunidad');
-    document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
-    document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
-    document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => { e.preventDefault(); const n = document.getElementById('reg-com-nombre').value; const d = document.getElementById('reg-com-deporte').value; const c = document.getElementById('reg-com-ciudad').value; const l = document.getElementById('reg-com-link').value; window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad y obtener el check de verificado ✅.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}\n*Link de Verificación:* ${l}`)}`, '_blank'); modalCrear.style.display = 'none'; e.target.reset(); });
-
-    document.getElementById('cerrar-editar-partido').addEventListener('click', () => document.getElementById('modal-editar-partido').style.display = 'none'); window.abrirEditarPartido = async function(partidoId) { partidoEditarId = partidoId; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); document.getElementById('ep-fecha').value = p.fecha; document.getElementById('ep-hora').value = p.hora; document.getElementById('ep-duracion').value = p.duracion || 60; document.getElementById('ep-lugar').value = p.lugar; document.getElementById('ep-maps').value = p.linkMaps || ''; document.getElementById('ep-cupos').value = p.cuposTotales; document.getElementById('ep-precio').value = p.precioInstrucciones; document.getElementById('modal-editar-partido').style.display = 'flex'; } } catch(e) { alert("Error."); } }
-    document.getElementById('form-editar-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; try { await updateDoc(doc(db, 'partidos', partidoEditarId), { fecha: document.getElementById('ep-fecha').value, hora: document.getElementById('ep-hora').value, duracion: parseInt(document.getElementById('ep-duracion').value), lugar: document.getElementById('ep-lugar').value, linkMaps: document.getElementById('ep-maps').value, cuposTotales: parseInt(document.getElementById('ep-cupos').value), precioInstrucciones: document.getElementById('ep-precio').value }); alert("¡Actualizado!"); document.getElementById('modal-editar-partido').style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Guardar Cambios'; btnSubmit.disabled = false; } });
-    const modalMiembros = document.getElementById('modal-miembros'); document.getElementById('btn-ver-miembros').addEventListener('click', () => { modalMiembros.style.display = 'flex'; cargarSolicitudes(); }); document.getElementById('cerrar-miembros').addEventListener('click', () => modalMiembros.style.display = 'none'); const btnTabSol = document.getElementById('tab-solicitudes'); const btnTabActivos = document.getElementById('tab-activos'); const panelSol = document.getElementById('panel-solicitudes'); const panelActivos = document.getElementById('panel-activos'); btnTabSol.addEventListener('click', () => { btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active'); panelSol.style.display = 'block'; panelActivos.style.display = 'none'; }); btnTabActivos.addEventListener('click', () => { btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active'); panelActivos.style.display = 'block'; panelSol.style.display = 'none'; cargarMiembrosActivos(); });
-    window.cargarSolicitudes = async function() { panelSol.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando...</p>'; try { const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'pendiente')); const snap = await getDocs(q); let html = ''; snap.forEach(d => { const s = d.data(); html += `<div class="solicitud-item"><div style="display:flex; align-items:center; gap:12px;"><img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #555;"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span></div><button class="btn" style="width:auto !important; padding:6px 12px; background:#2ecc71; color:#000; border:none; border-radius:6px;" onclick="aceptarJugador('${d.id}', '${s.usuarioUid}')">Aceptar</button></div>`; }); panelSol.innerHTML = html || '<p style="color:#aaa; text-align:center;">No hay solicitudes.</p>'; } catch (e) { panelSol.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } };
-    window.cargarMiembrosActivos = async function() { panelActivos.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando...</p>'; try { const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'aceptada')); const snap = await getDocs(q); let html = ''; snap.forEach(d => { const s = d.data(); html += `<div class="solicitud-item"><div style="display:flex; align-items:center; gap:12px;"><img src="${s.fotoUsuario}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid var(--primary-green);"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${s.nombreUsuario}</span></div><button class="btn" style="width:auto !important; padding:6px 10px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.8rem;" onclick="eliminarJugador('${d.id}', '${s.usuarioUid}', '${s.nombreUsuario}')">Eliminar</button></div>`; }); panelActivos.innerHTML = html || '<p style="color:#aaa; text-align:center;">No hay miembros.</p>'; } catch (e) { panelActivos.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } };
-    window.aceptarJugador = async function(idSolicitud, uidJugador) { try { await updateDoc(doc(db, 'solicitudes_comunidad', idSolicitud), { estado: 'aceptada' }); await updateDoc(doc(db, 'comunidades', comunidadActivaId), { miembros_uids: arrayUnion(uidJugador) }); alert("Aceptado"); cargarSolicitudes(); } catch (e) { alert("Error."); } };
-    window.eliminarJugador = async function(idSolicitud, uidJugador, nombre) { if(!confirm("Eliminar?")) return; try { await deleteDoc(doc(db, 'solicitudes_comunidad', idSolicitud)); await updateDoc(doc(db, 'comunidades', comunidadActivaId), { miembros_uids: arrayRemove(uidJugador) }); alert("Eliminado."); cargarMiembrosActivos(); } catch (e) { alert("Error."); } };
-    window.enviarSolicitudIngreso = async function() { if (!currentUser) return alert("Inicia sesión."); try { const q = query(collection(db, 'solicitudes_comunidad'), where('comunidadId', '==', comunidadActivaId), where('usuarioUid', '==', currentUser.uid)); const snap = await getDocs(q); if (snap.empty) { await addDoc(collection(db, 'solicitudes_comunidad'), { comunidadId: comunidadActivaId, usuarioUid: currentUser.uid, nombreUsuario: currentUser.displayName || 'Jugador', fotoUsuario: currentUser.photoURL || 'avatar', estado: 'pendiente', fecha: new Date().toISOString() }); } const numClean = String(window.comunidadActivaWsp || '').replace(/\D/g, ''); if (numClean) window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(`Hola, solicito unirme a ${window.comunidadActivaNombre}`)}`, '_blank'); else alert("Guardado."); } catch (e) { alert("Error."); } };
-    document.getElementById('btn-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'flex'); document.getElementById('cerrar-nuevo-partido').addEventListener('click', () => document.getElementById('modal-nuevo-partido').style.display = 'none');
-    document.getElementById('form-nuevo-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Publicando...'; btnSubmit.disabled = true; const np = { comunidadId: comunidadActivaId, creadorUid: currentUser.uid, deporte: document.getElementById('np-deporte').value, fecha: document.getElementById('np-fecha').value, hora: document.getElementById('np-hora').value, duracion: parseInt(document.getElementById('np-duracion').value), lugar: document.getElementById('np-lugar').value, linkMaps: document.getElementById('np-maps').value, cuposTotales: parseInt(document.getElementById('np-cupos').value), cuposOcupados: 0, precioInstrucciones: document.getElementById('np-precio').value, estado: 'abierto', fechaCreacion: new Date().toISOString() }; try { await addDoc(collection(db, 'partidos'), np); alert("Publicado."); document.getElementById('modal-nuevo-partido').style.display = 'none'; e.target.reset(); refrescarPartidosActuales(); } catch (err) { alert("Error."); } finally { btnSubmit.innerHTML = 'Publicar'; btnSubmit.disabled = false; } });
 </script>
 </body>
 </html>
