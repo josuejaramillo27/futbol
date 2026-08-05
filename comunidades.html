@@ -40,11 +40,10 @@
         .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
         
-        /* MAGIA: ESTILOS DEL CAMPO VERDE */
+        /* MAGIA: ESTILOS DEL CAMPO VERDE CÉSPED */
         .soccer-pitch {
             position: relative;
-            /* Fondo Verde de Cancha Real */
-            background: linear-gradient(180deg, #1a4f27 0%, #0d2e16 100%);
+            background: repeating-linear-gradient(0deg, #1b4924, #1b4924 10%, #153c1d 10%, #153c1d 20%);
             border: 2px solid rgba(255,255,255,0.4);
             border-radius: 12px;
             padding: 15px 10px;
@@ -54,15 +53,7 @@
             height: 480px;
             overflow: hidden;
             margin-top: 15px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
-        }
-        .soccer-pitch::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            /* Franjas de corte de césped típicas */
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(255,255,255,0.04) 10%, rgba(255,255,255,0.04) 20%);
-            pointer-events: none;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
         }
         .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
         .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
@@ -176,7 +167,7 @@
 <!-- MODALES Y FORMULARIOS -->
 <!-- ========================================== -->
 
-<!-- MODAL: REGISTRAR COMUNIDAD -->
+<!-- MODAL: REGISTRAR COMUNIDAD (CON LINK DE VERIFICACIÓN) -->
 <div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -192,8 +183,6 @@
     </div>
 </div>
 
-<!-- OTROS MODALES (Partido Interno, Lanzar Reto, Editar, etc) -->
-<!-- MANTENIDOS EXACTAMENTE IGUAL -->
 <div id="modal-nuevo-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;">
         <button id="cerrar-nuevo-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -537,7 +526,7 @@
         } catch(e) { alert("Error."); }
     };
 
-    // LOGICA ZONA DE RETOS (PARTE 1)
+    // LOGICA ZONA DE RETOS
     document.getElementById('btn-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'flex'; });
     document.getElementById('cerrar-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'none'; });
     
@@ -724,27 +713,25 @@
             ranking.sort((a,b) => b.score - a.score); 
             const sieteIdeal = ranking.slice(0, 7); 
             
-            // OBTENER POSICIONES DESDE LA BASE DE DATOS (Manejando diferentes nombres de variables)
+            // OBTENER POSICIONES DESDE LA COLECCIÓN CORRECTA (jugadores_perfiles)
             for (let j of sieteIdeal) {
                 try {
-                    const uSnap = await getDoc(doc(db, 'usuarios', j.uid));
+                    const uSnap = await getDoc(doc(db, 'jugadores_perfiles', j.uid));
                     if (uSnap.exists()) { 
-                        const data = uSnap.data();
-                        // Algunas versiones de app guardan como 'posicion', otras como 'posicionPrincipal'
-                        j.posicion = data.posicion || data.posicionPrincipal || data.posicion_principal || 'Mediocampista'; 
+                        j.posicion = uSnap.data().posicion || 'MED'; 
                     } 
-                    else { j.posicion = 'Mediocampista'; }
-                } catch(e) { j.posicion = 'Mediocampista'; }
+                    else { j.posicion = 'MED'; }
+                } catch(e) { j.posicion = 'MED'; }
             }
 
-            // AGRUPAR POR LÍNEAS EN LA CANCHA (Tolerante a sinónimos)
+            // AGRUPAR POR LÍNEAS EN LA CANCHA (Tolerante a valores cortos ARQ, DEF, DEL)
             const lineas = { fwd: [], mid: [], def: [], gk: [] };
             sieteIdeal.forEach(j => {
-                const p = String(j.posicion || '').toLowerCase();
-                if (p.includes('portero') || p.includes('arquero') || p.includes('gk') || p.includes('guardameta')) lineas.gk.push(j);
-                else if (p.includes('defensa') || p.includes('central') || p.includes('lateral') || p.includes('zaguero')) lineas.def.push(j);
-                else if (p.includes('delantero') || p.includes('atacante') || p.includes('extremo') || p.includes('punta') || p.includes('9')) lineas.fwd.push(j);
-                else lineas.mid.push(j); // Si no hace match con nada, va al medio
+                const p = String(j.posicion || '').toUpperCase();
+                if (p.includes('ARQ') || p.includes('PORTERO') || p.includes('GK')) lineas.gk.push(j);
+                else if (p.includes('DEF') || p.includes('ZAGUERO') || p.includes('CENTRAL')) lineas.def.push(j);
+                else if (p.includes('DEL') || p.includes('PUNTA') || p.includes('ATACANTE')) lineas.fwd.push(j);
+                else lineas.mid.push(j); // Si es MED, LIB o no coincide
             });
 
             const generarCarta = (j) => `
@@ -761,7 +748,7 @@
                 <div class="ranking-podium">
                     <div class="podium-card"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
                     <div class="podium-card"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
-                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asistencias</span></p></div>
+                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asist.</span></p></div>
                 </div>
 
                 <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
