@@ -39,8 +39,44 @@
         
         .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
-        .rank-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); border-radius: 8px; margin-bottom: 8px; }
-        .rank-number { width: 30px; font-weight: bold; color: #888; font-size: 1.1rem; }
+        
+        /* MAGIA: ESTILOS DEL CAMPO 7 IDEAL */
+        .soccer-pitch {
+            position: relative;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 480px;
+            overflow: hidden;
+            margin-top: 15px;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
+        }
+        .soccer-pitch::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(255,255,255,0.02) 10%, rgba(255,255,255,0.02) 20%);
+            pointer-events: none;
+        }
+        .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.15); pointer-events: none; }
+        .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
+        .pitch-circle { top: 50%; left: 50%; width: 100px; height: 100px; border-radius: 50%; transform: translate(-50%, -50%); }
+        .pitch-box-top { top: 0; left: 20%; width: 60%; height: 18%; border-top: none; }
+        .pitch-box-bottom { bottom: 0; left: 20%; width: 60%; height: 18%; border-bottom: none; }
+        .pitch-goal-top { top: 0; left: 35%; width: 30%; height: 6%; border-top: none; }
+        .pitch-goal-bottom { bottom: 0; left: 35%; width: 30%; height: 6%; border-bottom: none; }
+        
+        .formation-row { display: flex; justify-content: center; gap: 15px; z-index: 10; position: relative; min-height: 70px; flex-wrap: wrap; align-items: center; }
+        .player-pitch-card { display: flex; flex-direction: column; align-items: center; transition: transform 0.3s ease; position: relative; cursor: pointer; }
+        .player-pitch-card:hover { transform: scale(1.1); z-index: 20; }
+        .player-pitch-photo-container { position: relative; width: 55px; height: 65px; display: flex; justify-content: center; }
+        .player-pitch-card img { width: 100%; height: 100%; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; border: 2px solid #f1c40f; background: #111; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+        .player-pitch-score { position: absolute; top: -5px; right: -8px; background: #f1c40f; color: #000; border-radius: 50%; width: 22px; height: 22px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 2px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .player-pitch-name { background: rgba(0,0,0,0.85); color: #fff; font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; margin-top: -10px; font-weight: bold; text-transform: uppercase; white-space: nowrap; max-width: 70px; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(255,255,255,0.2); z-index: 2; text-shadow: 1px 1px 2px #000; }
     </style>
 </head>
 <body>
@@ -138,7 +174,7 @@
 <!-- MODALES Y FORMULARIOS -->
 <!-- ========================================== -->
 
-<!-- MODAL: REGISTRAR COMUNIDAD (AHORA CON LINK DE VERIFICACIÓN) -->
+<!-- MODAL: REGISTRAR COMUNIDAD (CON LINK DE VERIFICACIÓN) -->
 <div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -372,7 +408,7 @@
         } catch (error) { console.error("Error:", error); }
     }
 
-    // CARGAR PARTIDOS 
+    // CARGAR PARTIDOS Y RELOJ INTELIGENTE
     window.seleccionarDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
         window.deporteActivoGlobal = nombreDeporte; 
         document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-bold ph-soccer-ball" style="color:${colorPrincipal};"></i> Cartelera de Partidos</h3>`;
@@ -497,9 +533,7 @@
         } catch(e) { alert("Error."); }
     };
 
-    // ==========================================
-    // LOGICA ZONA DE RETOS Y OFICIALIZACIÓN (PARTE 2 COMPLETA)
-    // ==========================================
+    // LOGICA ZONA DE RETOS
     document.getElementById('btn-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'flex'; });
     document.getElementById('cerrar-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'none'; });
     
@@ -517,8 +551,6 @@
             const q = query(collection(db, 'retos_comunidades')); const snap = await getDocs(q); let html = '';
             snap.forEach(docSnap => {
                 const r = docSnap.data(); 
-                
-                // Mostrar si busca rival, O si soy el creador y está coordinando
                 if (r.estado === 'buscando_rival' || (r.estado === 'coordinando' && currentUser && r.liderUid === currentUser.uid)) {
                     let fechaAmigable = r.fecha; try { const partes = r.fecha.split('-'); fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`; } catch(e){}
                     const soyCreador = currentUser && r.liderUid === currentUser.uid;
@@ -553,7 +585,7 @@
         const snap = await getDocs(q);
         if (snap.empty) return alert("🚨 Solo los líderes de comunidad pueden aceptar retos.");
         
-        if (!confirm(`¿Aceptar el reto de ${nombreComunidadRival}? Serás redirigido a WhatsApp para coordinar la seña de la cancha.`)) return;
+        if (!confirm(`¿Aceptar el reto de ${nombreComunidadRival}? Serás redirigido a WhatsApp para coordinar la seña.`)) return;
 
         try {
             await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'coordinando', rivalUid: currentUser.uid });
@@ -567,34 +599,20 @@
         } catch (e) { alert("Error al aceptar el reto."); }
     }
 
-    // OFICIALIZAR O RECHAZAR POR PARTE DEL CREADOR
+    // OFICIALIZAR O RECHAZAR
     window.oficializarReto = async function(retoId) {
         if(!confirm("¿Seguro que el rival ya pagó la seña y quieres hacer el clásico OFICIAL?")) return;
-        try {
-            await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'oficial' });
-            alert("¡Clásico oficializado! La comunidad se prepara para el enfrentamiento."); 
-            cargarRetosGlobales();
-        } catch(e) { alert("Error al oficializar."); }
+        try { await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'oficial' }); alert("¡Clásico oficializado!"); cargarRetosGlobales(); } catch(e) { alert("Error."); }
     }
-
     window.rechazarReto = async function(retoId) {
-        if(!confirm("¿El rival no era serio? El reto volverá a publicarse en la Zona de Retos.")) return;
-        try {
-            await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'buscando_rival', rivalUid: null });
-            alert("Reto devuelto a la cartelera."); 
-            cargarRetosGlobales();
-        } catch(e) { alert("Error al rechazar."); }
+        if(!confirm("¿El rival no era serio? El reto volverá a publicarse.")) return;
+        try { await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'buscando_rival', rivalUid: null }); alert("Reto devuelto a la cartelera."); cargarRetosGlobales(); } catch(e) { alert("Error."); }
     }
 
-
-    // CARGA DE LOGOS PROPIOS (LA MAGIA)
-    document.getElementById('btn-cambiar-logo').addEventListener('click', () => {
-        if (window.soyLiderGlobal) { document.getElementById('input-logo-comunidad').click(); }
-    });
-
+    // CARGA DE LOGOS PROPIOS 
+    document.getElementById('btn-cambiar-logo').addEventListener('click', () => { if (window.soyLiderGlobal) { document.getElementById('input-logo-comunidad').click(); } });
     document.getElementById('input-logo-comunidad').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
@@ -608,7 +626,7 @@
                 try {
                     document.getElementById('img-logo-comunidad').src = dataUrl; document.getElementById('img-logo-comunidad').style.display = 'block'; document.getElementById('icon-logo-comunidad').style.display = 'none';
                     await updateDoc(doc(db, 'comunidades', comunidadActivaId), { logo: dataUrl }); cargarComunidades(); 
-                } catch(err) { alert("Error al subir el logo. Revisa tu conexión."); }
+                } catch(err) { alert("Error al subir el logo."); }
             }
             img.src = event.target.result;
         }
@@ -636,23 +654,114 @@
         setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
 
-    window.mostrarRankingComunidad = async function() { document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); const btnRanking = document.getElementById('btn-ranking-tab'); btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none'; document.getElementById('hub-lista-partidos').style.display = 'none'; const panelRanking = document.getElementById('hub-panel-ranking'); panelRanking.style.display = 'block'; document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#f1c40f; font-size:1.1rem;"><i class="ph-fill ph-trophy"></i> Salón de la Fama</h3>`; panelRanking.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:#f1c40f;"></i><p style="color:#aaa; margin-top:10px;">Calculando estadísticas...</p></div>`; try { const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'finalizado')); const snap = await getDocs(q); let stats = {}; snap.forEach(docSnap => { const p = docSnap.data(); if(p.resultadosOficiales) { p.resultadosOficiales.forEach(res => { if(!stats[res.uid]) { const infoJugador = p.inscritos.find(j => j.uid === res.uid) || { nombreUsuario: 'Jugador', fotoUsuario: 'avatar' }; stats[res.uid] = { nombre: infoJugador.nombreUsuario, foto: infoJugador.fotoUsuario, goles: 0, asist: 0, mvp: 0, partidos: 0, score: 0 }; } stats[res.uid].partidos += 1; stats[res.uid].goles += res.goles || 0; stats[res.uid].asist += res.asistencias || 0; if(p.mvp === res.uid) stats[res.uid].mvp += 1; }); } }); let ranking = Object.values(stats); ranking.forEach(j => { j.score = (j.partidos * 10) + (j.goles * 5) + (j.asist * 3) + (j.mvp * 15); }); if(ranking.length === 0) { panelRanking.innerHTML = `<div style="text-align:center; padding:30px 10px;"><p style="color:#aaa;">Aún no hay estadísticas.</p></div>`; return; } const goleador = [...ranking].sort((a,b) => b.goles - a.goles)[0]; const asistidor = [...ranking].sort((a,b) => b.asist - a.asist)[0]; const franquicia = [...ranking].sort((a,b) => b.mvp - a.mvp)[0]; ranking.sort((a,b) => b.score - a.score); const sieteIdeal = ranking.slice(0, 7); let htmlRanking = `<div class="ranking-podium"><div class="podium-card"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div><div class="podium-card"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div><div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asist.</span></p></div></div><div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;"><h3 style="margin: 0 0 15px 0; color: #fff; text-align: center;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El 7 Ideal (Puntaje Total)</h3><div style="display: flex; justify-content: space-between; padding: 0 15px 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;"><span style="font-size: 0.7rem; color: #888; font-weight: bold;">JUGADOR</span><div style="display: flex; gap: 20px;"><span style="font-size: 0.7rem; color: #888; font-weight: bold;">PJ</span><span style="font-size: 0.7rem; color: #888; font-weight: bold;">PTS</span></div></div>`; sieteIdeal.forEach((jugador, idx) => { const medallaColor = idx === 0 ? '#f1c40f' : idx === 1 ? '#bdc3c7' : idx === 2 ? '#cd7f32' : '#555'; htmlRanking += `<div class="rank-list-item"><div style="display: flex; align-items: center; gap: 15px;"><span class="rank-number" style="color: ${medallaColor};">${idx + 1}</span><img src="${jugador.foto}" style="width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 1px solid ${medallaColor};"><span style="color: #fff; font-weight: bold; font-size: 0.9rem;">${jugador.nombre}</span></div><div style="display: flex; gap: 25px; align-items: center;"><span style="color: #aaa; font-size: 0.85rem; font-weight: bold; width: 15px; text-align: center;">${jugador.partidos}</span><span style="color: #fff; font-size: 1rem; font-weight: 900; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px;">${jugador.score}</span></div></div>`; }); panelRanking.innerHTML = htmlRanking + `</div>`; } catch(e) { panelRanking.innerHTML = '<p style="color:red; text-align:center;">Error al cargar estadísticas.</p>'; } }
+    // MAGIA: MOSTRAR EL 7 IDEAL EN LA CANCHA
+    window.mostrarRankingComunidad = async function() { 
+        document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); 
+        const btnRanking = document.getElementById('btn-ranking-tab'); btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none'; 
+        document.getElementById('hub-lista-partidos').style.display = 'none'; const panelRanking = document.getElementById('hub-panel-ranking'); panelRanking.style.display = 'block'; document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#f1c40f; font-size:1.1rem;"><i class="ph-fill ph-trophy"></i> Salón de la Fama</h3>`; 
+        panelRanking.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:#f1c40f;"></i><p style="color:#aaa; margin-top:10px;">Calculando estadísticas y alineando el equipo...</p></div>`; 
+        
+        try { 
+            const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'finalizado')); 
+            const snap = await getDocs(q); let stats = {}; 
+            
+            snap.forEach(docSnap => { 
+                const p = docSnap.data(); 
+                if(p.resultadosOficiales) { 
+                    p.resultadosOficiales.forEach(res => { 
+                        if(!stats[res.uid]) { 
+                            const infoJugador = p.inscritos.find(j => j.uid === res.uid) || { nombreUsuario: 'Jugador', fotoUsuario: 'avatar' }; 
+                            stats[res.uid] = { uid: res.uid, nombre: infoJugador.nombreUsuario, foto: infoJugador.fotoUsuario, goles: 0, asist: 0, mvp: 0, partidos: 0, score: 0 }; 
+                        } 
+                        stats[res.uid].partidos += 1; stats[res.uid].goles += res.goles || 0; stats[res.uid].asist += res.asistencias || 0; if(p.mvp === res.uid) stats[res.uid].mvp += 1; 
+                    }); 
+                } 
+            }); 
+            
+            let ranking = Object.values(stats); 
+            ranking.forEach(j => { j.score = (j.partidos * 10) + (j.goles * 5) + (j.asist * 3) + (j.mvp * 15); }); 
+            if(ranking.length === 0) { panelRanking.innerHTML = `<div style="text-align:center; padding:30px 10px;"><p style="color:#aaa;">Aún no hay estadísticas suficientes para armar el equipo ideal.</p></div>`; return; } 
+            
+            const goleador = [...ranking].sort((a,b) => b.goles - a.goles)[0]; const asistidor = [...ranking].sort((a,b) => b.asist - a.asist)[0]; const franquicia = [...ranking].sort((a,b) => b.mvp - a.mvp)[0]; 
+            ranking.sort((a,b) => b.score - a.score); 
+            const sieteIdeal = ranking.slice(0, 7); 
+            
+            // OBTENER POSICIONES DESDE LA COLECCIÓN USUARIOS
+            for (let j of sieteIdeal) {
+                try {
+                    const uSnap = await getDoc(doc(db, 'usuarios', j.uid));
+                    if (uSnap.exists() && uSnap.data().posicion) { j.posicion = uSnap.data().posicion; } 
+                    else { j.posicion = 'Mediocampista'; }
+                } catch(e) { j.posicion = 'Mediocampista'; }
+            }
+
+            // AGRUPAR POR LÍNEAS EN LA CANCHA
+            const lineas = { fwd: [], mid: [], def: [], gk: [] };
+            sieteIdeal.forEach(j => {
+                const p = (j.posicion || '').toLowerCase();
+                if (p.includes('portero') || p.includes('arquero')) lineas.gk.push(j);
+                else if (p.includes('defensa') || p.includes('central') || p.includes('lateral')) lineas.def.push(j);
+                else if (p.includes('delantero') || p.includes('atacante') || p.includes('extremo') || p.includes('punta')) lineas.fwd.push(j);
+                else lineas.mid.push(j);
+            });
+
+            // Función para generar la Carta de Jugador en la Cancha
+            const generarCarta = (j) => `
+                <div class="player-pitch-card">
+                    <div class="player-pitch-photo-container">
+                        <img src="${j.foto}">
+                        <div class="player-pitch-score">${j.score}</div>
+                    </div>
+                    <div class="player-pitch-name">${j.nombre.split(' ')[0]}</div>
+                </div>
+            `;
+
+            let htmlRanking = `
+                <div class="ranking-podium">
+                    <div class="podium-card"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
+                    <div class="podium-card"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
+                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asist.</span></p></div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic; letter-spacing: 1px;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El 7 Ideal (Team of the Month)</h3>
+                    
+                    <div class="soccer-pitch">
+                        <div class="pitch-line pitch-center"></div>
+                        <div class="pitch-line pitch-circle"></div>
+                        <div class="pitch-line pitch-box-top"></div>
+                        <div class="pitch-line pitch-box-bottom"></div>
+                        <div class="pitch-line pitch-goal-top"></div>
+                        <div class="pitch-line pitch-goal-bottom"></div>
+
+                        <div class="formation-row">${lineas.fwd.map(generarCarta).join('')}</div>
+                        <div class="formation-row">${lineas.mid.map(generarCarta).join('')}</div>
+                        <div class="formation-row">${lineas.def.map(generarCarta).join('')}</div>
+                        <div class="formation-row">${lineas.gk.map(generarCarta).join('')}</div>
+                    </div>
+                </div>
+            `;
+            
+            panelRanking.innerHTML = htmlRanking; 
+        } catch(e) { console.error(e); panelRanking.innerHTML = '<p style="color:red; text-align:center;">Error al armar el equipo ideal.</p>'; } 
+    }
     
+    // Resultados
+    const modalResultados = document.getElementById('modal-resultados-partido'); document.getElementById('cerrar-resultados-partido').addEventListener('click', () => modalResultados.style.display = 'none');
+    window.abrirResultadosPartido = async function(partidoId) { partidoResultadosId = partidoId; modalResultados.style.display = 'flex'; const listaJugadores = document.getElementById('lista-resultados-jugadores'); listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando...</p>'; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); let html = ''; if(p.inscritos && p.inscritos.length > 0){ p.inscritos.forEach((j, index) => { html += `<div class="resultado-jugador-row" data-uid="${j.uid}" style="grid-template-columns: 2fr 1fr 1fr;"><div style="display:flex; align-items:center; gap:8px;"><img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #555;"><span style="color:#fff; font-size:0.85rem; font-weight:bold;">${j.nombreUsuario}</span></div><input type="number" class="res-goles" min="0" value="0"><input type="number" class="res-asist" min="0" value="0"></div>`; }); listaJugadores.innerHTML = html; } else { listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Nadie asistió.</p>'; } } } catch(e){ listaJugadores.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } };
+    document.getElementById('form-resultados-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; const resultados = []; document.querySelectorAll('.resultado-jugador-row').forEach(row => { const uid = row.getAttribute('data-uid'); const goles = parseInt(row.querySelector('.res-goles').value) || 0; const asistencias = parseInt(row.querySelector('.res-asist').value) || 0; resultados.push({ uid, goles, asistencias, mvp: false }); }); try { await updateDoc(doc(db, 'partidos', partidoResultadosId), { estado: 'votando_mvp', resultadosOficiales: resultados, votosMVP: {}, hanVotado: [] }); alert("¡Stats guardadas! Urnas abiertas."); modalResultados.style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Publicar Stats y Abrir Votación MVP'; btnSubmit.disabled = false; } });
+    
+    // Gestión Lista
+    const modalListaPartido = document.getElementById('modal-lista-partido'); document.getElementById('cerrar-lista-partido').addEventListener('click', () => modalListaPartido.style.display = 'none');
+    window.abrirGestionLista = async function(partidoId) { modalListaPartido.style.display = 'flex'; const panelInscritos = document.getElementById('panel-inscritos'); panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando lista...</p>'; try { const docSnap = await getDoc(doc(db, 'partidos', partidoId)); if (docSnap.exists()) { const p = docSnap.data(); let html = ''; if (p.inscritos && p.inscritos.length > 0) { p.inscritos.forEach((jugador, index) => { let btnCapitan = ''; if (p.capitanUid === jugador.uid) { btnCapitan = `<span style="background: rgba(241, 196, 15, 0.2); color: #f1c40f; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px;"><i class="ph-fill ph-star"></i> Capitán</span><button class="btn" style="padding:4px 8px; background:transparent; color:#888; border:1px solid #888; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', null, '${jugador.nombreUsuario}')">Quitar</button>`; } else { btnCapitan = `<button class="btn" style="padding:4px 8px; background:transparent; color:#f1c40f; border:1px solid #f1c40f; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')">Hacer Capitán</button>`; } html += `<div class="solicitud-item" style="border-left: 3px solid #f1c40f; flex-wrap: wrap;"><div style="display:flex; align-items:center; gap:12px; margin-bottom: 5px;"><div style="width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #ccc; font-weight: bold;">${index + 1}</div><img src="${jugador.fotoUsuario}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid #f1c40f;"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${jugador.nombreUsuario}</span></div><div style="display: flex; align-items: center;">${btnCapitan}<button class="btn" style="padding:4px 8px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.75rem;" onclick="liberarCupoJugador('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')"><i class="ph-bold ph-x"></i> Liberar</button></div></div>`; }); panelInscritos.innerHTML = html; } else { panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Aún no hay jugadores inscritos.</p>'; } } } catch(e) { panelInscritos.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } }
+    window.asignarCapitan = async function(partidoId, uidJugador, nombre) { try { await updateDoc(doc(db, 'partidos', partidoId), { capitanUid: uidJugador }); alert(uidJugador ? `¡${nombre} ahora es el Capitán!` : `Permisos removidos.`); abrirGestionLista(partidoId); refrescarPartidosActuales(); } catch(e) { alert("Error."); } }
+    window.liberarCupoJugador = async function(partidoId, uidJugador, nombre) { if (!confirm(`¿Liberar a ${nombre}?`)) return; try { const pRef = doc(db, 'partidos', partidoId); const pSnap = await getDoc(pRef); if(pSnap.exists()){ const data = pSnap.data(); const inscritosActualizados = data.inscritos.filter(j => j.uid !== uidJugador); await updateDoc(pRef, { inscritos: inscritosActualizados, cuposOcupados: increment(-1) }); alert("Cupo liberado."); abrirGestionLista(partidoId); refrescarPartidosActuales(); } } catch(e) { alert("Error."); } }
+
     // FUNCIONES DEL MODAL CREAR COMUNIDAD
     const modalCrear = document.getElementById('modal-crear-comunidad');
     document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
     document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
-    
-    document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => {
-        e.preventDefault(); 
-        const n = document.getElementById('reg-com-nombre').value;
-        const d = document.getElementById('reg-com-deporte').value;
-        const c = document.getElementById('reg-com-ciudad').value;
-        const l = document.getElementById('reg-com-link').value;
-        window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad y obtener el check de verificado ✅.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}\n*Link de Verificación:* ${l}`)}`, '_blank');
-        modalCrear.style.display = 'none'; 
-        e.target.reset(); 
-    });
+    document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => { e.preventDefault(); const n = document.getElementById('reg-com-nombre').value; const d = document.getElementById('reg-com-deporte').value; const c = document.getElementById('reg-com-ciudad').value; const l = document.getElementById('reg-com-link').value; window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad y obtener el check de verificado ✅.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}\n*Link de Verificación:* ${l}`)}`, '_blank'); modalCrear.style.display = 'none'; e.target.reset(); });
 
     document.getElementById('cerrar-editar-partido').addEventListener('click', () => document.getElementById('modal-editar-partido').style.display = 'none'); window.abrirEditarPartido = async function(partidoId) { partidoEditarId = partidoId; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); document.getElementById('ep-fecha').value = p.fecha; document.getElementById('ep-hora').value = p.hora; document.getElementById('ep-duracion').value = p.duracion || 60; document.getElementById('ep-lugar').value = p.lugar; document.getElementById('ep-maps').value = p.linkMaps || ''; document.getElementById('ep-cupos').value = p.cuposTotales; document.getElementById('ep-precio').value = p.precioInstrucciones; document.getElementById('modal-editar-partido').style.display = 'flex'; } } catch(e) { alert("Error."); } }
     document.getElementById('form-editar-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; try { await updateDoc(doc(db, 'partidos', partidoEditarId), { fecha: document.getElementById('ep-fecha').value, hora: document.getElementById('ep-hora').value, duracion: parseInt(document.getElementById('ep-duracion').value), lugar: document.getElementById('ep-lugar').value, linkMaps: document.getElementById('ep-maps').value, cuposTotales: parseInt(document.getElementById('ep-cupos').value), precioInstrucciones: document.getElementById('ep-precio').value }); alert("¡Actualizado!"); document.getElementById('modal-editar-partido').style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Guardar Cambios'; btnSubmit.disabled = false; } });
