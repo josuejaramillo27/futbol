@@ -40,11 +40,12 @@
         .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
         
-        /* MAGIA: ESTILOS DEL CAMPO 7 IDEAL */
+        /* MAGIA: ESTILOS DEL CAMPO VERDE */
         .soccer-pitch {
             position: relative;
-            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
-            border: 2px solid rgba(255,255,255,0.2);
+            /* Fondo Verde de Cancha Real */
+            background: linear-gradient(180deg, #1a4f27 0%, #0d2e16 100%);
+            border: 2px solid rgba(255,255,255,0.4);
             border-radius: 12px;
             padding: 15px 10px;
             display: flex;
@@ -59,10 +60,11 @@
             content: '';
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(255,255,255,0.02) 10%, rgba(255,255,255,0.02) 20%);
+            /* Franjas de corte de césped típicas */
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(255,255,255,0.04) 10%, rgba(255,255,255,0.04) 20%);
             pointer-events: none;
         }
-        .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.15); pointer-events: none; }
+        .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
         .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
         .pitch-circle { top: 50%; left: 50%; width: 100px; height: 100px; border-radius: 50%; transform: translate(-50%, -50%); }
         .pitch-box-top { top: 0; left: 20%; width: 60%; height: 18%; border-top: none; }
@@ -174,7 +176,7 @@
 <!-- MODALES Y FORMULARIOS -->
 <!-- ========================================== -->
 
-<!-- MODAL: REGISTRAR COMUNIDAD (CON LINK DE VERIFICACIÓN) -->
+<!-- MODAL: REGISTRAR COMUNIDAD -->
 <div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -190,6 +192,8 @@
     </div>
 </div>
 
+<!-- OTROS MODALES (Partido Interno, Lanzar Reto, Editar, etc) -->
+<!-- MANTENIDOS EXACTAMENTE IGUAL -->
 <div id="modal-nuevo-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;">
         <button id="cerrar-nuevo-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -533,7 +537,7 @@
         } catch(e) { alert("Error."); }
     };
 
-    // LOGICA ZONA DE RETOS
+    // LOGICA ZONA DE RETOS (PARTE 1)
     document.getElementById('btn-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'flex'; });
     document.getElementById('cerrar-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'none'; });
     
@@ -609,10 +613,15 @@
         try { await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'buscando_rival', rivalUid: null }); alert("Reto devuelto a la cartelera."); cargarRetosGlobales(); } catch(e) { alert("Error."); }
     }
 
+
     // CARGA DE LOGOS PROPIOS 
-    document.getElementById('btn-cambiar-logo').addEventListener('click', () => { if (window.soyLiderGlobal) { document.getElementById('input-logo-comunidad').click(); } });
+    document.getElementById('btn-cambiar-logo').addEventListener('click', () => {
+        if (window.soyLiderGlobal) { document.getElementById('input-logo-comunidad').click(); }
+    });
+
     document.getElementById('input-logo-comunidad').addEventListener('change', function(e) {
-        const file = e.target.files[0]; if (!file) return;
+        const file = e.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
@@ -624,8 +633,11 @@
                 canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.85); 
                 try {
-                    document.getElementById('img-logo-comunidad').src = dataUrl; document.getElementById('img-logo-comunidad').style.display = 'block'; document.getElementById('icon-logo-comunidad').style.display = 'none';
-                    await updateDoc(doc(db, 'comunidades', comunidadActivaId), { logo: dataUrl }); cargarComunidades(); 
+                    document.getElementById('img-logo-comunidad').src = dataUrl;
+                    document.getElementById('img-logo-comunidad').style.display = 'block';
+                    document.getElementById('icon-logo-comunidad').style.display = 'none';
+                    await updateDoc(doc(db, 'comunidades', comunidadActivaId), { logo: dataUrl });
+                    cargarComunidades(); 
                 } catch(err) { alert("Error al subir el logo."); }
             }
             img.src = event.target.result;
@@ -633,28 +645,54 @@
         reader.readAsDataURL(file);
     });
 
-    const hubModal = document.getElementById('hub-comunidad'); document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
+    const hubModal = document.getElementById('hub-comunidad');
+    document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
+
     window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp, soyMiembro, logoUrl) => {
         comunidadActivaId = id; window.soyLiderGlobal = esLider; window.soyMiembroGlobal = soyMiembro; window.comunidadActivaNombre = nombre; window.comunidadActivaWsp = wsp;
         document.getElementById('hub-nombre').textContent = nombre; document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none'; document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
         
-        const imgLogo = document.getElementById('img-logo-comunidad'); const iconLogo = document.getElementById('icon-logo-comunidad'); const overlayLogo = document.getElementById('overlay-logo');
-        if (logoUrl && logoUrl !== 'undefined') { imgLogo.src = logoUrl; imgLogo.style.display = 'block'; iconLogo.style.display = 'none'; } else { imgLogo.style.display = 'none'; iconLogo.style.display = 'block'; }
-        if (esLider) { overlayLogo.style.display = 'block'; document.getElementById('btn-cambiar-logo').style.cursor = 'pointer'; } else { overlayLogo.style.display = 'none'; document.getElementById('btn-cambiar-logo').style.cursor = 'default'; }
-        const btnWa = document.getElementById('btn-unirse-wa');
-        if (wsp) { const numClean = String(wsp).replace(/\D/g, ''); btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme a la comunidad " + nombre)}`, '_blank'); } else btnWa.onclick = () => alert("Sin link configurado.");
+        const imgLogo = document.getElementById('img-logo-comunidad');
+        const iconLogo = document.getElementById('icon-logo-comunidad');
+        const overlayLogo = document.getElementById('overlay-logo');
+        
+        if (logoUrl && logoUrl !== 'undefined') {
+            imgLogo.src = logoUrl; imgLogo.style.display = 'block'; iconLogo.style.display = 'none';
+        } else {
+            imgLogo.style.display = 'none'; iconLogo.style.display = 'block';
+        }
 
-        const deportesArray = deportesRaw.split(','); const contenedorFiltros = document.getElementById('hub-deportes-filtros'); const selectDeporteModal = document.getElementById('np-deporte'); const selectRetoModal = document.getElementById('lr-deporte');
+        if (esLider) {
+            overlayLogo.style.display = 'block';
+            document.getElementById('btn-cambiar-logo').style.cursor = 'pointer';
+        } else {
+            overlayLogo.style.display = 'none';
+            document.getElementById('btn-cambiar-logo').style.cursor = 'default';
+        }
+
+        const btnWa = document.getElementById('btn-unirse-wa');
+        if (wsp) { const numClean = String(wsp).replace(/\D/g, ''); btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme a la comunidad " + nombre)}`, '_blank'); } 
+        else btnWa.onclick = () => alert("Sin link configurado.");
+
+        const deportesArray = deportesRaw.split(','); const contenedorFiltros = document.getElementById('hub-deportes-filtros'); const selectDeporteModal = document.getElementById('np-deporte'); 
+        const selectRetoModal = document.getElementById('lr-deporte');
         contenedorFiltros.innerHTML = ''; selectDeporteModal.innerHTML = ''; selectRetoModal.innerHTML = '';
-        deportesArray.forEach((dep, index) => { const isFirst = index === 0; const nombreDeporte = dep.trim(); if (!nombreDeporte) return; const colorPrincipal = obtenerColorDeporte(nombreDeporte); const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)'; const color = isFirst ? '#000' : '#fff'; const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)'; contenedorFiltros.innerHTML += `<button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">${nombreDeporte}</button>`; selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`; selectRetoModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`; });
+        
+        deportesArray.forEach((dep, index) => {
+            const isFirst = index === 0; const nombreDeporte = dep.trim(); if (!nombreDeporte) return;
+            const colorPrincipal = obtenerColorDeporte(nombreDeporte); const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)'; const color = isFirst ? '#000' : '#fff'; const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
+            contenedorFiltros.innerHTML += `<button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">${nombreDeporte}</button>`;
+            selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
+            selectRetoModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
+        });
         contenedorFiltros.innerHTML += `<button id="btn-ranking-tab" class="btn btn-sport-chip" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed #f1c40f; margin-left: 10px !important;" onclick="mostrarRankingComunidad()">🏆 Ranking</button>`;
 
         hubModal.classList.add('mostrar');
         setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
 
-    // MAGIA: MOSTRAR EL 7 IDEAL EN LA CANCHA
+    // MAGIA: MOSTRAR EL 7 IDEAL EN LA CANCHA Y RECONOCER POSICIONES CORRECTAMENTE
     window.mostrarRankingComunidad = async function() { 
         document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); 
         const btnRanking = document.getElementById('btn-ranking-tab'); btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none'; 
@@ -686,26 +724,29 @@
             ranking.sort((a,b) => b.score - a.score); 
             const sieteIdeal = ranking.slice(0, 7); 
             
-            // OBTENER POSICIONES DESDE LA COLECCIÓN USUARIOS
+            // OBTENER POSICIONES DESDE LA BASE DE DATOS (Manejando diferentes nombres de variables)
             for (let j of sieteIdeal) {
                 try {
                     const uSnap = await getDoc(doc(db, 'usuarios', j.uid));
-                    if (uSnap.exists() && uSnap.data().posicion) { j.posicion = uSnap.data().posicion; } 
+                    if (uSnap.exists()) { 
+                        const data = uSnap.data();
+                        // Algunas versiones de app guardan como 'posicion', otras como 'posicionPrincipal'
+                        j.posicion = data.posicion || data.posicionPrincipal || data.posicion_principal || 'Mediocampista'; 
+                    } 
                     else { j.posicion = 'Mediocampista'; }
                 } catch(e) { j.posicion = 'Mediocampista'; }
             }
 
-            // AGRUPAR POR LÍNEAS EN LA CANCHA
+            // AGRUPAR POR LÍNEAS EN LA CANCHA (Tolerante a sinónimos)
             const lineas = { fwd: [], mid: [], def: [], gk: [] };
             sieteIdeal.forEach(j => {
-                const p = (j.posicion || '').toLowerCase();
-                if (p.includes('portero') || p.includes('arquero')) lineas.gk.push(j);
-                else if (p.includes('defensa') || p.includes('central') || p.includes('lateral')) lineas.def.push(j);
-                else if (p.includes('delantero') || p.includes('atacante') || p.includes('extremo') || p.includes('punta')) lineas.fwd.push(j);
-                else lineas.mid.push(j);
+                const p = String(j.posicion || '').toLowerCase();
+                if (p.includes('portero') || p.includes('arquero') || p.includes('gk') || p.includes('guardameta')) lineas.gk.push(j);
+                else if (p.includes('defensa') || p.includes('central') || p.includes('lateral') || p.includes('zaguero')) lineas.def.push(j);
+                else if (p.includes('delantero') || p.includes('atacante') || p.includes('extremo') || p.includes('punta') || p.includes('9')) lineas.fwd.push(j);
+                else lineas.mid.push(j); // Si no hace match con nada, va al medio
             });
 
-            // Función para generar la Carta de Jugador en la Cancha
             const generarCarta = (j) => `
                 <div class="player-pitch-card">
                     <div class="player-pitch-photo-container">
@@ -720,7 +761,7 @@
                 <div class="ranking-podium">
                     <div class="podium-card"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
                     <div class="podium-card"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
-                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asist.</span></p></div>
+                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asistencias</span></p></div>
                 </div>
 
                 <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
