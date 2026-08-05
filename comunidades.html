@@ -12,10 +12,14 @@
     <link rel="stylesheet" href="discovery.css">
     
     <style>
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; }
-        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: all 0.3s ease; }
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: all 0.3s ease; flex-shrink: 0; }
         .tab-btn:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.05); }
         .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
+        
+        .tab-btn-reto { color: #e74c3c !important; }
+        .tab-btn-reto.active { background: rgba(231, 76, 60, 0.12) !important; border: 1px solid rgba(231, 76, 60, 0.4) !important; }
+
         .community-card { background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%); border: 1px solid rgba(46, 204, 113, 0.25); border-radius: 16px; padding: 20px; transition: all 0.3s ease; cursor: pointer; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
         .community-card:hover { border-color: var(--primary-green); transform: translateY(-4px); box-shadow: 0 10px 25px rgba(46, 204, 113, 0.15); }
         .sport-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
@@ -29,9 +33,11 @@
         .btn-crear-compacto:hover { background: var(--primary-green) !important; color: #080b0a !important; }
         .btn-sport-chip { width: auto !important; min-width: auto !important; max-width: max-content !important; flex: 0 0 auto !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 8px 20px !important; border-radius: 30px !important; font-size: 0.85rem !important; font-weight: 800 !important; letter-spacing: 0.5px !important; cursor: pointer !important; transition: all 0.25s ease !important; box-shadow: none !important; margin: 0 !important; }
         .solicitud-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
-        .resultado-jugador-row { display: grid; grid-template-columns: 2fr 1fr 1fr; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .resultado-jugador-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .resultado-jugador-row input[type="number"] { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; text-align: center; }
+        .resultado-jugador-row input[type="radio"] { width: 20px; height: 20px; accent-color: #f1c40f; cursor: pointer; }
         
+        /* Estilos de Ranking */
         .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
         .rank-list-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.01); border-radius: 8px; margin-bottom: 8px; }
@@ -56,16 +62,21 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
         <div>
             <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Comunidades</h1>
-            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Encuentra pichangas fijas o gestiona tus grupos.</p>
+            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Encuentra pichangas fijas o lanza retos.</p>
         </div>
         <button id="btn-solicitar-creacion" class="btn btn-crear-compacto"><i class="ph-bold ph-plus-circle"></i> Registrar la mía</button>
     </div>
+    
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-mis-comunidades">Mis Comunidades</button>
         <button class="tab-btn" id="tab-explorar">Explorar Comunidades</button>
+        <button class="tab-btn tab-btn-reto" id="tab-retos" style="border: 1px dashed rgba(231, 76, 60, 0.4);"><i class="ph-bold ph-swords"></i> Zona de Retos</button>
     </div>
+
     <div id="lista-mis-comunidades" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"><p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p></div>
     <div id="lista-explorar" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
+    
+    <div id="lista-retos" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
 </main>
 
 <div id="hub-comunidad" class="hub-modal">
@@ -87,12 +98,12 @@
     <div class="hub-content-container">
         <div id="hub-panel-lider" style="display: none; background: linear-gradient(135deg, rgba(241, 196, 15, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%); border: 1px dashed #f1c40f; padding: 20px; border-radius: 14px; margin-bottom: 25px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <h3 style="color: #f1c40f; margin: 0; font-size: 1.1rem;"><i class="ph-fill ph-crown"></i> Panel de Administración del Líder</h3>
-                <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241, 196, 15, 0.15); padding: 3px 8px; border-radius: 4px;">Modo Organizador</span>
+                <h3 style="color: #f1c40f; margin: 0; font-size: 1.1rem;"><i class="ph-fill ph-crown"></i> Panel del Líder</h3>
+                <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241, 196, 15, 0.15); padding: 3px 8px; border-radius: 4px;">Organizador</span>
             </div>
-            <p style="margin: 0 0 15px 0; color: #ccc; font-size: 0.85rem;">Crea nuevos partidos y administra las inscripciones de tus jugadores.</p>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="btn-nuevo-partido" class="btn" style="width: auto !important; background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Nuevo Partido</button>
+                <button id="btn-nuevo-partido" class="btn" style="width: auto !important; background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Partido Interno</button>
+                <button id="btn-lanzar-reto" class="btn" style="width: auto !important; background: #e74c3c; color: #fff; border: none; font-weight: bold;"><i class="ph-bold ph-swords"></i> Lanzar Reto</button>
                 <button id="btn-ver-miembros" class="btn" style="width: auto !important; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
             </div>
         </div>
@@ -133,7 +144,7 @@
 <div id="modal-nuevo-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(241, 196, 15, 0.4); box-shadow:0 10px 30px rgba(0,0,0,0.8); max-height: 90vh; overflow-y: auto;">
         <button id="cerrar-nuevo-partido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-calendar-plus"></i> Organizar Partido</h2>
+        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-calendar-plus"></i> Partido Interno</h2>
         <form id="form-nuevo-partido">
             <select id="np-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
             <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -150,6 +161,35 @@
                 <div style="flex: 2;"><input type="text" id="np-precio" required placeholder="Precio/Yape" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff;"></div>
             </div>
             <button type="submit" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;"><i class="ph-bold ph-check-circle"></i> Publicar</button>
+        </form>
+    </div>
+</div>
+
+<div id="modal-lanzar-reto" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #e74c3c; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+        <button id="cerrar-lanzar-reto" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <h2 style="margin-top:0; color:#e74c3c;"><i class="ph-fill ph-swords"></i> Lanzar Reto</h2>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Desafía a otras comunidades. Ellas podrán aceptar y coordinar contigo por WhatsApp.</p>
+        <form id="form-lanzar-reto">
+            <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Deporte a competir</label>
+            <select id="lr-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
+
+            <label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Formato del Partido</label>
+            <select id="lr-formato" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
+                <option value="5 vs 5">5 vs 5</option>
+                <option value="6 vs 6">6 vs 6</option>
+                <option value="7 vs 7">7 vs 7</option>
+                <option value="8 vs 8">8 vs 8</option>
+                <option value="9 vs 9">9 vs 9</option>
+                <option value="11 vs 11">11 vs 11</option>
+            </select>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 25px;">
+                <div style="flex: 2;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Fecha Propuesta</label><input type="date" id="lr-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+                <div style="flex: 1;"><label style="display:block; margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-muted);">Hora aprox.</label><input type="time" id="lr-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
+            </div>
+
+            <button type="submit" class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold;"><i class="ph-bold ph-megaphone"></i> Publicar Reto Público</button>
         </form>
     </div>
 </div>
@@ -277,10 +317,27 @@
         return PALETA_DEPORTES_EXTRA[Math.abs(hash) % PALETA_DEPORTES_EXTRA.length];
     }
 
-    const btnMisComunidades = document.getElementById('tab-mis-comunidades'); const btnExplorar = document.getElementById('tab-explorar');
-    const listaMisComunidades = document.getElementById('lista-mis-comunidades'); const listaExplorar = document.getElementById('lista-explorar');
-    btnMisComunidades.addEventListener('click', () => { btnMisComunidades.classList.add('active'); btnExplorar.classList.remove('active'); listaMisComunidades.style.display = 'grid'; listaExplorar.style.display = 'none'; });
-    btnExplorar.addEventListener('click', () => { btnExplorar.classList.add('active'); btnMisComunidades.classList.remove('active'); listaExplorar.style.display = 'grid'; listaMisComunidades.style.display = 'none'; });
+    const btnTabMis = document.getElementById('tab-mis-comunidades'); 
+    const btnTabExplorar = document.getElementById('tab-explorar');
+    const btnTabRetos = document.getElementById('tab-retos'); // BOTON DE RETOS
+    const listaMisComunidades = document.getElementById('lista-mis-comunidades'); 
+    const listaExplorar = document.getElementById('lista-explorar');
+    const listaRetos = document.getElementById('lista-retos'); // CONTENEDOR DE RETOS
+
+    btnTabMis.addEventListener('click', () => { 
+        btnTabMis.classList.add('active'); btnTabExplorar.classList.remove('active'); btnTabRetos.classList.remove('active');
+        listaMisComunidades.style.display = 'grid'; listaExplorar.style.display = 'none'; listaRetos.style.display = 'none';
+    });
+    btnTabExplorar.addEventListener('click', () => { 
+        btnTabExplorar.classList.add('active'); btnTabMis.classList.remove('active'); btnTabRetos.classList.remove('active');
+        listaExplorar.style.display = 'grid'; listaMisComunidades.style.display = 'none'; listaRetos.style.display = 'none';
+    });
+    // LOGICA TAB DE RETOS
+    btnTabRetos.addEventListener('click', () => { 
+        btnTabRetos.classList.add('active'); btnTabMis.classList.remove('active'); btnTabExplorar.classList.remove('active');
+        listaRetos.style.display = 'grid'; listaMisComunidades.style.display = 'none'; listaExplorar.style.display = 'none';
+        cargarRetosGlobales();
+    });
 
     onAuthStateChanged(auth, async (user) => { currentUser = user; cargarComunidades(); });
 
@@ -353,7 +410,6 @@
                     let botonAccion = '';
                     const esCapitan = p.capitanUid === currentUser.uid;
 
-                    // LÓGICA DE ESTADOS DEL PARTIDO
                     if (partidoYaPaso) {
                         if (p.estado === 'finalizado') {
                             botonAccion = `<div style="background: rgba(46, 204, 113, 0.1); color: #2ecc71; text-align: center; padding: 10px; border-radius: 8px; font-weight: bold; border: 1px dashed #2ecc71;"><i class="ph-bold ph-check-circle"></i> Resultados Publicados</div>`;
@@ -415,7 +471,7 @@
     }
 
     // ==========================================
-    // ENCUESTA MVP EN VIVO (MAGIA REALTIME)
+    // ENCUESTA MVP EN VIVO 
     // ==========================================
     document.getElementById('cerrar-votacion-mvp').addEventListener('click', () => {
         document.getElementById('modal-votacion-mvp').style.display = 'none';
@@ -514,82 +570,108 @@
         } catch(e) { alert("Error al finalizar el partido."); }
     };
 
-
-    window.separarCupoPartido = async function(partidoId) {
-        if (!confirm("¿Seguro que deseas separar un cupo para este partido?")) return;
-        try {
-            await updateDoc(doc(db, 'partidos', partidoId), {
-                cuposOcupados: increment(1),
-                inscritos: arrayUnion({ uid: currentUser.uid, nombreUsuario: currentUser.displayName || 'Jugador', fotoUsuario: currentUser.photoURL || 'https://ui-avatars.com/api/?name=Jugador' })
-            });
-            alert("¡Cupo separado con éxito! Nos vemos en la cancha.");
-            refrescarPartidosActuales();
-        } catch (e) { alert("Error al separar tu cupo."); }
-    }
-
-    window.eliminarPartido = async function(partidoId) {
-        if (!confirm("🚨 ¿Estás seguro que deseas ELIMINAR este partido por completo? Esta acción no se puede deshacer.")) return;
-        try { await deleteDoc(doc(db, 'partidos', partidoId)); alert("Partido eliminado correctamente."); refrescarPartidosActuales(); } 
-        catch (e) { alert("Error al intentar eliminar."); }
-    }
-
-    // CARGAR RESULTADOS (SIN MVP AHORA)
-    const modalResultados = document.getElementById('modal-resultados-partido');
-    document.getElementById('cerrar-resultados-partido').addEventListener('click', () => modalResultados.style.display = 'none');
+    // ==========================================
+    // LOGICA ZONA DE RETOS (PARTE 1)
+    // ==========================================
+    document.getElementById('btn-lanzar-reto').addEventListener('click', () => {
+        document.getElementById('modal-lanzar-reto').style.display = 'flex';
+    });
     
-    window.abrirResultadosPartido = async function(partidoId) {
-        partidoResultadosId = partidoId;
-        modalResultados.style.display = 'flex';
-        const listaJugadores = document.getElementById('lista-resultados-jugadores');
-        listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando jugadores...</p>';
-        
-        try {
-            const pSnap = await getDoc(doc(db, 'partidos', partidoId));
-            if(pSnap.exists()){
-                const p = pSnap.data(); let html = '';
-                if(p.inscritos && p.inscritos.length > 0){
-                    p.inscritos.forEach((j, index) => {
-                        html += `
-                            <div class="resultado-jugador-row" data-uid="${j.uid}" style="grid-template-columns: 2fr 1fr 1fr;">
-                                <div style="display:flex; align-items:center; gap:8px;">
-                                    <img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #555;">
-                                    <span style="color:#fff; font-size:0.85rem; font-weight:bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${j.nombreUsuario}</span>
-                                </div>
-                                <input type="number" class="res-goles" min="0" value="0">
-                                <input type="number" class="res-asist" min="0" value="0">
-                            </div>`;
-                    });
-                    listaJugadores.innerHTML = html;
-                } else { listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Nadie asistió.</p>'; }
-            }
-        } catch(e){ listaJugadores.innerHTML = '<p style="color:red; text-align:center;">Error al cargar.</p>'; }
-    };
-
-    document.getElementById('form-resultados-partido').addEventListener('submit', async (e) => {
-        e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]');
-        btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...'; btnSubmit.disabled = true;
-        const resultados = [];
-        document.querySelectorAll('.resultado-jugador-row').forEach(row => {
-            const uid = row.getAttribute('data-uid');
-            const goles = parseInt(row.querySelector('.res-goles').value) || 0;
-            const asistencias = parseInt(row.querySelector('.res-asist').value) || 0;
-            resultados.push({ uid, goles, asistencias, mvp: false }); // mvp se define despues
-        });
-        try {
-            // PASAMOS A ESTADO DE VOTACIÓN
-            await updateDoc(doc(db, 'partidos', partidoResultadosId), { 
-                estado: 'votando_mvp', 
-                resultadosOficiales: resultados,
-                votosMVP: {},
-                hanVotado: []
-            });
-            alert("¡Estadísticas guardadas! Las Urnas del MVP se han abierto."); modalResultados.style.display = 'none'; refrescarPartidosActuales();
-        } catch (error) { alert("Error al guardar."); } finally { btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Publicar Stats y Abrir Votación MVP'; btnSubmit.disabled = false; }
+    document.getElementById('cerrar-lanzar-reto').addEventListener('click', () => {
+        document.getElementById('modal-lanzar-reto').style.display = 'none';
     });
 
+    document.getElementById('form-lanzar-reto').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btnSubmit = e.target.querySelector('button[type="submit"]');
+        btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; 
+        btnSubmit.disabled = true;
+
+        const nuevoReto = {
+            comunidadId: comunidadActivaId,
+            nombreComunidad: window.comunidadActivaNombre,
+            liderUid: currentUser.uid,
+            whatsappLider: window.comunidadActivaWsp,
+            deporte: document.getElementById('lr-deporte').value,
+            formato: document.getElementById('lr-formato').value,
+            fecha: document.getElementById('lr-fecha').value,
+            hora: document.getElementById('lr-hora').value,
+            estado: 'buscando_rival',
+            fechaCreacion: new Date().toISOString()
+        };
+
+        try {
+            await addDoc(collection(db, 'retos_comunidades'), nuevoReto);
+            alert("¡Reto lanzado! Ahora aparecerá en la Zona de Retos.");
+            document.getElementById('modal-lanzar-reto').style.display = 'none';
+            e.target.reset();
+            // Refrescar retos si estamos en esa tab
+            if(document.getElementById('tab-retos').classList.contains('active')) {
+                window.cargarRetosGlobales();
+            }
+        } catch(err) {
+            console.error(err);
+            alert("Error al publicar el reto.");
+        } finally {
+            btnSubmit.innerHTML = '<i class="ph-bold ph-megaphone"></i> Publicar Reto Público'; 
+            btnSubmit.disabled = false;
+        }
+    });
+
+    window.cargarRetosGlobales = async function() {
+        const listaRetos = document.getElementById('lista-retos');
+        listaRetos.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 2rem;"></i><br>Cargando clásicos...</p>';
+        try {
+            const q = query(collection(db, 'retos_comunidades'), where('estado', '==', 'buscando_rival'));
+            const snap = await getDocs(q);
+            let html = '';
+
+            snap.forEach(docSnap => {
+                const r = docSnap.data();
+                let fechaAmigable = r.fecha; try { const partes = r.fecha.split('-'); fechaAmigable = `${partes[2]}/${partes[1]}/${partes[0]}`; } catch(e){}
+                
+                const soyCreador = currentUser && r.liderUid === currentUser.uid;
+                let btnAccion = '';
+
+                if(soyCreador) {
+                    btnAccion = `<button class="btn" style="width:100%; background:rgba(231,76,60,0.1); color:#e74c3c; border:1px solid #e74c3c; font-size:0.85rem;" disabled>Tu Reto (Esperando Rival)</button>`;
+                } else {
+                    btnAccion = `<button class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold; border:none; font-size:0.85rem;" onclick="prepararAceptarReto('${docSnap.id}')"><i class="ph-bold ph-sword"></i> Aceptar Reto</button>`;
+                }
+
+                html += `
+                    <div class="community-card" style="border-color: rgba(231, 76, 60, 0.4);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                            <div>
+                                <h3 style="margin:0; font-size:1.1rem; color:#fff;"><i class="ph-fill ph-shield-checkered" style="color:#e74c3c;"></i> ${r.nombreComunidad}</h3>
+                                <p style="margin:3px 0 0 0; font-size:0.8rem; color:#aaa;">Busca rival para clásico</p>
+                            </div>
+                            <span style="background:rgba(231,76,60,0.1); color:#e74c3c; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; border: 1px solid rgba(231,76,60,0.3);">${r.formato}</span>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:8px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;">
+                            <span style="color:#f1c40f; font-size:0.85rem; font-weight:bold;"><i class="ph-fill ph-trophy"></i> ${r.deporte}</span>
+                            <span style="color:#fff; font-size:0.85rem;"><i class="ph-bold ph-calendar-blank"></i> ${fechaAmigable} - ${r.hora}</span>
+                        </div>
+                        ${btnAccion}
+                    </div>
+                `;
+            });
+
+            listaRetos.innerHTML = html || '<div style="grid-column:1/-1; text-align:center; padding: 40px;"><i class="ph-bold ph-ghost" style="font-size: 3rem; color: #444;"></i><p style="color:#aaa; margin-top: 10px;">No hay retos activos en este momento. ¡Sé el primero en lanzar uno!</p></div>';
+        } catch(e) {
+            console.error(e);
+            listaRetos.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar retos.</p>';
+        }
+    }
+
+    window.prepararAceptarReto = function(retoId) {
+        alert("En la PARTE 2: Este botón abrirá automáticamente el WhatsApp del líder rival para que coordinen, y pondrá el reto en estado 'Coordinando'.");
+    }
+
     // ==========================================
-    // EL RANKING Y ESTADÍSTICAS DEL MES
+    // DEMAS FUNCIONALIDADES (Rankings, Resultados, etc)
     // ==========================================
+
     window.mostrarRankingComunidad = async function() {
         document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; });
         const btnRanking = document.getElementById('btn-ranking-tab');
@@ -619,7 +701,7 @@
                         stats[res.uid].partidos += 1;
                         stats[res.uid].goles += res.goles || 0;
                         stats[res.uid].asist += res.asistencias || 0;
-                        if(p.mvp === res.uid) stats[res.uid].mvp += 1; // Le sumamos el MVP real
+                        if(p.mvp === res.uid) stats[res.uid].mvp += 1;
                     });
                 }
             });
@@ -661,71 +743,58 @@
         } catch(e) { console.error(e); panelRanking.innerHTML = '<p style="color:red; text-align:center;">Error al cargar las estadísticas.</p>'; }
     }
 
-    // GESTIONAR LISTA
-    const modalListaPartido = document.getElementById('modal-lista-partido');
-    document.getElementById('cerrar-lista-partido').addEventListener('click', () => modalListaPartido.style.display = 'none');
+    const modalResultados = document.getElementById('modal-resultados-partido');
+    document.getElementById('cerrar-resultados-partido').addEventListener('click', () => modalResultados.style.display = 'none');
     
-    window.abrirGestionLista = async function(partidoId) {
-        modalListaPartido.style.display = 'flex';
-        const panelInscritos = document.getElementById('panel-inscritos');
-        panelInscritos.innerHTML = '<p style="color:var(--text-muted); text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando lista...</p>';
+    window.abrirResultadosPartido = async function(partidoId) {
+        partidoResultadosId = partidoId;
+        modalResultados.style.display = 'flex';
+        const listaJugadores = document.getElementById('lista-resultados-jugadores');
+        listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando jugadores...</p>';
+        
         try {
-            const docSnap = await getDoc(doc(db, 'partidos', partidoId));
-            if (docSnap.exists()) {
-                const p = docSnap.data(); let html = '';
-                if (p.inscritos && p.inscritos.length > 0) {
-                    p.inscritos.forEach((jugador, index) => {
-                        let btnCapitan = '';
-                        if (p.capitanUid === jugador.uid) {
-                            btnCapitan = `
-                                <span style="background: rgba(241, 196, 15, 0.2); color: #f1c40f; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px;"><i class="ph-fill ph-star"></i> Capitán</span>
-                                <button class="btn" style="padding:4px 8px; background:transparent; color:#888; border:1px solid #888; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', null, '${jugador.nombreUsuario}')">Quitar</button>
-                            `;
-                        } else {
-                            btnCapitan = `<button class="btn" style="padding:4px 8px; background:transparent; color:#f1c40f; border:1px solid #f1c40f; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')"><i class="ph-bold ph-star"></i> Hacer Capitán</button>`;
-                        }
-
+            const pSnap = await getDoc(doc(db, 'partidos', partidoId));
+            if(pSnap.exists()){
+                const p = pSnap.data(); let html = '';
+                if(p.inscritos && p.inscritos.length > 0){
+                    p.inscritos.forEach((j, index) => {
                         html += `
-                            <div class="solicitud-item" style="border-left: 3px solid #f1c40f; flex-wrap: wrap;">
-                                <div style="display:flex; align-items:center; gap:12px; margin-bottom: 5px;">
-                                    <div style="width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #ccc; font-weight: bold;">${index + 1}</div>
-                                    <img src="${jugador.fotoUsuario}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid #f1c40f;">
-                                    <span style="color:#fff; font-weight:bold; font-size:0.95rem;">${jugador.nombreUsuario}</span>
+                            <div class="resultado-jugador-row" data-uid="${j.uid}" style="grid-template-columns: 2fr 1fr 1fr;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #555;">
+                                    <span style="color:#fff; font-size:0.85rem; font-weight:bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${j.nombreUsuario}</span>
                                 </div>
-                                <div style="display: flex; align-items: center;">
-                                    ${btnCapitan}
-                                    <button class="btn" style="padding:4px 8px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.75rem;" onclick="liberarCupoJugador('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')"><i class="ph-bold ph-x"></i> Liberar</button>
-                                </div>
+                                <input type="number" class="res-goles" min="0" value="0">
+                                <input type="number" class="res-asist" min="0" value="0">
                             </div>`;
                     });
-                    panelInscritos.innerHTML = html;
-                } else { panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Aún no hay jugadores inscritos.</p>'; }
+                    listaJugadores.innerHTML = html;
+                } else { listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Nadie asistió.</p>'; }
             }
-        } catch(e) { panelInscritos.innerHTML = '<p style="color:red; text-align:center;">Error al cargar lista.</p>'; }
-    }
+        } catch(e){ listaJugadores.innerHTML = '<p style="color:red; text-align:center;">Error al cargar.</p>'; }
+    };
 
-    window.asignarCapitan = async function(partidoId, uidJugador, nombre) {
+    document.getElementById('form-resultados-partido').addEventListener('submit', async (e) => {
+        e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]');
+        btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...'; btnSubmit.disabled = true;
+        const resultados = [];
+        document.querySelectorAll('.resultado-jugador-row').forEach(row => {
+            const uid = row.getAttribute('data-uid');
+            const goles = parseInt(row.querySelector('.res-goles').value) || 0;
+            const asistencias = parseInt(row.querySelector('.res-asist').value) || 0;
+            resultados.push({ uid, goles, asistencias, mvp: false }); 
+        });
         try {
-            await updateDoc(doc(db, 'partidos', partidoId), { capitanUid: uidJugador });
-            alert(uidJugador ? `¡${nombre} ahora es el Capitán! Podrá cargar los resultados.` : `Permisos de capitán removidos.`);
-            abrirGestionLista(partidoId); refrescarPartidosActuales();
-        } catch(e) { alert("Error al asignar capitán."); }
-    }
+            await updateDoc(doc(db, 'partidos', partidoResultadosId), { 
+                estado: 'votando_mvp', 
+                resultadosOficiales: resultados,
+                votosMVP: {},
+                hanVotado: []
+            });
+            alert("¡Estadísticas guardadas! Las Urnas del MVP se han abierto."); modalResultados.style.display = 'none'; refrescarPartidosActuales();
+        } catch (error) { alert("Error al guardar."); } finally { btnSubmit.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Publicar Stats y Abrir Votación MVP'; btnSubmit.disabled = false; }
+    });
 
-    window.liberarCupoJugador = async function(partidoId, uidJugador, nombre) {
-        if (!confirm(`¿Seguro que deseas liberar el cupo de ${nombre}?`)) return;
-        try {
-            const pRef = doc(db, 'partidos', partidoId); const pSnap = await getDoc(pRef);
-            if(pSnap.exists()){
-                const data = pSnap.data();
-                const inscritosActualizados = data.inscritos.filter(j => j.uid !== uidJugador);
-                await updateDoc(pRef, { inscritos: inscritosActualizados, cuposOcupados: increment(-1) });
-                alert("Cupo liberado."); abrirGestionLista(partidoId); refrescarPartidosActuales(); 
-            }
-        } catch(e) { alert("Error al liberar."); }
-    }
-
-    // NAVEGACIÓN Y RESTO DE FUNCIONES
     const hubModal = document.getElementById('hub-comunidad');
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
@@ -738,13 +807,15 @@
         else btnWa.onclick = () => alert("Sin link configurado.");
 
         const deportesArray = deportesRaw.split(','); const contenedorFiltros = document.getElementById('hub-deportes-filtros'); const selectDeporteModal = document.getElementById('np-deporte'); 
-        contenedorFiltros.innerHTML = ''; selectDeporteModal.innerHTML = ''; 
+        const selectRetoModal = document.getElementById('lr-deporte');
+        contenedorFiltros.innerHTML = ''; selectDeporteModal.innerHTML = ''; selectRetoModal.innerHTML = '';
         
         deportesArray.forEach((dep, index) => {
             const isFirst = index === 0; const nombreDeporte = dep.trim(); if (!nombreDeporte) return;
             const colorPrincipal = obtenerColorDeporte(nombreDeporte); const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)'; const color = isFirst ? '#000' : '#fff'; const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
             contenedorFiltros.innerHTML += `<button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">${nombreDeporte}</button>`;
             selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
+            selectRetoModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
         });
 
         contenedorFiltros.innerHTML += `<button id="btn-ranking-tab" class="btn btn-sport-chip" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed #f1c40f; margin-left: 10px !important;" onclick="mostrarRankingComunidad()">🏆 Ranking</button>`;
