@@ -35,26 +35,12 @@
         .solicitud-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px; }
         .resultado-jugador-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .resultado-jugador-row input[type="number"] { width: 100%; padding: 8px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; text-align: center; }
-        .resultado-jugador-row input[type="radio"] { width: 20px; height: 20px; accent-color: #f1c40f; cursor: pointer; }
         
         .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
         
-        /* MAGIA: ESTILOS DEL CAMPO VERDE CÉSPED */
-        .soccer-pitch {
-            position: relative;
-            background: repeating-linear-gradient(0deg, #1b4924, #1b4924 10%, #153c1d 10%, #153c1d 20%);
-            border: 2px solid rgba(255,255,255,0.4);
-            border-radius: 12px;
-            padding: 15px 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            height: 480px;
-            overflow: hidden;
-            margin-top: 15px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.6);
-        }
+        /* ESTILOS DEL CAMPO VERDE CÉSPED */
+        .soccer-pitch { position: relative; background: repeating-linear-gradient(0deg, #1b4924, #1b4924 10%, #153c1d 10%, #153c1d 20%); border: 2px solid rgba(255,255,255,0.4); border-radius: 12px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 480px; overflow: hidden; margin-top: 15px; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
         .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
         .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
         .pitch-circle { top: 50%; left: 50%; width: 100px; height: 100px; border-radius: 50%; transform: translate(-50%, -50%); }
@@ -70,6 +56,17 @@
         .player-pitch-card img { width: 100%; height: 100%; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; border: 2px solid #f1c40f; background: #111; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
         .player-pitch-score { position: absolute; top: -5px; right: -8px; background: #f1c40f; color: #000; border-radius: 50%; width: 22px; height: 22px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 2px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .player-pitch-name { background: rgba(0,0,0,0.85); color: #fff; font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; margin-top: -10px; font-weight: bold; text-transform: uppercase; white-space: nowrap; max-width: 70px; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(255,255,255,0.2); z-index: 2; text-shadow: 1px 1px 2px #000; }
+
+        /* MAGIA: ANIMACIÓN DE FUEGO PARA RETOS */
+        @keyframes parpadeoFuego {
+            0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px #e74c3c); }
+            50% { transform: scale(1.3); opacity: 0.8; filter: drop-shadow(0 0 8px #f1c40f); }
+            100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px #e74c3c); }
+        }
+        .alerta-reto { display: inline-block; animation: parpadeoFuego 1s infinite; margin-left: 5px; font-size: 1.1rem; }
+        
+        /* ESTILOS DE INSIGNIAS DE JUGADOR */
+        .insignia-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #fff; display: flex; align-items: center; gap: 6px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -79,10 +76,20 @@
         <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 30px; width: auto; object-fit: contain;">
         <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP <b style="color: var(--primary-green); font-size: 0.8rem; vertical-align: middle;">COMUNIDADES</b></span>
     </a>
+    
     <nav style="display: flex; gap: 20px; align-items: center;">
-        <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa;"><i class="ph-bold ph-map-pin" style="font-size: 1.3rem;"></i><span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span></a>
-        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa;"><i class="ph-bold ph-users" style="font-size: 1.3rem;"></i><span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span></a>
-        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);"><i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i><span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span></a>
+        <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-map-pin" style="font-size: 1.3rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
+        </a>
+        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-users" style="font-size: 1.3rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
+        </a>
+        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
+            <i class="ph-bold ph-shield-checkered" style="font-size: 1.3rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES <span id="nav-alerta-reto" style="display:none;" class="alerta-reto">🔥</span></span>
+        </a>
     </nav>
 </header>
 
@@ -98,7 +105,7 @@
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-mis-comunidades">Mis Comunidades</button>
         <button class="tab-btn" id="tab-explorar">Explorar Comunidades</button>
-        <button class="tab-btn tab-btn-reto" id="tab-retos" style="border: 1px dashed rgba(231, 76, 60, 0.4);"><i class="ph-bold ph-swords"></i> Zona de Retos</button>
+        <button class="tab-btn tab-btn-reto" id="tab-retos" style="border: 1px dashed rgba(231, 76, 60, 0.4);">⚔️ Zona de Retos <span id="tab-alerta-reto" style="display:none;" class="alerta-reto">🔥</span></button>
     </div>
 
     <div id="lista-mis-comunidades" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"><p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p></div>
@@ -138,7 +145,7 @@
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <button id="btn-nuevo-partido" class="btn" style="width: auto !important; background: #f1c40f; color: #000; border: none; font-weight: bold;"><i class="ph-bold ph-calendar-plus"></i> Partido Interno</button>
-                <button id="btn-lanzar-reto" class="btn" style="width: auto !important; background: #e74c3c; color: #fff; border: none; font-weight: bold;"><i class="ph-bold ph-swords"></i> Lanzar Reto</button>
+                <button id="btn-lanzar-reto" class="btn" style="width: auto !important; background: #e74c3c; color: #fff; border: none; font-weight: bold;">⚔️ Lanzar Reto</button>
                 <button id="btn-ver-miembros" class="btn" style="width: auto !important; background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1);"><i class="ph-bold ph-users"></i> Ver Miembros</button>
             </div>
         </div>
@@ -167,16 +174,43 @@
 <!-- MODALES Y FORMULARIOS -->
 <!-- ========================================== -->
 
-<!-- MODAL: REGISTRAR COMUNIDAD (CON LINK DE VERIFICACIÓN) -->
+<!-- NUEVO MODAL: PERFIL EXPANDIDO DEL JUGADOR (SALÓN DE TROFEOS) -->
+<div id="modal-perfil-expandido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding:30px 25px; border-radius:16px; width:100%; max-width:400px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 40px rgba(241,196,15,0.2);">
+        <button id="cerrar-perfil-expandido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 100px; height: 100px; margin: 0 auto 10px; position: relative;">
+                <img id="pe-foto" src="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #f1c40f;">
+                <div id="pe-score" style="position: absolute; bottom: -5px; right: -5px; background: #f1c40f; color: #000; font-weight: 900; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #111; font-size: 1.1rem;">99</div>
+            </div>
+            <h2 id="pe-nombre" style="margin: 0; color: #fff; font-size: 1.6rem; text-transform: uppercase;">Cargando...</h2>
+            <p id="pe-posicion" style="margin: 5px 0 0 0; color: #f1c40f; font-weight: bold; letter-spacing: 1px;">---</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; text-align: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;">
+            <div><div id="pe-partidos" style="color: #fff; font-size: 1.5rem; font-weight: 900;">0</div><div style="color: #888; font-size: 0.7rem; font-weight: bold;">PARTIDOS</div></div>
+            <div><div id="pe-goles" style="color: #2ecc71; font-size: 1.5rem; font-weight: 900;">0</div><div style="color: #888; font-size: 0.7rem; font-weight: bold;">GOLES</div></div>
+            <div><div id="pe-asist" style="color: #3498db; font-size: 1.5rem; font-weight: 900;">0</div><div style="color: #888; font-size: 0.7rem; font-weight: bold;">ASIST.</div></div>
+        </div>
+
+        <div>
+            <h4 style="color: #aaa; font-size: 0.8rem; margin: 0 0 10px 0; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Vitrina de Trofeos</h4>
+            <div id="pe-insignias" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <!-- Insignias generadas por JS -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="modal-crear-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-crear-comunidad" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
         <h2 style="margin-top:0; color:#fff;">Registra tu Comunidad</h2>
-        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Incluye un link para verificar que tu equipo es real y poder habilitarte para los Retos Públicos.</p>
         <form id="form-nueva-comunidad">
-            <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga o equipo" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
+            <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
             <input type="text" id="reg-com-deporte" required placeholder="Deportes (Fútbol, Vóley)" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-            <input type="text" id="reg-com-ciudad" required placeholder="Ciudad / Distrito" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
+            <input type="text" id="reg-com-ciudad" required placeholder="Ciudad" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px;">
             <input type="url" id="reg-com-link" required placeholder="Link de Instagram/Facebook para verificar" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px;">
             <button type="submit" class="btn hero-primary" style="width:100%;"><i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud</button>
         </form>
@@ -210,7 +244,7 @@
 <div id="modal-lanzar-reto" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:1001; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #e74c3c; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         <button id="cerrar-lanzar-reto" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        <h2 style="margin-top:0; color:#e74c3c;"><i class="ph-fill ph-swords"></i> Lanzar Reto</h2>
+        <h2 style="margin-top:0; color:#e74c3c;">⚔️ Lanzar Reto</h2>
         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Desafía a otras comunidades. Podrán aceptar y coordinar contigo por WhatsApp.</p>
         <form id="form-lanzar-reto">
             <select id="lr-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
@@ -226,7 +260,7 @@
                 <div style="flex: 2;"><input type="date" id="lr-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
                 <div style="flex: 1;"><input type="time" id="lr-hora" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
             </div>
-            <button type="submit" class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold;"><i class="ph-bold ph-megaphone"></i> Publicar Reto</button>
+            <button type="submit" class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold;">⚔️ Publicar Reto</button>
         </form>
     </div>
 </div>
@@ -302,7 +336,6 @@
     </div>
 </div>
 
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, query, addDoc, where, doc, updateDoc, arrayUnion, arrayRemove, increment, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -327,6 +360,7 @@
     let partidoResultadosId = null; 
     let partidoVotacionId = null;
     let unsubscribeMVP = null;
+    let unsubscribeRetos = null;
     window.deporteActivoGlobal = ''; 
 
     window.soyLiderGlobal = false; window.soyMiembroGlobal = false;
@@ -363,7 +397,34 @@
         cargarRetosGlobales();
     });
 
-    onAuthStateChanged(auth, async (user) => { currentUser = user; cargarComunidades(); });
+    onAuthStateChanged(auth, async (user) => { 
+        currentUser = user; 
+        cargarComunidades(); 
+        escucharRetosActivos();
+    });
+
+    // MAGIA: ESCUCHADOR DE RETOS PARA LA ANIMACIÓN 🔥
+    function escucharRetosActivos() {
+        if(unsubscribeRetos) unsubscribeRetos();
+        unsubscribeRetos = onSnapshot(query(collection(db, 'retos_comunidades'), where('estado', '==', 'buscando_rival')), (snap) => {
+            let hayRetosNuevos = false;
+            snap.forEach(doc => {
+                // Solo alerta si el reto NO es mío
+                if (currentUser && doc.data().liderUid !== currentUser.uid) {
+                    hayRetosNuevos = true;
+                } else if (!currentUser) {
+                    hayRetosNuevos = true;
+                }
+            });
+
+            const navAlerta = document.getElementById('nav-alerta-reto');
+            const tabAlerta = document.getElementById('tab-alerta-reto');
+            if(navAlerta && tabAlerta) {
+                navAlerta.style.display = hayRetosNuevos ? 'inline-block' : 'none';
+                tabAlerta.style.display = hayRetosNuevos ? 'inline-block' : 'none';
+            }
+        });
+    }
 
     async function cargarComunidades() {
         if (!currentUser) return;
@@ -526,7 +587,7 @@
         } catch(e) { alert("Error."); }
     };
 
-    // LOGICA ZONA DE RETOS
+    // LOGICA ZONA DE RETOS (CON ESPADAS)
     document.getElementById('btn-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'flex'; });
     document.getElementById('cerrar-lanzar-reto').addEventListener('click', () => { document.getElementById('modal-lanzar-reto').style.display = 'none'; });
     
@@ -535,7 +596,7 @@
         const nuevoReto = {
             comunidadId: comunidadActivaId, nombreComunidad: window.comunidadActivaNombre, liderUid: currentUser.uid, whatsappLider: window.comunidadActivaWsp, deporte: document.getElementById('lr-deporte').value, formato: document.getElementById('lr-formato').value, fecha: document.getElementById('lr-fecha').value, hora: document.getElementById('lr-hora').value, estado: 'buscando_rival', fechaCreacion: new Date().toISOString()
         };
-        try { await addDoc(collection(db, 'retos_comunidades'), nuevoReto); alert("¡Reto lanzado!"); document.getElementById('modal-lanzar-reto').style.display = 'none'; e.target.reset(); if(document.getElementById('tab-retos').classList.contains('active')) { window.cargarRetosGlobales(); } } catch(err) { alert("Error."); } finally { btnSubmit.innerHTML = 'Publicar Reto'; btnSubmit.disabled = false; }
+        try { await addDoc(collection(db, 'retos_comunidades'), nuevoReto); alert("¡Reto lanzado!"); document.getElementById('modal-lanzar-reto').style.display = 'none'; e.target.reset(); if(document.getElementById('tab-retos').classList.contains('active')) { window.cargarRetosGlobales(); } } catch(err) { alert("Error."); } finally { btnSubmit.innerHTML = '⚔️ Publicar Reto'; btnSubmit.disabled = false; }
     });
 
     window.cargarRetosGlobales = async function() {
@@ -561,7 +622,7 @@
                             `;
                         }
                     } else {
-                        btnAccion = `<button class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold; border:none; font-size:0.85rem;" onclick="prepararAceptarReto('${docSnap.id}', '${r.whatsappLider}', '${r.nombreComunidad}')"><i class="ph-bold ph-sword"></i> Aceptar Reto</button>`;
+                        btnAccion = `<button class="btn" style="width:100%; background:#e74c3c; color:#fff; font-weight:bold; border:none; font-size:0.85rem;" onclick="prepararAceptarReto('${docSnap.id}', '${r.whatsappLider}', '${r.nombreComunidad}')">⚔️ Aceptar Reto</button>`;
                     }
 
                     html += `<div class="community-card" style="border-color: rgba(231, 76, 60, 0.4);"><div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;"><div><h3 style="margin:0; font-size:1.1rem; color:#fff;"><i class="ph-fill ph-shield-checkered" style="color:#e74c3c;"></i> ${r.nombreComunidad}</h3><p style="margin:3px 0 0 0; font-size:0.8rem; color:#aaa;">${r.estado === 'coordinando' ? 'Coordinando seña...' : 'Busca rival'}</p></div><span style="background:rgba(231,76,60,0.1); color:#e74c3c; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; border: 1px solid rgba(231,76,60,0.3);">${r.formato}</span></div><div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:8px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;"><span style="color:#f1c40f; font-size:0.85rem; font-weight:bold;"><i class="ph-fill ph-trophy"></i> ${r.deporte}</span><span style="color:#fff; font-size:0.85rem;"><i class="ph-bold ph-calendar-blank"></i> ${fechaAmigable} - ${r.hora}</span></div>${btnAccion}</div>`;
@@ -571,28 +632,24 @@
         } catch(e) { listaRetos.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar retos.</p>'; }
     }
 
-    // ACEPTAR EL RETO Y ABRIR WHATSAPP
     window.prepararAceptarReto = async function(retoId, wspLider, nombreComunidadRival) {
         if (!currentUser) return alert("Debes iniciar sesión.");
         const q = query(collection(db, 'comunidades'), where('liderUid', '==', currentUser.uid));
         const snap = await getDocs(q);
         if (snap.empty) return alert("🚨 Solo los líderes de comunidad pueden aceptar retos.");
         
-        if (!confirm(`¿Aceptar el reto de ${nombreComunidadRival}? Serás redirigido a WhatsApp para coordinar la seña.`)) return;
+        if (!confirm(`¿Aceptar el reto de ${nombreComunidadRival}? Serás redirigido a WhatsApp para coordinar.`)) return;
 
         try {
             await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'coordinando', rivalUid: currentUser.uid });
             const numClean = String(wspLider || '').replace(/\D/g, '');
             if (numClean) {
                 window.open(`https://wa.me/${numClean}?text=${encodeURIComponent(`¡Hola! Vimos tu reto en la Zona de Retos de CHALACAPP. Somos un equipo serio y queremos aceptar el clásico. ¿Dónde y a qué hora jugamos? Te paso la seña si es necesario.`)}`, '_blank');
-            } else {
-                alert("Reto aceptado, pero el líder rival no configuró su WhatsApp.");
-            }
+            } else { alert("Reto aceptado, pero el líder rival no configuró su WhatsApp."); }
             cargarRetosGlobales();
         } catch (e) { alert("Error al aceptar el reto."); }
     }
 
-    // OFICIALIZAR O RECHAZAR
     window.oficializarReto = async function(retoId) {
         if(!confirm("¿Seguro que el rival ya pagó la seña y quieres hacer el clásico OFICIAL?")) return;
         try { await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'oficial' }); alert("¡Clásico oficializado!"); cargarRetosGlobales(); } catch(e) { alert("Error."); }
@@ -602,15 +659,12 @@
         try { await updateDoc(doc(db, 'retos_comunidades', retoId), { estado: 'buscando_rival', rivalUid: null }); alert("Reto devuelto a la cartelera."); cargarRetosGlobales(); } catch(e) { alert("Error."); }
     }
 
-
-    // CARGA DE LOGOS PROPIOS 
     document.getElementById('btn-cambiar-logo').addEventListener('click', () => {
         if (window.soyLiderGlobal) { document.getElementById('input-logo-comunidad').click(); }
     });
 
     document.getElementById('input-logo-comunidad').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
@@ -642,38 +696,20 @@
         document.getElementById('hub-nombre').textContent = nombre; document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none'; document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
         
-        const imgLogo = document.getElementById('img-logo-comunidad');
-        const iconLogo = document.getElementById('icon-logo-comunidad');
-        const overlayLogo = document.getElementById('overlay-logo');
-        
-        if (logoUrl && logoUrl !== 'undefined') {
-            imgLogo.src = logoUrl; imgLogo.style.display = 'block'; iconLogo.style.display = 'none';
-        } else {
-            imgLogo.style.display = 'none'; iconLogo.style.display = 'block';
-        }
-
-        if (esLider) {
-            overlayLogo.style.display = 'block';
-            document.getElementById('btn-cambiar-logo').style.cursor = 'pointer';
-        } else {
-            overlayLogo.style.display = 'none';
-            document.getElementById('btn-cambiar-logo').style.cursor = 'default';
-        }
-
+        const imgLogo = document.getElementById('img-logo-comunidad'); const iconLogo = document.getElementById('icon-logo-comunidad'); const overlayLogo = document.getElementById('overlay-logo');
+        if (logoUrl && logoUrl !== 'undefined') { imgLogo.src = logoUrl; imgLogo.style.display = 'block'; iconLogo.style.display = 'none'; } else { imgLogo.style.display = 'none'; iconLogo.style.display = 'block'; }
+        if (esLider) { overlayLogo.style.display = 'block'; document.getElementById('btn-cambiar-logo').style.cursor = 'pointer'; } else { overlayLogo.style.display = 'none'; document.getElementById('btn-cambiar-logo').style.cursor = 'default'; }
         const btnWa = document.getElementById('btn-unirse-wa');
         if (wsp) { const numClean = String(wsp).replace(/\D/g, ''); btnWa.onclick = () => window.open(`https://wa.me/${numClean}?text=${encodeURIComponent("Hola! Vengo desde CHALACAPP y quiero unirme a la comunidad " + nombre)}`, '_blank'); } 
         else btnWa.onclick = () => alert("Sin link configurado.");
 
-        const deportesArray = deportesRaw.split(','); const contenedorFiltros = document.getElementById('hub-deportes-filtros'); const selectDeporteModal = document.getElementById('np-deporte'); 
-        const selectRetoModal = document.getElementById('lr-deporte');
+        const deportesArray = deportesRaw.split(','); const contenedorFiltros = document.getElementById('hub-deportes-filtros'); const selectDeporteModal = document.getElementById('np-deporte'); const selectRetoModal = document.getElementById('lr-deporte');
         contenedorFiltros.innerHTML = ''; selectDeporteModal.innerHTML = ''; selectRetoModal.innerHTML = '';
-        
         deportesArray.forEach((dep, index) => {
             const isFirst = index === 0; const nombreDeporte = dep.trim(); if (!nombreDeporte) return;
             const colorPrincipal = obtenerColorDeporte(nombreDeporte); const bg = isFirst ? colorPrincipal : 'rgba(255,255,255,0.05)'; const color = isFirst ? '#000' : '#fff'; const border = isFirst ? `1px solid ${colorPrincipal}` : '1px solid rgba(255,255,255,0.12)';
             contenedorFiltros.innerHTML += `<button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">${nombreDeporte}</button>`;
-            selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
-            selectRetoModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
+            selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`; selectRetoModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
         });
         contenedorFiltros.innerHTML += `<button id="btn-ranking-tab" class="btn btn-sport-chip" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed #f1c40f; margin-left: 10px !important;" onclick="mostrarRankingComunidad()">🏆 Ranking</button>`;
 
@@ -681,61 +717,57 @@
         setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
 
-    // MAGIA: MOSTRAR EL 7 IDEAL EN LA CANCHA Y RECONOCER POSICIONES CORRECTAMENTE
+    // MAGIA: MOSTRAR EL 7 IDEAL Y PERFILES EXPANDIDOS
     window.mostrarRankingComunidad = async function() { 
         document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); 
         const btnRanking = document.getElementById('btn-ranking-tab'); btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none'; 
         document.getElementById('hub-lista-partidos').style.display = 'none'; const panelRanking = document.getElementById('hub-panel-ranking'); panelRanking.style.display = 'block'; document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#f1c40f; font-size:1.1rem;"><i class="ph-fill ph-trophy"></i> Salón de la Fama</h3>`; 
-        panelRanking.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:#f1c40f;"></i><p style="color:#aaa; margin-top:10px;">Calculando estadísticas y alineando el equipo...</p></div>`; 
+        panelRanking.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:#f1c40f;"></i><p style="color:#aaa; margin-top:10px;">Alineando el equipo...</p></div>`; 
         
         try { 
             const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'finalizado')); 
-            const snap = await getDocs(q); let stats = {}; 
+            const snap = await getDocs(q); window.statsGlobales = {}; 
             
             snap.forEach(docSnap => { 
                 const p = docSnap.data(); 
                 if(p.resultadosOficiales) { 
                     p.resultadosOficiales.forEach(res => { 
-                        if(!stats[res.uid]) { 
+                        if(!window.statsGlobales[res.uid]) { 
                             const infoJugador = p.inscritos.find(j => j.uid === res.uid) || { nombreUsuario: 'Jugador', fotoUsuario: 'avatar' }; 
-                            stats[res.uid] = { uid: res.uid, nombre: infoJugador.nombreUsuario, foto: infoJugador.fotoUsuario, goles: 0, asist: 0, mvp: 0, partidos: 0, score: 0 }; 
+                            window.statsGlobales[res.uid] = { uid: res.uid, nombre: infoJugador.nombreUsuario, foto: infoJugador.fotoUsuario, goles: 0, asist: 0, mvp: 0, partidos: 0, score: 0 }; 
                         } 
-                        stats[res.uid].partidos += 1; stats[res.uid].goles += res.goles || 0; stats[res.uid].asist += res.asistencias || 0; if(p.mvp === res.uid) stats[res.uid].mvp += 1; 
+                        window.statsGlobales[res.uid].partidos += 1; window.statsGlobales[res.uid].goles += res.goles || 0; window.statsGlobales[res.uid].asist += res.asistencias || 0; if(p.mvp === res.uid) window.statsGlobales[res.uid].mvp += 1; 
                     }); 
                 } 
             }); 
             
-            let ranking = Object.values(stats); 
+            let ranking = Object.values(window.statsGlobales); 
             ranking.forEach(j => { j.score = (j.partidos * 10) + (j.goles * 5) + (j.asist * 3) + (j.mvp * 15); }); 
             if(ranking.length === 0) { panelRanking.innerHTML = `<div style="text-align:center; padding:30px 10px;"><p style="color:#aaa;">Aún no hay estadísticas suficientes para armar el equipo ideal.</p></div>`; return; } 
             
             const goleador = [...ranking].sort((a,b) => b.goles - a.goles)[0]; const asistidor = [...ranking].sort((a,b) => b.asist - a.asist)[0]; const franquicia = [...ranking].sort((a,b) => b.mvp - a.mvp)[0]; 
-            ranking.sort((a,b) => b.score - a.score); 
-            const sieteIdeal = ranking.slice(0, 7); 
+            ranking.sort((a,b) => b.score - a.score); const sieteIdeal = ranking.slice(0, 7); 
             
-            // OBTENER POSICIONES DESDE LA COLECCIÓN CORRECTA (jugadores_perfiles)
             for (let j of sieteIdeal) {
                 try {
                     const uSnap = await getDoc(doc(db, 'jugadores_perfiles', j.uid));
-                    if (uSnap.exists()) { 
-                        j.posicion = uSnap.data().posicion || 'MED'; 
-                    } 
-                    else { j.posicion = 'MED'; }
+                    if (uSnap.exists()) { j.posicion = uSnap.data().posicion || uSnap.data().posicionPrincipal || 'MED'; } else { j.posicion = 'MED'; }
                 } catch(e) { j.posicion = 'MED'; }
+                window.statsGlobales[j.uid].posicion = j.posicion; // Guardar en memoria para el modal
             }
 
-            // AGRUPAR POR LÍNEAS EN LA CANCHA (Tolerante a valores cortos ARQ, DEF, DEL)
             const lineas = { fwd: [], mid: [], def: [], gk: [] };
             sieteIdeal.forEach(j => {
                 const p = String(j.posicion || '').toUpperCase();
                 if (p.includes('ARQ') || p.includes('PORTERO') || p.includes('GK')) lineas.gk.push(j);
                 else if (p.includes('DEF') || p.includes('ZAGUERO') || p.includes('CENTRAL')) lineas.def.push(j);
                 else if (p.includes('DEL') || p.includes('PUNTA') || p.includes('ATACANTE')) lineas.fwd.push(j);
-                else lineas.mid.push(j); // Si es MED, LIB o no coincide
+                else lineas.mid.push(j); 
             });
 
+            // AHORA LAS CARTAS TIENEN UN ONCLICK PARA ABRIR EL PERFIL
             const generarCarta = (j) => `
-                <div class="player-pitch-card">
+                <div class="player-pitch-card" onclick="verPerfilExpandido('${j.uid}')">
                     <div class="player-pitch-photo-container">
                         <img src="${j.foto}">
                         <div class="player-pitch-score">${j.score}</div>
@@ -746,22 +778,15 @@
 
             let htmlRanking = `
                 <div class="ranking-podium">
-                    <div class="podium-card"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
-                    <div class="podium-card"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
-                    <div class="podium-card"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asist.</span></p></div>
+                    <div class="podium-card" onclick="verPerfilExpandido('${goleador.uid}')" style="cursor:pointer;"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
+                    <div class="podium-card" onclick="verPerfilExpandido('${franquicia.uid}')" style="cursor:pointer;"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
+                    <div class="podium-card" onclick="verPerfilExpandido('${asistidor.uid}')" style="cursor:pointer;"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asistencias</span></p></div>
                 </div>
 
                 <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
                     <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic; letter-spacing: 1px;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El 7 Ideal (Team of the Month)</h3>
-                    
                     <div class="soccer-pitch">
-                        <div class="pitch-line pitch-center"></div>
-                        <div class="pitch-line pitch-circle"></div>
-                        <div class="pitch-line pitch-box-top"></div>
-                        <div class="pitch-line pitch-box-bottom"></div>
-                        <div class="pitch-line pitch-goal-top"></div>
-                        <div class="pitch-line pitch-goal-bottom"></div>
-
+                        <div class="pitch-line pitch-center"></div><div class="pitch-line pitch-circle"></div><div class="pitch-line pitch-box-top"></div><div class="pitch-line pitch-box-bottom"></div><div class="pitch-line pitch-goal-top"></div><div class="pitch-line pitch-goal-bottom"></div>
                         <div class="formation-row">${lineas.fwd.map(generarCarta).join('')}</div>
                         <div class="formation-row">${lineas.mid.map(generarCarta).join('')}</div>
                         <div class="formation-row">${lineas.def.map(generarCarta).join('')}</div>
@@ -769,28 +794,52 @@
                     </div>
                 </div>
             `;
-            
             panelRanking.innerHTML = htmlRanking; 
         } catch(e) { console.error(e); panelRanking.innerHTML = '<p style="color:red; text-align:center;">Error al armar el equipo ideal.</p>'; } 
     }
-    
-    // Resultados
+
+    // LOGICA DEL SALÓN DE TROFEOS (MODAL PERFIL)
+    document.getElementById('cerrar-perfil-expandido').addEventListener('click', () => {
+        document.getElementById('modal-perfil-expandido').style.display = 'none';
+    });
+
+    window.verPerfilExpandido = function(uid) {
+        const j = window.statsGlobales[uid];
+        if(!j) return;
+
+        document.getElementById('pe-foto').src = j.foto;
+        document.getElementById('pe-score').innerText = j.score;
+        document.getElementById('pe-nombre').innerText = j.nombre;
+        document.getElementById('pe-posicion').innerText = j.posicion || 'JUGADOR';
+        document.getElementById('pe-partidos').innerText = j.partidos;
+        document.getElementById('pe-goles').innerText = j.goles;
+        document.getElementById('pe-asist').innerText = j.asist;
+
+        // CALCULO DE INSIGNIAS AUTOMÁTICAS
+        let insigniasHTML = '';
+
+        if(j.partidos >= 20) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-diamond" style="color: #00d2d3;"></i> Leyenda</div>`;
+        else if(j.partidos >= 10) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-medal" style="color: #f1c40f;"></i> Franquicia</div>`;
+        else if(j.partidos >= 3) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-medal" style="color: #bdc3c7;"></i> Convocado Fijo</div>`;
+        else insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-medal" style="color: #cd7f32;"></i> Amateur</div>`;
+
+        if(j.goles >= 10) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-soccer-ball" style="color: #2ecc71;"></i> Killer / Pichichi</div>`;
+        if(j.asist >= 5) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-sneaker" style="color: #3498db;"></i> Mago del Balón</div>`;
+        if(j.mvp >= 2) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-star" style="color: #f1c40f;"></i> MVP Múltiple</div>`;
+
+        document.getElementById('pe-insignias').innerHTML = insigniasHTML;
+        document.getElementById('modal-perfil-expandido').style.display = 'flex';
+    };
+
+    // EL RESTO ES EL CÓDIGO INTACTO DE RESULTADOS Y EDICIÓN
     const modalResultados = document.getElementById('modal-resultados-partido'); document.getElementById('cerrar-resultados-partido').addEventListener('click', () => modalResultados.style.display = 'none');
     window.abrirResultadosPartido = async function(partidoId) { partidoResultadosId = partidoId; modalResultados.style.display = 'flex'; const listaJugadores = document.getElementById('lista-resultados-jugadores'); listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando...</p>'; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); let html = ''; if(p.inscritos && p.inscritos.length > 0){ p.inscritos.forEach((j, index) => { html += `<div class="resultado-jugador-row" data-uid="${j.uid}" style="grid-template-columns: 2fr 1fr 1fr;"><div style="display:flex; align-items:center; gap:8px;"><img src="${j.fotoUsuario}" style="width:30px; height:30px; border-radius:50%; object-fit:cover; border:1px solid #555;"><span style="color:#fff; font-size:0.85rem; font-weight:bold;">${j.nombreUsuario}</span></div><input type="number" class="res-goles" min="0" value="0"><input type="number" class="res-asist" min="0" value="0"></div>`; }); listaJugadores.innerHTML = html; } else { listaJugadores.innerHTML = '<p style="color:#aaa; text-align:center;">Nadie asistió.</p>'; } } } catch(e){ listaJugadores.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } };
     document.getElementById('form-resultados-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; const resultados = []; document.querySelectorAll('.resultado-jugador-row').forEach(row => { const uid = row.getAttribute('data-uid'); const goles = parseInt(row.querySelector('.res-goles').value) || 0; const asistencias = parseInt(row.querySelector('.res-asist').value) || 0; resultados.push({ uid, goles, asistencias, mvp: false }); }); try { await updateDoc(doc(db, 'partidos', partidoResultadosId), { estado: 'votando_mvp', resultadosOficiales: resultados, votosMVP: {}, hanVotado: [] }); alert("¡Stats guardadas! Urnas abiertas."); modalResultados.style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Publicar Stats y Abrir Votación MVP'; btnSubmit.disabled = false; } });
-    
-    // Gestión Lista
     const modalListaPartido = document.getElementById('modal-lista-partido'); document.getElementById('cerrar-lista-partido').addEventListener('click', () => modalListaPartido.style.display = 'none');
     window.abrirGestionLista = async function(partidoId) { modalListaPartido.style.display = 'flex'; const panelInscritos = document.getElementById('panel-inscritos'); panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Cargando lista...</p>'; try { const docSnap = await getDoc(doc(db, 'partidos', partidoId)); if (docSnap.exists()) { const p = docSnap.data(); let html = ''; if (p.inscritos && p.inscritos.length > 0) { p.inscritos.forEach((jugador, index) => { let btnCapitan = ''; if (p.capitanUid === jugador.uid) { btnCapitan = `<span style="background: rgba(241, 196, 15, 0.2); color: #f1c40f; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-right: 5px;"><i class="ph-fill ph-star"></i> Capitán</span><button class="btn" style="padding:4px 8px; background:transparent; color:#888; border:1px solid #888; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', null, '${jugador.nombreUsuario}')">Quitar</button>`; } else { btnCapitan = `<button class="btn" style="padding:4px 8px; background:transparent; color:#f1c40f; border:1px solid #f1c40f; border-radius:6px; font-size:0.75rem; margin-right: 5px;" onclick="asignarCapitan('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')">Hacer Capitán</button>`; } html += `<div class="solicitud-item" style="border-left: 3px solid #f1c40f; flex-wrap: wrap;"><div style="display:flex; align-items:center; gap:12px; margin-bottom: 5px;"><div style="width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #ccc; font-weight: bold;">${index + 1}</div><img src="${jugador.fotoUsuario}" style="width:36px; height:36px; border-radius:50%; object-fit:cover; border:1px solid #f1c40f;"><span style="color:#fff; font-weight:bold; font-size:0.95rem;">${jugador.nombreUsuario}</span></div><div style="display: flex; align-items: center;">${btnCapitan}<button class="btn" style="padding:4px 8px; background:transparent; color:#e74c3c; border:1px solid #e74c3c; border-radius:6px; font-size:0.75rem;" onclick="liberarCupoJugador('${partidoId}', '${jugador.uid}', '${jugador.nombreUsuario}')"><i class="ph-bold ph-x"></i> Liberar</button></div></div>`; }); panelInscritos.innerHTML = html; } else { panelInscritos.innerHTML = '<p style="color:#aaa; text-align:center;">Aún no hay jugadores inscritos.</p>'; } } } catch(e) { panelInscritos.innerHTML = '<p style="color:red; text-align:center;">Error.</p>'; } }
     window.asignarCapitan = async function(partidoId, uidJugador, nombre) { try { await updateDoc(doc(db, 'partidos', partidoId), { capitanUid: uidJugador }); alert(uidJugador ? `¡${nombre} ahora es el Capitán!` : `Permisos removidos.`); abrirGestionLista(partidoId); refrescarPartidosActuales(); } catch(e) { alert("Error."); } }
     window.liberarCupoJugador = async function(partidoId, uidJugador, nombre) { if (!confirm(`¿Liberar a ${nombre}?`)) return; try { const pRef = doc(db, 'partidos', partidoId); const pSnap = await getDoc(pRef); if(pSnap.exists()){ const data = pSnap.data(); const inscritosActualizados = data.inscritos.filter(j => j.uid !== uidJugador); await updateDoc(pRef, { inscritos: inscritosActualizados, cuposOcupados: increment(-1) }); alert("Cupo liberado."); abrirGestionLista(partidoId); refrescarPartidosActuales(); } } catch(e) { alert("Error."); } }
-
-    // FUNCIONES DEL MODAL CREAR COMUNIDAD
-    const modalCrear = document.getElementById('modal-crear-comunidad');
-    document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex');
-    document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none');
-    document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => { e.preventDefault(); const n = document.getElementById('reg-com-nombre').value; const d = document.getElementById('reg-com-deporte').value; const c = document.getElementById('reg-com-ciudad').value; const l = document.getElementById('reg-com-link').value; window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad y obtener el check de verificado ✅.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}\n*Link de Verificación:* ${l}`)}`, '_blank'); modalCrear.style.display = 'none'; e.target.reset(); });
-
+    const modalCrear = document.getElementById('modal-crear-comunidad'); document.getElementById('btn-solicitar-creacion').addEventListener('click', () => modalCrear.style.display = 'flex'); document.getElementById('cerrar-crear-comunidad').addEventListener('click', () => modalCrear.style.display = 'none'); document.getElementById('form-nueva-comunidad').addEventListener('submit', (e) => { e.preventDefault(); const n = document.getElementById('reg-com-nombre').value; const d = document.getElementById('reg-com-deporte').value; const c = document.getElementById('reg-com-ciudad').value; const l = document.getElementById('reg-com-link').value; window.open(`https://wa.me/51999999999?text=${encodeURIComponent(`Hola CHALACAPP ⚽, solicito registrar mi comunidad y obtener el check de verificado ✅.\n\n*Nombre:* ${n}\n*Deportes:* ${d}\n*Ubicación:* ${c}\n*Link de Verificación:* ${l}`)}`, '_blank'); modalCrear.style.display = 'none'; e.target.reset(); });
     document.getElementById('cerrar-editar-partido').addEventListener('click', () => document.getElementById('modal-editar-partido').style.display = 'none'); window.abrirEditarPartido = async function(partidoId) { partidoEditarId = partidoId; try { const pSnap = await getDoc(doc(db, 'partidos', partidoId)); if(pSnap.exists()){ const p = pSnap.data(); document.getElementById('ep-fecha').value = p.fecha; document.getElementById('ep-hora').value = p.hora; document.getElementById('ep-duracion').value = p.duracion || 60; document.getElementById('ep-lugar').value = p.lugar; document.getElementById('ep-maps').value = p.linkMaps || ''; document.getElementById('ep-cupos').value = p.cuposTotales; document.getElementById('ep-precio').value = p.precioInstrucciones; document.getElementById('modal-editar-partido').style.display = 'flex'; } } catch(e) { alert("Error."); } }
     document.getElementById('form-editar-partido').addEventListener('submit', async (e) => { e.preventDefault(); const btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.innerHTML = 'Guardando...'; btnSubmit.disabled = true; try { await updateDoc(doc(db, 'partidos', partidoEditarId), { fecha: document.getElementById('ep-fecha').value, hora: document.getElementById('ep-hora').value, duracion: parseInt(document.getElementById('ep-duracion').value), lugar: document.getElementById('ep-lugar').value, linkMaps: document.getElementById('ep-maps').value, cuposTotales: parseInt(document.getElementById('ep-cupos').value), precioInstrucciones: document.getElementById('ep-precio').value }); alert("¡Actualizado!"); document.getElementById('modal-editar-partido').style.display = 'none'; refrescarPartidosActuales(); } catch (error) { alert("Error."); } finally { btnSubmit.innerHTML = 'Guardar Cambios'; btnSubmit.disabled = false; } });
     const modalMiembros = document.getElementById('modal-miembros'); document.getElementById('btn-ver-miembros').addEventListener('click', () => { modalMiembros.style.display = 'flex'; cargarSolicitudes(); }); document.getElementById('cerrar-miembros').addEventListener('click', () => modalMiembros.style.display = 'none'); const btnTabSol = document.getElementById('tab-solicitudes'); const btnTabActivos = document.getElementById('tab-activos'); const panelSol = document.getElementById('panel-solicitudes'); const panelActivos = document.getElementById('panel-activos'); btnTabSol.addEventListener('click', () => { btnTabSol.classList.add('active'); btnTabActivos.classList.remove('active'); panelSol.style.display = 'block'; panelActivos.style.display = 'none'; }); btnTabActivos.addEventListener('click', () => { btnTabActivos.classList.add('active'); btnTabSol.classList.remove('active'); panelActivos.style.display = 'block'; panelSol.style.display = 'none'; cargarMiembrosActivos(); });
