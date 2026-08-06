@@ -69,14 +69,14 @@
             font-size: 1rem;
         }
 
-        /* ESTILOS DEL NUEVO CARRUSEL DE CALENDARIO (CON EFECTO IMÁN) */
+        /* ESTILOS DEL NUEVO CARRUSEL DE CALENDARIO */
         .week-days { 
             display: flex !important; 
             gap: 10px !important; 
             overflow-x: auto !important; 
             padding: 5px 0 !important; 
             scroll-behavior: smooth; 
-            scroll-snap-type: x mandatory; /* EFECTO IMÁN */
+            scroll-snap-type: x mandatory; 
             scrollbar-width: none; 
         }
         .week-days::-webkit-scrollbar { display: none; }
@@ -84,7 +84,7 @@
         .week-days > * { 
             min-width: 65px !important; 
             flex-shrink: 0 !important; 
-            scroll-snap-align: start; /* HACE QUE SE ALINEE PERFECTO A LA IZQUIERDA */
+            scroll-snap-align: start; 
         }
 
         .btn-scroll-cal {
@@ -105,6 +105,27 @@
             background: #f1c40f;
             color: #000;
             border-color: #f1c40f;
+        }
+
+        /* CORRECCIÓN: Cajas de horas estiradas y texto centrado */
+        .admin-schedule {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+        /* Forzamos el padding y alineación central en todo lo que se inyecte aquí */
+        .admin-schedule > div, 
+        .admin-schedule > button,
+        .admin-schedule > a {
+            padding: 12px 10px !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+            text-align: center !important;
+            gap: 6px !important;
         }
 
         .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
@@ -281,6 +302,7 @@
                     </label>
                 </div>
 
+                <!-- Pagos -->
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
                     <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #fff;">Cobros y Señas</h3>
                     <div style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
@@ -325,6 +347,7 @@
                     </div>
                 </div>
 
+                <!-- Detalles multimedia -->
                 <label style="display:block; margin-bottom:15px; color:#aaa; font-size:0.85rem;">Descripción del Complejo
                     <textarea id="admin-descripcion" rows="3" placeholder="Contamos con 3 canchas techadas..." style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;"></textarea>
                 </label>
@@ -338,6 +361,7 @@
                     </label>
                 </div>
 
+                <!-- MANTENIENDO COMPATIBILIDAD CON TUS SCRIPTS DE COORDENADAS -->
                 <div class="form-two" style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap; display:none;">
                     <label style="flex:1; min-width:140px;">Latitud <input type="text" id="admin-lat"></label>
                     <label style="flex:1; min-width:140px;">Longitud <input type="text" id="admin-lng"></label>
@@ -440,6 +464,7 @@
                 <input id="evento-nombre" required placeholder="Ej: Los Galácticos / Mantenimiento" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
             </label>
 
+            <!-- CAJA: EVENTO ÚNICO -->
             <div id="caja-evento-unico" style="display:block; background:rgba(255,255,255,0.03); padding:10px; border-radius:8px; margin-bottom:15px;">
                 <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <label style="flex:1; min-width:140px; color:#aaa; font-size:0.8rem;">Desde<input id="evento-inicio" type="datetime-local" style="width:100%; padding:8px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:#fff; margin-top:5px;"></label>
@@ -447,6 +472,7 @@
                 </div>
             </div>
 
+            <!-- CAJA: ABONADO FIJO -->
             <div id="caja-evento-abonado" style="display:none; background:rgba(52,152,219,0.1); border:1px dashed #3498db; padding:15px; border-radius:8px; margin-bottom:15px;">
                 <p style="margin:0 0 10px 0; font-size:0.8rem; color:#3498db; font-weight:bold;">Se bloqueará automáticamente cada semana.</p>
                 <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
@@ -500,7 +526,6 @@
     // SCRIPTS DE DESPLAZAMIENTO DEL CALENDARIO EXACTO (EFECTO SNAP)
     document.getElementById('btn-cal-prev').addEventListener('click', () => {
         const container = document.getElementById('week-days');
-        // Calculamos cuánto mide el primer cuadrito + el gap (10px) o usamos 80px por defecto
         const scrollAmount = container.firstElementChild ? container.firstElementChild.offsetWidth + 10 : 80;
         container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     });
