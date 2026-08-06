@@ -17,7 +17,6 @@
            CORRECCIONES RESPONSIVE (MÓVIL FRIENDLY)
            ========================================== */
         
-        /* 1. Pestañas Principales (Cero estrés) */
         .admin-tabs { 
             display: flex; 
             gap: 8px; 
@@ -49,7 +48,6 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 2. Cabecera y Fecha (Evita que el texto y el emoji se aplasten) */
         .admin-heading { 
             display: flex; 
             justify-content: space-between; 
@@ -66,33 +64,48 @@
             gap: 8px !important; 
             padding: 10px 16px !important; 
             border-radius: 8px !important; 
-            white-space: nowrap !important; /* Nunca se parte en dos líneas */
+            white-space: nowrap !important; 
             font-weight: bold;
             font-size: 1rem;
         }
 
-        /* 3. El Calendario Deslizable (Swipe Horizontal) */
+        /* ESTILOS DEL NUEVO CARRUSEL DE CALENDARIO */
         .week-days { 
             display: flex !important; 
             gap: 10px !important; 
-            overflow-x: auto !important; /* Permite deslizar */
-            padding-bottom: 10px !important; 
-            -webkit-overflow-scrolling: touch; /* Suavidad en iPhone/Android */
-            scrollbar-width: none; /* Oculta la barra de scroll en Firefox */
+            overflow-x: hidden !important; /* Ocultamos el scrollbar nativo */
+            padding: 5px 0 !important; 
+            scroll-behavior: smooth; /* Movimiento fluido */
         }
-        .week-days::-webkit-scrollbar { display: none; } /* Oculta la barra en Chrome/Safari */
-        
         .week-days > * { 
-            min-width: 65px !important; /* Evita que los botones de los días se aplasten */
+            min-width: 65px !important; 
             flex-shrink: 0 !important; 
         }
+        .btn-scroll-cal {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .btn-scroll-cal:hover {
+            background: #f1c40f;
+            color: #000;
+            border-color: #f1c40f;
+        }
 
-        /* 4. Cuadrícula de Mostrador */
         .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
         @media (max-width: 768px) {
             .dashboard-grid { grid-template-columns: 1fr; }
             .admin-kpis { grid-template-columns: 1fr !important; }
-            .admin-date { width: 100%; } /* El botón de fecha ocupa todo el ancho en móvil */
+            .admin-date { width: 100%; } 
         }
     </style>
 </head>
@@ -129,6 +142,9 @@
         <button class="admin-tab-btn" data-target="tab-configuracion"><i class="ph-bold ph-sliders"></i> Ajustes</button>
     </div>
 
+    <!-- ========================================== -->
+    <!-- TAB 1: MOSTRADOR (HOY) -->
+    <!-- ========================================== -->
     <div id="tab-panel-hoy" class="tab-content active">
         <section id="kpis" class="admin-kpis" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
             <div class="admin-kpi" style="background: linear-gradient(135deg, rgba(46,204,113,0.1), rgba(0,0,0,0.5)); border: 1px solid rgba(46,204,113,0.3); padding: 20px; border-radius: 12px; position: relative;">
@@ -148,12 +164,26 @@
             </div>
         </section>
 
+        <!-- CALENDARIO CON FLECHAS DE NAVEGACIÓN -->
         <section class="card week-control-card" style="margin-bottom: 25px;">
             <div class="week-head" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div><span class="mini-label">CALENDARIO</span><h2 style="margin:0;">Horarios y Separaciones</h2><p style="color:#aaa; font-size:0.8rem; margin:0;">Desliza los días 👈👉</p></div>
-                <button id="btn-hoy" class="btn btn-outline" style="padding: 6px 12px; width: auto; white-space: nowrap;"><i class="ph-bold ph-calendar-check"></i> Volver a Hoy</button>
+                <div>
+                    <span class="mini-label">CALENDARIO</span>
+                    <h2 style="margin:0;">Horarios y Separaciones</h2>
+                    <p style="color:#aaa; font-size:0.8rem; margin:0;">Navega entre los días usando las flechas</p>
+                </div>
+                <button id="btn-hoy" class="btn btn-outline" style="padding: 6px 12px; width: auto; white-space: nowrap;">
+                    <i class="ph-bold ph-calendar-check"></i> Volver a Hoy
+                </button>
             </div>
-            <div id="week-days" class="week-days" style="margin-top: 15px;"></div>
+            
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 15px;">
+                <button id="btn-cal-prev" class="btn-scroll-cal"><i class="ph-bold ph-caret-left" style="font-size: 1.2rem;"></i></button>
+                
+                <div id="week-days" class="week-days" style="flex: 1;"></div>
+                
+                <button id="btn-cal-next" class="btn-scroll-cal"><i class="ph-bold ph-caret-right" style="font-size: 1.2rem;"></i></button>
+            </div>
         </section>
 
         <div class="dashboard-grid">
@@ -178,6 +208,9 @@
         </div>
     </div>
 
+    <!-- ========================================== -->
+    <!-- TAB 2: GESTIÓN DE ESPACIOS Y ABONADOS      -->
+    <!-- ========================================== -->
     <div id="tab-gestion" class="tab-content">
         <section id="espacios" class="card management-card" style="margin-bottom: 25px;">
             <div class="section-title" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px;">
@@ -208,6 +241,9 @@
         </section>
     </div>
 
+    <!-- ========================================== -->
+    <!-- TAB 3: CONFIGURACIÓN PESADA (OCULTA)       -->
+    <!-- ========================================== -->
     <div id="tab-configuracion" class="tab-content">
         <section id="configuracion-cancha" class="card config-card">
             <div class="section-title" style="margin-bottom: 20px;">
@@ -282,6 +318,7 @@
                     </div>
                 </div>
 
+                <!-- Detalles multimedia -->
                 <label style="display:block; margin-bottom:15px; color:#aaa; font-size:0.85rem;">Descripción del Complejo
                     <textarea id="admin-descripcion" rows="3" placeholder="Contamos con 3 canchas techadas..." style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;"></textarea>
                 </label>
@@ -315,6 +352,9 @@
     </div>
 </main>
 
+<!-- ========================================== -->
+<!-- MODAL: AGREGAR ESPACIO (CON TARIFA NOCTURNA)-->
+<!-- ========================================== -->
 <div id="modal-espacio" class="admin-modal" aria-hidden="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="admin-modal-card" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #2ecc71;">
         <button type="button" class="btn-cerrar admin-modal-close" id="cerrar-modal-espacio" data-close="modal-espacio" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -369,6 +409,9 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- MODAL: EVENTOS Y ABONADOS FIJOS -->
+<!-- ========================================== -->
 <div id="modal-evento" class="admin-modal" aria-hidden="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="admin-modal-card" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #3498db;">
         <button type="button" class="btn-cerrar admin-modal-close" id="cerrar-modal-evento" data-close="modal-evento" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
@@ -408,7 +451,8 @@
 
             <label style="display:block; margin-bottom:15px; color:#aaa; font-size:0.85rem;">¿Qué cancha ocuparán?
                 <select id="evento-espacios" multiple size="4" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
-                    </select>
+                    <!-- Se llena con JS nativo -->
+                </select>
             </label>
 
             <button type="submit" class="btn" style="width:100%; background:#3498db; color:#fff; font-weight:bold;"><i class="ph-bold ph-lock-key"></i> Bloquear Cancha</button>
@@ -418,6 +462,7 @@
 
 <div id="toast-admin" class="admin-toast"></div>
 
+<!-- LÓGICA DE INTERFAZ -->
 <script>
     document.querySelectorAll('.admin-tab-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -444,8 +489,17 @@
             if(modalId) document.getElementById(modalId).style.display = 'none';
         }
     });
+
+    // SCRIPTS DE DESPLAZAMIENTO DEL CALENDARIO
+    document.getElementById('btn-cal-prev').addEventListener('click', () => {
+        document.getElementById('week-days').scrollBy({ left: -160, behavior: 'smooth' });
+    });
+    document.getElementById('btn-cal-next').addEventListener('click', () => {
+        document.getElementById('week-days').scrollBy({ left: 160, behavior: 'smooth' });
+    });
 </script>
 
+<!-- TUS SCRIPTS ORIGINALES CONECTADOS -->
 <script type="module" src="admin-dashboard.js"></script>
 <script type="module" src="admin-operations.js"></script>
 <script type="module" src="admin-hours.js"></script>
