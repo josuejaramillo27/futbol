@@ -35,7 +35,10 @@ function renderEspacios(){
         box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-buildings"></i><b>Aún no tienes canchas individuales</b><span>Agrega la primera para administrar horarios y precios por separado.</span></div>';
         return;
     }
-    box.innerHTML=espacios.map(e=>`<article class="space-card"><div class="space-icon"><i class="ph-fill ph-soccer-ball"></i></div><div class="space-main"><div class="space-top"><h3>${esc(e.nombre)}</h3><span class="space-status">${e.legacy?'PRINCIPAL':'ACTIVA'}</span></div><p>${esc(e.tipo||'Fútbol')} · S/ ${Number(e.precio||0).toFixed(2)} / hora</p><small>${esc(e.caracteristicas||'Sin características adicionales')} · ${esc(e.horaApertura||'16:00')}–${esc(e.horaCierre||'23:00')}</small></div><div class="space-actions">${e.legacy?'':'<button class="icon-btn edit-space" data-id="'+e.id+'" title="Editar"><i class="ph-bold ph-pencil-simple"></i></button><button class="icon-btn delete-space" data-id="'+e.id+'" title="Eliminar"><i class="ph-bold ph-trash"></i></button>'}</div></article>`).join('');
+    box.innerHTML=espacios.map(e=>{
+        const strPrecioNoche = e.tienePrecioNoche ? `<br><small style="color:#f1c40f;"><i class="ph-fill ph-moon"></i> S/ ${Number(e.precioNoche||0).toFixed(2)} / hora (Noche)</small>` : '';
+        return `<article class="space-card"><div class="space-icon"><i class="ph-fill ph-soccer-ball"></i></div><div class="space-main"><div class="space-top"><h3>${esc(e.nombre)}</h3><span class="space-status">${e.legacy?'PRINCIPAL':'ACTIVA'}</span></div><p>${esc(e.tipo||'Fútbol')} · S/ ${Number(e.precio||0).toFixed(2)} / hora (Día) ${strPrecioNoche}</p></div><div class="space-actions">${e.legacy?'':'<button class="icon-btn edit-space" data-id="'+e.id+'" title="Editar"><i class="ph-bold ph-pencil-simple"></i></button><button class="icon-btn delete-space" data-id="'+e.id+'" title="Eliminar"><i class="ph-bold ph-trash"></i></button>'}</div></article>`;
+    }).join('');
     box.querySelectorAll('.edit-space').forEach(b=>b.onclick=()=>editarEspacio(b.dataset.id));
     box.querySelectorAll('.delete-space').forEach(b=>b.onclick=()=>eliminarEspacio(b.dataset.id));
 }
@@ -47,7 +50,28 @@ function llenarEspaciosEvento(){
 
 function editarEspacio(id){
     const e=espacios.find(x=>x.id===id);if(!e||e.legacy)return;
-    $('espacio-id').value=e.id;$('espacio-modal-title').textContent='Editar cancha';$('espacio-nombre').value=e.nombre||'';$('espacio-tipo').value=e.tipo||'Sintética';$('espacio-precio').value=e.precio??'';$('espacio-apertura').value=e.horaApertura||'16:00';$('espacio-cierre').value=e.horaCierre||'23:00';$('espacio-caracteristicas').value=e.caracteristicas||'';openModal('modal-espacio');
+    $('espacio-id').value=e.id;
+    $('espacio-modal-title').textContent='Editar cancha';
+    $('espacio-nombre').value=e.nombre||'';
+    $('espacio-tipo').value=e.tipo||'Sintética';
+    $('espacio-precio').value=e.precio??'';
+    
+    // MAGIA COMERCIAL: Carga de tarifa nocturna
+    const checkNoche = $('espacio-check-noche');
+    const cajaNoche = $('caja-noche');
+    if (e.tienePrecioNoche) {
+        checkNoche.checked = true;
+        cajaNoche.style.display = 'block';
+        $('espacio-hora-noche').value = e.horaInicioNoche || '18:00';
+        $('espacio-precio-noche').value = e.precioNoche ?? '';
+    } else {
+        checkNoche.checked = false;
+        cajaNoche.style.display = 'none';
+        $('espacio-hora-noche').value = '18:00';
+        $('espacio-precio-noche').value = '';
+    }
+    
+    openModal('modal-espacio');
 }
 
 async function eliminarEspacio(id){
@@ -56,22 +80,28 @@ async function eliminarEspacio(id){
 }
 
 $('btn-nuevo-espacio')?.addEventListener('click',()=>{
-    $('form-espacio').reset();$('espacio-id').value='';$('espacio-modal-title').textContent='Agregar cancha';$('espacio-apertura').value='16:00';$('espacio-cierre').value='23:00';openModal('modal-espacio');
+    $('form-espacio').reset();
+    $('espacio-id').value='';
+    $('espacio-modal-title').textContent='Agregar cancha';
+    $('espacio-check-noche').checked = false;
+    $('caja-noche').style.display = 'none';
+    openModal('modal-espacio');
 });
 
 $('form-espacio')?.addEventListener('submit',async e=>{
     e.preventDefault();
     const id=$('espacio-id').value;
+    const tieneNoche = $('espacio-check-noche').checked;
     
-    // FASE 8: Creación/Edición con OwnerUid estricto inyectado automáticamente
+    // FASE 8: Creación/Edición con OwnerUid estricto + TARIFAS DINÁMICAS
     const data={
         ownerUid:uid,
         nombre:$('espacio-nombre').value.trim(),
         tipo:$('espacio-tipo').value,
         precio:Number($('espacio-precio').value||0),
-        horaApertura:$('espacio-apertura').value,
-        horaCierre:$('espacio-cierre').value,
-        caracteristicas:$('espacio-caracteristicas').value.trim(),
+        tienePrecioNoche: tieneNoche,
+        precioNoche: tieneNoche ? Number($('espacio-precio-noche').value||0) : null,
+        horaInicioNoche: tieneNoche ? $('espacio-hora-noche').value : null,
         activo:true,
         updatedAt:serverTimestamp()
     };
@@ -86,54 +116,80 @@ $('form-espacio')?.addEventListener('submit',async e=>{
     }catch(err){console.error(err);toast('No se pudo guardar la cancha.',true)}
 });
 
-// FASE 27 PREP: EVENTOS VINCULADOS A ESPACIOS Y OWNERUID
+// FASE 27 PREP: EVENTOS Y ABONADOS FIJOS VINCULADOS A ESPACIOS
 async function cargarEventos(){
     const q=query(collection(db,'eventos'),where('ownerUid','==',uid));
     const s=await getDocs(q);
-    eventos=s.docs.map(x=>({id:x.id,...x.data()})).sort((a,b)=>String(a.inicio).localeCompare(String(b.inicio)));
+    // Para simplificar la vista, ordenaremos por fecha de creación o inicio.
+    eventos=s.docs.map(x=>({id:x.id,...x.data()})); 
     renderEventos();
 }
 
 function renderEventos(){
     const box=$('lista-eventos');if(!box)return;
-    if(!eventos.length){box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-trophy"></i><b>No hay eventos programados</b><span>Ideal para campeonatos, academias, cumpleaños y alquileres privados.</span></div>';return}
+    if(!eventos.length){box.innerHTML='<div class="admin-empty"><i class="ph-bold ph-trophy"></i><b>No hay eventos ni abonados programados</b><span>Ideal para ingresos fijos mensuales y campeonatos.</span></div>';return}
+    
     box.innerHTML=eventos.map(e=>{
-        const ids=e.espacioIds||[],nombres=ids.map(id=>espacios.find(x=>x.id===id)?.nombre).filter(Boolean),pasado=new Date(e.fin)<new Date();
-        return `<article class="event-card ${pasado?'event-past':''}"><div class="event-icon"><i class="ph-fill ph-trophy"></i></div><div class="event-main"><div class="event-top"><h3>${esc(e.nombre)}</h3><span class="event-status">${pasado?'FINALIZADO':'RESERVADO'}</span></div><p><i class="ph-bold ph-calendar"></i> ${fecha(e.inicio)} → ${fecha(e.fin)}</p><small>${nombres.length?esc(nombres.join(' · ')):'Espacios no especificados'} ${e.bloqueaEspacios?' · Bloqueo automático':''}</small></div><button class="icon-btn delete-event" data-id="${e.id}" title="Eliminar evento"><i class="ph-bold ph-trash"></i></button></article>`;
+        const ids=e.espacioIds||[],nombres=ids.map(id=>espacios.find(x=>x.id===id)?.nombre).filter(Boolean);
+        
+        // Render condicional si es Abonado Fijo o Evento Único
+        if (e.esAbonado) {
+            const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+            const diaNombre = diasSemana[parseInt(e.diaSemana)] || "Día";
+            return `<article class="event-card" style="border-left: 3px solid #3498db;"><div class="event-icon"><i class="ph-fill ph-users"></i></div><div class="event-main"><div class="event-top"><h3 style="color:#3498db;">${esc(e.nombre)}</h3><span class="event-status" style="background: rgba(52,152,219,0.2); color:#3498db;">FIJO MENSUAL</span></div><p><i class="ph-bold ph-calendar-check"></i> Todos los ${diaNombre} a las ${esc(e.horaFija)}</p><small>${nombres.length?esc(nombres.join(' · ')):'Cancha eliminada'} · Contrato: ${esc(e.mesesContrato)} Mes(es)</small></div><button class="icon-btn delete-event" data-id="${e.id}" title="Eliminar contrato"><i class="ph-bold ph-trash"></i></button></article>`;
+        } else {
+            const pasado=new Date(e.fin)<new Date();
+            return `<article class="event-card ${pasado?'event-past':''}"><div class="event-icon"><i class="ph-fill ph-trophy"></i></div><div class="event-main"><div class="event-top"><h3>${esc(e.nombre)}</h3><span class="event-status">${pasado?'FINALIZADO':'RESERVADO'}</span></div><p><i class="ph-bold ph-calendar"></i> ${fecha(e.inicio)} → ${fecha(e.fin)}</p><small>${nombres.length?esc(nombres.join(' · ')):'Espacios no especificados'}</small></div><button class="icon-btn delete-event" data-id="${e.id}" title="Eliminar evento"><i class="ph-bold ph-trash"></i></button></article>`;
+        }
     }).join('');
     box.querySelectorAll('.delete-event').forEach(b=>b.onclick=()=>eliminarEvento(b.dataset.id));
 }
 
 async function eliminarEvento(id){
-    if(!confirm('¿Eliminar este evento y liberar su reserva especial?'))return;
-    try{await deleteDoc(doc(db,'eventos',id));toast('Evento eliminado.');await cargarEventos()}catch(e){console.error(e);toast('No se pudo eliminar.',true)}
+    if(!confirm('¿Eliminar este registro y liberar las horas asociadas?'))return;
+    try{await deleteDoc(doc(db,'eventos',id));toast('Registro eliminado.');await cargarEventos()}catch(e){console.error(e);toast('No se pudo eliminar.',true)}
 }
 
 $('btn-nuevo-evento')?.addEventListener('click',()=>{
-    if(!espacios.length){toast('Primero agrega al menos una cancha.',true);location.hash='espacios';return}
-    $('form-evento').reset();llenarEspaciosEvento();openModal('modal-evento');
+    if(!espacios.length){toast('Primero agrega al menos una cancha.',true);return;}
+    $('form-evento').reset();
+    $('evento-tipo').value = 'unico';
+    $('caja-evento-unico').style.display='block';
+    $('caja-evento-abonado').style.display='none';
+    llenarEspaciosEvento();
+    openModal('modal-evento');
 });
 
 $('form-evento')?.addEventListener('submit',async e=>{
     e.preventDefault();
-    const inicio=$('evento-inicio').value,fin=$('evento-fin').value,espacioIds=[...$('evento-espacios').selectedOptions].filter(o=>!o.disabled).map(o=>o.value);
-    if(new Date(fin)<=new Date(inicio)){toast('La fecha final debe ser posterior a la inicial.',true);return}
-    if(!espacioIds.length){toast('Selecciona al menos una cancha nueva.',true);return}
+    const espacioIds=[...$('evento-espacios').selectedOptions].filter(o=>!o.disabled).map(o=>o.value);
+    if(!espacioIds.length){toast('Selecciona al menos una cancha.',true);return}
+    
+    const esAbonado = $('evento-tipo').value === 'abonado';
+    let data = {
+        ownerUid:uid,
+        nombre:$('evento-nombre').value.trim(),
+        espacioIds: espacioIds,
+        esAbonado: esAbonado,
+        createdAt:serverTimestamp()
+    };
+
+    if (esAbonado) {
+        data.diaSemana = $('abonado-dia').value;
+        data.horaFija = $('abonado-hora').value;
+        data.mesesContrato = parseInt($('abonado-meses').value);
+        if(!data.horaFija) { toast('Debes seleccionar una hora para el abonado.',true); return; }
+    } else {
+        const inicio=$('evento-inicio').value,fin=$('evento-fin').value;
+        if(new Date(fin)<=new Date(inicio)){toast('La fecha final debe ser posterior a la inicial.',true);return}
+        data.inicio = inicio;
+        data.fin = fin;
+    }
+
     try{
-        const data={
-            ownerUid:uid,
-            nombre:$('evento-nombre').value.trim(),
-            inicio,fin,espacioIds,
-            bloqueaEspacios:$('evento-bloquea').checked,
-            publico:$('evento-publico').checked,
-            nota:$('evento-nota').value.trim(),
-            estado:'programado',
-            createdAt:serverTimestamp()
-        };
-        const ref=await addDoc(collection(db,'eventos'),data);
-        if(data.bloqueaEspacios) await addDoc(collection(db,'bloqueos'),{ownerUid:uid,tipo:'evento',eventoId:ref.id,nombre:data.nombre,inicio,fin,espacioIds,createdAt:serverTimestamp()});
-        closeModal('modal-evento');toast('Evento programado y espacios reservados.');await cargarEventos();
-    }catch(err){console.error(err);toast('No se pudo programar el evento.',true)}
+        await addDoc(collection(db,'eventos'),data);
+        closeModal('modal-evento');toast(esAbonado ? 'Contrato de Abonado guardado.' : 'Evento programado.');await cargarEventos();
+    }catch(err){console.error(err);toast('No se pudo guardar el bloqueo.',true)}
 });
 
 document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));
