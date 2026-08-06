@@ -69,18 +69,24 @@
             font-size: 1rem;
         }
 
-        /* ESTILOS DEL NUEVO CARRUSEL DE CALENDARIO */
+        /* ESTILOS DEL NUEVO CARRUSEL DE CALENDARIO (CON EFECTO IMÁN) */
         .week-days { 
             display: flex !important; 
             gap: 10px !important; 
-            overflow-x: hidden !important; /* Ocultamos el scrollbar nativo */
+            overflow-x: auto !important; 
             padding: 5px 0 !important; 
-            scroll-behavior: smooth; /* Movimiento fluido */
+            scroll-behavior: smooth; 
+            scroll-snap-type: x mandatory; /* EFECTO IMÁN */
+            scrollbar-width: none; 
         }
+        .week-days::-webkit-scrollbar { display: none; }
+        
         .week-days > * { 
             min-width: 65px !important; 
             flex-shrink: 0 !important; 
+            scroll-snap-align: start; /* HACE QUE SE ALINEE PERFECTO A LA IZQUIERDA */
         }
+
         .btn-scroll-cal {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -136,6 +142,7 @@
         </div>
     </section>
 
+    <!-- NAVEGACIÓN ADAPTADA A CELULAR -->
     <div class="admin-tabs">
         <button class="admin-tab-btn active" data-target="tab-panel-hoy"><i class="ph-bold ph-calendar-check"></i> Mostrador</button>
         <button class="admin-tab-btn" data-target="tab-gestion"><i class="ph-bold ph-buildings"></i> Canchas y Abonados</button>
@@ -318,7 +325,6 @@
                     </div>
                 </div>
 
-                <!-- Detalles multimedia -->
                 <label style="display:block; margin-bottom:15px; color:#aaa; font-size:0.85rem;">Descripción del Complejo
                     <textarea id="admin-descripcion" rows="3" placeholder="Contamos con 3 canchas techadas..." style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;"></textarea>
                 </label>
@@ -382,6 +388,7 @@
                 </label>
             </div>
 
+            <!-- MAGIA COMERCIAL: PRECIOS DINÁMICOS -->
             <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px dashed rgba(46,204,113,0.4); margin-bottom: 15px;">
                 <label style="display:block; margin-bottom:10px; color:#fff; font-size:0.9rem; font-weight:bold;">Tarifa Base (De Día) S/
                     <input id="espacio-precio" type="number" min="0" required placeholder="Ej: 40" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
@@ -490,12 +497,18 @@
         }
     });
 
-    // SCRIPTS DE DESPLAZAMIENTO DEL CALENDARIO
+    // SCRIPTS DE DESPLAZAMIENTO DEL CALENDARIO EXACTO (EFECTO SNAP)
     document.getElementById('btn-cal-prev').addEventListener('click', () => {
-        document.getElementById('week-days').scrollBy({ left: -160, behavior: 'smooth' });
+        const container = document.getElementById('week-days');
+        // Calculamos cuánto mide el primer cuadrito + el gap (10px) o usamos 80px por defecto
+        const scrollAmount = container.firstElementChild ? container.firstElementChild.offsetWidth + 10 : 80;
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     });
+    
     document.getElementById('btn-cal-next').addEventListener('click', () => {
-        document.getElementById('week-days').scrollBy({ left: 160, behavior: 'smooth' });
+        const container = document.getElementById('week-days');
+        const scrollAmount = container.firstElementChild ? container.firstElementChild.offsetWidth + 10 : 80;
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
 </script>
 
