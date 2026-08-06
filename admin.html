@@ -13,17 +13,21 @@
     <link rel="stylesheet" href="admin.css">
 
     <style>
-        /* ESTILOS DE PESTAÑAS (MÓVIL FRIENDLY) */
+        /* ==========================================
+           CORRECCIONES RESPONSIVE (MÓVIL FRIENDLY)
+           ========================================== */
+        
+        /* 1. Pestañas Principales (Cero estrés) */
         .admin-tabs { 
             display: flex; 
             gap: 8px; 
             margin-bottom: 25px; 
             border-bottom: 1px solid rgba(255,255,255,0.08); 
             padding-bottom: 12px; 
-            flex-wrap: wrap; /* Esto evita el scroll horizontal en móviles */
+            flex-wrap: wrap; 
         }
         .admin-tab-btn { 
-            flex: 1 1 auto; /* Se adaptan al ancho disponible */
+            flex: 1 1 auto; 
             background: transparent; 
             border: 1px solid transparent; 
             color: #888; 
@@ -45,19 +49,50 @@
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* GRID RESPONSIVE PARA EL MOSTRADOR */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            gap: 20px;
+        /* 2. Cabecera y Fecha (Evita que el texto y el emoji se aplasten) */
+        .admin-heading { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-start; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            margin-bottom: 25px; 
         }
+        .admin-heading > div:first-child { flex: 1; min-width: 250px; }
+        .admin-date { 
+            display: inline-flex !important; 
+            align-items: center !important; 
+            justify-content: center;
+            gap: 8px !important; 
+            padding: 10px 16px !important; 
+            border-radius: 8px !important; 
+            white-space: nowrap !important; /* Nunca se parte en dos líneas */
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* 3. El Calendario Deslizable (Swipe Horizontal) */
+        .week-days { 
+            display: flex !important; 
+            gap: 10px !important; 
+            overflow-x: auto !important; /* Permite deslizar */
+            padding-bottom: 10px !important; 
+            -webkit-overflow-scrolling: touch; /* Suavidad en iPhone/Android */
+            scrollbar-width: none; /* Oculta la barra de scroll en Firefox */
+        }
+        .week-days::-webkit-scrollbar { display: none; } /* Oculta la barra en Chrome/Safari */
+        
+        .week-days > * { 
+            min-width: 65px !important; /* Evita que los botones de los días se aplasten */
+            flex-shrink: 0 !important; 
+        }
+
+        /* 4. Cuadrícula de Mostrador */
+        .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr; /* En celular se pone uno debajo del otro */
-            }
-            .admin-kpis {
-                grid-template-columns: 1fr !important; /* Tarjetas de ingresos apiladas */
-            }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .admin-kpis { grid-template-columns: 1fr !important; }
+            .admin-date { width: 100%; } /* El botón de fecha ocupa todo el ancho en móvil */
         }
     </style>
 </head>
@@ -79,11 +114,12 @@
     <section class="admin-heading">
         <div>
             <span class="mini-label" style="color: #f1c40f;">PANEL PRIVADO DE ADMINISTRACIÓN</span>
-            <h1 id="nombre-cancha-admin">Cargando Complejo...</h1>
-            <p style="color: #aaa;">Gestiona tus reservas, canchas y contabilidad de forma simple.</p>
+            <h1 id="nombre-cancha-admin" style="font-size: 1.8rem; margin: 5px 0;">Cargando Complejo...</h1>
+            <p style="color: #aaa; margin: 0; font-size: 0.9rem;">Gestiona tus reservas, canchas y contabilidad de forma simple.</p>
         </div>
         <div class="admin-date" style="background: rgba(241,196,15,0.1); color: #f1c40f; border: 1px solid rgba(241,196,15,0.3);">
-            <i class="ph-bold ph-calendar-blank"></i><span id="fecha-hoy"></span>
+            <i class="ph-bold ph-calendar-blank" style="font-size: 1.3rem;"></i>
+            <span id="fecha-hoy">--/--/----</span>
         </div>
     </section>
 
@@ -114,8 +150,8 @@
 
         <section class="card week-control-card" style="margin-bottom: 25px;">
             <div class="week-head" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                <div><span class="mini-label">CALENDARIO</span><h2 style="margin:0;">Horarios y Separaciones</h2></div>
-                <button id="btn-hoy" class="btn btn-outline" style="padding: 6px 12px; width: auto;"><i class="ph-bold ph-calendar-check"></i> Volver a Hoy</button>
+                <div><span class="mini-label">CALENDARIO</span><h2 style="margin:0;">Horarios y Separaciones</h2><p style="color:#aaa; font-size:0.8rem; margin:0;">Desliza los días 👈👉</p></div>
+                <button id="btn-hoy" class="btn btn-outline" style="padding: 6px 12px; width: auto; white-space: nowrap;"><i class="ph-bold ph-calendar-check"></i> Volver a Hoy</button>
             </div>
             <div id="week-days" class="week-days" style="margin-top: 15px;"></div>
         </section>
@@ -402,7 +438,6 @@
         document.getElementById('modal-evento').style.display = 'flex';
     });
 
-    // Delegación para cerrar modales de admin
     document.body.addEventListener('click', (e) => {
         if(e.target.closest('.admin-modal-close')) {
             const modalId = e.target.closest('.admin-modal-close').getAttribute('data-close');
