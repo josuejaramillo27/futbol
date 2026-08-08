@@ -112,7 +112,6 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Botón de editar perfil (con hover arreglado) */
         .btn-edit-profile {
             width: 100%;
             background: rgba(46, 204, 113, 0.1);
@@ -290,12 +289,12 @@
     </div>
 
     <div id="modal-ver-perfil" class="modal-oculto">
-        <div class="modal-contenido" style="max-width: 400px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
+        <div class="modal-contenido" style="max-width: 400px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px; border: 1px solid #f1c40f;">
             <button id="cerrar-ver-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-            <span class="mini-label">PERFIL DEL JUGADOR</span>
+            <span class="mini-label" style="color: #f1c40f;">PERFIL DEL JUGADOR</span>
             
             <div id="contenido-perfil-publico" style="margin-top: 15px;">
-                <p style="text-align:center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap"></i> Cargando datos...</p>
+                <p style="text-align:center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando datos...</p>
             </div>
         </div>
     </div>
@@ -306,7 +305,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
@@ -375,7 +374,7 @@
         btnGuardarPerfil.addEventListener('click', async () => {
             if (!currentUser) return;
             
-            btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> Guardando en servidor...';
+            btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
             btnGuardarPerfil.disabled = true;
             
             const perfilData = {
@@ -407,13 +406,13 @@
         });
     }
 
-    // Ver perfil público de otros jugadores
     if (btnCerrarVerPerfil) {
         btnCerrarVerPerfil.addEventListener('click', () => {
             modalVerPerfil.classList.remove('mostrar');
         });
     }
 
+    // MAGIA DE REPUTACIÓN: CALCULAR ESTRELLAS Y ETIQUETAS ROJAS
     window.abrirPerfilJugador = async (jugadorUid) => {
         modalVerPerfil.classList.add('mostrar');
         contenedorPerfil.innerHTML = '<p style="text-align:center; color: #aaa;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando perfil...</p>';
@@ -422,6 +421,56 @@
             const docRef = doc(db, "jugadores_perfiles", jugadorUid);
             const docSnap = await getDoc(docRef);
 
+            // 1. OBTENER RESEÑAS DE ESTE JUGADOR
+            const qReviews = query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', jugadorUid));
+            const revSnap = await getDocs(qReviews);
+            let sumRating = 0;
+            let totalReviews = 0;
+            let tagsCount = {};
+            
+            revSnap.forEach(r => {
+                const data = r.data();
+                if(data.rating) {
+                    sumRating += data.rating;
+                    totalReviews++;
+                }
+                if(data.tags && Array.isArray(data.tags)) {
+                    data.tags.forEach(t => {
+                        tagsCount[t] = (tagsCount[t] || 0) + 1;
+                    });
+                }
+            });
+
+            // 2. CALCULAR PROMEDIO
+            let prom = totalReviews > 0 ? (sumRating / totalReviews).toFixed(1) : 0;
+            let starsHtml = '';
+            if(totalReviews > 0) {
+                starsHtml = `
+                <div style="display:flex; align-items:center; gap:5px; margin-top:10px; color:#f1c40f; font-size:1.1rem;">
+                    <i class="ph-fill ph-star"></i> <strong style="font-size:1.3rem;">${prom}</strong> 
+                    <span style="color:#aaa; font-size:0.8rem; font-weight:normal;">(${totalReviews} calificaciones de canchas)</span>
+                </div>`;
+            } else {
+                starsHtml = `<div style="margin-top:10px; color:#aaa; font-size:0.85rem;"><i class="ph-bold ph-shield-checkered"></i> Jugador nuevo (Sin historial)</div>`;
+            }
+
+            // 3. DETECTAR RED FLAGS (BANDERAS ROJAS Y VERDES)
+            const redFlagsList = ["No show (No vinieron)", "Pelea / Violencia", "Dañaron la cancha", "Falta de pago", "Mal comportamiento 👎", "Pésimos / Peligrosos 😡", "Dejaron basura", "Llegaron tarde"];
+            let alertsHtml = '';
+            let goodTagsHtml = '';
+            
+            Object.entries(tagsCount).forEach(([tag, count]) => {
+                if(redFlagsList.some(rf => tag.includes(rf))) {
+                    alertsHtml += `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-warning"></i> ${tag} (${count})</span>`;
+                } else if(count >= 1) {
+                    goodTagsHtml += `<span style="background:rgba(255,255,255,0.05); color:#ccc; border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;">${tag} (${count})</span>`;
+                }
+            });
+
+            if(alertsHtml) alertsHtml = `<div style="margin-top:15px; display:flex; flex-direction:column; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#e74c3c; font-weight:bold;">🚨 Reportes Negativos:</small>${alertsHtml}</div>`;
+            if(goodTagsHtml) goodTagsHtml = `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px;">${goodTagsHtml}</div>`;
+
+            // 4. PINTAR LA TARJETA FUT + REPUTACIÓN
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 
@@ -438,20 +487,26 @@
                                 <span class="stat-pill"><i class="ph-bold ph-soccer-ball"></i> ${data.deporte || 'Fútbol'}</span>
                                 <span class="stat-pill">${data.habilidad || 'Diestro'}</span>
                             </div>
+                            ${starsHtml}
                         </div>
                     </div>
+                    ${goodTagsHtml}
+                    ${alertsHtml}
                 `;
             } else {
                 contenedorPerfil.innerHTML = `
                     <div style="text-align:center; padding: 20px;">
                         <i class="ph-fill ph-user-circle" style="font-size: 3rem; color: #555;"></i>
                         <p style="color: #aaa; margin-top: 10px;">Este jugador aún no ha configurado su Tarjeta FUT.</p>
+                        ${starsHtml}
+                        ${goodTagsHtml}
+                        ${alertsHtml}
                     </div>
                 `;
             }
         } catch (error) {
             console.error("Error al cargar perfil:", error);
-            contenedorPerfil.innerHTML = '<p style="color: red; text-align:center;">Error al cargar datos.</p>';
+            contenedorPerfil.innerHTML = '<p style="color: red; text-align:center;">Error al cargar datos de reputación.</p>';
         }
     };
 </script>
