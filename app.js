@@ -55,7 +55,7 @@ const slotsDeCancha = (c, reservas, fechaReq) => {
     if(a===null || b0===null || !Number.isFinite(step) || step<=0) return [];
     let b = b0<=a ? b0+1440 : b0;
     const fReq = fechaReq || fechaHoy();
-    const ocupadas = new Set(reservas.filter(r => String(r.canchaId)===String(c.id) && String(r.fecha)===fReq && !['cancelada','cancelado','cancelled'].includes(normalizar(r.estado))).map(r=>minutos(r.horaInicio)).filter(Number.isFinite));
+    const ocupadas = new Set(reservas.filter(r => String(r.canchaId)===String(c.id) && String(r.fecha)===fReq && !['cancelada','cancelado','cancelled','rejected'].includes(normalizar(r.estado))).map(r=>minutos(r.horaInicio)).filter(Number.isFinite));
     const isToday = fReq === fechaHoy();
     const now = new Date(), actual = now.getHours()*60 + now.getMinutes();
     const out = [];
@@ -122,6 +122,7 @@ async function pintarDisponibilidadModal(c, fechaElegida){
         box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b=>b.addEventListener('click',()=>abrirReserva(c, b.dataset.bookTime, b.dataset.bookDate)));
     } catch (e) { box.innerHTML='<span style="color:var(--danger)">Error cargando horarios.</span>'; }
 }
+
 function abrirReserva(c, hora, fechaElegida){
     const modal = document.getElementById('modal-reserva');
     if(!modal) return;
@@ -129,39 +130,53 @@ function abrirReserva(c, hora, fechaElegida){
     const dateObj = new Date(`${fechaElegida}T12:00:00`);
     document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE',{weekday:'long',day:'numeric',month:'short'}).format(dateObj).toUpperCase()} · ${hora}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
-    document.getElementById('booking-status').textContent = '';
+    document.getElementById('booking-status').innerHTML = ''; // Limpiamos la caja amarilla anterior si la hubiera
     modal.dataset.courtId = c.id; modal.dataset.time = hora; modal.dataset.date = fechaElegida;
     modal.classList.add('mostrar'); modal.setAttribute('aria-hidden','false');
 }
+
 async function confirmarReserva(){
     const modal = document.getElementById('modal-reserva');
     const id = modal?.dataset.courtId, hora = modal?.dataset.time, fechaReq = modal?.dataset.date;
     const nombre = document.getElementById('booking-nombre')?.value.trim(), telefono = document.getElementById('booking-telefono')?.value.trim(), btn = document.getElementById('btn-confirmar-reserva');
+    
     if(!id || !hora || !fechaReq || !nombre || !telefono){ window.toast('Completa tu nombre y teléfono.','warning'); return; }
     if(!usuarioActual){
         window.toast('Inicia sesión con Google para reservar.','warning');
         try{ const r = await signInWithPopup(auth, new GoogleAuthProvider()); usuarioActual = r.user; }catch(e){return;}
     }
+    
     const c = canchasGlobales.find(x=>x.id===id);
     btn.disabled = true; window.toast('Confirmando horario...','info');
     const key = `${id}_${fechaReq}_${hora.replace(':','')}`;
+    
     try {
         await runTransaction(db, async tx => {
             const ref = doc(db,'reservas',key), existing = await tx.get(ref);
-            if(existing.exists() && !['cancelada','cancelado','cancelled'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
+            if(existing.exists() && !['cancelada','cancelado','cancelled','rejected'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
             tx.set(ref,{ id: key, canchaId: id, canchaNombre: c?.nombre||'', usuarioUid: usuarioActual.uid, nombre: nombre, usuarioNombre: nombre, telefono: telefono, usuarioTelefono: telefono, fecha: fechaReq, horaInicio: hora, horaFin: hora, estado: 'pendiente', precio: Number(c?.precio||0), metodoPago: 'pendiente', senaPagada: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
         });
-        window.toast('¡Reserva registrada! Abriendo WhatsApp...','success');
+        
+        // MAGIA DEL SEMÁFORO: Mostramos la advertencia amarilla
+        document.getElementById('booking-status').innerHTML = `
+            <div style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; padding:15px; border-radius:8px; color:#f1c40f; margin-top:15px; text-align:center;">
+                <i class="ph-fill ph-hourglass-high" style="font-size: 2rem;"></i><br>
+                <b style="font-size:1.1rem; display:block; margin:5px 0;">Reserva en estado PENDIENTE</b>
+                <span>Abre WhatsApp, envía la foto del pago/seña y espera que la cancha valide tu reserva.</span>
+            </div>`;
+            
         await pintarDisponibilidadModal(c, fechaReq);
         const telOwner = String(c?.whatsapp || '').replace(/\D/g, '');
+        
         if (telOwner) {
-            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, solicito reserva:\n👤 *Nombre:* ${nombre}\n📅 *Fecha:* ${fechaReq}\n⏰ *Hora:* ${hora}\n📱 *Teléfono:* ${telefono}`;
-            setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); cerrarReserva(); cerrarModal(); }, 1200);
-        } else { setTimeout(() => { cerrarReserva(); cerrarModal(); }, 1100); }
+            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en la APP:\n👤 *Nombre:* ${nombre}\n📅 *Fecha:* ${fechaReq}\n⏰ *Hora:* ${hora}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
+            setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); }, 2500);
+        }
     } catch(e) {
         window.toast(e.message==='SLOT_OCUPADO'?'Ese horario acaba de ser reservado.':'No pudimos registrar la reserva.','error');
     } finally { btn.disabled = false; }
 }
+
 const btnCerrar=document.getElementById('cerrar-modal'),modalCancha=document.getElementById('modal-cancha');if(btnCerrar)btnCerrar.addEventListener('click',cerrarModal);if(modalCancha)modalCancha.addEventListener('click',e=>{if(e.target===modalCancha)cerrarModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarModal();cerrarReserva()}});function cerrarModal(){if(!modalCancha)return;modalCancha.classList.remove('mostrar');document.body.style.overflow=''}
 function cerrarReserva(){const m=document.getElementById('modal-reserva');if(m){m.classList.remove('mostrar');m.setAttribute('aria-hidden','true')}}
 const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',cerrarReserva);document.getElementById('modal-reserva')?.addEventListener('click',e=>{if(e.target.id==='modal-reserva')cerrarReserva()});document.getElementById('btn-confirmar-reserva')?.addEventListener('click',confirmarReserva);
@@ -176,7 +191,6 @@ if (window.location.pathname.includes('jugadores.html')) {
     const lista = document.getElementById('lista-jugadores');
     const hint = document.getElementById('login-hint');
 
-    // 1. Control visual del Login de Google
     onAuthStateChanged(auth, u => {
         usuarioActual = u || null;
         if (btnLogin) btnLogin.style.display = u ? 'none' : 'flex';
@@ -184,18 +198,13 @@ if (window.location.pathname.includes('jugadores.html')) {
         if (hint) hint.style.display = u ? 'none' : 'block';
     });
 
-    // 2. Botón Iniciar Sesión con Google
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
-            try {
-                await signInWithPopup(auth, new GoogleAuthProvider());
-            } catch (e) {
-                window.toast('No se pudo iniciar sesión con Google.', 'error');
-            }
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); } 
+            catch (e) { window.toast('No se pudo iniciar sesión con Google.', 'error'); }
         });
     }
 
-    // 3. Descargar y pintar los partidos en vivo (Escáner)
     if (lista) {
         const q = query(collection(db, 'bolsa_jugadores'), orderBy('createdAt', 'desc'));
         onSnapshot(q, s => {
@@ -216,18 +225,13 @@ if (window.location.pathname.includes('jugadores.html')) {
                 lista.innerHTML += `
                 <article style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:12px; padding:20px; margin-bottom:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        
-                        <!-- AQUÍ ESTÁ LA MAGIA: Agregamos onclick="abrirPerfilJugador('${d.uid}')" y cursor:pointer -->
                         <strong onclick="abrirPerfilJugador('${d.uid}')" style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem; cursor:pointer; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#fff'" title="Ver Tarjeta FUT">
                             <i class="ph-fill ph-user-circle" style="font-size:1.8rem; color:var(--primary-green);"></i> 
                             ${d.nombreJugador || d.nombre || 'Jugador'}
                         </strong>
-                        
                         <span style="font-size:0.75rem; color:var(--text-muted);">${fechaTexto}</span>
                     </div>
-                    <p style="margin:5px 0; font-size:0.95rem; color:#ddd;">
-                        Busco: <b style="color:#fff;">${d.tipo || 'jugador'}</b> · <b style="color:#fff;">${d.modalidad || d.posicion || 'Fútbol 7'}</b>
-                    </p>
+                    <p style="margin:5px 0; font-size:0.95rem; color:#ddd;">Busco: <b style="color:#fff;">${d.tipo || 'jugador'}</b> · <b style="color:#fff;">${d.modalidad || d.posicion || 'Fútbol 7'}</b></p>
                     ${d.nivel || d.distrito ? `<p style="margin:5px 0; font-size:0.85rem; color:var(--text-muted);">Nivel: ${d.nivel || 'Amateur'} | Zona: ${d.distrito || 'No especificada'}</p>` : ''}
                     ${d.texto ? `<p style="margin:12px 0; font-size:0.95rem; color:#eee; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;">${d.texto}</p>` : ''}
                     ${d.contacto ? `<p style="margin:10px 0; font-size:0.95rem; color:var(--primary-green); font-weight:bold;"><i class="ph-bold ph-whatsapp-logo"></i> ${d.contacto}</p>` : ''}
@@ -235,7 +239,6 @@ if (window.location.pathname.includes('jugadores.html')) {
                 </article>`;
             });
 
-            // Listener para borrar el anuncio propio
             lista.querySelectorAll('.btn-borrar').forEach(b => {
                 b.addEventListener('click', async () => {
                     if (confirm('¿Borrar tu anuncio de búsqueda?')) {
@@ -252,22 +255,16 @@ if (window.location.pathname.includes('jugadores.html')) {
         });
     }
 
-    // 4. Enviar Formulario Anti-Spam
     if (formAnuncio) {
         formAnuncio.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            if (!usuarioActual) {
-                window.toast('Inicia sesión con Google para publicar.', 'warning');
-                return;
-            }
+            if (!usuarioActual) { window.toast('Inicia sesión con Google para publicar.', 'warning'); return; }
 
             const btn = formAnuncio.querySelector('button[type="submit"]') || document.getElementById('btn-publicar-anuncio');
             const textOriginal = btn ? btn.innerHTML : 'Publicar Anuncio';
             if(btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; }
 
             try {
-                // Validar Regla Anti-SPAM
                 const qCheck = query(collection(db, 'bolsa_jugadores'), where('uid', '==', usuarioActual.uid));
                 const snapCheck = await getDocs(qCheck);
                 
@@ -284,26 +281,16 @@ if (window.location.pathname.includes('jugadores.html')) {
                 await addDoc(collection(db, 'bolsa_jugadores'), {
                     uid: usuarioActual.uid, 
                     nombreJugador: usuarioActual.displayName || 'Jugador',
-                    nombre: usuarioActual.displayName || 'Jugador', // retro-compatibilidad
-                    tipo: tipo,
-                    modalidad: modalidad,
-                    posicion: document.getElementById('bolsa-posicion')?.value || '',
-                    nivel: document.getElementById('bolsa-nivel')?.value || '',
-                    distrito: document.getElementById('bolsa-distrito')?.value || '',
-                    contacto: document.getElementById('bolsa-contacto')?.value || '',
-                    texto: texto,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp()
+                    nombre: usuarioActual.displayName || 'Jugador',
+                    tipo: tipo, modalidad: modalidad, posicion: document.getElementById('bolsa-posicion')?.value || '',
+                    nivel: document.getElementById('bolsa-nivel')?.value || '', distrito: document.getElementById('bolsa-distrito')?.value || '',
+                    contacto: document.getElementById('bolsa-contacto')?.value || '', texto: texto,
+                    createdAt: serverTimestamp(), updatedAt: serverTimestamp()
                 });
                 
                 window.toast('¡Tu partido se publicó con éxito!', 'success');
                 formAnuncio.reset();
-                
-            } catch (error) {
-                window.toast('Ocurrió un error al intentar publicar.', 'error');
-            } finally {
-                if(btn) { btn.disabled = false; btn.innerHTML = textOriginal; }
-            }
+            } catch (error) { window.toast('Ocurrió un error al intentar publicar.', 'error'); } finally { if(btn) { btn.disabled = false; btn.innerHTML = textOriginal; } }
         });
     }
 }
