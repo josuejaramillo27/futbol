@@ -4,207 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
-    <title>Partidos | CHALACAPP</title>
+    <title>Bolsa de Jugadores | CHALACAPP</title>
     
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
-    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="discovery.css">
     
     <style>
-        /* ==========================================
-           ESTILOS DE LA TARJETA DE JUGADOR (FUT STYLE)
-           ========================================== */
-        .player-card-container {
-            background: linear-gradient(135deg, rgba(20,25,22,1) 0%, rgba(10,15,12,1) 100%);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-            border-radius: 16px;
-            padding: 15px;
-            display: flex;
-            gap: 15px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        /* ESTILOS DE LA TARJETA DE JUGADOR */
+        .player-card-container { background: linear-gradient(135deg, rgba(20,25,22,1) 0%, rgba(10,15,12,1) 100%); border: 1px solid rgba(46, 204, 113, 0.3); border-radius: 16px; padding: 15px; display: flex; gap: 15px; position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .player-card-container:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(46, 204, 113, 0.15); border-color: rgba(46, 204, 113, 0.8); }
+        .player-card-container::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(46,204,113,0.05) 0%, transparent 60%); z-index: 0; }
+        .player-avatar-wrapper { position: relative; z-index: 1; width: 80px; height: 100px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 15px; }
+        .player-photo { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-green); background: #000; }
+        .player-pos { font-size: 0.85rem; text-transform: uppercase; color: var(--primary-green); font-weight: bold; margin-top: 8px; }
+        .player-info { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .player-name { font-size: 1.1rem; color: #fff; margin: 0 0 4px 0; display: flex; align-items: center; gap: 6px; }
+        .player-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+        .stat-pill { background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; color: #ccc; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-edit-profile { width: 100%; background: rgba(46, 204, 113, 0.1); border: 1px dashed var(--primary-green); color: var(--primary-green); transition: all 0.3s ease; }
+        .btn-edit-profile:hover { background: var(--primary-green) !important; color: #080B0A !important; border: 1px solid var(--primary-green); }
+        
+        /* HEADER RESPONSIVE */
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100; }
+        .topbar-nav { display: flex; gap: 20px; align-items: center; }
+        .topbar-nav-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; }
+        .topbar-nav-link i { font-size: 1.3rem; }
+        .topbar-nav-link span { font-size: 0.6rem; margin-top: 3px; font-weight: bold; }
+        @media (max-width: 600px) {
+            .topbar { padding: 10px 12px !important; }
+            .topbar-nav { gap: 12px !important; }
+            .topbar-nav-link i { font-size: 1.15rem !important; }
+            .topbar-nav-link span { font-size: 0.55rem !important; }
         }
-
-        .player-card-container:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(46, 204, 113, 0.15);
-            border-color: rgba(46, 204, 113, 0.8);
-        }
-
-        /* Brillo de fondo */
-        .player-card-container::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(46,204,113,0.05) 0%, transparent 60%);
-            z-index: 0;
-        }
-
-        .player-avatar-wrapper {
-            position: relative;
-            z-index: 1;
-            width: 80px;
-            height: 100px;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            padding-right: 15px;
-        }
-
-        .player-photo {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--primary-green);
-            background: #000;
-        }
-
-        .player-pos {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            color: var(--primary-green);
-            font-weight: bold;
-            margin-top: 8px;
-        }
-
-        .player-info {
-            position: relative;
-            z-index: 1;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .player-name {
-            font-size: 1.1rem;
-            color: #fff;
-            margin: 0 0 4px 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .player-stats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
-
-        .stat-pill {
-            background: rgba(255,255,255,0.05);
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            color: #ccc;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .btn-edit-profile {
-            width: 100%;
-            background: rgba(46, 204, 113, 0.1);
-            border: 1px dashed var(--primary-green);
-            color: var(--primary-green);
-            transition: all 0.3s ease;
-        }
-
-        .btn-edit-profile:hover {
-            background: var(--primary-green) !important;
-            color: #080B0A !important;
-            border: 1px solid var(--primary-green);
-        }
-        /* ==========================================
-   HEADER RESPONSIVE PARA MÓVILES
-   ========================================== */
-.topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background: rgba(8, 11, 10, 0.95);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.topbar-nav {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-.topbar-nav-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: #aaa;
-    transition: color 0.3s;
-}
-
-.topbar-nav-link i {
-    font-size: 1.3rem;
-}
-
-.topbar-nav-link span {
-    font-size: 0.6rem;
-    margin-top: 3px;
-    font-weight: bold;
-}
-
-/* Ajustes exclusivos para celulares */
-@media (max-width: 600px) {
-    .topbar {
-        padding: 10px 12px !important;
-    }
-    .brand-sub {
-        display: none !important; /* Oculta 'COMUNIDADES' o 'JUGADORES' en celular */
-    }
-    .topbar-nav {
-        gap: 12px !important; /* Reduce la separación entre botones */
-    }
-    .topbar-nav-link i {
-        font-size: 1.15rem !important; /* Achica ligeramente los íconos */
-    }
-    .topbar-nav-link span {
-        font-size: 0.55rem !important; /* Ajusta el texto */
-    }
-}
     </style>
 </head>
 <body>
 
-<header class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100;">
+<header class="topbar">
     <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
         <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 28px; width: auto; object-fit: contain;">
-        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
+        <span style="font-size: 1.1rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
     </a>
-    
-    <nav style="display: flex; gap: 15px; align-items: center;">
-        <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
-            <i class="ph-bold ph-map-pin" style="font-size: 1.2rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
+    <nav class="topbar-nav">
+        <a href="index.html" class="topbar-nav-link" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-map-pin"></i><span>CANCHAS</span>
         </a>
-        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
-            <i class="ph-bold ph-users" style="font-size: 1.2rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
+        <a href="jugadores.html" class="topbar-nav-link" style="color: var(--primary-green);">
+            <i class="ph-bold ph-users"></i><span>BOLSA</span>
         </a>
-        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
-            <i class="ph-bold ph-shield-checkered" style="font-size: 1.2rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span>
+        <a href="comunidades.html" class="topbar-nav-link" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-shield-checkered"></i><span>COMUNIDADES</span>
         </a>
     </nav>
 </header>
@@ -253,8 +104,6 @@
                         <option>Fútbol 6</option>
                         <option>Fútbol 7</option>
                         <option>Fútbol 8</option>
-                        <option>Fútbol 9</option>
-                        <option>Fútbol 10</option>
                         <option>Fútbol 11</option>
                     </select>
                 </label>
@@ -279,7 +128,6 @@
             </div>
             <div class="live-indicator"><span></span> En vivo</div>
         </div>
-
         <div id="lista-jugadores" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
             <p style="text-align:center;color:var(--text-muted);grid-column:1/-1">Cargando partidos...</p>
         </div>
@@ -290,56 +138,41 @@
             <button id="cerrar-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
             <span class="mini-label">TU FUT CARD</span>
             <h2>Edita tu Perfil</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-                Estos datos solo serán visibles cuando publiques en la Bolsa de Jugadores.
-            </p>
             
-            <form id="form-editar-perfil">
-                <div style="display: flex; gap: 15px; margin-bottom: 20px; align-items: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;">
-                    <img id="preview-avatar" src="https://ui-avatars.com/api/?name=Jugador&background=2ecc71&color=fff" alt="Preview" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-green);">
-                    <div style="flex: 1;">
-                        <p style="margin: 0; font-size: 0.95rem; color: #fff; font-weight: bold;"><i class="ph-bold ph-google-logo" style="color: #1DA1F2;"></i> Foto vinculada</p>
-                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: var(--text-muted);">Usamos tu foto de perfil de Google por seguridad y confianza.</p>
+            <div id="sms-section" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #f1c40f;">
+                <h4 style="margin:0 0 10px 0; color:#f1c40f;"><i class="ph-bold ph-device-mobile"></i> Verificación de Seguridad</h4>
+                
+                <div id="phone-verified-msg" style="display:none; color:#2ecc71; font-weight:bold; font-size:0.9rem;">
+                    <i class="ph-bold ph-check-circle"></i> Celular verificado y seguro.
+                </div>
+                
+                <div id="phone-unverified-box">
+                    <p style="font-size:0.8rem; color:#ccc; margin-top:0;">Verifica tu celular para activar tu Tarjeta FUT y ser visible.</p>
+                    
+                    <div id="step-1-phone">
+                        <input type="tel" id="sms-phone" placeholder="987654321" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:10px; text-align:center; font-size:1.2rem; letter-spacing:2px;">
+                        <div id="recaptcha-container" style="margin-bottom:10px; display:flex; justify-content:center;"></div>
+                        <button type="button" id="btn-send-sms" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;">Enviar SMS de Código</button>
+                    </div>
+                    
+                    <div id="step-2-code" style="display:none;">
+                        <p style="font-size:0.8rem; color:#ccc; text-align:center;">Ingresa los 6 dígitos que te llegaron por SMS:</p>
+                        <input type="text" id="sms-code" placeholder="------" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:10px; text-align:center; font-size:1.5rem; letter-spacing:5px;">
+                        <button type="button" id="btn-verify-sms" class="btn" style="width:100%; background:#2ecc71; color:#000; font-weight:bold;">Verificar Código</button>
                     </div>
                 </div>
+            </div>
 
+            <form id="form-editar-perfil">
                 <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <label class="filter-field">
-                        <span>Deporte Principal</span>
-                        <select id="perfil-deporte">
-                            <option>Fútbol</option>
-                            <option>Vóley</option>
-                            <option>Básquet</option>
-                        </select>
-                    </label>
-                    <label class="filter-field">
-                        <span>Posición</span>
-                        <select id="perfil-posicion">
-                            <option value="DEL">Delantero (DEL)</option>
-                            <option value="MED">Mediocampista (MED)</option>
-                            <option value="DEF">Defensa (DEF)</option>
-                            <option value="ARQ">Arquero (ARQ)</option>
-                            <option value="LIB">Libre / Polifuncional</option>
-                        </select>
-                    </label>
+                    <label class="filter-field"><span>Deporte Principal</span><select id="perfil-deporte"><option>Fútbol</option><option>Vóley</option><option>Básquet</option></select></label>
+                    <label class="filter-field"><span>Posición</span><select id="perfil-posicion"><option value="DEL">Delantero (DEL)</option><option value="MED">Mediocampista (MED)</option><option value="DEF">Defensa (DEF)</option><option value="ARQ">Arquero (ARQ)</option><option value="LIB">Polifuncional</option></select></label>
                 </div>
-
                 <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <label class="filter-field">
-                        <span>Departamento / Ciudad</span>
-                        <input type="text" id="perfil-ciudad" placeholder="Ej: Piura, Castilla..." style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </label>
-                    <label class="filter-field">
-                        <span>Pierna / Mano Hábil</span>
-                        <select id="perfil-habilidad">
-                            <option>Diestro</option>
-                            <option>Zurdo</option>
-                            <option>Ambidiestro</option>
-                        </select>
-                    </label>
+                    <label class="filter-field"><span>Ciudad</span><input type="text" id="perfil-ciudad" placeholder="Ej: Piura" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;"></label>
+                    <label class="filter-field"><span>Pie Hábil</span><select id="perfil-habilidad"><option>Diestro</option><option>Zurdo</option><option>Ambidiestro</option></select></label>
                 </div>
-
-                <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;">
+                <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;" disabled>
                     <i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta
                 </button>
             </form>
@@ -350,7 +183,6 @@
         <div class="modal-contenido" style="max-width: 400px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px; border: 1px solid #f1c40f;">
             <button id="cerrar-ver-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
             <span class="mini-label" style="color: #f1c40f;">PERFIL DEL JUGADOR</span>
-            
             <div id="contenido-perfil-publico" style="margin-top: 15px;">
                 <p style="text-align:center; color: var(--text-muted);"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando datos...</p>
             </div>
@@ -361,8 +193,9 @@
 <script type="module" src="app.js"></script>
 
 <script type="module">
+    // IMPORTACIÓN ACTUALIZADA INCLUYENDO TELÉFONO Y RECAPTCHA
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, linkWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -381,21 +214,10 @@
 
     const btnAbrirPerfil = document.getElementById('btn-abrir-perfil');
     const modalPerfil = document.getElementById('modal-perfil-jugador');
-    const btnCerrarPerfil = document.getElementById('cerrar-perfil');
     const btnGuardarPerfil = document.getElementById('btn-guardar-perfil');
-    
-    const modalVerPerfil = document.getElementById('modal-ver-perfil');
-    const btnCerrarVerPerfil = document.getElementById('cerrar-ver-perfil');
-    const contenedorPerfil = document.getElementById('contenido-perfil-publico');
-
     let currentUser = null;
 
-    onAuthStateChanged(auth, (user) => {
-        currentUser = user;
-        if (user) {
-            document.getElementById('preview-avatar').src = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName}&background=2ecc71&color=fff`;
-        }
-    });
+    onAuthStateChanged(auth, (user) => { currentUser = user; });
 
     if (btnAbrirPerfil) {
         btnAbrirPerfil.addEventListener('click', async () => {
@@ -403,15 +225,12 @@
                 try {
                     const result = await signInWithPopup(auth, provider);
                     currentUser = result.user;
-                } catch (error) {
-                    console.error("Cancelado o error en Google:", error);
-                    return; 
-                }
+                } catch (error) { return; }
             }
             
+            // CARGAR DATOS SI YA TIENE FUT CARD
             const docRef = doc(db, "jugadores_perfiles", currentUser.uid);
             const docSnap = await getDoc(docRef);
-            
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 document.getElementById('perfil-deporte').value = data.deporte || 'Fútbol';
@@ -419,119 +238,146 @@
                 document.getElementById('perfil-ciudad').value = data.ciudad || '';
                 document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
             }
+
+            // GESTIÓN DEL BLOQUE SMS
+            if (currentUser.phoneNumber) {
+                document.getElementById('phone-unverified-box').style.display = 'none';
+                const msg = document.getElementById('phone-verified-msg');
+                msg.style.display = 'block';
+                msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Verificado: ${currentUser.phoneNumber}`;
+                btnGuardarPerfil.disabled = false; // Como está verificado, le dejamos guardar
+            } else {
+                document.getElementById('phone-unverified-box').style.display = 'block';
+                document.getElementById('phone-verified-msg').style.display = 'none';
+                btnGuardarPerfil.disabled = true; // Bloqueado hasta que verifique
+                
+                if(!window.recaptchaVerifier) {
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'normal' });
+                    window.recaptchaVerifier.render();
+                }
+            }
             
             modalPerfil.classList.add('mostrar');
         });
     }
 
-    if (btnCerrarPerfil) {
-        btnCerrarPerfil.addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
-    }
+    // BOTÓN: ENVIAR SMS
+    document.getElementById('btn-send-sms').addEventListener('click', () => {
+        const num = document.getElementById('sms-phone').value;
+        if(num.length !== 9) return alert("Ingresa un número celular de 9 dígitos válido.");
+        const phoneNumber = "+51" + num; // Agrega código de Perú
+        
+        const btn = document.getElementById('btn-send-sms');
+        btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Enviando SMS...';
 
+        linkWithPhoneNumber(currentUser, phoneNumber, window.recaptchaVerifier)
+            .then((confirmationResult) => {
+                window.confirmationResult = confirmationResult;
+                document.getElementById('step-1-phone').style.display = 'none';
+                document.getElementById('step-2-code').style.display = 'block';
+            }).catch((error) => {
+                console.error("SMS Error:", error);
+                alert("Error al enviar el SMS. Es posible que debas agregar localhost en Firebase.");
+                btn.disabled = false; btn.innerHTML = "Reintentar";
+                window.recaptchaVerifier.clear();
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'normal'});
+                window.recaptchaVerifier.render();
+            });
+    });
+
+    // BOTÓN: VERIFICAR EL CÓDIGO
+    document.getElementById('btn-verify-sms').addEventListener('click', () => {
+        const code = document.getElementById('sms-code').value;
+        if(code.length !== 6) return alert("El código tiene 6 dígitos.");
+        
+        const btn = document.getElementById('btn-verify-sms');
+        btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Validando...';
+
+        window.confirmationResult.confirm(code).then((result) => {
+            document.getElementById('phone-unverified-box').style.display = 'none';
+            const msg = document.getElementById('phone-verified-msg');
+            msg.style.display = 'block';
+            msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Celular verificado: ${result.user.phoneNumber}`;
+            
+            // DESBLOQUEA EL GUARDADO DE LA TARJETA
+            btnGuardarPerfil.disabled = false;
+        }).catch((error) => {
+            console.error("Code Error:", error);
+            alert("Código incorrecto. Verifica el mensaje en tu celular.");
+            btn.disabled = false; btn.innerHTML = "Verificar Código";
+        });
+    });
+
+    document.getElementById('cerrar-perfil').addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
+    document.getElementById('cerrar-ver-perfil').addEventListener('click', () => document.getElementById('modal-ver-perfil').classList.remove('mostrar'));
+
+    // GUARDAR TARJETA FUT
     if (btnGuardarPerfil) {
         btnGuardarPerfil.addEventListener('click', async () => {
             if (!currentUser) return;
-            
             btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
             btnGuardarPerfil.disabled = true;
             
             const perfilData = {
-                uid: currentUser.uid,
-                nombre: currentUser.displayName,
-                foto: currentUser.photoURL,
+                uid: currentUser.uid, nombre: currentUser.displayName, foto: currentUser.photoURL,
+                telefono: currentUser.phoneNumber, // GUARDAMOS SU TELÉFONO REAL
                 deporte: document.getElementById('perfil-deporte').value,
                 posicion: document.getElementById('perfil-posicion').value,
                 ciudad: document.getElementById('perfil-ciudad').value,
-                habilidad: document.getElementById('perfil-habilidad').value,
-                verificado: false
+                habilidad: document.getElementById('perfil-habilidad').value
             };
 
             try {
                 await setDoc(doc(db, "jugadores_perfiles", currentUser.uid), perfilData);
                 btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-check"></i> ¡Tarjeta Guardada!';
-                
-                setTimeout(() => {
-                    modalPerfil.classList.remove('mostrar');
-                    btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta';
-                    btnGuardarPerfil.disabled = false;
-                }, 1500);
-                
-            } catch (error) {
-                console.error("Error guardando perfil:", error);
-                btnGuardarPerfil.innerHTML = 'Error al guardar';
-                btnGuardarPerfil.disabled = false;
-            }
+                setTimeout(() => { modalPerfil.classList.remove('mostrar'); btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta'; btnGuardarPerfil.disabled = false; }, 1500);
+            } catch (error) { btnGuardarPerfil.innerHTML = 'Error al guardar'; btnGuardarPerfil.disabled = false; }
         });
     }
 
-    if (btnCerrarVerPerfil) {
-        btnCerrarVerPerfil.addEventListener('click', () => {
-            modalVerPerfil.classList.remove('mostrar');
-        });
-    }
-
-    // MAGIA DE REPUTACIÓN: CALCULAR ESTRELLAS Y ETIQUETAS ROJAS
+    // MAGIA: MOSTRAR PERFIL + ESTRELLAS + INSIGNIAS DE COMUNIDAD
     window.abrirPerfilJugador = async (jugadorUid) => {
+        const modalVerPerfil = document.getElementById('modal-ver-perfil');
+        const contenedorPerfil = document.getElementById('contenido-perfil-publico');
         modalVerPerfil.classList.add('mostrar');
-        contenedorPerfil.innerHTML = '<p style="text-align:center; color: #aaa;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando perfil...</p>';
+        contenedorPerfil.innerHTML = '<p style="text-align:center; color: #aaa;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando expediente...</p>';
 
         try {
-            const docRef = doc(db, "jugadores_perfiles", jugadorUid);
-            const docSnap = await getDoc(docRef);
+            const docSnap = await getDoc(doc(db, "jugadores_perfiles", jugadorUid));
 
-            // 1. OBTENER RESEÑAS DE ESTE JUGADOR
-            const qReviews = query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', jugadorUid));
-            const revSnap = await getDocs(qReviews);
-            let sumRating = 0;
-            let totalReviews = 0;
-            let tagsCount = {};
-            
+            // 1. REPUTACIÓN (Estrellas de Canchas)
+            const revSnap = await getDocs(query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', jugadorUid)));
+            let sumRating = 0, totalReviews = 0, tagsCount = {};
             revSnap.forEach(r => {
-                const data = r.data();
-                if(data.rating) {
-                    sumRating += data.rating;
-                    totalReviews++;
-                }
-                if(data.tags && Array.isArray(data.tags)) {
-                    data.tags.forEach(t => {
-                        tagsCount[t] = (tagsCount[t] || 0) + 1;
-                    });
-                }
+                if(r.data().rating) { sumRating += r.data().rating; totalReviews++; }
+                if(r.data().tags) r.data().tags.forEach(t => tagsCount[t] = (tagsCount[t] || 0) + 1);
             });
-
-            // 2. CALCULAR PROMEDIO
             let prom = totalReviews > 0 ? (sumRating / totalReviews).toFixed(1) : 0;
-            let starsHtml = '';
-            if(totalReviews > 0) {
-                starsHtml = `
-                <div style="display:flex; align-items:center; gap:5px; margin-top:10px; color:#f1c40f; font-size:1.1rem;">
-                    <i class="ph-fill ph-star"></i> <strong style="font-size:1.3rem;">${prom}</strong> 
-                    <span style="color:#aaa; font-size:0.8rem; font-weight:normal;">(${totalReviews} calificaciones de canchas)</span>
-                </div>`;
-            } else {
-                starsHtml = `<div style="margin-top:10px; color:#aaa; font-size:0.85rem;"><i class="ph-bold ph-shield-checkered"></i> Jugador nuevo (Sin historial)</div>`;
-            }
+            let starsHtml = totalReviews > 0 
+                ? `<div style="display:flex; align-items:center; gap:5px; margin-top:10px; color:#f1c40f; font-size:1.1rem;"><i class="ph-fill ph-star"></i> <strong style="font-size:1.3rem;">${prom}</strong> <span style="color:#aaa; font-size:0.8rem; font-weight:normal;">(${totalReviews} calificaciones)</span></div>`
+                : `<div style="margin-top:10px; color:#aaa; font-size:0.85rem;"><i class="ph-bold ph-shield-checkered"></i> Jugador libre (Sin historial de canchas)</div>`;
 
-            // 3. DETECTAR RED FLAGS (BANDERAS ROJAS Y VERDES)
-            const redFlagsList = ["No show (No vinieron)", "Pelea / Violencia", "Dañaron la cancha", "Falta de pago", "Mal comportamiento 👎", "Pésimos / Peligrosos 😡", "Dejaron basura", "Llegaron tarde"];
-            let alertsHtml = '';
-            let goodTagsHtml = '';
-            
+            const redFlags = ["No show (No vinieron)", "Pelea / Violencia", "Dañaron la cancha", "Falta de pago", "Mal comportamiento", "Pésimos / Peligrosos", "Dejaron basura", "Llegaron tarde"];
+            let alertsHtml = '', goodTagsHtml = '';
             Object.entries(tagsCount).forEach(([tag, count]) => {
-                if(redFlagsList.some(rf => tag.includes(rf))) {
-                    alertsHtml += `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-warning"></i> ${tag} (${count})</span>`;
-                } else if(count >= 1) {
-                    goodTagsHtml += `<span style="background:rgba(255,255,255,0.05); color:#ccc; border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;">${tag} (${count})</span>`;
-                }
+                if(redFlags.some(rf => tag.includes(rf))) alertsHtml += `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-warning"></i> ${tag} (${count})</span>`;
+                else if(count >= 1) goodTagsHtml += `<span style="background:rgba(255,255,255,0.05); color:#ccc; border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;">${tag} (${count})</span>`;
             });
-
-            if(alertsHtml) alertsHtml = `<div style="margin-top:15px; display:flex; flex-direction:column; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#e74c3c; font-weight:bold;">🚨 Reportes Negativos:</small>${alertsHtml}</div>`;
+            if(alertsHtml) alertsHtml = `<div style="margin-top:15px; display:flex; flex-direction:column; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#e74c3c; font-weight:bold;">🚨 Reportes de Indisciplina:</small>${alertsHtml}</div>`;
             if(goodTagsHtml) goodTagsHtml = `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px;">${goodTagsHtml}</div>`;
 
-            // 4. PINTAR LA TARJETA FUT + REPUTACIÓN
+            // 2. DETECTAR COMUNIDADES (Líder o Miembro)
+            let badgesComunidad = '';
+            const snapLider = await getDocs(query(collection(db, 'comunidades'), where('liderUid', '==', jugadorUid)));
+            snapLider.forEach(d => { badgesComunidad += `<span style="background:rgba(241,196,15,0.15); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-crown"></i> Líder: ${d.data().nombre}</span>`; });
+
+            const snapMiembro = await getDocs(query(collection(db, 'comunidades'), where('miembros_uids', 'array-contains', jugadorUid)));
+            snapMiembro.forEach(d => { if(d.data().liderUid !== jugadorUid) badgesComunidad += `<span style="background:rgba(52,152,219,0.15); color:#3498db; border:1px solid rgba(52,152,219,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-shield-checkered"></i> Club: ${d.data().nombre}</span>`; });
+            if(badgesComunidad) badgesComunidad = `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#aaa; width:100%;">Comunidades a las que pertenece:</small>${badgesComunidad}</div>`;
+
+            // 3. RENDERIZAR TODO
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                
                 contenedorPerfil.innerHTML = `
                     <div class="player-card-container">
                         <div class="player-avatar-wrapper">
@@ -541,31 +387,21 @@
                         <div class="player-info">
                             <h3 class="player-name">${data.nombre}</h3>
                             <div class="player-stats">
-                                <span class="stat-pill"><i class="ph-bold ph-map-pin"></i> ${data.ciudad || 'No especificado'}</span>
+                                <span class="stat-pill"><i class="ph-bold ph-map-pin"></i> ${data.ciudad || 'Libre'}</span>
                                 <span class="stat-pill"><i class="ph-bold ph-soccer-ball"></i> ${data.deporte || 'Fútbol'}</span>
                                 <span class="stat-pill">${data.habilidad || 'Diestro'}</span>
                             </div>
                             ${starsHtml}
                         </div>
                     </div>
+                    ${badgesComunidad}
                     ${goodTagsHtml}
                     ${alertsHtml}
                 `;
             } else {
-                contenedorPerfil.innerHTML = `
-                    <div style="text-align:center; padding: 20px;">
-                        <i class="ph-fill ph-user-circle" style="font-size: 3rem; color: #555;"></i>
-                        <p style="color: #aaa; margin-top: 10px;">Este jugador aún no ha configurado su Tarjeta FUT.</p>
-                        ${starsHtml}
-                        ${goodTagsHtml}
-                        ${alertsHtml}
-                    </div>
-                `;
+                contenedorPerfil.innerHTML = `<div style="text-align:center; padding: 20px;"><i class="ph-fill ph-user-circle" style="font-size: 3rem; color: #555;"></i><p style="color: #aaa; margin-top: 10px;">El jugador no tiene Tarjeta FUT pública.</p>${starsHtml}${badgesComunidad}${alertsHtml}</div>`;
             }
-        } catch (error) {
-            console.error("Error al cargar perfil:", error);
-            contenedorPerfil.innerHTML = '<p style="color: red; text-align:center;">Error al cargar datos de reputación.</p>';
-        }
+        } catch (error) { contenedorPerfil.innerHTML = '<p style="color: red; text-align:center;">Error al cargar datos.</p>'; }
     };
 </script>
 </body>
