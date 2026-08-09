@@ -67,6 +67,64 @@
         
         /* ESTILOS DE INSIGNIAS DE JUGADOR */
         .insignia-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #fff; display: flex; align-items: center; gap: 6px; font-weight: bold; }
+    /* ==========================================
+   HEADER RESPONSIVE PARA MÓVILES
+   ========================================== */
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(8, 11, 10, 0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.topbar-nav {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.topbar-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #aaa;
+    transition: color 0.3s;
+}
+
+.topbar-nav-link i {
+    font-size: 1.3rem;
+}
+
+.topbar-nav-link span {
+    font-size: 0.6rem;
+    margin-top: 3px;
+    font-weight: bold;
+}
+
+/* Ajustes exclusivos para celulares */
+@media (max-width: 600px) {
+    .topbar {
+        padding: 10px 12px !important;
+    }
+    .brand-sub {
+        display: none !important; /* Oculta 'COMUNIDADES' o 'JUGADORES' en celular */
+    }
+    .topbar-nav {
+        gap: 12px !important; /* Reduce la separación entre botones */
+    }
+    .topbar-nav-link i {
+        font-size: 1.15rem !important; /* Achica ligeramente los íconos */
+    }
+    .topbar-nav-link span {
+        font-size: 0.55rem !important; /* Ajusta el texto */
+    }
+}
     </style>
 </head>
 <body>
