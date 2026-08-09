@@ -83,6 +83,15 @@ window.customPrompt = function(mensaje, placeholder) {
 // ==========================================
 // UTILIDADES Y FUNCIONES BÁSICAS
 // ==========================================
+
+// ✅ FUNCIÓN INTELIGENTE PARA FORMATEAR EL WHATSAPP (AGREGA EL 51 AUTOMÁTICAMENTE)
+function formatWsp(num) {
+    if (!num) return '';
+    let n = String(num).replace(/\D/g, ''); // Quita espacios, guiones, símbolos
+    if (n.length === 9) return '51' + n;    // Si tiene 9 dígitos (Perú), le pone el 51
+    return n;                               // Si ya tiene el 51 o es de otro país, lo deja igual
+}
+
 function normalizar(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
 function obtenerCiudad(c){return c.ciudad||c.provincia||c.departamento||''} function obtenerTipo(c){return c.tipoCancha||c.tipo||c.modalidad||''}
 function precioNumero(c){const p=Number(String(c.precio??'').replace(',','.').replace(/[^0-9.]/g,''));return Number.isFinite(p)?p:0}
@@ -143,7 +152,9 @@ if(esInicio()){
 // ==========================================
 // MODAL DE RESERVA Y DISPONIBILIDAD
 // ==========================================
-window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';const tel=String(c.whatsapp||'').replace(/\D/g,'');document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de APP FUTBOL y quiero consultar disponibilidad.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
+window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';
+const tel=formatWsp(c.whatsapp); // FORMATEAMOS EL WHATSAPP DEL DUEÑO DE LA CANCHA
+document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de APP FUTBOL y quiero consultar disponibilidad.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
 async function pintarDisponibilidadModal(c, fechaElegida){
     const box = document.getElementById('modal-disponibilidad');
     if(!box) return;
@@ -209,7 +220,7 @@ async function confirmarReserva(){
             </div>`;
             
         await pintarDisponibilidadModal(c, fechaReq);
-        const telOwner = String(c?.whatsapp || '').replace(/\D/g, '');
+        const telOwner = formatWsp(c?.whatsapp); // FORMATEAMOS EL WHATSAPP DEL DUEÑO PARA QUE NUNCA FALLE
         
         if (telOwner) {
             const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en la APP:\n👤 *Nombre:* ${nombre}\n📅 *Fecha:* ${fechaReq}\n⏰ *Hora:* ${hora}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
@@ -226,7 +237,7 @@ const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',
 onAuthStateChanged(auth,u=>{usuarioActual=u||null});
 
 // ==========================================
-// FASE 26: LA BOLSA DE JUGADORES (MATCHMAKING SEGURO)
+// FASE 26: BOLSA DE JUGADORES Y PARTIDOS EN VIVO
 // ==========================================
 if (window.location.pathname.includes('jugadores.html')) {
     const btnLogin = document.getElementById('btn-login-google');
@@ -255,11 +266,10 @@ if (window.location.pathname.includes('jugadores.html')) {
             s.forEach(ds => docs.push({ id: ds.id, ...ds.data() }));
 
             if (!docs.length) {
-                lista.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:30px; grid-column:1/-1;"><i class="ph-bold ph-users-three" style="font-size:40px;color:var(--primary-green)"></i><p style="margin-top:10px;">No hay partidos abiertos todavía. Sé el primero.</p></div>';
+                lista.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:30px; grid-column:1/-1;"><i class=\"ph-bold ph-users-three\" style=\"font-size:40px;color:var(--primary-green)\"></i><p style=\"margin-top:10px;\">No hay partidos abiertos todavía. Sé el primero.</p></div>';
                 return;
             }
 
-            // Evitamos borrar toda la lista de golpe y usamos innerHTML cuidadosamente
             let bufferHTML = '';
 
             docs.forEach(d => {
@@ -275,12 +285,12 @@ if (window.location.pathname.includes('jugadores.html')) {
                 const miPostulacion = yaPostulo ? postulantes[usuarioActual.uid] : null;
 
                 if (esMio) {
-                    // VISTA DEL CREADOR DEL ANUNCIO
                     let htmlPost = listaPostulantes.map(p => {
                         if(p.estado === 'aceptado') {
+                            // AQUÍ TAMBIÉN FORMATEAMOS EL WHATSAPP AL ABRIR EL LINK
                             return `<div style="background:rgba(46,204,113,0.1); border:1px solid #2ecc71; padding:10px; border-radius:8px; margin-top:8px;">
                                 <span style="color:#2ecc71; font-size:0.85rem;"><i class="ph-fill ph-handshake"></i> Fichaste a <b>${p.nombre}</b></span>
-                                <a href="https://wa.me/${p.telefono}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:5px; margin-top:8px; color:#000; background:#25D366; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:0.8rem; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir al +${p.telefono}</a>
+                                <a href="https://wa.me/${formatWsp(p.telefono)}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:5px; margin-top:8px; color:#000; background:#25D366; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:0.8rem; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir a ${p.nombre}</a>
                             </div>`;
                         } else {
                             return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px; margin-top:8px; border: 1px solid rgba(255,255,255,0.1);">
@@ -295,14 +305,14 @@ if (window.location.pathname.includes('jugadores.html')) {
                         ${htmlPost || '<div style="color:#666; font-size:0.8rem; margin-top:8px; font-style:italic;">Nadie se ha postulado aún.</div>'}
                     </div>`;
                 } else {
-                    // VISTA DEL JUGADOR QUE BUSCA EQUIPO
                     if (!usuarioActual) {
                         interaccionHTML = `<button class="btn" style="width:100%; margin-top:15px; background:rgba(255,255,255,0.1); color:#aaa; border:1px dashed #555;" onclick="window.toast('Inicia sesión para postularte','warning')">Inicia sesión para apuntarte</button>`;
                     } else if (yaPostulo) {
                         if (miPostulacion.estado === 'aceptado') {
+                            // AQUÍ FORMATEAMOS EL CONTACTO DEL CREADOR
                             interaccionHTML = `<div style="margin-top:15px; padding:15px; background:rgba(46,204,113,0.1); border:1px solid #2ecc71; border-radius:8px; text-align:center;">
                                 <span style="color:#2ecc71; font-weight:bold; font-size:0.95rem; display:block; margin-bottom:8px;">🎉 ¡Has sido fichado!</span>
-                                <a href="https://wa.me/${d.contacto}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#25D366; color:#000; font-weight:bold; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:0.85rem;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir al Capitán</a>
+                                <a href="https://wa.me/${formatWsp(d.contacto)}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#25D366; color:#000; font-weight:bold; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:0.85rem;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir al Capitán</a>
                             </div>`;
                         } else {
                             interaccionHTML = `<div style="margin-top:15px; padding:12px; background:rgba(241,196,15,0.1); border:1px dashed rgba(241,196,15,0.4); border-radius:8px; color:#f1c40f; text-align:center; font-size:0.85rem; font-weight:bold;">
@@ -338,6 +348,9 @@ if (window.location.pathname.includes('jugadores.html')) {
                 b.addEventListener('click', async () => {
                     const num = await window.customPrompt('Para apuntarte, ingresa tu número de WhatsApp. El capitán solo lo verá si te acepta.', 'Ej: 987654321');
                     if(!num) return;
+                    
+                    const numFormatted = formatWsp(num); // 👈 MAGIA AQUÍ (Agrega el 51 automáticamente)
+
                     const anuncioId = b.dataset.anuncio;
                     b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
                     try {
@@ -345,7 +358,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                             [`postulantes.${usuarioActual.uid}`]: {
                                 uid: usuarioActual.uid,
                                 nombre: usuarioActual.displayName || 'Jugador',
-                                telefono: num,
+                                telefono: numFormatted, // Se guarda ya limpio y con código de país
                                 estado: 'pendiente'
                             }
                         });
@@ -391,9 +404,10 @@ if (window.location.pathname.includes('jugadores.html')) {
             e.preventDefault();
             if (!usuarioActual) { window.toast('Inicia sesión con Google para publicar.', 'warning'); return; }
 
-            // IMPORTANTE: Exigimos el número del creador para guardarlo oculto
             const telefonoCreador = await window.customPrompt('Ingresa tu número de WhatsApp. Los jugadores solo lo verán SI TÚ LOS ACEPTAS.', 'Ej: 987654321');
             if(!telefonoCreador) return;
+
+            const telCreadorFormatted = formatWsp(telefonoCreador); // 👈 MAGIA AQUÍ TAMBIÉN
 
             const btn = formAnuncio.querySelector('button[type="submit"]');
             const textOriginal = btn ? btn.innerHTML : 'Publicar';
@@ -415,9 +429,9 @@ if (window.location.pathname.includes('jugadores.html')) {
                     nombre: usuarioActual.displayName || 'Jugador',
                     tipo: document.getElementById('tipo-anuncio')?.value || 'jugador',
                     modalidad: document.getElementById('modalidad-anuncio')?.value || 'Fútbol 7',
-                    contacto: telefonoCreador, // Oculto hasta aceptar postulantes
+                    contacto: telCreadorFormatted, // Guardado con código de país, pero Oculto
                     texto: document.getElementById('texto-anuncio')?.value || '',
-                    postulantes: {}, // Inicializamos el diccionario de postulantes vacío
+                    postulantes: {}, 
                     createdAt: serverTimestamp(), updatedAt: serverTimestamp()
                 });
                 
