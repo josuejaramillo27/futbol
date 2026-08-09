@@ -37,7 +37,7 @@ window.toast = function(mensaje, tipo = 'success') {
 };
 window.alert = function(mensaje) { window.toast(mensaje, 'info'); };
 
-// MODAL PARA PEDIR WHATSAPP
+// MODAL BLINDADO PARA PEDIR WHATSAPP (SOLO 9 DÍGITOS + CONFIRMACIÓN)
 window.customPrompt = function(mensaje, placeholder) {
     return new Promise((resolve) => {
         let overlay = document.getElementById('custom-prompt-overlay');
@@ -53,7 +53,7 @@ window.customPrompt = function(mensaje, placeholder) {
                 <div class="prompt-box">
                     <i class="ph-fill ph-whatsapp-logo" style="font-size:3rem; color:#25D366; margin-bottom:10px;"></i>
                     <p id="custom-prompt-msg" style="margin:0 0 15px; font-size:0.95rem; color:#fff; line-height:1.4;"></p>
-                    <input type="tel" id="custom-prompt-input" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:20px; text-align:center; font-size:1.1rem; font-weight:bold;" placeholder="">
+                    <input type="tel" id="custom-prompt-input" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:20px; text-align:center; font-size:1.2rem; font-weight:bold; letter-spacing:2px;" placeholder="">
                     <div style="display:flex; gap:10px;">
                         <button id="btn-prompt-cancel" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff; border:none;">Cancelar</button>
                         <button id="btn-prompt-ok" class="btn" style="flex:1; background:#f1c40f; color:#000; font-weight:bold; border:none;">Enviar</button>
@@ -69,9 +69,16 @@ window.customPrompt = function(mensaje, placeholder) {
 
         document.getElementById('btn-prompt-ok').onclick = () => {
             const val = document.getElementById('custom-prompt-input').value.trim();
-            if(!val) { window.toast('Debes ingresar un número válido.', 'warning'); return; }
-            overlay.classList.remove('show');
-            resolve(val);
+            if(val.length !== 9) { 
+                window.toast('El número debe tener exactamente 9 dígitos.', 'warning'); 
+                return; 
+            }
+            
+            // ALERTA DE CONFIRMACIÓN ANTES DE ENVIAR
+            if(confirm(`¿Tu número es ${val}?\n\nVerifica que esté correcto antes de enviarlo, ya que por ahí te contactarán.`)) {
+                overlay.classList.remove('show');
+                resolve(val);
+            }
         };
         document.getElementById('btn-prompt-cancel').onclick = () => {
             overlay.classList.remove('show');
@@ -83,13 +90,11 @@ window.customPrompt = function(mensaje, placeholder) {
 // ==========================================
 // UTILIDADES Y FUNCIONES BÁSICAS
 // ==========================================
-
-// ✅ FUNCIÓN INTELIGENTE PARA FORMATEAR EL WHATSAPP (AGREGA EL 51 AUTOMÁTICAMENTE)
 function formatWsp(num) {
     if (!num) return '';
-    let n = String(num).replace(/\D/g, ''); // Quita espacios, guiones, símbolos
-    if (n.length === 9) return '51' + n;    // Si tiene 9 dígitos (Perú), le pone el 51
-    return n;                               // Si ya tiene el 51 o es de otro país, lo deja igual
+    let n = String(num).replace(/\D/g, ''); 
+    if (n.length === 9) return '51' + n;    
+    return n;                               
 }
 
 function normalizar(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
@@ -152,9 +157,7 @@ if(esInicio()){
 // ==========================================
 // MODAL DE RESERVA Y DISPONIBILIDAD
 // ==========================================
-window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';
-const tel=formatWsp(c.whatsapp); // FORMATEAMOS EL WHATSAPP DEL DUEÑO DE LA CANCHA
-document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de APP FUTBOL y quiero consultar disponibilidad.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
+window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';const tel=formatWsp(c.whatsapp); document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de APP FUTBOL y quiero consultar disponibilidad.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
 async function pintarDisponibilidadModal(c, fechaElegida){
     const box = document.getElementById('modal-disponibilidad');
     if(!box) return;
@@ -220,7 +223,7 @@ async function confirmarReserva(){
             </div>`;
             
         await pintarDisponibilidadModal(c, fechaReq);
-        const telOwner = formatWsp(c?.whatsapp); // FORMATEAMOS EL WHATSAPP DEL DUEÑO PARA QUE NUNCA FALLE
+        const telOwner = formatWsp(c?.whatsapp); 
         
         if (telOwner) {
             const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en la APP:\n👤 *Nombre:* ${nombre}\n📅 *Fecha:* ${fechaReq}\n⏰ *Hora:* ${hora}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
@@ -287,7 +290,6 @@ if (window.location.pathname.includes('jugadores.html')) {
                 if (esMio) {
                     let htmlPost = listaPostulantes.map(p => {
                         if(p.estado === 'aceptado') {
-                            // AQUÍ TAMBIÉN FORMATEAMOS EL WHATSAPP AL ABRIR EL LINK
                             return `<div style="background:rgba(46,204,113,0.1); border:1px solid #2ecc71; padding:10px; border-radius:8px; margin-top:8px;">
                                 <span style="color:#2ecc71; font-size:0.85rem;"><i class="ph-fill ph-handshake"></i> Fichaste a <b>${p.nombre}</b></span>
                                 <a href="https://wa.me/${formatWsp(p.telefono)}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:5px; margin-top:8px; color:#000; background:#25D366; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:0.8rem; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir a ${p.nombre}</a>
@@ -309,7 +311,6 @@ if (window.location.pathname.includes('jugadores.html')) {
                         interaccionHTML = `<button class="btn" style="width:100%; margin-top:15px; background:rgba(255,255,255,0.1); color:#aaa; border:1px dashed #555;" onclick="window.toast('Inicia sesión para postularte','warning')">Inicia sesión para apuntarte</button>`;
                     } else if (yaPostulo) {
                         if (miPostulacion.estado === 'aceptado') {
-                            // AQUÍ FORMATEAMOS EL CONTACTO DEL CREADOR
                             interaccionHTML = `<div style="margin-top:15px; padding:15px; background:rgba(46,204,113,0.1); border:1px solid #2ecc71; border-radius:8px; text-align:center;">
                                 <span style="color:#2ecc71; font-weight:bold; font-size:0.95rem; display:block; margin-bottom:8px;">🎉 ¡Has sido fichado!</span>
                                 <a href="https://wa.me/${formatWsp(d.contacto)}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#25D366; color:#000; font-weight:bold; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:0.85rem;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir al Capitán</a>
@@ -349,7 +350,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                     const num = await window.customPrompt('Para apuntarte, ingresa tu número de WhatsApp. El capitán solo lo verá si te acepta.', 'Ej: 987654321');
                     if(!num) return;
                     
-                    const numFormatted = formatWsp(num); // 👈 MAGIA AQUÍ (Agrega el 51 automáticamente)
+                    const numFormatted = formatWsp(num); 
 
                     const anuncioId = b.dataset.anuncio;
                     b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
@@ -358,7 +359,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                             [`postulantes.${usuarioActual.uid}`]: {
                                 uid: usuarioActual.uid,
                                 nombre: usuarioActual.displayName || 'Jugador',
-                                telefono: numFormatted, // Se guarda ya limpio y con código de país
+                                telefono: numFormatted, 
                                 estado: 'pendiente'
                             }
                         });
@@ -407,7 +408,7 @@ if (window.location.pathname.includes('jugadores.html')) {
             const telefonoCreador = await window.customPrompt('Ingresa tu número de WhatsApp. Los jugadores solo lo verán SI TÚ LOS ACEPTAS.', 'Ej: 987654321');
             if(!telefonoCreador) return;
 
-            const telCreadorFormatted = formatWsp(telefonoCreador); // 👈 MAGIA AQUÍ TAMBIÉN
+            const telCreadorFormatted = formatWsp(telefonoCreador); 
 
             const btn = formAnuncio.querySelector('button[type="submit"]');
             const textOriginal = btn ? btn.innerHTML : 'Publicar';
@@ -429,7 +430,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                     nombre: usuarioActual.displayName || 'Jugador',
                     tipo: document.getElementById('tipo-anuncio')?.value || 'jugador',
                     modalidad: document.getElementById('modalidad-anuncio')?.value || 'Fútbol 7',
-                    contacto: telCreadorFormatted, // Guardado con código de país, pero Oculto
+                    contacto: telCreadorFormatted, 
                     texto: document.getElementById('texto-anuncio')?.value || '',
                     postulantes: {}, 
                     createdAt: serverTimestamp(), updatedAt: serverTimestamp()
