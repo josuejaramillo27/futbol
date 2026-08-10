@@ -151,7 +151,9 @@
                     
                     <div id="step-1-phone">
                         <input type="tel" id="sms-phone" placeholder="987654321" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:10px; text-align:center; font-size:1.2rem; letter-spacing:2px;">
-                        <div id="recaptcha-container" style="margin-bottom:10px; display:flex; justify-content:center;"></div>
+                        
+                        <div id="recaptcha-container"></div>
+                        
                         <button type="button" id="btn-send-sms" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;">Enviar SMS de Código</button>
                     </div>
                     
@@ -193,7 +195,7 @@
 <script type="module" src="app.js"></script>
 
 <script type="module">
-    // IMPORTACIÓN ACTUALIZADA INCLUYENDO TELÉFONO Y RECAPTCHA
+    // IMPORTACIÓN ACTUALIZADA
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, linkWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -251,9 +253,9 @@
                 document.getElementById('phone-verified-msg').style.display = 'none';
                 btnGuardarPerfil.disabled = true; // Bloqueado hasta que verifique
                 
+                // INICIALIZAMOS EL RECAPTCHA INVISIBLE
                 if(!window.recaptchaVerifier) {
-                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'normal' });
-                    window.recaptchaVerifier.render();
+                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
                 }
             }
             
@@ -268,7 +270,7 @@
         const phoneNumber = "+51" + num; // Agrega código de Perú
         
         const btn = document.getElementById('btn-send-sms');
-        btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Enviando SMS...';
+        btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Enviando...';
 
         linkWithPhoneNumber(currentUser, phoneNumber, window.recaptchaVerifier)
             .then((confirmationResult) => {
@@ -277,11 +279,10 @@
                 document.getElementById('step-2-code').style.display = 'block';
             }).catch((error) => {
                 console.error("SMS Error:", error);
-                alert("Error al enviar el SMS. Es posible que debas agregar localhost en Firebase.");
+                alert("Error al enviar el SMS. Intenta con un número de prueba configurado en Firebase.");
                 btn.disabled = false; btn.innerHTML = "Reintentar";
-                window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'normal'});
-                window.recaptchaVerifier.render();
+                if(window.recaptchaVerifier) window.recaptchaVerifier.clear();
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
             });
     });
 
