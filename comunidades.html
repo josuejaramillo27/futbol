@@ -39,15 +39,28 @@
         .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
         
-        /* ESTILOS DEL CAMPO VERDE CÉSPED */
+        /* ⚽ CANCHA FÚTBOL */
         .soccer-pitch { position: relative; background: repeating-linear-gradient(0deg, #1b4924, #1b4924 10%, #153c1d 10%, #153c1d 20%); border: 2px solid rgba(255,255,255,0.4); border-radius: 12px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 480px; overflow: hidden; margin-top: 15px; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
         .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
         .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
         .pitch-circle { top: 50%; left: 50%; width: 100px; height: 100px; border-radius: 50%; transform: translate(-50%, -50%); }
         .pitch-box-top { top: 0; left: 20%; width: 60%; height: 18%; border-top: none; }
         .pitch-box-bottom { bottom: 0; left: 20%; width: 60%; height: 18%; border-bottom: none; }
-        .pitch-goal-top { top: 0; left: 35%; width: 30%; height: 6%; border-top: none; }
-        .pitch-goal-bottom { bottom: 0; left: 35%; width: 30%; height: 6%; border-bottom: none; }
+
+        /* 🏐 CANCHA VÓLEY */
+        .voley-pitch { position: relative; background: #2980b9; border: 3px solid #f1c40f; border-radius: 8px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 440px; overflow: hidden; margin-top: 15px; box-shadow: inset 0 0 30px rgba(0,0,0,0.4); }
+        .voley-line { position: absolute; background: #f1c40f; pointer-events: none; }
+        .voley-center { top: 50%; left: 0; width: 100%; height: 4px; transform: translateY(-50%); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .voley-attack-top { top: 33%; left: 0; width: 100%; height: 2px; opacity: 0.8; }
+        .voley-attack-bottom { bottom: 33%; left: 0; width: 100%; height: 2px; opacity: 0.8; }
+
+        /* 🏀 CANCHA BÁSQUET */
+        .basket-pitch { position: relative; background: #d35400; border: 2px solid #fff; border-radius: 8px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 480px; overflow: hidden; margin-top: 15px; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
+        .basket-line { position: absolute; border: 2px solid #fff; pointer-events: none; }
+        .basket-center { top: 50%; left: 0; width: 100%; height: 0; }
+        .basket-circle { top: 50%; left: 50%; width: 80px; height: 80px; border-radius: 50%; transform: translate(-50%, -50%); }
+        .basket-paint-top { top: 0; left: 30%; width: 40%; height: 25%; border-top: none; background: rgba(255,255,255,0.1); }
+        .basket-paint-bottom { bottom: 0; left: 30%; width: 40%; height: 25%; border-bottom: none; background: rgba(255,255,255,0.1); }
         
         .formation-row { display: flex; justify-content: center; gap: 15px; z-index: 10; position: relative; min-height: 70px; flex-wrap: wrap; align-items: center; }
         .player-pitch-card { display: flex; flex-direction: column; align-items: center; transition: transform 0.3s ease; position: relative; cursor: pointer; }
@@ -57,74 +70,17 @@
         .player-pitch-score { position: absolute; top: -5px; right: -8px; background: #f1c40f; color: #000; border-radius: 50%; width: 22px; height: 22px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 2px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .player-pitch-name { background: rgba(0,0,0,0.85); color: #fff; font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; margin-top: -10px; font-weight: bold; text-transform: uppercase; white-space: nowrap; max-width: 70px; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(255,255,255,0.2); z-index: 2; text-shadow: 1px 1px 2px #000; }
 
-        /* MAGIA: ANIMACIÓN DE FUEGO PARA RETOS */
-        @keyframes parpadeoFuego {
-            0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px #e74c3c); }
-            50% { transform: scale(1.3); opacity: 0.8; filter: drop-shadow(0 0 8px #f1c40f); }
-            100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px #e74c3c); }
-        }
+        @keyframes parpadeoFuego { 0% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px #e74c3c); } 50% { transform: scale(1.3); opacity: 0.8; filter: drop-shadow(0 0 8px #f1c40f); } 100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px #e74c3c); } }
         .alerta-reto { display: inline-block; animation: parpadeoFuego 1s infinite; pointer-events: none; }
-        
-        /* ESTILOS DE INSIGNIAS DE JUGADOR */
         .insignia-pill { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; color: #fff; display: flex; align-items: center; gap: 6px; font-weight: bold; }
-    /* ==========================================
-   HEADER RESPONSIVE PARA MÓVILES
-   ========================================== */
-.topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    background: rgba(8, 11, 10, 0.95);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.topbar-nav {
-    display: flex;
-    gap: 20px;
-    align-items: center;
-}
-
-.topbar-nav-link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    color: #aaa;
-    transition: color 0.3s;
-}
-
-.topbar-nav-link i {
-    font-size: 1.3rem;
-}
-
-.topbar-nav-link span {
-    font-size: 0.6rem;
-    margin-top: 3px;
-    font-weight: bold;
-}
-
-/* Ajustes exclusivos para celulares */
-@media (max-width: 600px) {
-    .topbar {
-        padding: 10px 12px !important;
-    }
-    .brand-sub {
-        display: none !important; /* Oculta 'COMUNIDADES' o 'JUGADORES' en celular */
-    }
-    .topbar-nav {
-        gap: 12px !important; /* Reduce la separación entre botones */
-    }
-    .topbar-nav-link i {
-        font-size: 1.15rem !important; /* Achica ligeramente los íconos */
-    }
-    .topbar-nav-link span {
-        font-size: 0.55rem !important; /* Ajusta el texto */
-    }
-}
+        
+        /* HEADER MÓVIL */
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100; }
+        .topbar-nav { display: flex; gap: 20px; align-items: center; }
+        .topbar-nav-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; }
+        .topbar-nav-link i { font-size: 1.3rem; }
+        .topbar-nav-link span { font-size: 0.6rem; margin-top: 3px; font-weight: bold; }
+        @media (max-width: 600px) { .topbar { padding: 10px 12px !important; } .brand-sub { display: none !important; } .topbar-nav { gap: 12px !important; } .topbar-nav-link i { font-size: 1.15rem !important; } .topbar-nav-link span { font-size: 0.55rem !important; } }
     </style>
 </head>
 <body>
@@ -162,7 +118,7 @@
     
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-mis-comunidades">Mis Comunidades</button>
-        <button class="tab-btn" id="tab-explorar">Explorar Comunidades</button>
+        <button class="tab-btn" id="tab-explorar">Explorar</button>
         <button class="tab-btn tab-btn-reto" id="tab-retos" style="border: 1px dashed rgba(231, 76, 60, 0.4); position: relative;">
             ⚔️ Zona de Retos 
             <span id="tab-alerta-reto" style="display:none; position:absolute; top:-10px; right:-10px; font-size:1.1rem; z-index:10;" class="alerta-reto">🔥</span>
@@ -174,9 +130,6 @@
     <div id="lista-retos" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;"></div>
 </main>
 
-<!-- ========================================== -->
-<!-- HUB DE LA COMUNIDAD -->
-<!-- ========================================== -->
 <div id="hub-comunidad" class="hub-modal">
     <div class="hub-header-banner">
         <div style="max-width: 900px; margin: 0 auto;">
@@ -218,7 +171,11 @@
         
         <div class="hub-card-box" style="padding: 0; background: transparent; border: none;">
             <div id="hub-lista-partidos"></div>
-            <div id="hub-panel-ranking" style="display: none;"></div>
+            <div id="hub-panel-ranking" style="display: none;">
+                <div id="ranking-filtros-deporte" style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    </div>
+                <div id="ranking-contenido-deporte"></div>
+            </div>
         </div>
 
         <div id="hub-link-whatsapp-box" class="hub-card-box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
@@ -231,15 +188,9 @@
     </div>
 </div>
 
-<!-- ========================================== -->
-<!-- MODALES Y FORMULARIOS -->
-<!-- ========================================== -->
-
-<!-- NUEVO MODAL: PERFIL EXPANDIDO DEL JUGADOR (SALÓN DE TROFEOS) -->
 <div id="modal-perfil-expandido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); padding:30px 25px; border-radius:16px; width:100%; max-width:400px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 40px rgba(241,196,15,0.2);">
         <button id="cerrar-perfil-expandido" class="btn-cerrar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
-        
         <div style="text-align: center; margin-bottom: 20px;">
             <div style="width: 100px; height: 100px; margin: 0 auto 10px; position: relative;">
                 <img id="pe-foto" src="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 3px solid #f1c40f;">
@@ -248,18 +199,14 @@
             <h2 id="pe-nombre" style="margin: 0; color: #fff; font-size: 1.6rem; text-transform: uppercase;">Cargando...</h2>
             <p id="pe-posicion" style="margin: 5px 0 0 0; color: #f1c40f; font-weight: bold; letter-spacing: 1px;">---</p>
         </div>
-
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; text-align: center; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;">
             <div><div id="pe-partidos" style="color: #fff; font-size: 1.5rem; font-weight: 900;">0</div><div style="color: #888; font-size: 0.7rem; font-weight: bold;">PARTIDOS</div></div>
-            <div><div id="pe-goles" style="color: #2ecc71; font-size: 1.5rem; font-weight: 900;">0</div><div style="color: #888; font-size: 0.7rem; font-weight: bold;">GOLES</div></div>
-            <div><div id="pe-asist" style="color: #3498db; font-size: 1.5rem; font-weight: 900;">0</div><div style="color: #888; font-size: 0.7rem; font-weight: bold;">ASIST.</div></div>
+            <div><div id="pe-goles" style="color: #2ecc71; font-size: 1.5rem; font-weight: 900;">0</div><div id="pe-label-goles" style="color: #888; font-size: 0.7rem; font-weight: bold;">ANOTACIONES</div></div>
+            <div><div id="pe-asist" style="color: #3498db; font-size: 1.5rem; font-weight: 900;">0</div><div id="pe-label-asist" style="color: #888; font-size: 0.7rem; font-weight: bold;">ASIST/BLOQ</div></div>
         </div>
-
         <div>
             <h4 style="color: #aaa; font-size: 0.8rem; margin: 0 0 10px 0; text-transform: uppercase; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">Vitrina de Trofeos</h4>
-            <div id="pe-insignias" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                <!-- Insignias generadas por JS -->
-            </div>
+            <div id="pe-insignias" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
         </div>
     </div>
 </div>
@@ -270,7 +217,7 @@
         <h2 style="margin-top:0; color:#fff;">Registra tu Comunidad</h2>
         <form id="form-nueva-comunidad">
             <input type="text" id="reg-com-nombre" required placeholder="Nombre de tu liga" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-            <input type="text" id="reg-com-deporte" required placeholder="Deportes (Fútbol, Vóley)" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
+            <input type="text" id="reg-com-deporte" required placeholder="Deportes (Fútbol, Vóley, Básquet, etc)" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
             <input type="text" id="reg-com-ciudad" required placeholder="Ciudad" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px;">
             <input type="url" id="reg-com-link" required placeholder="Link de Instagram/Facebook para verificar" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:20px;">
             <button type="submit" class="btn hero-primary" style="width:100%;"><i class="ph-bold ph-whatsapp-logo"></i> Enviar Solicitud</button>
@@ -310,12 +257,11 @@
         <form id="form-lanzar-reto">
             <select id="lr-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;"></select>
             <select id="lr-formato" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-bottom:15px;">
-                <option value="5 vs 5">5 vs 5</option>
-                <option value="6 vs 6">6 vs 6</option>
+                <option value="5 vs 5">5 vs 5 / Quintetos</option>
+                <option value="6 vs 6">6 vs 6 / Sextetos</option>
                 <option value="7 vs 7">7 vs 7</option>
-                <option value="8 vs 8">8 vs 8</option>
-                <option value="9 vs 9">9 vs 9</option>
                 <option value="11 vs 11">11 vs 11</option>
+                <option value="Libre">Formato Libre</option>
             </select>
             <div style="display: flex; gap: 10px; margin-bottom: 25px;">
                 <div style="flex: 2;"><input type="date" id="lr-fecha" required style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;"></div>
@@ -376,8 +322,8 @@
         <h2 style="margin-top:0; color:#2ecc71;"><i class="ph-fill ph-trophy"></i> Tercer Tiempo</h2>
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 10px;">
             <div style="font-size:0.75rem; color:#aaa; font-weight:bold;">JUGADOR</div>
-            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">GOLES</div>
-            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">ASIST.</div>
+            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">PUNTOS / GOLES</div>
+            <div style="font-size:0.75rem; color:#aaa; font-weight:bold; text-align:center;">ASIST / BLOQ</div>
         </div>
         <form id="form-resultados-partido" style="overflow-y: auto; flex: 1;">
             <div id="lista-resultados-jugadores"></div>
@@ -425,7 +371,7 @@
     window.deporteActivoGlobal = ''; 
 
     window.soyLiderGlobal = false; window.soyMiembroGlobal = false;
-    window.comunidadActivaNombre = ''; window.comunidadActivaWsp = '';
+    window.comunidadActivaNombre = ''; window.comunidadActivaWsp = ''; window.comunidadActivaDeportes = '';
 
     const PALETA_DEPORTES_EXTRA = ['#00d2d3','#ff9ff3','#ff6b6b','#1dd1a1','#feca57','#54a0ff','#5f27cd','#ff9f43','#10ac84','#ee5253'];
     function obtenerColorDeporte(nombreDeporte) {
@@ -433,7 +379,7 @@
         const str = nombreDeporte.trim().toLowerCase();
         if (str.includes('fútbol') || str.includes('futbol') || str.includes('futsal')) return '#2ecc71'; 
         if (str.includes('básquet') || str.includes('basquet') || str.includes('baloncesto')) return '#e67e22'; 
-        if (str.includes('vóley') || str.includes('voley') || str.includes('voleibol')) return '#9b59b6'; 
+        if (str.includes('vóley') || str.includes('voley') || str.includes('voleibol')) return '#3498db'; 
         return PALETA_DEPORTES_EXTRA[Math.abs(str.charCodeAt(0)) % PALETA_DEPORTES_EXTRA.length];
     }
 
@@ -523,8 +469,10 @@
         const listaPartidos = document.getElementById('hub-lista-partidos');
         listaPartidos.style.display = 'block';
 
-        document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; });
-        btnElement.style.background = colorPrincipal; btnElement.style.color = '#000'; btnElement.style.border = `1px solid ${colorPrincipal}`;
+        // Resaltar el botón del deporte en el Hub
+        const contenedorFiltros = document.getElementById('hub-deportes-filtros');
+        contenedorFiltros.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; });
+        if(btnElement) { btnElement.style.background = colorPrincipal; btnElement.style.color = '#000'; btnElement.style.border = `1px solid ${colorPrincipal}`; }
 
         listaPartidos.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:${colorPrincipal};"></i></div>`;
         
@@ -595,7 +543,7 @@
         } catch (error) { console.error("Error al obtener partidos:", error); }
     };
 
-    function refrescarPartidosActuales() { const btnActivo = Array.from(document.querySelectorAll('.btn-sport-chip')).find(b => b.textContent.trim() === window.deporteActivoGlobal); if(btnActivo) btnActivo.click(); }
+    function refrescarPartidosActuales() { const btnActivo = Array.from(document.querySelectorAll('#hub-deportes-filtros .btn-sport-chip')).find(b => b.textContent.trim() === window.deporteActivoGlobal); if(btnActivo) btnActivo.click(); }
 
     window.separarCupoPartido = async function(partidoId) { if (!confirm("¿Seguro que deseas separar un cupo?")) return; try { await updateDoc(doc(db, 'partidos', partidoId), { cuposOcupados: increment(1), inscritos: arrayUnion({ uid: currentUser.uid, nombreUsuario: currentUser.displayName || 'Jugador', fotoUsuario: currentUser.photoURL || 'avatar' }) }); alert("¡Cupo separado con éxito!"); refrescarPartidosActuales(); } catch (e) { alert("Error."); } }
     window.eliminarPartido = async function(partidoId) { if (!confirm("🚨 ¿ELIMINAR este partido?")) return; try { await deleteDoc(doc(db, 'partidos', partidoId)); alert("Eliminado."); refrescarPartidosActuales(); } catch (e) { alert("Error."); } }
@@ -745,7 +693,7 @@
     document.getElementById('cerrar-hub').addEventListener('click', () => hubModal.classList.remove('mostrar'));
 
     window.abrirHubComunidad = (id, nombre, ciudad, deportesRaw, esLider, wsp, soyMiembro, logoUrl) => {
-        comunidadActivaId = id; window.soyLiderGlobal = esLider; window.soyMiembroGlobal = soyMiembro; window.comunidadActivaNombre = nombre; window.comunidadActivaWsp = wsp;
+        comunidadActivaId = id; window.soyLiderGlobal = esLider; window.soyMiembroGlobal = soyMiembro; window.comunidadActivaNombre = nombre; window.comunidadActivaWsp = wsp; window.comunidadActivaDeportes = deportesRaw;
         document.getElementById('hub-nombre').textContent = nombre; document.getElementById('hub-ubicacion').innerHTML = `<i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${ciudad}`;
         document.getElementById('hub-panel-lider').style.display = esLider ? 'block' : 'none'; document.getElementById('hub-link-whatsapp-box').style.display = esLider ? 'none' : 'flex';
         
@@ -764,29 +712,63 @@
             contenedorFiltros.innerHTML += `<button class="btn btn-sport-chip" data-color="${colorPrincipal}" onclick="seleccionarDeporte(this, '${nombreDeporte}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:${border};">${nombreDeporte}</button>`;
             selectDeporteModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`; selectRetoModal.innerHTML += `<option value="${nombreDeporte}">${nombreDeporte}</option>`;
         });
-        contenedorFiltros.innerHTML += `<button id="btn-ranking-tab" class="btn btn-sport-chip" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed #f1c40f; margin-left: 10px !important;" onclick="mostrarRankingComunidad()">🏆 Ranking</button>`;
+        
+        contenedorFiltros.innerHTML += `<button id="btn-ranking-tab" class="btn btn-sport-chip" style="background: rgba(255,255,255,0.05); color: #fff; border: 1px dashed #f1c40f; margin-left: 10px !important;" onclick="iniciarRanking()"><i class="ph-fill ph-trophy"></i> Ranking</button>`;
 
         hubModal.classList.add('mostrar');
         setTimeout(() => { const primerBotonDeporte = contenedorFiltros.querySelector('.btn-sport-chip'); if(primerBotonDeporte) primerBotonDeporte.click(); }, 150);
     };
 
-    window.mostrarRankingComunidad = async function() { 
-        document.querySelectorAll('.btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); 
-        const btnRanking = document.getElementById('btn-ranking-tab'); btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none'; 
-        document.getElementById('hub-lista-partidos').style.display = 'none'; const panelRanking = document.getElementById('hub-panel-ranking'); panelRanking.style.display = 'block'; document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#f1c40f; font-size:1.1rem;"><i class="ph-fill ph-trophy"></i> Salón de la Fama</h3>`; 
-        panelRanking.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:#f1c40f;"></i><p style="color:#aaa; margin-top:10px;">Alineando el equipo...</p></div>`; 
+    /* ==========================================
+       SISTEMA MAESTRO DE RANKINGS (CORE VS CUSTOM)
+       ========================================== */
+    window.iniciarRanking = function() {
+        document.getElementById('hub-lista-partidos').style.display = 'none';
+        document.getElementById('hub-panel-ranking').style.display = 'block';
+        document.getElementById('hub-titulo-seccion').innerHTML = `<h3 style="margin:0; color:#f1c40f; font-size:1.1rem;"><i class="ph-fill ph-trophy"></i> Salón de la Fama</h3>`;
         
-        try { 
+        // Limpiar estilos de los botones principales del Hub
+        document.querySelectorAll('#hub-deportes-filtros .btn-sport-chip').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; b.style.border = '1px solid rgba(255,255,255,0.12)'; }); 
+        const btnRanking = document.getElementById('btn-ranking-tab'); 
+        btnRanking.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)'; btnRanking.style.color = '#000'; btnRanking.style.border = 'none';
+
+        // Generar los botones dinámicos de deportes DENTRO del panel de ranking
+        const filtroRanking = document.getElementById('ranking-filtros-deporte');
+        filtroRanking.innerHTML = '';
+        const deportesArray = window.comunidadActivaDeportes.split(',').map(d => d.trim());
+        
+        deportesArray.forEach((dep, index) => {
+            if (!dep) return;
+            const colorPrincipal = obtenerColorDeporte(dep);
+            const isActive = index === 0;
+            const bg = isActive ? colorPrincipal : 'rgba(255,255,255,0.05)';
+            const color = isActive ? '#000' : '#fff';
+            filtroRanking.innerHTML += `<button class="btn btn-sport-chip ranking-sub-tab" onclick="seleccionarRankingDeporte(this, '${dep}', '${colorPrincipal}')" style="background:${bg}; color:${color}; border:1px solid ${colorPrincipal}; padding: 6px 15px !important; font-size: 0.8rem !important;">${dep}</button>`;
+        });
+
+        // Click automático al primer deporte para cargar su ranking
+        setTimeout(() => { const primerFiltro = filtroRanking.querySelector('.ranking-sub-tab'); if(primerFiltro) primerFiltro.click(); }, 50);
+    }
+
+    window.seleccionarRankingDeporte = async function(btnElement, nombreDeporte, colorPrincipal) {
+        document.querySelectorAll('.ranking-sub-tab').forEach(b => { b.style.background = 'rgba(255,255,255,0.05)'; b.style.color = '#fff'; });
+        btnElement.style.background = colorPrincipal; btnElement.style.color = '#000';
+        
+        const contenedor = document.getElementById('ranking-contenido-deporte');
+        contenedor.innerHTML = `<div style="text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2.2rem; color:${colorPrincipal};"></i><p style="color:#aaa; margin-top:10px;">Calculando estadísticas de ${nombreDeporte}...</p></div>`;
+
+        try {
             const q = query(collection(db, 'partidos'), where('comunidadId', '==', comunidadActivaId), where('estado', '==', 'finalizado')); 
-            const snap = await getDocs(q); window.statsGlobales = {}; 
+            const snap = await getDocs(q); 
+            window.statsGlobales = {}; 
             
             snap.forEach(docSnap => { 
                 const p = docSnap.data(); 
-                if(p.resultadosOficiales) { 
+                if(p.deporte === nombreDeporte && p.resultadosOficiales) { 
                     p.resultadosOficiales.forEach(res => { 
                         if(!window.statsGlobales[res.uid]) { 
                             const infoJugador = p.inscritos.find(j => j.uid === res.uid) || { nombreUsuario: 'Jugador', fotoUsuario: 'avatar' }; 
-                            window.statsGlobales[res.uid] = { uid: res.uid, nombre: infoJugador.nombreUsuario, foto: infoJugador.fotoUsuario, goles: 0, asist: 0, mvp: 0, partidos: 0, score: 0 }; 
+                            window.statsGlobales[res.uid] = { uid: res.uid, nombre: infoJugador.nombreUsuario, foto: infoJugador.fotoUsuario, goles: 0, asist: 0, mvp: 0, partidos: 0, score: 0, posicion: 'JUG' }; 
                         } 
                         window.statsGlobales[res.uid].partidos += 1; window.statsGlobales[res.uid].goles += res.goles || 0; window.statsGlobales[res.uid].asist += res.asistencias || 0; if(p.mvp === res.uid) window.statsGlobales[res.uid].mvp += 1; 
                     }); 
@@ -795,58 +777,122 @@
             
             let ranking = Object.values(window.statsGlobales); 
             ranking.forEach(j => { j.score = (j.partidos * 10) + (j.goles * 5) + (j.asist * 3) + (j.mvp * 15); }); 
-            if(ranking.length === 0) { panelRanking.innerHTML = `<div style="text-align:center; padding:30px 10px;"><p style="color:#aaa;">Aún no hay estadísticas suficientes para armar el equipo ideal.</p></div>`; return; } 
+            if(ranking.length === 0) { contenedor.innerHTML = `<div style="text-align:center; padding:30px 10px;"><p style="color:#aaa;">Aún no hay estadísticas para armar el ranking de ${nombreDeporte}.</p></div>`; return; } 
             
             const goleador = [...ranking].sort((a,b) => b.goles - a.goles)[0]; const asistidor = [...ranking].sort((a,b) => b.asist - a.asist)[0]; const franquicia = [...ranking].sort((a,b) => b.mvp - a.mvp)[0]; 
-            ranking.sort((a,b) => b.score - a.score); const sieteIdeal = ranking.slice(0, 7); 
-            
-            for (let j of sieteIdeal) {
+            ranking.sort((a,b) => b.score - a.score); 
+
+            // Buscar posición real en Firestore
+            for (let j of ranking) {
                 try {
                     const uSnap = await getDoc(doc(db, 'jugadores_perfiles', j.uid));
-                    if (uSnap.exists()) { j.posicion = uSnap.data().posicion || uSnap.data().posicionPrincipal || 'MED'; } else { j.posicion = 'MED'; }
-                } catch(e) { j.posicion = 'MED'; }
+                    if (uSnap.exists() && uSnap.data().posicion) { j.posicion = uSnap.data().posicion; }
+                } catch(e) {}
                 window.statsGlobales[j.uid].posicion = j.posicion; 
             }
 
-            const lineas = { fwd: [], mid: [], def: [], gk: [] };
-            sieteIdeal.forEach(j => {
-                const p = String(j.posicion || '').toUpperCase();
-                if (p.includes('ARQ') || p.includes('PORTERO') || p.includes('GK')) lineas.gk.push(j);
-                else if (p.includes('DEF') || p.includes('ZAGUERO') || p.includes('CENTRAL')) lineas.def.push(j);
-                else if (p.includes('DEL') || p.includes('PUNTA') || p.includes('ATACANTE')) lineas.fwd.push(j);
-                else lineas.mid.push(j); 
-            });
-
-            const generarCarta = (j) => `
-                <div class="player-pitch-card" onclick="verPerfilExpandido('${j.uid}')">
-                    <div class="player-pitch-photo-container">
-                        <img src="${j.foto}">
-                        <div class="player-pitch-score">${j.score}</div>
-                    </div>
-                    <div class="player-pitch-name">${j.nombre.split(' ')[0]}</div>
-                </div>
-            `;
+            const strDeporte = nombreDeporte.toLowerCase();
+            const esFutbol = strDeporte.includes('fútbol') || strDeporte.includes('futbol') || strDeporte.includes('futsal');
+            const esVoley = strDeporte.includes('vóley') || strDeporte.includes('voley') || strDeporte.includes('voleibol');
+            const esBasquet = strDeporte.includes('básquet') || strDeporte.includes('basquet') || strDeporte.includes('baloncesto');
 
             let htmlRanking = `
                 <div class="ranking-podium">
-                    <div class="podium-card" onclick="verPerfilExpandido('${goleador.uid}')" style="cursor:pointer;"><i class="ph-fill ph-soccer-ball" style="font-size: 2rem; color: #2ecc71;"></i><h4 style="margin: 5px 0; color: #fff;">Goleador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #2ecc71; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: #2ecc71; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">goles</span></p></div>
-                    <div class="podium-card" onclick="verPerfilExpandido('${franquicia.uid}')" style="cursor:pointer;"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">Jugador Franquicia</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
-                    <div class="podium-card" onclick="verPerfilExpandido('${asistidor.uid}')" style="cursor:pointer;"><i class="ph-fill ph-sneaker" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Asistidor</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asistencias</span></p></div>
-                </div>
-
-                <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
-                    <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic; letter-spacing: 1px;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El 7 Ideal (Team of the Month)</h3>
-                    <div class="soccer-pitch">
-                        <div class="pitch-line pitch-center"></div><div class="pitch-line pitch-circle"></div><div class="pitch-line pitch-box-top"></div><div class="pitch-line pitch-box-bottom"></div><div class="pitch-line pitch-goal-top"></div><div class="pitch-line pitch-goal-bottom"></div>
-                        <div class="formation-row">${lineas.fwd.map(generarCarta).join('')}</div>
-                        <div class="formation-row">${lineas.mid.map(generarCarta).join('')}</div>
-                        <div class="formation-row">${lineas.def.map(generarCarta).join('')}</div>
-                        <div class="formation-row">${lineas.gk.map(generarCarta).join('')}</div>
-                    </div>
+                    <div class="podium-card" onclick="verPerfilExpandido('${goleador.uid}')" style="cursor:pointer;"><i class="ph-fill ph-target" style="font-size: 2rem; color: ${colorPrincipal};"></i><h4 style="margin: 5px 0; color: #fff;">Máx. Anotador</h4><img src="${goleador.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid ${colorPrincipal}; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${goleador.nombre}</p><p style="margin: 0; color: ${colorPrincipal}; font-size: 1.2rem; font-weight: 900;">${goleador.goles} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">pts/goles</span></p></div>
+                    <div class="podium-card" onclick="verPerfilExpandido('${franquicia.uid}')" style="cursor:pointer;"><i class="ph-fill ph-star" style="font-size: 2rem; color: #f1c40f;"></i><h4 style="margin: 5px 0; color: #fff;">MVP del Mes</h4><img src="${franquicia.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #f1c40f; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${franquicia.nombre}</p><p style="margin: 0; color: #f1c40f; font-size: 1.2rem; font-weight: 900;">${franquicia.mvp} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">MVPs</span></p></div>
+                    <div class="podium-card" onclick="verPerfilExpandido('${asistidor.uid}')" style="cursor:pointer;"><i class="ph-fill ph-handshake" style="font-size: 2rem; color: #3498db;"></i><h4 style="margin: 5px 0; color: #fff;">Asist / Bloqueos</h4><img src="${asistidor.foto}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #3498db; margin: 10px 0;"><p style="margin: 0; color: #fff; font-weight: bold; font-size: 0.9rem;">${asistidor.nombre}</p><p style="margin: 0; color: #3498db; font-size: 1.2rem; font-weight: 900;">${asistidor.asist} <span style="font-size: 0.7rem; color: #aaa; font-weight: normal;">asist/bloq</span></p></div>
                 </div>
             `;
-            panelRanking.innerHTML = htmlRanking; 
-        } catch(e) { console.error(e); panelRanking.innerHTML = '<p style="color:red; text-align:center;">Error al armar el equipo ideal.</p>'; } 
+
+            const generarCarta = (j) => `
+                <div class="player-pitch-card" onclick="verPerfilExpandido('${j.uid}')">
+                    <div class="player-pitch-photo-container"><img src="${j.foto}"><div class="player-pitch-score">${j.score}</div></div>
+                    <div class="player-pitch-name">${j.nombre.split(' ')[0]}</div>
+                    <div style="background: rgba(0,0,0,0.8); color: #f1c40f; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; margin-top: 2px; border: 1px solid #f1c40f;">${j.posAsignada || j.posicion}</div>
+                </div>
+            `;
+
+            // ALGORITMO INTELIGENTE PARA SELECCIONAR POSICIONES
+            function armarEquipoIdeal(rank, reqs) {
+                let seleccionados = []; let disponibles = [...rank];
+                reqs.forEach(req => {
+                    let idx = disponibles.findIndex(jug => jug.posicion && jug.posicion.includes(req));
+                    if (idx !== -1) { seleccionados.push({...disponibles[idx], posAsignada: req}); disponibles.splice(idx, 1); } 
+                    else if (disponibles.length > 0) { seleccionados.push({...disponibles[0], posAsignada: 'POL'}); disponibles.splice(0, 1); }
+                });
+                return seleccionados;
+            }
+
+            if (esFutbol) {
+                const team = armarEquipoIdeal(ranking, ['ARQ', 'DEF', 'DEF', 'MED', 'MED', 'DEL', 'DEL']);
+                htmlRanking += `
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El 7 del Mes</h3>
+                    <div class="soccer-pitch">
+                        <div class="pitch-line pitch-center"></div><div class="pitch-line pitch-circle"></div><div class="pitch-line pitch-box-top"></div><div class="pitch-line pitch-box-bottom"></div>
+                        <div class="formation-row">${team.slice(5,7).map(generarCarta).join('')}</div>
+                        <div class="formation-row">${team.slice(3,5).map(generarCarta).join('')}</div>
+                        <div class="formation-row">${team.slice(1,3).map(generarCarta).join('')}</div>
+                        <div class="formation-row">${generarCarta(team[0])}</div>
+                    </div>
+                </div>`;
+            } 
+            else if (esVoley) {
+                const team = armarEquipoIdeal(ranking, ['ARM', 'OPU', 'ATQ', 'ATQ', 'CEN', 'LIB']);
+                htmlRanking += `
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El Sexteto del Mes</h3>
+                    <div class="voley-pitch">
+                        <div class="voley-line voley-center"></div><div class="voley-line voley-attack-top"></div><div class="voley-line voley-attack-bottom"></div>
+                        <div class="formation-row">${team.slice(2,5).map(generarCarta).join('')}</div>
+                        <div class="formation-row" style="margin-top:20px;">${team.slice(0,2).map(generarCarta).join('')}${generarCarta(team[5])}</div>
+                    </div>
+                </div>`;
+            }
+            else if (esBasquet) {
+                const team = armarEquipoIdeal(ranking, ['BAS', 'ESC', 'ALE', 'API', 'PIV']);
+                htmlRanking += `
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> El Quinteto del Mes</h3>
+                    <div class="basket-pitch">
+                        <div class="basket-line basket-center"></div><div class="basket-line basket-circle"></div><div class="basket-line basket-paint-top"></div><div class="basket-line basket-paint-bottom"></div>
+                        <div class="formation-row" style="margin-top:20px;">${team.slice(3,5).map(generarCarta).join('')}</div>
+                        <div class="formation-row">${team.slice(1,3).map(generarCarta).join('')}</div>
+                        <div class="formation-row">${generarCarta(team[0])}</div>
+                    </div>
+                </div>`;
+            }
+            else {
+                // NIVEL 2: DEPORTE CUSTOM (LISTA UNIVERSAL)
+                htmlRanking += `
+                <div style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #fff; text-align: center; text-transform: uppercase; font-style: italic;"><i class="ph-fill ph-fire" style="color: #e74c3c;"></i> Top 10 MVPs del Mes</h3>
+                    <div style="display:flex; flex-direction:column; gap:10px;">`;
+                
+                ranking.slice(0, 10).forEach((j, index) => {
+                    let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index+1}º`;
+                    let color = index === 0 ? '#f1c40f' : index === 1 ? '#bdc3c7' : index === 2 ? '#cd7f32' : '#888';
+                    htmlRanking += `
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:12px; border-radius:10px; border-left:4px solid ${color}; cursor:pointer;" onclick="verPerfilExpandido('${j.uid}')">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:1.2rem; font-weight:bold; width:30px; text-align:center;">${medal}</span>
+                                <img src="${j.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid ${color};">
+                                <div>
+                                    <div style="color:#fff; font-weight:bold; font-size:1rem;">${j.nombre}</div>
+                                    <div style="color:#aaa; font-size:0.75rem;">${j.posicion || 'JUG'}</div>
+                                </div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="color:#f1c40f; font-weight:900; font-size:1.2rem;">${j.score} <span style="font-size:0.7rem; color:#aaa; font-weight:normal;">pts</span></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                htmlRanking += `</div></div>`;
+            }
+
+            contenedor.innerHTML = htmlRanking; 
+        } catch(e) { console.error(e); contenedor.innerHTML = '<p style="color:red; text-align:center;">Error al procesar el ranking.</p>'; } 
     }
 
     document.getElementById('cerrar-perfil-expandido').addEventListener('click', () => {
@@ -871,8 +917,8 @@
         else if(j.partidos >= 3) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-medal" style="color: #bdc3c7;"></i> Convocado Fijo</div>`;
         else insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-medal" style="color: #cd7f32;"></i> Amateur</div>`;
 
-        if(j.goles >= 10) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-soccer-ball" style="color: #2ecc71;"></i> Killer / Pichichi</div>`;
-        if(j.asist >= 5) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-sneaker" style="color: #3498db;"></i> Mago del Balón</div>`;
+        if(j.goles >= 10) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-target" style="color: #2ecc71;"></i> Top Scorer</div>`;
+        if(j.asist >= 5) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-handshake" style="color: #3498db;"></i> Playmaker</div>`;
         if(j.mvp >= 2) insigniasHTML += `<div class="insignia-pill"><i class="ph-fill ph-star" style="color: #f1c40f;"></i> MVP Múltiple</div>`;
 
         document.getElementById('pe-insignias').innerHTML = insigniasHTML;
