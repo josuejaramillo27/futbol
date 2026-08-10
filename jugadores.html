@@ -154,12 +154,19 @@
             </div>
 
             <form id="form-editar-perfil">
+                <div style="margin-bottom: 15px;">
+                    <label class="filter-field">
+                        <span>Nombre / Apodo en la App</span>
+                        <input type="text" id="perfil-nombre" placeholder="Ej: Josué Jaramillo" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; margin-top: 5px;">
+                    </label>
+                </div>
+
                 <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
                     <label class="filter-field"><span>Deporte Principal</span><select id="perfil-deporte"><option>Fútbol</option><option>Vóley</option><option>Básquet</option></select></label>
                     <label class="filter-field"><span>Posición</span><select id="perfil-posicion"><option value="DEL">Delantero (DEL)</option><option value="MED">Mediocampista (MED)</option><option value="DEF">Defensa (DEF)</option><option value="ARQ">Arquero (ARQ)</option><option value="LIB">Polifuncional</option></select></label>
                 </div>
                 <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <label class="filter-field"><span>Ciudad</span><input type="text" id="perfil-ciudad" placeholder="Ej: Piura" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;"></label>
+                    <label class="filter-field"><span>Ciudad</span><input type="text" id="perfil-ciudad" placeholder="Ej: Piura" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;"></label>
                     <label class="filter-field"><span>Pie Hábil</span><select id="perfil-habilidad"><option>Diestro</option><option>Zurdo</option><option>Ambidiestro</option></select></label>
                 </div>
                 
@@ -216,7 +223,6 @@
     onAuthStateChanged(auth, async (user) => { 
         currentUser = user; 
         if(user) {
-            // Buscamos si ya tiene el teléfono en su perfil de la base de datos
             try {
                 const docSnap = await getDoc(doc(db, "jugadores_perfiles", user.uid));
                 if (docSnap.exists() && docSnap.data().telefono) {
@@ -235,18 +241,24 @@
                 } catch (error) { return; }
             }
             
+            // PRECARGAMOS EL NOMBRE DESDE GOOGLE O LA BASE DE DATOS
             const docRef = doc(db, "jugadores_perfiles", currentUser.uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
                 const data = docSnap.data();
+                let nombreCargado = data.nombre;
+                if (!nombreCargado || nombreCargado === "null") nombreCargado = currentUser.displayName || "";
+                
+                document.getElementById('perfil-nombre').value = nombreCargado;
                 document.getElementById('perfil-deporte').value = data.deporte || 'Fútbol';
                 document.getElementById('perfil-posicion').value = data.posicion || 'DEL';
                 document.getElementById('perfil-ciudad').value = data.ciudad || '';
                 document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
                 verifiedPhoneFromDB = data.telefono;
+            } else {
+                document.getElementById('perfil-nombre').value = currentUser.displayName || "";
             }
 
-            // AHORA REVISAMOS TANTO FIREBASE AUTH COMO NUESTRA BASE DE DATOS
             if (currentUser.phoneNumber || verifiedPhoneFromDB) {
                 document.getElementById('phone-unverified-box').style.display = 'none';
                 const msg = document.getElementById('phone-verified-msg');
@@ -281,13 +293,10 @@
         if(num.length !== 9) return alert("Ingresa un número celular de 9 dígitos válido.");
         const phoneNumber = "+51" + num; 
         
-        // Guardamos temporalmente el número que el usuario intentó verificar
         window.tempPhoneNumberToVerify = phoneNumber;
-        
         const btn = document.getElementById('btn-send-sms');
         btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Enviando...';
 
-        // Intentamos enviar el SMS directamente (sin enlazar obligatoriamente)
         signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
             .then((confirmationResult) => {
                 window.confirmationResult = confirmationResult;
@@ -314,9 +323,7 @@
             const msg = document.getElementById('phone-verified-msg');
             msg.style.display = 'block';
             
-            // Asignamos el número verificado a nuestra variable local de confianza
             verifiedPhoneFromDB = window.tempPhoneNumberToVerify;
-            
             msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Celular verificado: ${verifiedPhoneFromDB}`;
             btnGuardarPerfil.disabled = false;
         }).catch((error) => {
@@ -336,14 +343,16 @@
             btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
             btnGuardarPerfil.disabled = true;
             
-            let nombreSeguro = currentUser.displayName;
-            if (!nombreSeguro || nombreSeguro === "null") nombreSeguro = "Jugador";
+            let nombreIngresado = document.getElementById('perfil-nombre').value.trim();
+            if (!nombreIngresado || nombreIngresado === "null") {
+                nombreIngresado = currentUser.displayName || "Jugador";
+            }
 
             const perfilData = {
                 uid: currentUser.uid, 
-                nombre: nombreSeguro, 
-                foto: currentUser.photoURL,
-                telefono: currentUser.phoneNumber || verifiedPhoneFromDB, // USA EL TELÉFONO DE LA BASE DE DATOS
+                nombre: nombreIngresado, 
+                foto: currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreIngresado)}&background=2ecc71&color=fff`,
+                telefono: currentUser.phoneNumber || verifiedPhoneFromDB,
                 deporte: document.getElementById('perfil-deporte').value,
                 posicion: document.getElementById('perfil-posicion').value,
                 ciudad: document.getElementById('perfil-ciudad').value,
@@ -358,7 +367,7 @@
         });
     }
 
-    // MAGIA: MOSTRAR PERFIL
+    // MAGIA: MOSTRAR PERFIL PÚBLICO
     window.abrirPerfilJugador = async (jugadorUid) => {
         const modalVerPerfil = document.getElementById('modal-ver-perfil');
         const contenedorPerfil = document.getElementById('contenido-perfil-publico');
@@ -402,10 +411,12 @@
                 let nombreMostrado = data.nombre;
                 if (!nombreMostrado || nombreMostrado === "null") nombreMostrado = "Jugador";
                 
+                let fotoMostrada = data.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreMostrado)}&background=2ecc71&color=fff`;
+                
                 contenedorPerfil.innerHTML = `
                     <div class="player-card-container">
                         <div class="player-avatar-wrapper">
-                            <img src="${data.foto || 'https://ui-avatars.com/api/?name=' + nombreMostrado}" alt="Avatar" class="player-photo">
+                            <img src="${fotoMostrada}" alt="Avatar" class="player-photo">
                             <span class="player-pos">${data.posicion || '---'}</span>
                         </div>
                         <div class="player-info">
