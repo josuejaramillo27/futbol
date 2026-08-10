@@ -189,7 +189,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, linkWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, linkWithPhoneNumber, signOut, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -211,8 +211,20 @@
     const btnGuardarPerfil = document.getElementById('btn-guardar-perfil');
     const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
     let currentUser = null;
+    let verifiedPhoneFromDB = null;
 
-    onAuthStateChanged(auth, (user) => { currentUser = user; });
+    onAuthStateChanged(auth, async (user) => { 
+        currentUser = user; 
+        if(user) {
+            // Buscamos si ya tiene el teléfono en su perfil de la base de datos
+            try {
+                const docSnap = await getDoc(doc(db, "jugadores_perfiles", user.uid));
+                if (docSnap.exists() && docSnap.data().telefono) {
+                    verifiedPhoneFromDB = docSnap.data().telefono;
+                }
+            } catch(e) { console.error("Error leyendo DB:", e); }
+        }
+    });
 
     if (btnAbrirPerfil) {
         btnAbrirPerfil.addEventListener('click', async () => {
@@ -231,13 +243,15 @@
                 document.getElementById('perfil-posicion').value = data.posicion || 'DEL';
                 document.getElementById('perfil-ciudad').value = data.ciudad || '';
                 document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
+                verifiedPhoneFromDB = data.telefono;
             }
 
-            if (currentUser.phoneNumber) {
+            // AHORA REVISAMOS TANTO FIREBASE AUTH COMO NUESTRA BASE DE DATOS
+            if (currentUser.phoneNumber || verifiedPhoneFromDB) {
                 document.getElementById('phone-unverified-box').style.display = 'none';
                 const msg = document.getElementById('phone-verified-msg');
                 msg.style.display = 'block';
-                msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Verificado: ${currentUser.phoneNumber}`;
+                msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Verificado: ${currentUser.phoneNumber || verifiedPhoneFromDB}`;
                 btnGuardarPerfil.disabled = false;
             } else {
                 document.getElementById('phone-unverified-box').style.display = 'block';
@@ -253,7 +267,6 @@
         });
     }
 
-    // ACCIÓN: CERRAR SESIÓN
     if (btnCerrarSesion) {
         btnCerrarSesion.addEventListener('click', async () => {
             if (confirm("¿Seguro que deseas cerrar sesión?")) {
@@ -268,10 +281,14 @@
         if(num.length !== 9) return alert("Ingresa un número celular de 9 dígitos válido.");
         const phoneNumber = "+51" + num; 
         
+        // Guardamos temporalmente el número que el usuario intentó verificar
+        window.tempPhoneNumberToVerify = phoneNumber;
+        
         const btn = document.getElementById('btn-send-sms');
         btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Enviando...';
 
-        linkWithPhoneNumber(currentUser, phoneNumber, window.recaptchaVerifier)
+        // Intentamos enviar el SMS directamente (sin enlazar obligatoriamente)
+        signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
             .then((confirmationResult) => {
                 window.confirmationResult = confirmationResult;
                 document.getElementById('step-1-phone').style.display = 'none';
@@ -296,7 +313,11 @@
             document.getElementById('phone-unverified-box').style.display = 'none';
             const msg = document.getElementById('phone-verified-msg');
             msg.style.display = 'block';
-            msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Celular verificado: ${result.user.phoneNumber}`;
+            
+            // Asignamos el número verificado a nuestra variable local de confianza
+            verifiedPhoneFromDB = window.tempPhoneNumberToVerify;
+            
+            msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Celular verificado: ${verifiedPhoneFromDB}`;
             btnGuardarPerfil.disabled = false;
         }).catch((error) => {
             console.error("Code Error:", error);
@@ -308,24 +329,21 @@
     document.getElementById('cerrar-perfil').addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
     document.getElementById('cerrar-ver-perfil').addEventListener('click', () => document.getElementById('modal-ver-perfil').classList.remove('mostrar'));
 
-    // GUARDAR TARJETA FUT (Y EVITAR EL NULL)
+    // GUARDAR TARJETA FUT
     if (btnGuardarPerfil) {
         btnGuardarPerfil.addEventListener('click', async () => {
             if (!currentUser) return;
             btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
             btnGuardarPerfil.disabled = true;
             
-            // CURITA ANTI-NULL
             let nombreSeguro = currentUser.displayName;
-            if (!nombreSeguro || nombreSeguro === "null") {
-                nombreSeguro = "Jugador";
-            }
+            if (!nombreSeguro || nombreSeguro === "null") nombreSeguro = "Jugador";
 
             const perfilData = {
                 uid: currentUser.uid, 
                 nombre: nombreSeguro, 
                 foto: currentUser.photoURL,
-                telefono: currentUser.phoneNumber,
+                telefono: currentUser.phoneNumber || verifiedPhoneFromDB, // USA EL TELÉFONO DE LA BASE DE DATOS
                 deporte: document.getElementById('perfil-deporte').value,
                 posicion: document.getElementById('perfil-posicion').value,
                 ciudad: document.getElementById('perfil-ciudad').value,
@@ -381,7 +399,6 @@
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 
-                // MÁS PROTECCIÓN ANTI-NULL AQUÍ
                 let nombreMostrado = data.nombre;
                 if (!nombreMostrado || nombreMostrado === "null") nombreMostrado = "Jugador";
                 
