@@ -25,37 +25,28 @@
         .stat-pill { background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; color: #ccc; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.1); }
         .btn-edit-profile { width: 100%; background: rgba(46, 204, 113, 0.1); border: 1px dashed var(--primary-green); color: var(--primary-green); transition: all 0.3s ease; }
         .btn-edit-profile:hover { background: var(--primary-green) !important; color: #080B0A !important; border: 1px solid var(--primary-green); }
-        
-        /* HEADER RESPONSIVE */
-        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100; }
-        .topbar-nav { display: flex; gap: 20px; align-items: center; }
-        .topbar-nav-link { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; }
-        .topbar-nav-link i { font-size: 1.3rem; }
-        .topbar-nav-link span { font-size: 0.6rem; margin-top: 3px; font-weight: bold; }
-        @media (max-width: 600px) {
-            .topbar { padding: 10px 12px !important; }
-            .topbar-nav { gap: 12px !important; }
-            .topbar-nav-link i { font-size: 1.15rem !important; }
-            .topbar-nav-link span { font-size: 0.55rem !important; }
-        }
     </style>
 </head>
 <body>
 
-<header class="topbar">
+<header class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100;">
     <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
         <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 28px; width: auto; object-fit: contain;">
-        <span style="font-size: 1.1rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
+        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
     </a>
-    <nav class="topbar-nav">
-        <a href="index.html" class="topbar-nav-link" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
-            <i class="ph-bold ph-map-pin"></i><span>CANCHAS</span>
+    
+    <nav style="display: flex; gap: 15px; align-items: center;">
+        <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-map-pin" style="font-size: 1.2rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
         </a>
-        <a href="jugadores.html" class="topbar-nav-link" style="color: var(--primary-green);">
-            <i class="ph-bold ph-users"></i><span>BOLSA</span>
+        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
+            <i class="ph-bold ph-users" style="font-size: 1.2rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">BOLSA</span>
         </a>
-        <a href="comunidades.html" class="topbar-nav-link" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
-            <i class="ph-bold ph-shield-checkered"></i><span>COMUNIDADES</span>
+        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+            <i class="ph-bold ph-shield-checkered" style="font-size: 1.2rem;"></i>
+            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">COMUNIDADES</span>
         </a>
     </nav>
 </header>
@@ -148,12 +139,9 @@
                 
                 <div id="phone-unverified-box">
                     <p style="font-size:0.8rem; color:#ccc; margin-top:0;">Verifica tu celular para activar tu Tarjeta FUT y ser visible.</p>
-                    
                     <div id="step-1-phone">
                         <input type="tel" id="sms-phone" placeholder="987654321" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:10px; text-align:center; font-size:1.2rem; letter-spacing:2px;">
-                        
                         <div id="recaptcha-container"></div>
-                        
                         <button type="button" id="btn-send-sms" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;">Enviar SMS de Código</button>
                     </div>
                     
@@ -174,8 +162,13 @@
                     <label class="filter-field"><span>Ciudad</span><input type="text" id="perfil-ciudad" placeholder="Ej: Piura" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;"></label>
                     <label class="filter-field"><span>Pie Hábil</span><select id="perfil-habilidad"><option>Diestro</option><option>Zurdo</option><option>Ambidiestro</option></select></label>
                 </div>
+                
                 <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;" disabled>
                     <i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta
+                </button>
+                
+                <button type="button" id="btn-cerrar-sesion" class="btn" style="width: 100%; margin-top: 10px; background: rgba(231,76,60,0.1); color: #e74c3c; border: 1px dashed rgba(231,76,60,0.3);">
+                    <i class="ph-bold ph-sign-out"></i> Cerrar Sesión
                 </button>
             </form>
         </div>
@@ -195,9 +188,8 @@
 <script type="module" src="app.js"></script>
 
 <script type="module">
-    // IMPORTACIÓN ACTUALIZADA
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, linkWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, linkWithPhoneNumber, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -217,6 +209,7 @@
     const btnAbrirPerfil = document.getElementById('btn-abrir-perfil');
     const modalPerfil = document.getElementById('modal-perfil-jugador');
     const btnGuardarPerfil = document.getElementById('btn-guardar-perfil');
+    const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
     let currentUser = null;
 
     onAuthStateChanged(auth, (user) => { currentUser = user; });
@@ -230,7 +223,6 @@
                 } catch (error) { return; }
             }
             
-            // CARGAR DATOS SI YA TIENE FUT CARD
             const docRef = doc(db, "jugadores_perfiles", currentUser.uid);
             const docSnap = await getDoc(docRef);
             if (docSnap.exists()) {
@@ -241,19 +233,17 @@
                 document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
             }
 
-            // GESTIÓN DEL BLOQUE SMS
             if (currentUser.phoneNumber) {
                 document.getElementById('phone-unverified-box').style.display = 'none';
                 const msg = document.getElementById('phone-verified-msg');
                 msg.style.display = 'block';
                 msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Verificado: ${currentUser.phoneNumber}`;
-                btnGuardarPerfil.disabled = false; // Como está verificado, le dejamos guardar
+                btnGuardarPerfil.disabled = false;
             } else {
                 document.getElementById('phone-unverified-box').style.display = 'block';
                 document.getElementById('phone-verified-msg').style.display = 'none';
-                btnGuardarPerfil.disabled = true; // Bloqueado hasta que verifique
+                btnGuardarPerfil.disabled = true; 
                 
-                // INICIALIZAMOS EL RECAPTCHA INVISIBLE
                 if(!window.recaptchaVerifier) {
                     window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
                 }
@@ -263,11 +253,20 @@
         });
     }
 
-    // BOTÓN: ENVIAR SMS
+    // ACCIÓN: CERRAR SESIÓN
+    if (btnCerrarSesion) {
+        btnCerrarSesion.addEventListener('click', async () => {
+            if (confirm("¿Seguro que deseas cerrar sesión?")) {
+                await signOut(auth);
+                window.location.reload();
+            }
+        });
+    }
+
     document.getElementById('btn-send-sms').addEventListener('click', () => {
         const num = document.getElementById('sms-phone').value;
         if(num.length !== 9) return alert("Ingresa un número celular de 9 dígitos válido.");
-        const phoneNumber = "+51" + num; // Agrega código de Perú
+        const phoneNumber = "+51" + num; 
         
         const btn = document.getElementById('btn-send-sms');
         btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Enviando...';
@@ -286,7 +285,6 @@
             });
     });
 
-    // BOTÓN: VERIFICAR EL CÓDIGO
     document.getElementById('btn-verify-sms').addEventListener('click', () => {
         const code = document.getElementById('sms-code').value;
         if(code.length !== 6) return alert("El código tiene 6 dígitos.");
@@ -299,8 +297,6 @@
             const msg = document.getElementById('phone-verified-msg');
             msg.style.display = 'block';
             msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Celular verificado: ${result.user.phoneNumber}`;
-            
-            // DESBLOQUEA EL GUARDADO DE LA TARJETA
             btnGuardarPerfil.disabled = false;
         }).catch((error) => {
             console.error("Code Error:", error);
@@ -312,16 +308,24 @@
     document.getElementById('cerrar-perfil').addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
     document.getElementById('cerrar-ver-perfil').addEventListener('click', () => document.getElementById('modal-ver-perfil').classList.remove('mostrar'));
 
-    // GUARDAR TARJETA FUT
+    // GUARDAR TARJETA FUT (Y EVITAR EL NULL)
     if (btnGuardarPerfil) {
         btnGuardarPerfil.addEventListener('click', async () => {
             if (!currentUser) return;
             btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
             btnGuardarPerfil.disabled = true;
             
+            // CURITA ANTI-NULL
+            let nombreSeguro = currentUser.displayName;
+            if (!nombreSeguro || nombreSeguro === "null") {
+                nombreSeguro = "Jugador";
+            }
+
             const perfilData = {
-                uid: currentUser.uid, nombre: currentUser.displayName, foto: currentUser.photoURL,
-                telefono: currentUser.phoneNumber, // GUARDAMOS SU TELÉFONO REAL
+                uid: currentUser.uid, 
+                nombre: nombreSeguro, 
+                foto: currentUser.photoURL,
+                telefono: currentUser.phoneNumber,
                 deporte: document.getElementById('perfil-deporte').value,
                 posicion: document.getElementById('perfil-posicion').value,
                 ciudad: document.getElementById('perfil-ciudad').value,
@@ -336,7 +340,7 @@
         });
     }
 
-    // MAGIA: MOSTRAR PERFIL + ESTRELLAS + INSIGNIAS DE COMUNIDAD
+    // MAGIA: MOSTRAR PERFIL
     window.abrirPerfilJugador = async (jugadorUid) => {
         const modalVerPerfil = document.getElementById('modal-ver-perfil');
         const contenedorPerfil = document.getElementById('contenido-perfil-publico');
@@ -346,7 +350,6 @@
         try {
             const docSnap = await getDoc(doc(db, "jugadores_perfiles", jugadorUid));
 
-            // 1. REPUTACIÓN (Estrellas de Canchas)
             const revSnap = await getDocs(query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', jugadorUid)));
             let sumRating = 0, totalReviews = 0, tagsCount = {};
             revSnap.forEach(r => {
@@ -367,7 +370,6 @@
             if(alertsHtml) alertsHtml = `<div style="margin-top:15px; display:flex; flex-direction:column; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#e74c3c; font-weight:bold;">🚨 Reportes de Indisciplina:</small>${alertsHtml}</div>`;
             if(goodTagsHtml) goodTagsHtml = `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px;">${goodTagsHtml}</div>`;
 
-            // 2. DETECTAR COMUNIDADES (Líder o Miembro)
             let badgesComunidad = '';
             const snapLider = await getDocs(query(collection(db, 'comunidades'), where('liderUid', '==', jugadorUid)));
             snapLider.forEach(d => { badgesComunidad += `<span style="background:rgba(241,196,15,0.15); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-crown"></i> Líder: ${d.data().nombre}</span>`; });
@@ -376,17 +378,21 @@
             snapMiembro.forEach(d => { if(d.data().liderUid !== jugadorUid) badgesComunidad += `<span style="background:rgba(52,152,219,0.15); color:#3498db; border:1px solid rgba(52,152,219,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-shield-checkered"></i> Club: ${d.data().nombre}</span>`; });
             if(badgesComunidad) badgesComunidad = `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#aaa; width:100%;">Comunidades a las que pertenece:</small>${badgesComunidad}</div>`;
 
-            // 3. RENDERIZAR TODO
             if (docSnap.exists()) {
                 const data = docSnap.data();
+                
+                // MÁS PROTECCIÓN ANTI-NULL AQUÍ
+                let nombreMostrado = data.nombre;
+                if (!nombreMostrado || nombreMostrado === "null") nombreMostrado = "Jugador";
+                
                 contenedorPerfil.innerHTML = `
                     <div class="player-card-container">
                         <div class="player-avatar-wrapper">
-                            <img src="${data.foto || 'https://ui-avatars.com/api/?name=' + data.nombre}" alt="Avatar" class="player-photo">
+                            <img src="${data.foto || 'https://ui-avatars.com/api/?name=' + nombreMostrado}" alt="Avatar" class="player-photo">
                             <span class="player-pos">${data.posicion || '---'}</span>
                         </div>
                         <div class="player-info">
-                            <h3 class="player-name">${data.nombre}</h3>
+                            <h3 class="player-name">${nombreMostrado}</h3>
                             <div class="player-stats">
                                 <span class="stat-pill"><i class="ph-bold ph-map-pin"></i> ${data.ciudad || 'Libre'}</span>
                                 <span class="stat-pill"><i class="ph-bold ph-soccer-ball"></i> ${data.deporte || 'Fútbol'}</span>
