@@ -37,6 +37,51 @@ window.toast = function(mensaje, tipo = 'success') {
 };
 window.alert = function(mensaje) { window.toast(mensaje, 'info'); };
 
+// MODAL PARA PEDIR WHATSAPP
+window.customPrompt = function(mensaje, placeholder) {
+    return new Promise((resolve) => {
+        let overlay = document.getElementById('custom-prompt-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'custom-prompt-overlay';
+            overlay.innerHTML = `
+                <style>
+                    #custom-prompt-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
+                    #custom-prompt-overlay.show { display:flex; }
+                    .prompt-box { background:#111; padding:25px; border-radius:16px; width:100%; max-width:350px; border:1px solid #f1c40f; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+                </style>
+                <div class="prompt-box">
+                    <i class="ph-fill ph-whatsapp-logo" style="font-size:3rem; color:#25D366; margin-bottom:10px;"></i>
+                    <p id="custom-prompt-msg" style="margin:0 0 15px; font-size:0.95rem; color:#fff; line-height:1.4;"></p>
+                    <input type="tel" id="custom-prompt-input" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:20px; text-align:center; font-size:1.2rem; font-weight:bold; letter-spacing:2px;" placeholder="">
+                    <div style="display:flex; gap:10px;">
+                        <button id="btn-prompt-cancel" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff; border:none;">Cancelar</button>
+                        <button id="btn-prompt-ok" class="btn" style="flex:1; background:#f1c40f; color:#000; font-weight:bold; border:none;">Enviar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+        document.getElementById('custom-prompt-msg').textContent = mensaje;
+        document.getElementById('custom-prompt-input').placeholder = placeholder || '';
+        document.getElementById('custom-prompt-input').value = '';
+        overlay.classList.add('show');
+
+        document.getElementById('btn-prompt-ok').onclick = () => {
+            const val = document.getElementById('custom-prompt-input').value.trim();
+            if(val.length !== 9) { window.toast('El número debe tener 9 dígitos.', 'warning'); return; }
+            if(confirm(`¿Tu número es ${val}?\nVerifica que esté correcto antes de enviarlo.`)) {
+                overlay.classList.remove('show');
+                resolve(val);
+            }
+        };
+        document.getElementById('btn-prompt-cancel').onclick = () => {
+            overlay.classList.remove('show');
+            resolve(null);
+        };
+    });
+};
+
 // ==========================================
 // UTILIDADES Y FUNCIONES BÁSICAS
 // ==========================================
@@ -191,7 +236,7 @@ const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',
 onAuthStateChanged(auth,u=>{usuarioActual=u||null});
 
 // ==========================================
-// FASE 26: BOLSA DE JUGADORES (100% AUTOMATIZADO)
+// FASE 26: BOLSA DE JUGADORES (MOTOR RECONSTRUIDO)
 // ==========================================
 if (window.location.pathname.includes('jugadores.html')) {
     const btnLogin = document.getElementById('btn-login-google');
@@ -199,11 +244,158 @@ if (window.location.pathname.includes('jugadores.html')) {
     const lista = document.getElementById('lista-jugadores');
     const hint = document.getElementById('login-hint');
 
+    let docsBolsa = []; // Guardamos los anuncios temporalmente aquí
+
+    // 1. FUNCIÓN MAESTRA QUE PINTA LA BOLSA
+    // Se ejecuta cada vez que cambia la base de datos O cada vez que inicias/cierras sesión
+    function renderizarBolsa() {
+        if (!lista) return;
+        if (!docsBolsa.length) {
+            lista.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:30px; grid-column:1/-1;"><i class=\"ph-bold ph-users-three\" style=\"font-size:40px;color:var(--primary-green)\"></i><p style=\"margin-top:10px;\">No hay partidos abiertos todavía. Sé el primero.</p></div>';
+            return;
+        }
+
+        let bufferHTML = '';
+
+        docsBolsa.forEach(d => {
+            const esMio = usuarioActual && d.uid === usuarioActual.uid;
+            const borrar = esMio ? `<button class="btn btn-borrar-anuncio" data-id="${d.id}" style="width:100%; padding:8px 12px; font-size:0.8rem; border-radius:8px; margin-top:10px; background:rgba(231,76,60,0.1); color:#e74c3c; border:1px dashed rgba(231,76,60,0.3);"><i class="ph-bold ph-trash"></i> Borrar Anuncio</button>` : '';
+            const fechaTexto = d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
+
+            let interaccionHTML = '';
+            const postulantes = d.postulantes || {};
+            const listaPostulantes = Object.values(postulantes);
+            const yaPostulo = usuarioActual ? !!postulantes[usuarioActual.uid] : false;
+            const miPostulacion = yaPostulo ? postulantes[usuarioActual.uid] : null;
+
+            if (esMio) {
+                let htmlPost = listaPostulantes.map(p => {
+                    if(p.estado === 'aceptado') {
+                        return `<div style="background:rgba(46,204,113,0.1); border:1px solid #2ecc71; padding:10px; border-radius:8px; margin-top:8px;">
+                            <span style="color:#2ecc71; font-size:0.85rem;"><i class="ph-fill ph-handshake"></i> Fichaste a <b>${p.nombre}</b></span>
+                            <a href="https://wa.me/${formatWsp(p.telefono)}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:5px; margin-top:8px; color:#000; background:#25D366; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:0.8rem; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir a ${p.nombre}</a>
+                        </div>`;
+                    } else {
+                        return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px; margin-top:8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <span onclick="abrirPerfilJugador('${p.uid}')" style="cursor:pointer; color:#f1c40f; text-decoration:underline; font-size:0.85rem;" title="Ver perfil"><i class="ph-fill ph-user-circle"></i> ${p.nombre}</span>
+                            <button class="btn-aceptar-postulante" data-anuncio="${d.id}" data-uid="${p.uid}" style="padding:6px 12px; font-size:0.75rem; background:#2ecc71; color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;"><i class="ph-bold ph-check"></i> Fichar</button>
+                        </div>`;
+                    }
+                }).join('');
+
+                interaccionHTML = `<div style="margin-top:15px; border-top:1px dashed rgba(255,255,255,0.2); padding-top:15px;">
+                    <strong style="color:#aaa; font-size:0.85rem;">Candidatos postulados (${listaPostulantes.length}):</strong>
+                    ${htmlPost || '<div style="color:#666; font-size:0.8rem; margin-top:8px; font-style:italic;">Nadie se ha postulado aún.</div>'}
+                </div>`;
+            } else {
+                if (!usuarioActual) {
+                    interaccionHTML = `<button class="btn" style="width:100%; margin-top:15px; background:rgba(255,255,255,0.1); color:#aaa; border:1px dashed #555;" onclick="window.toast('Inicia sesión para postularte','warning')">Inicia sesión para apuntarte</button>`;
+                } else if (yaPostulo) {
+                    if (miPostulacion.estado === 'aceptado') {
+                        interaccionHTML = `<div style="margin-top:15px; padding:15px; background:rgba(46,204,113,0.1); border:1px solid #2ecc71; border-radius:8px; text-align:center;">
+                            <span style="color:#2ecc71; font-weight:bold; font-size:0.95rem; display:block; margin-bottom:8px;">🎉 ¡Has sido fichado!</span>
+                            <a href="https://wa.me/${formatWsp(d.contacto)}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#25D366; color:#000; font-weight:bold; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:0.85rem;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir al Capitán</a>
+                        </div>`;
+                    } else {
+                        interaccionHTML = `<div style="margin-top:15px; padding:12px; background:rgba(241,196,15,0.1); border:1px dashed rgba(241,196,15,0.4); border-radius:8px; color:#f1c40f; text-align:center; font-size:0.85rem; font-weight:bold;">
+                            <i class="ph-bold ph-hourglass-high"></i> Postulación enviada. Esperando que te acepte...
+                        </div>`;
+                    }
+                } else {
+                    interaccionHTML = `<button class="btn btn-postular" data-anuncio="${d.id}" style="width:100%; margin-top:15px; background:linear-gradient(45deg, #f1c40f, #e67e22); color:#000; font-weight:bold; border:none; box-shadow: 0 4px 15px rgba(241,196,15,0.2);"><i class="ph-bold ph-hand-raising" style="font-size:1.2rem;"></i> ✋ ¡Me Apunto!</button>`;
+                }
+            }
+
+            bufferHTML += `
+            <article style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <strong onclick="abrirPerfilJugador('${d.uid}')" style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem; cursor:pointer; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#fff'" title="Ver Tarjeta FUT">
+                        <i class="ph-fill ph-user-circle" style="font-size:1.8rem; color:var(--primary-green);"></i> 
+                        ${d.nombreJugador || d.nombre || 'Jugador'}
+                    </strong>
+                    <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:12px;">${fechaTexto}</span>
+                </div>
+                <p style="margin:5px 0; font-size:0.95rem; color:#ddd;">Busco: <b style="color:#f1c40f;">${d.tipo || 'jugador'}</b> · <b style="color:#f1c40f;">${d.modalidad || 'Fútbol 7'}</b></p>
+                ${d.texto ? `<p style="margin:12px 0; font-size:0.95rem; color:#eee; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border-left:3px solid var(--primary-green); font-style:italic;">"${d.texto}"</p>` : ''}
+                
+                ${interaccionHTML}
+                ${borrar}
+            </article>`;
+        });
+
+        lista.innerHTML = bufferHTML;
+
+        // ASIGNAMOS LOS EVENTOS A LOS BOTONES RECIÉN CREADOS
+        lista.querySelectorAll('.btn-postular').forEach(b => {
+            b.addEventListener('click', async () => {
+                if(!usuarioActual) return window.toast('Inicia sesión para postularte.', 'warning');
+
+                let telefonoVerificado = usuarioActual.phoneNumber;
+                if (!telefonoVerificado) {
+                    try {
+                        const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
+                        if (docSnap.exists() && docSnap.data().telefono) telefonoVerificado = docSnap.data().telefono;
+                    } catch(err) { console.error(err); }
+                }
+
+                if (!telefonoVerificado) {
+                    window.toast('Debes configurar y verificar tu número en la Tarjeta FUT antes de apuntarte.', 'warning');
+                    return;
+                }
+
+                const anuncioId = b.dataset.anuncio;
+                b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
+                try {
+                    await updateDoc(doc(db, 'bolsa_jugadores', anuncioId), {
+                        [`postulantes.${usuarioActual.uid}`]: {
+                            uid: usuarioActual.uid,
+                            nombre: usuarioActual.displayName || 'Jugador',
+                            telefono: formatWsp(telefonoVerificado), 
+                            estado: 'pendiente'
+                        }
+                    });
+                    window.toast('¡Te has apuntado con éxito!', 'success');
+                } catch(e) { window.toast('Error al apuntarse.', 'error'); b.innerHTML = '✋ ¡Me Apunto!'; b.disabled = false; }
+            });
+        });
+
+        lista.querySelectorAll('.btn-aceptar-postulante').forEach(b => {
+            b.addEventListener('click', async () => {
+                if(!confirm('¿Aceptar a este jugador y mostrarle tu WhatsApp?')) return;
+                const anuncioId = b.dataset.anuncio;
+                const postUid = b.dataset.uid;
+                b.innerHTML = '...'; b.disabled = true;
+                try {
+                    await updateDoc(doc(db, 'bolsa_jugadores', anuncioId), {
+                        [`postulantes.${postUid}.estado`]: 'aceptado'
+                    });
+                    window.toast('¡Fichaje completado!', 'success');
+                } catch(e) { window.toast('Error al aceptar.', 'error'); b.innerHTML = 'Fichar'; b.disabled = false; }
+            });
+        });
+
+        lista.querySelectorAll('.btn-borrar-anuncio').forEach(b => {
+            b.addEventListener('click', async () => {
+                if (confirm('¿Borrar tu anuncio definitivamente?')) {
+                    try {
+                        await deleteDoc(doc(db, 'bolsa_jugadores', b.dataset.id));
+                        window.toast('Anuncio eliminado.', 'success');
+                    } catch(e) { window.toast('Error al eliminar.', 'error'); }
+                }
+            });
+        });
+    }
+
+    // 2. ESCUCHAMOS CUANDO EL USUARIO INICIA O CIERRA SESIÓN
     onAuthStateChanged(auth, u => {
         usuarioActual = u || null;
         if (btnLogin) btnLogin.style.display = u ? 'none' : 'flex';
         if (formAnuncio) formAnuncio.style.display = u ? 'flex' : 'none';
         if (hint) hint.style.display = u ? 'none' : 'block';
+        
+        // ¡LA MAGIA AQUÍ! Repintamos todo para que el sistema "despierte"
+        // y reconozca cuáles anuncios le pertenecen al usuario logueado.
+        renderizarBolsa(); 
     });
 
     if (btnLogin) {
@@ -213,171 +405,30 @@ if (window.location.pathname.includes('jugadores.html')) {
         });
     }
 
+    // 3. ESCUCHAMOS LA BASE DE DATOS
     if (lista) {
         const q = query(collection(db, 'bolsa_jugadores'), orderBy('createdAt', 'desc'));
         onSnapshot(q, s => {
-            const docs = [];
-            s.forEach(ds => docs.push({ id: ds.id, ...ds.data() }));
-
-            if (!docs.length) {
-                lista.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:30px; grid-column:1/-1;"><i class=\"ph-bold ph-users-three\" style=\"font-size:40px;color:var(--primary-green)\"></i><p style=\"margin-top:10px;\">No hay partidos abiertos todavía. Sé el primero.</p></div>';
-                return;
-            }
-
-            let bufferHTML = '';
-
-            docs.forEach(d => {
-                const esMio = usuarioActual && d.uid === usuarioActual.uid;
-                const borrar = esMio ? `<button class="btn btn-borrar-anuncio" data-id="${d.id}" style="width:100%; padding:8px 12px; font-size:0.8rem; border-radius:8px; margin-top:10px; background:rgba(231,76,60,0.1); color:#e74c3c; border:1px dashed rgba(231,76,60,0.3);"><i class="ph-bold ph-trash"></i> Borrar Anuncio</button>` : '';
-                const fechaTexto = d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
-
-                // LÓGICA DE FICHAJES (ME APUNTO CON NÚMERO AUTOMÁTICO)
-                let interaccionHTML = '';
-                const postulantes = d.postulantes || {};
-                const listaPostulantes = Object.values(postulantes);
-                const yaPostulo = usuarioActual ? !!postulantes[usuarioActual.uid] : false;
-                const miPostulacion = yaPostulo ? postulantes[usuarioActual.uid] : null;
-
-                if (esMio) {
-                    let htmlPost = listaPostulantes.map(p => {
-                        if(p.estado === 'aceptado') {
-                            return `<div style="background:rgba(46,204,113,0.1); border:1px solid #2ecc71; padding:10px; border-radius:8px; margin-top:8px;">
-                                <span style="color:#2ecc71; font-size:0.85rem;"><i class="ph-fill ph-handshake"></i> Fichaste a <b>${p.nombre}</b></span>
-                                <a href="https://wa.me/${formatWsp(p.telefono)}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:5px; margin-top:8px; color:#000; background:#25D366; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:0.8rem; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir a ${p.nombre}</a>
-                            </div>`;
-                        } else {
-                            return `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.05); padding:8px 12px; border-radius:8px; margin-top:8px; border: 1px solid rgba(255,255,255,0.1);">
-                                <span onclick="abrirPerfilJugador('${p.uid}')" style="cursor:pointer; color:#f1c40f; text-decoration:underline; font-size:0.85rem;" title="Ver perfil"><i class="ph-fill ph-user-circle"></i> ${p.nombre}</span>
-                                <button class="btn-aceptar-postulante" data-anuncio="${d.id}" data-uid="${p.uid}" style="padding:6px 12px; font-size:0.75rem; background:#2ecc71; color:#000; border:none; border-radius:6px; font-weight:bold; cursor:pointer;"><i class="ph-bold ph-check"></i> Fichar</button>
-                            </div>`;
-                        }
-                    }).join('');
-
-                    interaccionHTML = `<div style="margin-top:15px; border-top:1px dashed rgba(255,255,255,0.2); padding-top:15px;">
-                        <strong style="color:#aaa; font-size:0.85rem;">Candidatos postulados (${listaPostulantes.length}):</strong>
-                        ${htmlPost || '<div style="color:#666; font-size:0.8rem; margin-top:8px; font-style:italic;">Nadie se ha postulado aún.</div>'}
-                    </div>`;
-                } else {
-                    if (!usuarioActual) {
-                        interaccionHTML = `<button class="btn" style="width:100%; margin-top:15px; background:rgba(255,255,255,0.1); color:#aaa; border:1px dashed #555;" onclick="window.toast('Inicia sesión para postularte','warning')">Inicia sesión para apuntarte</button>`;
-                    } else if (yaPostulo) {
-                        if (miPostulacion.estado === 'aceptado') {
-                            interaccionHTML = `<div style="margin-top:15px; padding:15px; background:rgba(46,204,113,0.1); border:1px solid #2ecc71; border-radius:8px; text-align:center;">
-                                <span style="color:#2ecc71; font-weight:bold; font-size:0.95rem; display:block; margin-bottom:8px;">🎉 ¡Has sido fichado!</span>
-                                <a href="https://wa.me/${formatWsp(d.contacto)}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#25D366; color:#000; font-weight:bold; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:0.85rem;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir al Capitán</a>
-                            </div>`;
-                        } else {
-                            interaccionHTML = `<div style="margin-top:15px; padding:12px; background:rgba(241,196,15,0.1); border:1px dashed rgba(241,196,15,0.4); border-radius:8px; color:#f1c40f; text-align:center; font-size:0.85rem; font-weight:bold;">
-                                <i class="ph-bold ph-hourglass-high"></i> Postulación enviada. Esperando que te acepte...
-                            </div>`;
-                        }
-                    } else {
-                        interaccionHTML = `<button class="btn btn-postular" data-anuncio="${d.id}" style="width:100%; margin-top:15px; background:linear-gradient(45deg, #f1c40f, #e67e22); color:#000; font-weight:bold; border:none; box-shadow: 0 4px 15px rgba(241,196,15,0.2);"><i class="ph-bold ph-hand-raising" style="font-size:1.2rem;"></i> ✋ ¡Me Apunto!</button>`;
-                    }
-                }
-
-                bufferHTML += `
-                <article style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <strong onclick="abrirPerfilJugador('${d.uid}')" style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem; cursor:pointer; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#fff'" title="Ver Tarjeta FUT">
-                            <i class="ph-fill ph-user-circle" style="font-size:1.8rem; color:var(--primary-green);"></i> 
-                            ${d.nombreJugador || d.nombre || 'Jugador'}
-                        </strong>
-                        <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:12px;">${fechaTexto}</span>
-                    </div>
-                    <p style="margin:5px 0; font-size:0.95rem; color:#ddd;">Busco: <b style="color:#f1c40f;">${d.tipo || 'jugador'}</b> · <b style="color:#f1c40f;">${d.modalidad || 'Fútbol 7'}</b></p>
-                    ${d.texto ? `<p style="margin:12px 0; font-size:0.95rem; color:#eee; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border-left:3px solid var(--primary-green); font-style:italic;">"${d.texto}"</p>` : ''}
-                    
-                    ${interaccionHTML}
-                    ${borrar}
-                </article>`;
-            });
-
-            lista.innerHTML = bufferHTML;
-
-            // LISTENER AUTOMATIZADO DE FICHAJE (SIN PROMPT)
-            lista.querySelectorAll('.btn-postular').forEach(b => {
-                b.addEventListener('click', async () => {
-                    if(!usuarioActual) return window.toast('Inicia sesión para postularte.', 'warning');
-
-                    // EXTRACCIÓN AUTOMÁTICA DEL TELÉFONO VERIFICADO
-                    let telefonoVerificado = usuarioActual.phoneNumber;
-                    if (!telefonoVerificado) {
-                        try {
-                            const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
-                            if (docSnap.exists() && docSnap.data().telefono) {
-                                telefonoVerificado = docSnap.data().telefono;
-                            }
-                        } catch(err) { console.error(err); }
-                    }
-
-                    if (!telefonoVerificado) {
-                        window.toast('Debes verificar tu celular en "Configurar mi Tarjeta de Jugador" para poder apuntarte.', 'warning');
-                        return;
-                    }
-
-                    const numFormatted = formatWsp(telefonoVerificado); 
-                    const anuncioId = b.dataset.anuncio;
-                    b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
-                    try {
-                        await updateDoc(doc(db, 'bolsa_jugadores', anuncioId), {
-                            [`postulantes.${usuarioActual.uid}`]: {
-                                uid: usuarioActual.uid,
-                                nombre: usuarioActual.displayName || 'Jugador',
-                                telefono: numFormatted, 
-                                estado: 'pendiente'
-                            }
-                        });
-                        window.toast('¡Te has apuntado con éxito!', 'success');
-                    } catch(e) { window.toast('Error al apuntarse.', 'error'); b.innerHTML = '✋ ¡Me Apunto!'; b.disabled = false; }
-                });
-            });
-
-            lista.querySelectorAll('.btn-aceptar-postulante').forEach(b => {
-                b.addEventListener('click', async () => {
-                    if(!confirm('¿Aceptar a este jugador y mostrarle tu WhatsApp?')) return;
-                    const anuncioId = b.dataset.anuncio;
-                    const postUid = b.dataset.uid;
-                    b.innerHTML = '...'; b.disabled = true;
-                    try {
-                        await updateDoc(doc(db, 'bolsa_jugadores', anuncioId), {
-                            [`postulantes.${postUid}.estado`]: 'aceptado'
-                        });
-                        window.toast('¡Fichaje completado!', 'success');
-                    } catch(e) { window.toast('Error al aceptar.', 'error'); b.innerHTML = 'Fichar'; b.disabled = false; }
-                });
-            });
-
-            lista.querySelectorAll('.btn-borrar-anuncio').forEach(b => {
-                b.addEventListener('click', async () => {
-                    if (confirm('¿Borrar tu anuncio definitivamente?')) {
-                        try {
-                            await deleteDoc(doc(db, 'bolsa_jugadores', b.dataset.id));
-                            window.toast('Anuncio eliminado.', 'success');
-                        } catch(e) { window.toast('Error al eliminar.', 'error'); }
-                    }
-                });
-            });
-
+            docsBolsa = [];
+            s.forEach(ds => docsBolsa.push({ id: ds.id, ...ds.data() }));
+            renderizarBolsa(); // Repintamos todo con los datos fresquitos
         }, e => {
             console.error('Error cargando bolsa:', e);
             lista.innerHTML = '<p style="color:var(--danger); text-align:center;">Error de conexión. No pudimos cargar los partidos.</p>';
         });
     }
 
+    // 4. CREAR UN NUEVO ANUNCIO
     if (formAnuncio) {
         formAnuncio.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!usuarioActual) { window.toast('Inicia sesión con Google para publicar.', 'warning'); return; }
 
-            // EXTRACCIÓN AUTOMÁTICA DEL TELÉFONO VERIFICADO PARA EL PUBLICANTE
             let telefonoVerificado = usuarioActual.phoneNumber;
             if (!telefonoVerificado) {
                 try {
                     const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
-                    if (docSnap.exists() && docSnap.data().telefono) {
-                        telefonoVerificado = docSnap.data().telefono;
-                    }
+                    if (docSnap.exists() && docSnap.data().telefono) telefonoVerificado = docSnap.data().telefono;
                 } catch(err) { console.error(err); }
             }
 
@@ -385,8 +436,6 @@ if (window.location.pathname.includes('jugadores.html')) {
                 window.toast('Debes verificar tu celular en "Configurar mi Tarjeta de Jugador" antes de publicar.', 'warning');
                 return;
             }
-
-            const telCreadorFormatted = formatWsp(telefonoVerificado); 
 
             const btn = formAnuncio.querySelector('button[type="submit"]');
             const textOriginal = btn ? btn.innerHTML : 'Publicar';
@@ -408,7 +457,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                     nombre: usuarioActual.displayName || 'Jugador',
                     tipo: document.getElementById('tipo-anuncio')?.value || 'jugador',
                     modalidad: document.getElementById('modalidad-anuncio')?.value || 'Fútbol 7',
-                    contacto: telCreadorFormatted, 
+                    contacto: formatWsp(telefonoVerificado), 
                     texto: document.getElementById('texto-anuncio')?.value || '',
                     postulantes: {}, 
                     createdAt: serverTimestamp(), updatedAt: serverTimestamp()
