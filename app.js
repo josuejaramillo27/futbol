@@ -16,7 +16,7 @@ const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAut
 let canchasGlobales = [], ubicacionUsuario = null, usuarioActual = null;
 
 // ==========================================
-// SISTEMA DE NOTIFICACIONES ELEGANTES (Toast y Prompt)
+// SISTEMA DE NOTIFICACIONES ELEGANTES
 // ==========================================
 window.toast = function(mensaje, tipo = 'success') {
     let container = document.getElementById('toast-container-global');
@@ -36,56 +36,6 @@ window.toast = function(mensaje, tipo = 'success') {
     }, 3200);
 };
 window.alert = function(mensaje) { window.toast(mensaje, 'info'); };
-
-// MODAL BLINDADO PARA PEDIR WHATSAPP (SOLO 9 DÍGITOS + CONFIRMACIÓN)
-window.customPrompt = function(mensaje, placeholder) {
-    return new Promise((resolve) => {
-        let overlay = document.getElementById('custom-prompt-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'custom-prompt-overlay';
-            overlay.innerHTML = `
-                <style>
-                    #custom-prompt-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; box-sizing:border-box; }
-                    #custom-prompt-overlay.show { display:flex; }
-                    .prompt-box { background:#111; padding:25px; border-radius:16px; width:100%; max-width:350px; border:1px solid #f1c40f; text-align:center; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
-                </style>
-                <div class="prompt-box">
-                    <i class="ph-fill ph-whatsapp-logo" style="font-size:3rem; color:#25D366; margin-bottom:10px;"></i>
-                    <p id="custom-prompt-msg" style="margin:0 0 15px; font-size:0.95rem; color:#fff; line-height:1.4;"></p>
-                    <input type="tel" id="custom-prompt-input" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:20px; text-align:center; font-size:1.2rem; font-weight:bold; letter-spacing:2px;" placeholder="">
-                    <div style="display:flex; gap:10px;">
-                        <button id="btn-prompt-cancel" class="btn" style="flex:1; background:rgba(255,255,255,0.1); color:#fff; border:none;">Cancelar</button>
-                        <button id="btn-prompt-ok" class="btn" style="flex:1; background:#f1c40f; color:#000; font-weight:bold; border:none;">Enviar</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-        }
-        document.getElementById('custom-prompt-msg').textContent = mensaje;
-        document.getElementById('custom-prompt-input').placeholder = placeholder || '';
-        document.getElementById('custom-prompt-input').value = '';
-        overlay.classList.add('show');
-
-        document.getElementById('btn-prompt-ok').onclick = () => {
-            const val = document.getElementById('custom-prompt-input').value.trim();
-            if(val.length !== 9) { 
-                window.toast('El número debe tener exactamente 9 dígitos.', 'warning'); 
-                return; 
-            }
-            
-            // ALERTA DE CONFIRMACIÓN ANTES DE ENVIAR
-            if(confirm(`¿Tu número es ${val}?\n\nVerifica que esté correcto antes de enviarlo, ya que por ahí te contactarán.`)) {
-                overlay.classList.remove('show');
-                resolve(val);
-            }
-        };
-        document.getElementById('btn-prompt-cancel').onclick = () => {
-            overlay.classList.remove('show');
-            resolve(null);
-        };
-    });
-};
 
 // ==========================================
 // UTILIDADES Y FUNCIONES BÁSICAS
@@ -157,7 +107,9 @@ if(esInicio()){
 // ==========================================
 // MODAL DE RESERVA Y DISPONIBILIDAD
 // ==========================================
-window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';const tel=formatWsp(c.whatsapp); document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de APP FUTBOL y quiero consultar disponibilidad.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
+window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';
+const tel=formatWsp(c.whatsapp);
+document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de CHALACAPP y quiero consultar disponibilidad.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
 async function pintarDisponibilidadModal(c, fechaElegida){
     const box = document.getElementById('modal-disponibilidad');
     if(!box) return;
@@ -187,7 +139,7 @@ function abrirReserva(c, hora, fechaElegida){
     const dateObj = new Date(`${fechaElegida}T12:00:00`);
     document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE',{weekday:'long',day:'numeric',month:'short'}).format(dateObj).toUpperCase()} · ${hora}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
-    document.getElementById('booking-status').innerHTML = ''; // Limpiamos la caja amarilla anterior si la hubiera
+    document.getElementById('booking-status').innerHTML = ''; 
     modal.dataset.courtId = c.id; modal.dataset.time = hora; modal.dataset.date = fechaElegida;
     modal.classList.add('mostrar'); modal.setAttribute('aria-hidden','false');
 }
@@ -214,7 +166,6 @@ async function confirmarReserva(){
             tx.set(ref,{ id: key, canchaId: id, canchaNombre: c?.nombre||'', usuarioUid: usuarioActual.uid, nombre: nombre, usuarioNombre: nombre, telefono: telefono, usuarioTelefono: telefono, fecha: fechaReq, horaInicio: hora, horaFin: hora, estado: 'pendiente', precio: Number(c?.precio||0), metodoPago: 'pendiente', senaPagada: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
         });
         
-        // MAGIA DEL SEMÁFORO: Mostramos la advertencia amarilla
         document.getElementById('booking-status').innerHTML = `
             <div style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; padding:15px; border-radius:8px; color:#f1c40f; margin-top:15px; text-align:center;">
                 <i class="ph-fill ph-hourglass-high" style="font-size: 2rem;"></i><br>
@@ -240,7 +191,7 @@ const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',
 onAuthStateChanged(auth,u=>{usuarioActual=u||null});
 
 // ==========================================
-// FASE 26: BOLSA DE JUGADORES Y PARTIDOS EN VIVO
+// FASE 26: BOLSA DE JUGADORES (100% AUTOMATIZADO)
 // ==========================================
 if (window.location.pathname.includes('jugadores.html')) {
     const btnLogin = document.getElementById('btn-login-google');
@@ -280,7 +231,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                 const borrar = esMio ? `<button class="btn btn-borrar-anuncio" data-id="${d.id}" style="width:100%; padding:8px 12px; font-size:0.8rem; border-radius:8px; margin-top:10px; background:rgba(231,76,60,0.1); color:#e74c3c; border:1px dashed rgba(231,76,60,0.3);"><i class="ph-bold ph-trash"></i> Borrar Anuncio</button>` : '';
                 const fechaTexto = d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
 
-                // LÓGICA DE FICHAJES (ME APUNTO)
+                // LÓGICA DE FICHAJES (ME APUNTO CON NÚMERO AUTOMÁTICO)
                 let interaccionHTML = '';
                 const postulantes = d.postulantes || {};
                 const listaPostulantes = Object.values(postulantes);
@@ -344,14 +295,28 @@ if (window.location.pathname.includes('jugadores.html')) {
 
             lista.innerHTML = bufferHTML;
 
-            // LISTENERS DE LOS BOTONES INYECTADOS
+            // LISTENER AUTOMATIZADO DE FICHAJE (SIN PROMPT)
             lista.querySelectorAll('.btn-postular').forEach(b => {
                 b.addEventListener('click', async () => {
-                    const num = await window.customPrompt('Para apuntarte, ingresa tu número de WhatsApp. El capitán solo lo verá si te acepta.', 'Ej: 987654321');
-                    if(!num) return;
-                    
-                    const numFormatted = formatWsp(num); 
+                    if(!usuarioActual) return window.toast('Inicia sesión para postularte.', 'warning');
 
+                    // EXTRACCIÓN AUTOMÁTICA DEL TELÉFONO VERIFICADO
+                    let telefonoVerificado = usuarioActual.phoneNumber;
+                    if (!telefonoVerificado) {
+                        try {
+                            const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
+                            if (docSnap.exists() && docSnap.data().telefono) {
+                                telefonoVerificado = docSnap.data().telefono;
+                            }
+                        } catch(err) { console.error(err); }
+                    }
+
+                    if (!telefonoVerificado) {
+                        window.toast('Debes verificar tu celular en "Configurar mi Tarjeta de Jugador" para poder apuntarte.', 'warning');
+                        return;
+                    }
+
+                    const numFormatted = formatWsp(telefonoVerificado); 
                     const anuncioId = b.dataset.anuncio;
                     b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
                     try {
@@ -405,10 +370,23 @@ if (window.location.pathname.includes('jugadores.html')) {
             e.preventDefault();
             if (!usuarioActual) { window.toast('Inicia sesión con Google para publicar.', 'warning'); return; }
 
-            const telefonoCreador = await window.customPrompt('Ingresa tu número de WhatsApp. Los jugadores solo lo verán SI TÚ LOS ACEPTAS.', 'Ej: 987654321');
-            if(!telefonoCreador) return;
+            // EXTRACCIÓN AUTOMÁTICA DEL TELÉFONO VERIFICADO PARA EL PUBLICANTE
+            let telefonoVerificado = usuarioActual.phoneNumber;
+            if (!telefonoVerificado) {
+                try {
+                    const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
+                    if (docSnap.exists() && docSnap.data().telefono) {
+                        telefonoVerificado = docSnap.data().telefono;
+                    }
+                } catch(err) { console.error(err); }
+            }
 
-            const telCreadorFormatted = formatWsp(telefonoCreador); 
+            if (!telefonoVerificado) {
+                window.toast('Debes verificar tu celular en "Configurar mi Tarjeta de Jugador" antes de publicar.', 'warning');
+                return;
+            }
+
+            const telCreadorFormatted = formatWsp(telefonoVerificado); 
 
             const btn = formAnuncio.querySelector('button[type="submit"]');
             const textOriginal = btn ? btn.innerHTML : 'Publicar';
