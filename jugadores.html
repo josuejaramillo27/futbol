@@ -162,12 +162,23 @@
                 </div>
 
                 <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <label class="filter-field"><span>Deporte Principal</span><select id="perfil-deporte"><option>Fútbol</option><option>Vóley</option><option>Básquet</option></select></label>
-                    <label class="filter-field"><span>Posición</span><select id="perfil-posicion"><option value="DEL">Delantero (DEL)</option><option value="MED">Mediocampista (MED)</option><option value="DEF">Defensa (DEF)</option><option value="ARQ">Arquero (ARQ)</option><option value="LIB">Polifuncional</option></select></label>
+                    <label class="filter-field">
+                        <span>Deporte Principal</span>
+                        <select id="perfil-deporte">
+                            <option value="Fútbol">Fútbol</option>
+                            <option value="Vóley">Vóley</option>
+                            <option value="Básquet">Básquet</option>
+                        </select>
+                    </label>
+                    <label class="filter-field">
+                        <span>Posición</span>
+                        <select id="perfil-posicion">
+                            </select>
+                    </label>
                 </div>
                 <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
                     <label class="filter-field"><span>Ciudad</span><input type="text" id="perfil-ciudad" placeholder="Ej: Piura" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box;"></label>
-                    <label class="filter-field"><span>Pie Hábil</span><select id="perfil-habilidad"><option>Diestro</option><option>Zurdo</option><option>Ambidiestro</option></select></label>
+                    <label class="filter-field"><span>Pie / Mano Hábil</span><select id="perfil-habilidad"><option>Diestro</option><option>Zurdo</option><option>Ambidiestro</option></select></label>
                 </div>
                 
                 <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;" disabled>
@@ -220,6 +231,47 @@
     let currentUser = null;
     let verifiedPhoneFromDB = null;
 
+    // MAPA DE POSICIONES POR DEPORTE
+    const posicionesPorDeporte = {
+        'Fútbol': [
+            { val: 'DEL', label: 'Delantero (DEL)' },
+            { val: 'MED', label: 'Mediocampista (MED)' },
+            { val: 'DEF', label: 'Defensa (DEF)' },
+            { val: 'ARQ', label: 'Arquero (ARQ)' },
+            { val: 'LIB', label: 'Polifuncional (LIB)' }
+        ],
+        'Vóley': [
+            { val: 'ARM', label: 'Armador / Colocador (ARM)' },
+            { val: 'ATQ', label: 'Atacante / Punta (ATQ)' },
+            { val: 'CEN', label: 'Central (CEN)' },
+            { val: 'LIB', label: 'Líbero (LIB)' },
+            { val: 'OPU', label: 'Opuesto (OPU)' },
+            { val: 'POL', label: 'Polifuncional (POL)' }
+        ],
+        'Básquet': [
+            { val: 'BAS', label: 'Base / Point Guard (BAS)' },
+            { val: 'ESC', label: 'Escolta / Shooting Guard (ESC)' },
+            { val: 'ALE', label: 'Alero / Small Forward (ALE)' },
+            { val: 'API', label: 'Ala-Pívot (API)' },
+            { val: 'PIV', label: 'Pívot / Center (PIV)' },
+            { val: 'POL', label: 'Polifuncional (POL)' }
+        ]
+    };
+
+    function actualizarPosiciones(deporteSeleccionado, posicionGuardada = null) {
+        const selectPos = document.getElementById('perfil-posicion');
+        if (!selectPos) return;
+        const lista = posicionesPorDeporte[deporteSeleccionado] || posicionesPorDeporte['Fútbol'];
+        selectPos.innerHTML = lista.map(p => `<option value="${p.val}">${p.label}</option>`).join('');
+        if (posicionGuardada) {
+            selectPos.value = posicionGuardada;
+        }
+    }
+
+    document.getElementById('perfil-deporte')?.addEventListener('change', (e) => {
+        actualizarPosiciones(e.target.value);
+    });
+
     onAuthStateChanged(auth, async (user) => { 
         currentUser = user; 
         if(user) {
@@ -241,23 +293,33 @@
                 } catch (error) { return; }
             }
             
-            // PRECARGAMOS EL NOMBRE DESDE GOOGLE O LA BASE DE DATOS
             const docRef = doc(db, "jugadores_perfiles", currentUser.uid);
             const docSnap = await getDoc(docRef);
+            
+            let nombreCargado = "";
+            let deporteCargado = "Fútbol";
+            let posicionCargada = "DEL";
+
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                let nombreCargado = data.nombre;
-                if (!nombreCargado || nombreCargado === "null") nombreCargado = currentUser.displayName || "";
-                
-                document.getElementById('perfil-nombre').value = nombreCargado;
-                document.getElementById('perfil-deporte').value = data.deporte || 'Fútbol';
-                document.getElementById('perfil-posicion').value = data.posicion || 'DEL';
+                nombreCargado = data.nombre;
+                deporteCargado = data.deporte || "Fútbol";
+                posicionCargada = data.posicion || "DEL";
                 document.getElementById('perfil-ciudad').value = data.ciudad || '';
                 document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
                 verifiedPhoneFromDB = data.telefono;
-            } else {
-                document.getElementById('perfil-nombre').value = currentUser.displayName || "";
             }
+
+            // SI EL NOMBRE EN FIRESTORE ES "Jugador" O "null", JALAMOS EL DE GOOGLE
+            if (!nombreCargado || nombreCargado === "Jugador" || nombreCargado === "null") {
+                nombreCargado = currentUser.displayName || "";
+            }
+
+            document.getElementById('perfil-nombre').value = nombreCargado;
+            document.getElementById('perfil-deporte').value = deporteCargado;
+            
+            // Cargar opciones dinámicas de posición
+            actualizarPosiciones(deporteCargado, posicionCargada);
 
             if (currentUser.phoneNumber || verifiedPhoneFromDB) {
                 document.getElementById('phone-unverified-box').style.display = 'none';
@@ -344,7 +406,7 @@
             btnGuardarPerfil.disabled = true;
             
             let nombreIngresado = document.getElementById('perfil-nombre').value.trim();
-            if (!nombreIngresado || nombreIngresado === "null") {
+            if (!nombreIngresado || nombreIngresado === "null" || nombreIngresado === "Jugador") {
                 nombreIngresado = currentUser.displayName || "Jugador";
             }
 
@@ -367,7 +429,7 @@
         });
     }
 
-    // MAGIA: MOSTRAR PERFIL PÚBLICO
+    // MAGIA: MOSTRAR PERFIL PÚBLICO DESDE FIRESTORE
     window.abrirPerfilJugador = async (jugadorUid) => {
         const modalVerPerfil = document.getElementById('modal-ver-perfil');
         const contenedorPerfil = document.getElementById('contenido-perfil-publico');
@@ -409,7 +471,9 @@
                 const data = docSnap.data();
                 
                 let nombreMostrado = data.nombre;
-                if (!nombreMostrado || nombreMostrado === "null") nombreMostrado = "Jugador";
+                if (!nombreMostrado || nombreMostrado === "null" || nombreMostrado === "Jugador") {
+                    nombreMostrado = currentUser?.displayName || "Jugador";
+                }
                 
                 let fotoMostrada = data.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreMostrado)}&background=2ecc71&color=fff`;
                 
