@@ -500,7 +500,7 @@ async function cargarEventosPublicos() {
 document.addEventListener('DOMContentLoaded', cargarEventosPublicos);
 
 // ==========================================
-// FASE 29: LÓGICA DE CALIFICACIÓN (cancha.html)
+// FASE 29: LINK EN BIO & CALIFICACIÓN (cancha.html)
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -517,18 +517,51 @@ if (window.location.pathname.includes('cancha.html')) {
     };
 
     async function cargarDetalleCancha() {
-        const infoEl = document.getElementById('court-info');
-        if (!canchaId) { if (infoEl) infoEl.innerHTML = '<h2>Cancha no especificada</h2>'; return; }
+        if (!canchaId) { document.getElementById('bio-title').textContent = 'Cancha no especificada'; return; }
         try {
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
             if (docSnap.exists()) {
                 const c = docSnap.data();
-                const logoEl = document.getElementById('court-logo');
+                c.id = docSnap.id; // Clave para el modal
+                
+                // INYECTAMOS LA CANCHA EN LA VARIABLE GLOBAL PARA QUE ABRIRMODAL() FUNCIONE
+                canchasGlobales = [{...c, isOpen: canchaEstaAbierta(c)}];
+
+                // Rellenamos el diseño del Link en Bio
+                const coverEl = document.getElementById('bio-cover');
+                if (coverEl) coverEl.src = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
+                
+                const logoEl = document.getElementById('bio-logo');
                 if (logoEl) logoEl.src = c.logo || 'https://via.placeholder.com/100';
-                const titleEl = document.getElementById('court-title');
+                
+                const titleEl = document.getElementById('bio-title');
                 if (titleEl) titleEl.textContent = c.nombre || 'Cancha';
-                const metaEl = document.getElementById('court-meta');
-                if (metaEl) metaEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || c.distrito || 'Ubicación'} · <i class="ph-bold ph-soccer-ball"></i> ${c.tipoCancha || 'Fútbol'}`;
+                
+                const locEl = document.getElementById('bio-location');
+                if (locEl) locEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || c.distrito || 'Ubicación'}`;
+
+                const descEl = document.getElementById('bio-desc');
+                if (descEl) descEl.textContent = c.descripcion || 'Sin descripción disponible.';
+
+                const tipoEl = document.getElementById('bio-tipo');
+                if (tipoEl) tipoEl.textContent = obtenerTipo(c) || 'Fútbol';
+
+                const precioEl = document.getElementById('bio-precio');
+                if (precioEl) precioEl.textContent = `S/ ${c.precio ?? '--'}`;
+
+                const btnMapa = document.getElementById('btn-mapa-bio');
+                if (btnMapa) {
+                    if (c.ubicacionLink) { btnMapa.href = c.ubicacionLink; }
+                    else { btnMapa.style.display = 'none'; }
+                }
+
+                // CONECTAMOS EL BOTÓN GIGANTE CON EL MODAL DE RESERVA
+                const btnReservar = document.getElementById('btn-reservar-bio');
+                if (btnReservar) {
+                    btnReservar.addEventListener('click', () => {
+                        abrirModal(c.id);
+                    });
+                }
             }
         } catch (e) { console.error(e); }
         await refrescarPromedio();
@@ -545,7 +578,7 @@ if (window.location.pathname.includes('cancha.html')) {
             const prom = total > 0 ? (sum / total).toFixed(1) : "0.0";
             const ratingEl = document.getElementById('court-rating');
             if (ratingEl) {
-                ratingEl.innerHTML = `<div class="rating-badge-minimal"><span>${prom}</span><i class="ph-fill ph-star"></i><span style="font-size:0.85rem; color:var(--text-muted); font-weight:normal;">Estrellas</span></div><small style="color:var(--text-muted); margin-top:6px; display:block;">(${total} ${total === 1 ? 'calificación' : 'calificaciones'})</small>`;
+                ratingEl.innerHTML = `<div class="rating-badge-minimal" style="font-size:1.5rem; padding: 5px 15px;"><span style="font-weight:900;">${prom}</span><i class="ph-fill ph-star"></i></div><small style="color:var(--text-muted); margin-top:8px; display:block;">Basado en ${total} calificaciones</small>`;
             }
         } catch (e) { console.error(e); }
     }
@@ -561,20 +594,38 @@ if (window.location.pathname.includes('cancha.html')) {
             star.onclick = () => {
                 ratingSeleccionado = Number(star.dataset.val);
                 etiquetasSeleccionadas.clear();
-                stars.forEach(s => s.classList.toggle('selected', Number(s.dataset.val) <= ratingSeleccionado));
+                stars.forEach(s => {
+                    if(Number(s.dataset.val) <= ratingSeleccionado) {
+                        s.style.color = '#f1c40f'; s.classList.add('selected');
+                    } else {
+                        s.style.color = '#333'; s.classList.remove('selected');
+                    }
+                });
+                
                 const labels = { 1: "Pésimo", 2: "Malo", 3: "Regular", 4: "Bueno", 5: "¡Excelente!" };
                 starLabel.textContent = labels[ratingSeleccionado];
+                starLabel.style.color = '#f1c40f';
+                
                 const tagsDisponibles = TAGS_POR_RATING[ratingSeleccionado] || [];
-                tagsContainer.innerHTML = tagsDisponibles.map(t => `<div class="tag-chip" data-icon="${t.icon}" data-text="${t.text}"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`).join('');
+                tagsContainer.innerHTML = tagsDisponibles.map(t => `<div class="tag-chip" data-icon="${t.icon}" data-text="${t.text}" style="border:1px solid #555; padding:6px 12px; border-radius:20px; font-size:0.8rem; cursor:pointer;"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`).join('');
                 tagsBox.style.display = 'block';
+                
                 tagsContainer.querySelectorAll('.tag-chip').forEach(chip => {
                     chip.onclick = () => {
                         const icon = chip.dataset.icon, text = chip.dataset.text, key = `${icon}|${text}`; 
-                        if (etiquetasSeleccionadas.has(key)) { etiquetasSeleccionadas.delete(key); chip.classList.remove('active'); } 
-                        else { etiquetasSeleccionadas.set(key, true); chip.classList.add('active'); }
+                        if (etiquetasSeleccionadas.has(key)) { 
+                            etiquetasSeleccionadas.delete(key); 
+                            chip.style.background = 'transparent'; chip.style.color = '#fff'; chip.style.borderColor = '#555';
+                        } else { 
+                            etiquetasSeleccionadas.set(key, true); 
+                            chip.style.background = 'rgba(241,196,15,0.1)'; chip.style.color = '#f1c40f'; chip.style.borderColor = '#f1c40f';
+                        }
                     };
                 });
                 btnSubmit.disabled = false;
+                btnSubmit.style.background = 'linear-gradient(45deg, #f1c40f, #e67e22)';
+                btnSubmit.style.color = '#000';
+                btnSubmit.style.fontWeight = 'bold';
             };
         });
 
@@ -593,12 +644,13 @@ if (window.location.pathname.includes('cancha.html')) {
                 });
                 window.toast("¡Calificación registrada con éxito!", "success");
                 ratingSeleccionado = 0; etiquetasSeleccionadas.clear();
-                stars.forEach(s => s.classList.remove('selected'));
-                tagsBox.style.display = 'none'; starLabel.textContent = "Toca las estrellas para calificar";
+                stars.forEach(s => { s.style.color = '#333'; s.classList.remove('selected'); });
+                tagsBox.style.display = 'none'; starLabel.textContent = "Toca las estrellas para calificar"; starLabel.style.color = 'var(--text-muted)';
                 btnSubmit.textContent = 'Publicar Calificación'; btnSubmit.disabled = true;
+                btnSubmit.style.background = 'rgba(255,255,255,0.05)'; btnSubmit.style.color = '#888';
                 await refrescarPromedio();
             } catch (e) {
-                console.error(e); window.toast("Ocurrió un error al registrar tu calificación.", "error");
+                console.error(e); window.toast("Ocurrió un error.", "error");
                 btnSubmit.disabled = false; btnSubmit.textContent = 'Publicar Calificación';
             }
         };
