@@ -169,7 +169,6 @@ function abrirGestionReserva(r){
         document.body.appendChild(m);
         m.querySelector('[data-close]').onclick=()=>m.classList.remove('mostrar');
     }
-    window.__reservaGestion=r;
     const st = estadoReserva(r);
     
     // SEMÁFORO DE COLORES
@@ -207,15 +206,15 @@ function abrirGestionReserva(r){
     }
 
     if(st === 'pending') {
-        // SEMÁFORO - ACCIONES DE VALIDACIÓN
+        // 🔥 AQUÍ ESTÁ EL BLINDAJE: PASAMOS EL ID DE LA RESERVA DIRECTAMENTE
         btnContainer.innerHTML += `
-            <button onclick="cambiarEstadoGestion('confirmed')" class="btn hero-primary" style="background:#2ecc71; color:#000; border:none;"><i class="ph-bold ph-check-circle"></i> Validar Yape y Aprobar</button>
-            <button onclick="cambiarEstadoGestion('rejected')" class="btn" style="background:rgba(231,76,60,0.1); color:var(--danger); border:1px solid var(--danger);"><i class="ph-bold ph-x-circle"></i> Rechazar (Pago Falso / Sin Pago)</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'confirmed')" class="btn hero-primary" style="background:#2ecc71; color:#000; border:none;"><i class="ph-bold ph-check-circle"></i> Validar Yape y Aprobar</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'rejected')" class="btn" style="background:rgba(231,76,60,0.1); color:var(--danger); border:1px solid var(--danger);"><i class="ph-bold ph-x-circle"></i> Rechazar (Pago Falso / Sin Pago)</button>
         `;
     } else if(st === 'confirmed') {
         btnContainer.innerHTML += `
-            <button onclick="cambiarEstadoGestion('completed')" class="btn" style="background:#a777e8; color:#fff; border:none;"><i class="ph-bold ph-flag-checkered"></i> Marcar como Partido Jugado</button>
-            <button onclick="cambiarEstadoGestion('cancelled')" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'completed')" class="btn" style="background:#a777e8; color:#fff; border:none;"><i class="ph-bold ph-flag-checkered"></i> Marcar como Partido Jugado</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'cancelled')" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
         `;
     } else if (st === 'completed') {
         if(!r.calificadoPorDueno) {
@@ -332,31 +331,29 @@ window.abrirCalificacionJugador = function(jugadorUid, reservaId, nombreJugador)
     m.classList.add('mostrar');
 };
 
-window.marcarSenaGestion = async function(recibida) {
-    const r=window.__reservaGestion;
-    if(!r)return;
-    if(!await customConfirm(recibida ? '¿Confirmas que recibiste el adelanto/seña para esta reserva?' : '¿Retirar la marca de seña?')) return;
-    try{
-        await updateDoc(doc(db,'reservas',r.id), { senaPagada: recibida, senaActualizadaEn: serverTimestamp(), senaActualizadaPor: usuarioActual.uid });
-        document.getElementById('modal-gestion-reserva')?.classList.remove('mostrar');
-        toast(recibida ? 'Seña registrada correctamente.' : 'Marca de seña retirada.');
-        await refrescar();
-    }catch(e){ console.error(e); toast('Error al actualizar la seña.',true); }
-};
-
-async function cambiarEstadoGestion(nuevoEstado){
-    const r=window.__reservaGestion;
-    if(!r)return;
-    if(!await customConfirm(`¿Estás seguro de cambiar la reserva a estado: ${nuevoEstado.toUpperCase()}?`)) return;
-    try{
+// 🔥 BLINDAJE DE LA FUNCIÓN DE CAMBIAR ESTADO
+window.cambiarEstadoGestion = async function(reservaId, nuevoEstado){
+    if(!reservaId) return;
+    if(!await window.customConfirm(`¿Estás seguro de cambiar la reserva a estado: ${nuevoEstado.toUpperCase()}?`)) return;
+    
+    try {
         const updateData = { estado: nuevoEstado, updatedAt: serverTimestamp() };
-        if(nuevoEstado === 'confirmed') { updateData.confirmadoPor = usuarioActual.uid; updateData.confirmadoEn = serverTimestamp(); } 
-        else if (nuevoEstado === 'cancelled' || nuevoEstado === 'rejected') { updateData.canceladoPor = usuarioActual.uid; updateData.canceladoEn = serverTimestamp(); }
-        await updateDoc(doc(db,'reservas',r.id), updateData);
+        if (nuevoEstado === 'confirmed') { 
+            updateData.confirmadoPor = usuarioActual.uid; 
+            updateData.confirmadoEn = serverTimestamp(); 
+        } else if (nuevoEstado === 'cancelled' || nuevoEstado === 'rejected') { 
+            updateData.canceladoPor = usuarioActual.uid; 
+            updateData.canceladoEn = serverTimestamp(); 
+        }
+        
+        await updateDoc(doc(db,'reservas', reservaId), updateData);
         document.getElementById('modal-gestion-reserva')?.classList.remove('mostrar');
         toast('Estado actualizado correctamente.');
         await refrescar();
-    }catch(e){ console.error(e); toast('No se pudo actualizar la reserva.',true); }
+    } catch(e) { 
+        console.error(e); 
+        toast('No se pudo actualizar la reserva.', true); 
+    }
 }
 
 async function refrescar(){await cargarReservas();renderSchedule();renderReservas()}
