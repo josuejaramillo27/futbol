@@ -124,7 +124,11 @@ const slotsDeCancha = (c, reservas, fechaReq) => {
 if(esInicio()){
  const contenedor=document.getElementById('lista-canchas'),inputBusqueda=document.getElementById('filtro-busqueda'),filtroCiudad=document.getElementById('filtro-ciudad'),filtroTipo=document.getElementById('filtro-tipo'),filtroPrecio=document.getElementById('filtro-precio'),filtroOrden=document.getElementById('filtro-orden'),contador=document.getElementById('contador-canchas'),filtroActivo=document.getElementById('filtro-activo');let soloAbiertas=false,soloCerca=false,soloTop=false;
  function llenarSelect(select,valores,placeholder){if(!select)return;const actual=select.value;select.innerHTML=`<option value="">${placeholder}</option>`;[...new Set(valores.map(v=>String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;select.appendChild(o)});if([...select.options].some(o=>o.value===actual))select.value=actual}
- function renderizarCanchas(){if(!contenedor)return;const texto=normalizar(inputBusqueda?.value),ciudad=normalizar(filtroCiudad?.value),tipo=normalizar(filtroTipo?.value),rango=filtroPrecio?.value||'',orden=filtroOrden?.value||'recomendadas';let resultados=canchasGlobales.filter(c=>{const buscable=normalizar(`${c.nombre} ${c.ubicacionTexto||''} ${obtenerCiudad(c)} ${obtenerTipo(c)}`),precio=precioNumero(c);let rp=true;if(rango){const[min,max]=rango.split('-').map(Number);rp=precio>=min&&precio<=max}return(!texto||buscable.includes(texto))&&(!ciudad||normalizar(obtenerCiudad(c))===ciudad)&&(!tipo||normalizar(obtenerTipo(c))===tipo)&&rp&&(!soloAbiertas||c.isOpen)&&(!soloTop||c.rating>=4.5)&&(!soloCerca||distanciaCerca(c)<=10)});resultados.sort((a,b)=>orden==='rating'?b.rating-a.rating:orden==='precio-asc'?precioNumero(a)-precioNumero(b):orden==='precio-desc'?precioNumero(b)-precioNumero(a):orden==='cerca'?distanciaCerca(a)-distanciaCerca(b):a.isOpen!==b.isOpen?(a.isOpen?-1:1):b.rating-a.rating);if(contador)contador.textContent=`${resultados.length} ${resultados.length===1?'cancha encontrada':'canchas encontradas'}`;if(filtroActivo){const a=[];if(ciudad)a.push(filtroCiudad.value);if(tipo)a.push(filtroTipo.value);if(rango)a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text);if(soloAbiertas)a.push('Abiertas ahora');if(soloTop)a.push('4.5+ estrellas');if(soloCerca)a.push(ubicacionUsuario?'Cerca de mí':'Cerca de mí*');filtroActivo.textContent=a.length?a.join(' · '):''}contenedor.innerHTML='';if(!resultados.length){contenedor.innerHTML='<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos esa cancha</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';document.getElementById('btn-reset-empty')?.addEventListener('click',limpiarFiltros);return}resultados.forEach(c=>{const estado=c.isOpen?'<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>':'<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>',logo=c.logo||'https://via.placeholder.com/100',portada=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85',d=distanciaCerca(c),dist=Number.isFinite(d)&&d<999999?` · ${d.toFixed(1)} km`:'';contenedor.innerHTML+=`<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><h3>${c.nombre||'Cancha'}</h3><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating>0?c.rating.toFixed(1):'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto||'Ubicación'}${obtenerCiudad(c)?` · ${obtenerCiudad(c)}`:''}${dist}</p><div class="court-meta"><span><i class="ph-bold ph-soccer-ball"></i> ${obtenerTipo(c)||'Fútbol'}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver cancha y reservar</span><i class="ph-bold ph-arrow-right"></i></button></div></div></article>`});contenedor.querySelectorAll('[data-court-id]').forEach(b=>b.addEventListener('click',()=>abrirModal(b.dataset.courtId)))}
+ function renderizarCanchas(){if(!contenedor)return;const texto=normalizar(inputBusqueda?.value),ciudad=normalizar(filtroCiudad?.value),tipo=normalizar(filtroTipo?.value),rango=filtroPrecio?.value||'',orden=filtroOrden?.value||'recomendadas';let resultados=canchasGlobales.filter(c=>{const buscable=normalizar(`${c.nombre} ${c.ubicacionTexto||''} ${obtenerCiudad(c)} ${obtenerTipo(c)}`),precio=precioNumero(c);let rp=true;if(rango){const[min,max]=rango.split('-').map(Number);rp=precio>=min&&precio<=max}return(!texto||buscable.includes(texto))&&(!ciudad||normalizar(obtenerCiudad(c))===ciudad)&&(!tipo||normalizar(obtenerTipo(c))===tipo)&&rp&&(!soloAbiertas||c.isOpen)&&(!soloTop||c.rating>=4.5)&&(!soloCerca||distanciaCerca(c)<=10)});resultados.sort((a,b)=>orden==='rating'?b.rating-a.rating:orden==='precio-asc'?precioNumero(a)-precioNumero(b):orden==='precio-desc'?precioNumero(b)-precioNumero(a):orden==='cerca'?distanciaCerca(a)-distanciaCerca(b):a.isOpen!==b.isOpen?(a.isOpen?-1:1):b.rating-a.rating);if(contador)contador.textContent=`${resultados.length} ${resultados.length===1?'cancha encontrada':'canchas encontradas'}`;if(filtroActivo){const a=[];if(ciudad)a.push(filtroCiudad.value);if(tipo)a.push(filtroTipo.value);if(rango)a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text);if(soloAbiertas)a.push('Abiertas ahora');if(soloTop)a.push('4.5+ estrellas');if(soloCerca)a.push(ubicacionUsuario?'Cerca de mí':'Cerca de mí*');filtroActivo.textContent=a.length?a.join(' · '):''}contenedor.innerHTML='';if(!resultados.length){contenedor.innerHTML='<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos esa cancha</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';document.getElementById('btn-reset-empty')?.addEventListener('click',limpiarFiltros);return}resultados.forEach(c=>{const estado=c.isOpen?'<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>':'<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>',logo=c.logo||'https://via.placeholder.com/100',portada=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85',d=distanciaCerca(c),dist=Number.isFinite(d)&&d<999999?` · ${d.toFixed(1)} km`:'';contenedor.innerHTML+=`<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><h3>${c.nombre||'Cancha'}</h3><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating>0?c.rating.toFixed(1):'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto||'Ubicación'}${obtenerCiudad(c)?` · ${obtenerCiudad(c)}`:''}${dist}</p><div class="court-meta"><span><i class="ph-bold ph-soccer-ball"></i> ${obtenerTipo(c)||'Fútbol'}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver perfil y reservar</span><i class="ph-bold ph-arrow-right"></i></button></div></div></article>`});
+ 
+ // 🔥 ESTE ES EL BOTÓN CORREGIDO PARA QUE VAYA A LA LANDING PAGE
+ contenedor.querySelectorAll('[data-court-id]').forEach(b=>b.addEventListener('click',()=> window.location.href = `cancha.html?id=${b.dataset.courtId}`))}
+ 
  function limpiarFiltros(){if(inputBusqueda)inputBusqueda.value='';if(filtroCiudad)filtroCiudad.value='';if(filtroTipo)filtroTipo.value='';if(filtroPrecio)filtroPrecio.value='';if(filtroOrden)filtroOrden.value='recomendadas';soloAbiertas=soloCerca=soloTop=false;document.querySelectorAll('.quick-filter').forEach(b=>b.classList.remove('active'));renderizarCanchas()}
  async function cargar(){
      if(!contenedor)return;
@@ -152,9 +156,7 @@ if(esInicio()){
 // ==========================================
 // MODAL DE RESERVA Y DISPONIBILIDAD
 // ==========================================
-window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre').innerText=c.nombre;document.getElementById('modal-logo').src=c.logo||'https://via.placeholder.com/100';document.getElementById('modal-imagen-principal').src=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';document.getElementById('modal-precio').innerText=c.precio??'Consultar';document.getElementById('modal-rating').innerText=c.rating>0?c.rating.toFixed(1):'Nuevo';document.getElementById('modal-horario').innerText=`${c.horaApertura||'??:??'} a ${c.horaCierre||'??:??'}`;document.getElementById('modal-descripcion').innerText=c.descripcion||'Sin descripción disponible.';document.getElementById('modal-link-maps').href=c.ubicacionLink||'#';
-const tel=formatWsp(c.whatsapp);
-document.getElementById('btn-whatsapp-reserva').href=tel?`https://wa.me/${tel}?text=${encodeURIComponent(`Hola ${c.nombre}, vengo de CHALACAPP y quiero consultar disponibilidad.`)}`:'#';document.getElementById('btn-ver-resenas').href=`cancha.html?id=${c.id}`;await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
+window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre-interno').innerText=c.nombre; await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
 async function pintarDisponibilidadModal(c, fechaElegida){
     const box = document.getElementById('modal-disponibilidad');
     if(!box) return;
@@ -244,10 +246,8 @@ if (window.location.pathname.includes('jugadores.html')) {
     const lista = document.getElementById('lista-jugadores');
     const hint = document.getElementById('login-hint');
 
-    let docsBolsa = []; // Guardamos los anuncios temporalmente aquí
+    let docsBolsa = []; 
 
-    // 1. FUNCIÓN MAESTRA QUE PINTA LA BOLSA
-    // Se ejecuta cada vez que cambia la base de datos O cada vez que inicias/cierras sesión
     function renderizarBolsa() {
         if (!lista) return;
         if (!docsBolsa.length) {
@@ -325,7 +325,6 @@ if (window.location.pathname.includes('jugadores.html')) {
 
         lista.innerHTML = bufferHTML;
 
-        // ASIGNAMOS LOS EVENTOS A LOS BOTONES RECIÉN CREADOS
         lista.querySelectorAll('.btn-postular').forEach(b => {
             b.addEventListener('click', async () => {
                 if(!usuarioActual) return window.toast('Inicia sesión para postularte.', 'warning');
@@ -386,15 +385,12 @@ if (window.location.pathname.includes('jugadores.html')) {
         });
     }
 
-    // 2. ESCUCHAMOS CUANDO EL USUARIO INICIA O CIERRA SESIÓN
     onAuthStateChanged(auth, u => {
         usuarioActual = u || null;
         if (btnLogin) btnLogin.style.display = u ? 'none' : 'flex';
         if (formAnuncio) formAnuncio.style.display = u ? 'flex' : 'none';
         if (hint) hint.style.display = u ? 'none' : 'block';
         
-        // ¡LA MAGIA AQUÍ! Repintamos todo para que el sistema "despierte"
-        // y reconozca cuáles anuncios le pertenecen al usuario logueado.
         renderizarBolsa(); 
     });
 
@@ -405,20 +401,18 @@ if (window.location.pathname.includes('jugadores.html')) {
         });
     }
 
-    // 3. ESCUCHAMOS LA BASE DE DATOS
     if (lista) {
         const q = query(collection(db, 'bolsa_jugadores'), orderBy('createdAt', 'desc'));
         onSnapshot(q, s => {
             docsBolsa = [];
             s.forEach(ds => docsBolsa.push({ id: ds.id, ...ds.data() }));
-            renderizarBolsa(); // Repintamos todo con los datos fresquitos
+            renderizarBolsa(); 
         }, e => {
             console.error('Error cargando bolsa:', e);
             lista.innerHTML = '<p style="color:var(--danger); text-align:center;">Error de conexión. No pudimos cargar los partidos.</p>';
         });
     }
 
-    // 4. CREAR UN NUEVO ANUNCIO
     if (formAnuncio) {
         formAnuncio.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -522,12 +516,10 @@ if (window.location.pathname.includes('cancha.html')) {
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
             if (docSnap.exists()) {
                 const c = docSnap.data();
-                c.id = docSnap.id; // Clave para el modal
+                c.id = docSnap.id; 
                 
-                // INYECTAMOS LA CANCHA EN LA VARIABLE GLOBAL PARA QUE ABRIRMODAL() FUNCIONE
                 canchasGlobales = [{...c, isOpen: canchaEstaAbierta(c)}];
 
-                // Rellenamos el diseño del Link en Bio
                 const coverEl = document.getElementById('bio-cover');
                 if (coverEl) coverEl.src = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
                 
@@ -555,7 +547,6 @@ if (window.location.pathname.includes('cancha.html')) {
                     else { btnMapa.style.display = 'none'; }
                 }
 
-                // CONECTAMOS EL BOTÓN GIGANTE CON EL MODAL DE RESERVA
                 const btnReservar = document.getElementById('btn-reservar-bio');
                 if (btnReservar) {
                     btnReservar.addEventListener('click', () => {
