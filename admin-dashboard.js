@@ -331,13 +331,28 @@ window.abrirCalificacionJugador = function(jugadorUid, reservaId, nombreJugador)
     m.classList.add('mostrar');
 };
 
-// 🔥 BLINDAJE DE LA FUNCIÓN DE CAMBIAR ESTADO
+// 🔥 BLINDAJE DE LA FUNCIÓN DE CAMBIAR ESTADO (CON TRADUCCIÓN VISUAL)
 window.cambiarEstadoGestion = async function(reservaId, nuevoEstado){
     if(!reservaId) return;
-    if(!await window.customConfirm(`¿Estás seguro de cambiar la reserva a estado: ${nuevoEstado.toUpperCase()}?`)) return;
+
+    // DICCIONARIO PARA TRADUCIR EL ESTADO SOLO EN LA ALERTA VISUAL
+    const nombresEstados = {
+        'confirmed': 'CONFIRMADA ✅',
+        'completed': 'JUGADA 🏁',
+        'cancelled': 'CANCELADA ❌',
+        'rejected': 'RECHAZADA 🚫'
+    };
+    
+    // Si encuentra la traducción la usa, si no, usa el original en mayúsculas
+    const estadoAmigable = nombresEstados[nuevoEstado] || nuevoEstado.toUpperCase();
+
+    // MOSTRAMOS LA ALERTA EN ESPAÑOL
+    if(!await window.customConfirm(`¿Estás seguro de cambiar la reserva a estado: ${estadoAmigable}?`)) return;
     
     try {
+        // PERO GUARDAMOS EN INGLÉS EN LA BASE DE DATOS PARA QUE EL SISTEMA NO FALLE
         const updateData = { estado: nuevoEstado, updatedAt: serverTimestamp() };
+        
         if (nuevoEstado === 'confirmed') { 
             updateData.confirmadoPor = usuarioActual.uid; 
             updateData.confirmadoEn = serverTimestamp(); 
@@ -355,7 +370,6 @@ window.cambiarEstadoGestion = async function(reservaId, nuevoEstado){
         toast('No se pudo actualizar la reserva.', true); 
     }
 }
-
 async function refrescar(){await cargarReservas();renderSchedule();renderReservas()}
 
 function renderReservas(){
