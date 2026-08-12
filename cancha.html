@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="phase34-public.css">
     
     <style>
-        /* ESTILOS "LINK EN BIO" - TARJETA CENTRAL PREMIUM PARA MÓVIL Y PC */
+        /* ESTILOS LINK EN BIO - PERFECCIONADO MÓVIL Y PC */
         body { background: #080B0A; min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
         
         /* BARRA SUPERIOR */
@@ -42,14 +42,15 @@
         .back-link-top:hover { color: var(--primary-green); }
         .back-link-top i { font-size: 1.1rem; color: var(--primary-green); }
 
-        /* CONTENEDOR CENTRAL ESTILO LINKTREE */
+        /* CONTENEDOR MÓVIL (PANTALLAS PEQUEÑAS) */
         .bio-container {
-            max-width: 520px; /* Ancho perfecto para lectura rápida en cualquier dispositivo */
+            max-width: 520px;
             width: 100%;
             margin: 0 auto;
             padding: 0;
             box-sizing: border-box;
             background: #080B0A;
+            transition: max-width 0.3s ease;
         }
 
         /* PORTADA Y LOGO */
@@ -72,17 +73,82 @@
         .bio-metric-icon { color: var(--primary-green); font-size: 1.2rem; margin-bottom: 2px; }
         .bio-metric-val { color: #fff; font-size: 0.85rem; font-weight: bold; }
 
-        /* BOTONES DE ACCIÓN (Ahora están ARRIBA de la descripción) */
-        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 900; font-size: 1rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
+        /* CONTENEDOR DE BOTONES DE ACCIÓN */
+        .bio-buttons-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; width: 100%; }
+
+        /* BOTONES DE ACCIÓN */
+        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 900; font-size: 1rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
         .bio-btn:active { transform: scale(0.98); }
         .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.25); color: #fff; box-shadow: none; }
         .bio-btn-outline:hover { border-color: var(--primary-green); color: var(--primary-green); }
 
-        /* CAJA DE DESCRIPCIÓN (Más abajo) */
-        .bio-desc-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 15px; text-align: left; margin-top: 25px; }
+        /* CAJA DE DESCRIPCIÓN */
+        .bio-desc-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 15px; text-align: left; margin-top: 20px; }
         .bio-desc-title { font-size: 0.95rem; color: #fff; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px; }
         .bio-desc { color: #ccc; font-size: 0.88rem; margin: 0; line-height: 1.5; font-style: italic; }
 
+        /* 🔥 VISTA HORIZONTAL EXPANDIDA PARA PC (min-width: 768px) */
+        @media (min-width: 768px) {
+            .bio-container {
+                max-width: 900px;
+                padding: 20px;
+            }
+            .bio-header {
+                height: 260px;
+            }
+            .bio-cover-box {
+                border-radius: 16px;
+            }
+            .bio-logo-wrapper {
+                width: 110px;
+                height: 110px;
+                bottom: -45px;
+                border-width: 4px;
+            }
+            .bio-body {
+                padding: 60px 40px 40px;
+            }
+            .bio-title {
+                font-size: 2.2rem;
+            }
+            .bio-location {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+            .bio-metrics {
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .bio-metric-box {
+                padding: 12px 24px;
+                min-width: 120px;
+            }
+            .bio-metric-icon {
+                font-size: 1.5rem;
+            }
+            .bio-metric-val {
+                font-size: 1rem;
+            }
+            /* En PC los botones principales se colocan en fila horizontal ocupando todo el ancho proporcional */
+            .bio-buttons-group {
+                flex-direction: row;
+                gap: 15px;
+            }
+            .bio-btn {
+                font-size: 1.05rem;
+                padding: 16px;
+            }
+            .bio-desc-container {
+                padding: 20px;
+                margin-top: 30px;
+            }
+            .bio-desc-title {
+                font-size: 1.05rem;
+            }
+            .bio-desc {
+                font-size: 0.95rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,10 +185,12 @@
                     <div id="bio-precio" class="bio-metric-val">...</div>
                 </div>
             </div>
-            <div id="court-rating" style="margin-bottom: 25px; display: flex; flex-direction: column; align-items: center;"></div>
+            <div id="court-rating" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center;"></div>
             
-            <button id="btn-reservar-bio" class="bio-btn"><i class="ph-bold ph-calendar-check"></i> Ver Horarios y Reservar</button>
-            <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline"><i class="ph-bold ph-navigation-arrow"></i> Cómo llegar (GPS)</a>
+            <div class="bio-buttons-group">
+                <button id="btn-reservar-bio" class="bio-btn"><i class="ph-bold ph-calendar-check"></i> Ver Horarios y Reservar</button>
+                <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline"><i class="ph-bold ph-navigation-arrow"></i> Cómo llegar (GPS)</a>
+            </div>
 
             <div class="bio-desc-container">
                 <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre la cancha</h3>
