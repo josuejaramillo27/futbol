@@ -627,12 +627,26 @@ if (window.location.pathname.includes('cancha.html')) {
                 try { await signInWithPopup(auth, new GoogleAuthProvider()); if(!auth.currentUser) return; } catch(e) { return; }
             }
             btnSubmit.disabled = true; btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
+            
             try {
                 const reseñaUnicaId = `${canchaId}_${auth.currentUser.uid}`;
-                await setDoc(doc(db, 'resenas', reseñaUnicaId), {
+                const refResena = doc(db, 'resenas', reseñaUnicaId);
+
+                // 🔥 MAGIA AQUÍ: Verificamos si ya existe antes de que Firebase nos bloquee
+                const snapResena = await getDoc(refResena);
+                if (snapResena.exists()) {
+                    window.toast("Ya calificaste esta cancha anteriormente.", "warning");
+                    btnSubmit.textContent = 'Publicar Calificación'; btnSubmit.disabled = true;
+                    btnSubmit.style.background = 'rgba(255,255,255,0.05)'; btnSubmit.style.color = '#888';
+                    return;
+                }
+
+                // SI NO EXISTÍA, GUARDAMOS
+                await setDoc(refResena, {
                     canchaId: canchaId, usuarioUid: auth.currentUser.uid, nombre: auth.currentUser.displayName || 'Jugador',
                     rating: ratingSeleccionado, tags: Array.from(etiquetasSeleccionadas.keys()), createdAt: serverTimestamp()
                 });
+                
                 window.toast("¡Calificación registrada con éxito!", "success");
                 ratingSeleccionado = 0; etiquetasSeleccionadas.clear();
                 stars.forEach(s => { s.style.color = '#333'; s.classList.remove('selected'); });
@@ -640,8 +654,15 @@ if (window.location.pathname.includes('cancha.html')) {
                 btnSubmit.textContent = 'Publicar Calificación'; btnSubmit.disabled = true;
                 btnSubmit.style.background = 'rgba(255,255,255,0.05)'; btnSubmit.style.color = '#888';
                 await refrescarPromedio();
+                
             } catch (e) {
-                console.error(e); window.toast("Ocurrió un error.", "error");
+                console.error(e);
+                // Si aún así Firebase rechaza por reglas de seguridad
+                if (e.code === 'permission-denied') {
+                    window.toast("Ya calificaste esta cancha.", "warning");
+                } else {
+                    window.toast("Ocurrió un error al publicar.", "error");
+                }
                 btnSubmit.disabled = false; btnSubmit.textContent = 'Publicar Calificación';
             }
         };
