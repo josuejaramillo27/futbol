@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="phase34-public.css">
     
     <style>
+        /* ESTILOS "LINK EN BIO" - TARJETA CENTRAL PREMIUM PARA MÓVIL Y PC */
         body { background: #080B0A; min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
         
         /* BARRA SUPERIOR */
@@ -41,64 +42,47 @@
         .back-link-top:hover { color: var(--primary-green); }
         .back-link-top i { font-size: 1.1rem; color: var(--primary-green); }
 
-        /* CONTENEDOR BASE */
+        /* CONTENEDOR CENTRAL ESTILO LINKTREE */
         .bio-container {
-            max-width: 100%;
+            max-width: 520px; /* Ancho perfecto para lectura rápida en cualquier dispositivo */
             width: 100%;
             margin: 0 auto;
             padding: 0;
             box-sizing: border-box;
+            background: #080B0A;
         }
 
-        /* CABECERA Y PORTADA COMPACTA (SIN CLIPEAR EL LOGO) */
-        .bio-header { position: relative; height: 180px; width: 100%; overflow: visible; }
+        /* PORTADA Y LOGO */
+        .bio-header { position: relative; height: 160px; width: 100%; overflow: visible; }
         .bio-cover-box { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 0 0 16px 16px; }
         .bio-cover { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65); }
-        .bio-cover-gradient { position: absolute; bottom: 0; left: 0; width: 100%; height: 100px; background: linear-gradient(to top, #080B0A, transparent); }
+        .bio-cover-gradient { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; background: linear-gradient(to top, #080B0A, transparent); }
         
-        /* LOGO CIRCULAR (SIN CORTARSE) */
-        .bio-logo-wrapper { position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); width: 90px; height: 90px; border-radius: 50%; border: 4px solid #080B0A; overflow: hidden; background: #111; z-index: 10; box-shadow: 0 6px 20px rgba(0,0,0,0.8); }
+        .bio-logo-wrapper { position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); width: 85px; height: 85px; border-radius: 50%; border: 3px solid #080B0A; overflow: hidden; background: #111; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
         .bio-logo { width: 100%; height: 100%; object-fit: cover; }
 
-        .bio-body { padding: 45px 16px 30px; text-align: center; box-sizing: border-box; }
-        .bio-title { font-size: 1.6rem; color: #fff; margin: 0 0 6px 0; font-weight: 900; letter-spacing: -0.5px; }
-        .bio-location { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px; }
+        /* CUERPO DEL PERFIL */
+        .bio-body { padding: 45px 20px 40px; text-align: center; box-sizing: border-box; }
+        .bio-title { font-size: 1.5rem; color: #fff; margin: 0 0 4px 0; font-weight: 900; letter-spacing: -0.3px; }
+        .bio-location { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 15px; }
         
-        .bio-metrics { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; }
-        .bio-metric-box { background: rgba(255,255,255,0.04); padding: 8px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); min-width: 90px; }
+        /* MÉTRICAS (Precio, Tipo, Estrellas) */
+        .bio-metrics { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .bio-metric-box { background: rgba(255,255,255,0.04); padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); min-width: 90px; }
         .bio-metric-icon { color: var(--primary-green); font-size: 1.2rem; margin-bottom: 2px; }
         .bio-metric-val { color: #fff; font-size: 0.85rem; font-weight: bold; }
 
-        .bio-desc { color: #ccc; font-size: 0.9rem; margin-bottom: 22px; line-height: 1.5; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 12px; font-style: italic; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
-        
-        /* BOTONES DE ACCIÓN */
-        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 900; font-size: 1.02rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(46, 204, 113, 0.22); transition: transform 0.2s, box-shadow 0.2s; box-sizing: border-box; }
-        .bio-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.35); }
+        /* BOTONES DE ACCIÓN (Ahora están ARRIBA de la descripción) */
+        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 900; font-size: 1rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
+        .bio-btn:active { transform: scale(0.98); }
         .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.25); color: #fff; box-shadow: none; }
         .bio-btn-outline:hover { border-color: var(--primary-green); color: var(--primary-green); }
 
-        .pc-grid-layout { display: block; }
-        .side-panel-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 16px; margin-top: 20px; }
+        /* CAJA DE DESCRIPCIÓN (Más abajo) */
+        .bio-desc-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 15px; text-align: left; margin-top: 25px; }
+        .bio-desc-title { font-size: 0.95rem; color: #fff; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px; }
+        .bio-desc { color: #ccc; font-size: 0.88rem; margin: 0; line-height: 1.5; font-style: italic; }
 
-        /* 🔥 DISEÑO HORIZONTAL EXCLUSIVO EN PC Y TABLET (min-width: 768px) */
-        @media (min-width: 768px) {
-            .bio-container { max-width: 1050px; padding: 25px 20px; }
-            .bio-header { height: 260px; }
-            .bio-logo-wrapper { width: 110px; height: 110px; bottom: -45px; left: 60px; transform: none; }
-            
-            .pc-grid-layout {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 30px;
-                align-items: start;
-                margin-top: 20px;
-            }
-
-            .bio-body { padding: 55px 0 0 0; text-align: left; }
-            .bio-metrics { justify-content: flex-start; }
-            .bio-desc { text-align: left; }
-            .side-panel-card { margin-top: 55px; padding: 25px; }
-        }
     </style>
 </head>
 <body>
@@ -121,51 +105,48 @@
             </div>
         </div>
 
-        <div class="pc-grid-layout">
-            <div class="bio-body">
-                <h1 id="bio-title" class="bio-title">Cargando...</h1>
-                <p id="bio-location" class="bio-location"><i class="ph-bold ph-map-pin"></i> ...</p>
-                
-                <div class="bio-metrics">
-                    <div class="bio-metric-box">
-                        <i class="ph-fill ph-soccer-ball bio-metric-icon"></i>
-                        <div id="bio-tipo" class="bio-metric-val">...</div>
-                    </div>
-                    <div class="bio-metric-box">
-                        <i class="ph-fill ph-money bio-metric-icon"></i>
-                        <div id="bio-precio" class="bio-metric-val">...</div>
-                    </div>
+        <div class="bio-body">
+            <h1 id="bio-title" class="bio-title">Cargando...</h1>
+            <p id="bio-location" class="bio-location"><i class="ph-bold ph-map-pin"></i> ...</p>
+            
+            <div class="bio-metrics">
+                <div class="bio-metric-box">
+                    <i class="ph-fill ph-soccer-ball bio-metric-icon"></i>
+                    <div id="bio-tipo" class="bio-metric-val">...</div>
                 </div>
+                <div class="bio-metric-box">
+                    <i class="ph-fill ph-money bio-metric-icon"></i>
+                    <div id="bio-precio" class="bio-metric-val">...</div>
+                </div>
+            </div>
+            <div id="court-rating" style="margin-bottom: 25px; display: flex; flex-direction: column; align-items: center;"></div>
+            
+            <button id="btn-reservar-bio" class="bio-btn"><i class="ph-bold ph-calendar-check"></i> Ver Horarios y Reservar</button>
+            <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline"><i class="ph-bold ph-navigation-arrow"></i> Cómo llegar (GPS)</a>
 
+            <div class="bio-desc-container">
+                <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre la cancha</h3>
                 <p id="bio-desc" class="bio-desc"></p>
+            </div>
+            
+            <hr style="border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 35px 0;">
 
-                <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline"><i class="ph-bold ph-navigation-arrow"></i> Cómo llegar (GPS)</a>
+            <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem;">¿Ya jugaste aquí?</h3>
+            <p id="star-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Ayuda a otros tocando las estrellas</p>
+            <div id="star-picker" style="font-size: 2.4rem; color: #333; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; gap: 6px;">
+                <i class="ph-fill ph-star" data-val="1"></i>
+                <i class="ph-fill ph-star" data-val="2"></i>
+                <i class="ph-fill ph-star" data-val="3"></i>
+                <i class="ph-fill ph-star" data-val="4"></i>
+                <i class="ph-fill ph-star" data-val="5"></i>
+            </div>
+            
+            <div id="quick-tags-box" style="display: none; margin-bottom: 22px;">
+                <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 12px;">¿Qué destacarías?</p>
+                <div id="quick-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
             </div>
 
-            <div class="side-panel-card">
-                <div id="court-rating" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center;"></div>
-                
-                <button id="btn-reservar-bio" class="bio-btn" style="margin-bottom: 25px;"><i class="ph-bold ph-calendar-check"></i> Ver Horarios y Reservar</button>
-
-                <hr style="border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 25px 0;">
-
-                <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem; text-align: center;">¿Ya jugaste aquí?</h3>
-                <p id="star-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; text-align: center;">Ayuda a otros tocando las estrellas</p>
-                <div id="star-picker" style="font-size: 2.5rem; color: #333; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; gap: 6px;">
-                    <i class="ph-fill ph-star" data-val="1"></i>
-                    <i class="ph-fill ph-star" data-val="2"></i>
-                    <i class="ph-fill ph-star" data-val="3"></i>
-                    <i class="ph-fill ph-star" data-val="4"></i>
-                    <i class="ph-fill ph-star" data-val="5"></i>
-                </div>
-                
-                <div id="quick-tags-box" style="display: none; margin-bottom: 22px;">
-                    <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 12px; text-align: center;">¿Qué destacarías?</p>
-                    <div id="quick-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
-                </div>
-
-                <button id="btn-submit-review" class="btn" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); width: 100%; font-size: 0.9rem; padding: 12px;" disabled>Publicar Calificación</button>
-            </div>
+            <button id="btn-submit-review" class="btn" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); width: 100%; font-size: 0.9rem; padding: 12px;" disabled>Publicar Calificación</button>
         </div>
     </main>
 
