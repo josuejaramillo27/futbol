@@ -13,19 +13,21 @@
     <link rel="stylesheet" href="phase34-public.css">
     
     <style>
-        /* ESTILOS REFINADOS PARA MÓVIL (LINK EN BIO) */
+        /* ESTILOS ULTRA-COMPACTOS PARA ENCAJE PERFECTO A PRIMERA VISTA EN CUALQUIER MÓVIL */
         body { background: #080B0A; min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; }
         
-        /* 🔥 BARRA SUPERIOR DEDICADA POR ENCIMA DE LA PORTADA */
+        /* BARRA SUPERIOR COMPACTA */
         .topbar-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 8px 14px;
             background: rgba(8, 11, 10, 0.98);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             position: relative;
             z-index: 100;
+            height: 40px;
+            box-sizing: border-box;
         }
 
         .back-link-top {
@@ -35,36 +37,52 @@
             align-items: center;
             gap: 6px;
             font-weight: 700;
-            font-size: 0.88rem;
+            font-size: 0.82rem;
             transition: color 0.2s ease;
         }
         .back-link-top:hover { color: var(--primary-green); }
-        .back-link-top i { font-size: 1.1rem; color: var(--primary-green); }
+        .back-link-top i { font-size: 1rem; color: var(--primary-green); }
 
-        .bio-header { position: relative; height: 220px; width: 100%; overflow: hidden; }
-        .bio-cover { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
-        .bio-cover-gradient { position: absolute; bottom: 0; width: 100%; height: 120px; background: linear-gradient(to top, #080B0A, transparent); }
+        /* PORTADA COMPACTA Y PROPORCIONADA */
+        .bio-header { position: relative; height: 130px; width: 100%; overflow: hidden; flex-shrink: 0; }
+        .bio-cover { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65); }
+        .bio-cover-gradient { position: absolute; bottom: 0; width: 100%; height: 80px; background: linear-gradient(to top, #080B0A, transparent); }
         
-        /* Logo centrado sobre el degradado */
-        .bio-logo-wrapper { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); width: 90px; height: 90px; border-radius: 50%; border: 3px solid #080B0A; overflow: hidden; background: #111; z-index: 10; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+        /* Logo centrado más compacto */
+        .bio-logo-wrapper { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 65px; height: 65px; border-radius: 50%; border: 2.5px solid #080B0A; overflow: hidden; background: #111; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
         .bio-logo { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Contenedor compacto */
-        .bio-body { padding: 20px 16px 30px; text-align: center; max-width: 480px; margin: 0 auto; flex: 1; width: 100%; box-sizing: border-box; }
-        .bio-title { font-size: 1.5rem; color: #fff; margin: 0 0 4px 0; font-weight: 800; letter-spacing: -0.3px; }
-        .bio-location { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; }
+        /* Contenedor optimizado para que todo quepa a primera vista */
+        .bio-body { padding: 10px 14px 20px; text-align: center; max-width: 480px; margin: 0 auto; flex: 1; width: 100%; box-sizing: border-box; }
+        .bio-title { font-size: 1.25rem; color: #fff; margin: 0 0 2px 0; font-weight: 800; letter-spacing: -0.3px; line-height: 1.2; }
+        .bio-location { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 8px; }
         
-        .bio-metrics { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .bio-metric-box { background: rgba(255,255,255,0.03); padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); width: 90px; }
-        .bio-metric-icon { color: var(--primary-green); font-size: 1.2rem; margin-bottom: 2px; }
-        .bio-metric-val { color: #fff; font-size: 0.8rem; font-weight: bold; }
+        /* Métricas reducidas */
+        .bio-metrics { display: flex; justify-content: center; gap: 8px; margin-bottom: 10px; }
+        .bio-metric-box { background: rgba(255,255,255,0.03); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); min-width: 80px; }
+        .bio-metric-icon { color: var(--primary-green); font-size: 1rem; margin-bottom: 1px; }
+        .bio-metric-val { color: #fff; font-size: 0.78rem; font-weight: bold; }
 
-        .bio-desc { color: #ccc; font-size: 0.88rem; margin-bottom: 20px; line-height: 1.5; background: rgba(255,255,255,0.02); padding: 12px; border-radius: 10px; font-style: italic; }
+        /* Descripción liviana */
+        .bio-desc { color: #ccc; font-size: 0.8rem; margin-bottom: 10px; line-height: 1.35; background: rgba(255,255,255,0.02); padding: 8px 10px; border-radius: 8px; font-style: italic; }
         
-        /* Botones estilizados */
-        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 18px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 800; font-size: 0.95rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
+        /* Botones optimizados en altura */
+        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px 14px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 800; font-size: 0.88rem; border: none; border-radius: 10px; cursor: pointer; text-decoration: none; margin-bottom: 8px; box-shadow: 0 3px 12px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
         .bio-btn:active { transform: scale(0.98); }
-        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: #fff; box-shadow: none; }
+        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: #fff; box-shadow: none; margin-bottom: 0; }
+
+        /* ADAPTATIVO PARA CELULARES CON PANTALLAS MÁS CORTAS DE ALTURA */
+        @media (max-height: 680px) {
+            .bio-header { height: 105px; }
+            .bio-logo-wrapper { width: 55px; height: 55px; bottom: 2px; }
+            .bio-title { font-size: 1.15rem; }
+            .bio-body { padding: 6px 12px 15px; }
+            .bio-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; padding: 6px 8px; font-size: 0.75rem; }
+            .bio-btn { padding: 8px 12px; font-size: 0.82rem; margin-bottom: 6px; }
+            .bio-metrics { margin-bottom: 6px; }
+            .bio-metric-box { padding: 4px 8px; }
+            #court-rating { margin-bottom: 8px !important; }
+        }
     </style>
 </head>
 <body>
@@ -89,7 +107,7 @@
             <h1 id="bio-title" class="bio-title">Cargando...</h1>
             <p id="bio-location" class="bio-location"><i class="ph-bold ph-map-pin"></i> ...</p>
             
-            <div id="court-rating" style="margin-bottom: 18px; display: flex; flex-direction: column; align-items: center;"></div>
+            <div id="court-rating" style="margin-bottom: 10px; display: flex; flex-direction: column; align-items: center;"></div>
             
             <div class="bio-metrics">
                 <div class="bio-metric-box">
