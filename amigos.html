@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#080B0A">
+    <title>Mi Vestuario | CHALACAPP</title>
+    
+    <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="styles.css">
+    
+    <style>
+        body { background: #080B0A; min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
+        
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100; }
+        .topbar-nav { display: flex; gap: 15px; align-items: center; }
+        .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; font-size: 0.6rem; font-weight: bold; gap: 3px; }
+        .topbar-nav a.active { color: var(--primary-green); }
+        .topbar-nav i { font-size: 1.2rem; }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 25px 20px 80px; width: 100%; box-sizing: border-box; }
+        
+        /* TABS */
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: all 0.3s ease; white-space: nowrap; }
+        .tab-btn:hover { color: #ffffff !important; background: rgba(255, 255, 255, 0.05); }
+        .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
+
+        /* MODO FÚTBOL TOGGLE */
+        .modo-futbol-box { display: flex; justify-content: space-between; align-items: center; background: rgba(46, 204, 113, 0.08); border: 1px dashed var(--primary-green); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+        .modo-futbol-info h4 { margin: 0; color: var(--primary-green); display: flex; align-items: center; gap: 6px; }
+        .modo-futbol-info p { margin: 4px 0 0; font-size: 0.8rem; color: #aaa; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary-green); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* FILTROS TÁCTICOS */
+        .filtros-tacticos { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px; }
+        .filtro-chip { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .filtro-chip.active { background: #f1c40f; color: #000; border-color: #f1c40f; }
+
+        /* LISTAS DE TARJETAS */
+        .friend-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .friend-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s; }
+        .friend-card:hover { border-color: rgba(255,255,255,0.2); }
+        .friend-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .friend-avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #555; position: relative; }
+        .status-dot { position: absolute; bottom: 0; right: 0; width: 14px; height: 14px; background: #2ecc71; border: 2px solid #111; border-radius: 50%; display: none; }
+        .status-dot.online { display: block; box-shadow: 0 0 8px #2ecc71; }
+        .friend-name { font-weight: bold; font-size: 1rem; color: #fff; margin: 0 0 2px; }
+        .friend-pos { font-size: 0.75rem; color: #f1c40f; font-weight: bold; background: rgba(241,196,15,0.1); padding: 2px 6px; border-radius: 4px; display: inline-block; }
+        
+        /* BUSCADOR */
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-input { flex: 1; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-size: 0.95rem; }
+        .search-btn { background: var(--primary-green); color: #000; border: none; padding: 0 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        /* CANCHAS DINÁMICAS (RANKING) */
+        .ranking-podium { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .podium-card { background: linear-gradient(135deg, rgba(241,196,15,0.1) 0%, rgba(0,0,0,0.4) 100%); border: 1px solid rgba(241,196,15,0.3); border-radius: 12px; padding: 20px; text-align: center; }
+        
+        .soccer-pitch { position: relative; background: repeating-linear-gradient(0deg, #1b4924, #1b4924 10%, #153c1d 10%, #153c1d 20%); border: 2px solid rgba(255,255,255,0.4); border-radius: 12px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 480px; overflow: hidden; margin-top: 15px; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
+        .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.3); pointer-events: none; }
+        .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
+        .pitch-circle { top: 50%; left: 50%; width: 100px; height: 100px; border-radius: 50%; transform: translate(-50%, -50%); }
+        
+        .voley-pitch { position: relative; background: #2980b9; border: 3px solid #f1c40f; border-radius: 8px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 440px; overflow: hidden; margin-top: 15px; }
+        .voley-line { position: absolute; background: #f1c40f; pointer-events: none; }
+        .voley-center { top: 50%; left: 0; width: 100%; height: 4px; transform: translateY(-50%); }
+
+        .basket-pitch { position: relative; background: #d35400; border: 2px solid #fff; border-radius: 8px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 480px; overflow: hidden; margin-top: 15px; }
+        .basket-line { position: absolute; border: 2px solid #fff; pointer-events: none; }
+        .basket-center { top: 50%; left: 0; width: 100%; height: 0; }
+        .basket-circle { top: 50%; left: 50%; width: 80px; height: 80px; border-radius: 50%; transform: translate(-50%, -50%); }
+
+        .formation-row { display: flex; justify-content: center; gap: 15px; z-index: 10; position: relative; min-height: 70px; flex-wrap: wrap; align-items: center; }
+        .player-pitch-card { display: flex; flex-direction: column; align-items: center; transition: transform 0.3s ease; position: relative; cursor: pointer; }
+        .player-pitch-photo-container { position: relative; width: 55px; height: 65px; display: flex; justify-content: center; }
+        .player-pitch-card img { width: 100%; height: 100%; object-fit: cover; border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; border: 2px solid #f1c40f; background: #111; box-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+        .player-pitch-score { position: absolute; top: -5px; right: -8px; background: #f1c40f; color: #000; border-radius: 50%; width: 22px; height: 22px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; font-weight: 900; border: 2px solid #111; }
+        .player-pitch-name { background: rgba(0,0,0,0.85); color: #fff; font-size: 0.65rem; padding: 3px 8px; border-radius: 4px; margin-top: -10px; font-weight: bold; text-transform: uppercase; white-space: nowrap; max-width: 70px; overflow: hidden; text-overflow: ellipsis; border: 1px solid rgba(255,255,255,0.2); z-index: 2; }
+
+        /* FAB - BOTÓN FLOTANTE CONVOCATORIA */
+        .fab-convocar { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; border: none; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 5px 20px rgba(241,196,15,0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
+        .fab-convocar:hover { transform: scale(1.1); }
+
+        /* MODAL CONVOCATORIA */
+        .modal-convocar-lista { max-height: 400px; overflow-y: auto; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; }
+        .convocar-item { display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .convocar-item:last-child { border-bottom: none; }
+        .convocar-item input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--primary-green); }
+
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+        <img src="logo-chalacapp-nav.png" alt="Logo" style="height: 28px;">
+        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
+    </a>
+    <nav class="topbar-nav">
+        <a href="index.html"><i class="ph-bold ph-map-pin"></i> CANCHAS</a>
+        <a href="jugadores.html"><i class="ph-bold ph-users"></i> BOLSA</a>
+        <a href="amigos.html" class="active"><i class="ph-bold ph-address-book"></i> AMIGOS</a>
+        <a href="comunidades.html"><i class="ph-bold ph-shield-checkered"></i> LIGAS</a>
+    </nav>
+</header>
+
+<main class="container">
+    <div style="margin-bottom: 25px;">
+        <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Mi Vestuario</h1>
+        <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.9rem;">Gestiona tus amigos, arma pichangas privadas y mira tu 11 Ideal.</p>
+    </div>
+    
+    <div class="tabs-container">
+        <button class="tab-btn active" id="tab-mis-amigos">Mis Amigos</button>
+        <button class="tab-btn" id="tab-explorar">Buscar / Solicitudes <span id="badge-solicitudes" style="background:#e74c3c;color:#fff;border-radius:50%;padding:2px 6px;font-size:0.7rem;display:none;">0</span></button>
+        <button class="tab-btn" id="tab-ranking"><i class="ph-fill ph-star" style="color:#f1c40f;"></i> Mi Equipo Ideal</button>
+    </div>
+
+    <div id="seccion-mis-amigos">
+        <div class="modo-futbol-box">
+            <div class="modo-futbol-info">
+                <h4><i class="ph-fill ph-soccer-ball"></i> Modo Fútbol</h4>
+                <p>Actívalo para que tus amigos sepan que estás disponible hoy.</p>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="toggle-modo-futbol">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="filtros-tacticos" id="filtros-posiciones">
+            <button class="filtro-chip active" data-pos="TODOS">Todos</button>
+            <button class="filtro-chip" data-pos="ARQ">Arqueros</button>
+            <button class="filtro-chip" data-pos="DEF">Defensas</button>
+            <button class="filtro-chip" data-pos="MED">Mediocampistas</button>
+            <button class="filtro-chip" data-pos="DEL">Delanteros</button>
+            <button class="filtro-chip" data-pos="LIB">Líberos (Vóley)</button>
+        </div>
+
+        <div id="lista-amigos" class="friend-list">
+            <p style="color:#aaa; text-align:center; grid-column:1/-1;">Cargando tu vestuario...</p>
+        </div>
+
+        <button class="fab-convocar" id="btn-abrir-convocatoria" title="Armar Partido Privado"><i class="ph-bold ph-megaphone"></i></button>
+    </div>
+
+    <div id="seccion-explorar" style="display: none;">
+        <div id="caja-solicitudes" style="display:none; background:rgba(231,76,60,0.1); border:1px solid #e74c3c; border-radius:12px; padding:15px; margin-bottom:25px;">
+            <h4 style="margin:0 0 10px; color:#e74c3c;">Solicitudes Pendientes</h4>
+            <div id="lista-solicitudes" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+
+        <div class="search-box">
+            <input type="text" id="input-buscar-jugador" class="search-input" placeholder="Buscar jugador por nombre o apodo...">
+            <button id="btn-buscar-jugador" class="search-btn"><i class="ph-bold ph-magnifying-glass"></i></button>
+        </div>
+        
+        <div id="lista-busqueda" class="friend-list">
+            <p style="color:#aaa; text-align:center; grid-column:1/-1; padding: 20px;">Busca jugadores para añadirlos a tu vestuario.</p>
+        </div>
+    </div>
+
+    <div id="seccion-ranking" style="display: none;">
+        <p style="color:var(--text-muted); font-size:0.9rem; text-align:center; margin-bottom:20px;">Basado en las estadísticas acumuladas de los jugadores en tu lista de amigos.</p>
+        
+        <div class="filtros-tacticos" id="filtros-deportes-ranking" style="justify-content: center;">
+            <button class="filtro-chip active" data-dep="Fútbol">Fútbol</button>
+            <button class="filtro-chip" data-dep="Vóley">Vóley</button>
+            <button class="filtro-chip" data-dep="Básquet">Básquet</button>
+            <button class="filtro-chip" data-dep="Otros">Otros (Lista)</button>
+        </div>
+
+        <div id="contenedor-cancha-ranking"></div>
+    </div>
+
+</main>
+
+<div id="modal-convocar" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #f1c40f; box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+        <button id="cerrar-convocar" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <h2 style="margin-top:0; color:#f1c40f;"><i class="ph-fill ph-megaphone"></i> Convocar Partido</h2>
+        <p style="color:#aaa; font-size:0.85rem; margin-bottom:15px;">Selecciona a los amigos que quieres invitar. Se generará un enlace de WhatsApp para enviarles.</p>
+        
+        <div class="modal-convocar-lista" id="lista-checkbox-amigos"></div>
+        
+        <input type="text" id="convocar-lugar" placeholder="¿Dónde juegan? (Cancha / Link)" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing:border-box;">
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <input type="date" id="convocar-fecha" style="flex:2; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; box-sizing:border-box;">
+            <input type="time" id="convocar-hora" style="flex:1; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; box-sizing:border-box;">
+        </div>
+
+        <button id="btn-generar-whatsapp" class="btn" style="width:100%; background:#25D366; color:#000; font-weight:bold; border:none;"><i class="ph-bold ph-whatsapp-logo"></i> Generar Invitación</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, serverTimestamp, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk", authDomain: "app-futbol-acd0f.firebaseapp.com", projectId: "app-futbol-acd0f", storageBucket: "app-futbol-acd0f.firebasestorage.app", messagingSenderId: "223446110165", appId: "1:223446110165:web:219afce6a9dac03203f75c" };
+    const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
+
+    let currentUser = null;
+    let misAmigosData = []; 
+    let miPerfil = null;
+
+    window.toast = function(msg, type='success') { alert(msg); };
+
+    // TABS LOGIC
+    const tabs = { mis: document.getElementById('tab-mis-amigos'), exp: document.getElementById('tab-explorar'), rnk: document.getElementById('tab-ranking') };
+    const secs = { mis: document.getElementById('seccion-mis-amigos'), exp: document.getElementById('seccion-explorar'), rnk: document.getElementById('seccion-ranking') };
+
+    function switchTab(tabKey) {
+        Object.values(tabs).forEach(t => t.classList.remove('active'));
+        Object.values(secs).forEach(s => s.style.display = 'none');
+        tabs[tabKey].classList.add('active'); secs[tabKey].style.display = 'block';
+        if(tabKey === 'rnk') dibujarEquipoIdeal('Fútbol');
+    }
+    tabs.mis.onclick = () => switchTab('mis'); tabs.exp.onclick = () => switchTab('exp'); tabs.rnk.onclick = () => switchTab('rnk');
+
+    // INIT
+    onAuthStateChanged(auth, async (u) => {
+        if(!u) { window.location.href = 'login.html'; return; }
+        currentUser = u;
+        await cargarMiPerfil();
+        cargarAmigos();
+        escucharSolicitudes();
+    });
+
+    async function cargarMiPerfil() {
+        const snap = await getDoc(doc(db, 'jugadores_perfiles', currentUser.uid));
+        if (snap.exists()) { 
+            miPerfil = snap.data(); 
+            document.getElementById('toggle-modo-futbol').checked = miPerfil.disponibleHoy || false;
+        } else {
+            miPerfil = { amigos_uids: [], disponibleHoy: false };
+        }
+    }
+
+    document.getElementById('toggle-modo-futbol').addEventListener('change', async (e) => {
+        const estado = e.target.checked;
+        try {
+            await updateDoc(doc(db, 'jugadores_perfiles', currentUser.uid), { disponibleHoy: estado });
+            window.toast(estado ? 'Modo Fútbol Activado. Tus amigos te verán disponible.' : 'Modo Fútbol Desactivado.');
+        } catch(err) { e.target.checked = !estado; window.toast('Error al actualizar', 'error'); }
+    });
+
+    async function cargarAmigos() {
+        const lista = document.getElementById('lista-amigos');
+        if (!miPerfil.amigos_uids || miPerfil.amigos_uids.length === 0) {
+            lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;">Tu vestuario está vacío. Ve a "Buscar" para añadir amigos.</p>';
+            return;
+        }
+        
+        lista.innerHTML = '<div style="text-align:center; grid-column:1/-1;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando equipo...</div>';
+        try {
+            misAmigosData = [];
+            // Dividir en chunks de 10 si son muchos (Firestore 'in' limit es 10)
+            const chunks = []; const uids = miPerfil.amigos_uids;
+            for(let i=0; i<uids.length; i+=10) chunks.push(uids.slice(i, i+10));
+            
+            for(let chunk of chunks) {
+                const q = query(collection(db, 'jugadores_perfiles'), where('__name__', 'in', chunk));
+                const snap = await getDocs(q);
+                snap.forEach(d => misAmigosData.push({ uid: d.id, ...d.data() }));
+            }
+            renderizarAmigos('TODOS');
+        } catch(e) { lista.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1;">Error al cargar amigos.</p>'; }
+    }
+
+    function renderizarAmigos(filtroPos) {
+        const lista = document.getElementById('lista-amigos');
+        let filtrados = misAmigosData;
+        if(filtroPos !== 'TODOS') filtrados = misAmigosData.filter(j => j.posicion && j.posicion.includes(filtroPos));
+        
+        // Ordenar: Disponibles (Modo Fútbol) primero
+        filtrados.sort((a, b) => (b.disponibleHoy === true) - (a.disponibleHoy === true));
+
+        if(filtrados.length === 0) { lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;">No hay jugadores en esta posición.</p>'; return; }
+
+        lista.innerHTML = filtrados.map(j => `
+            <div class="friend-card">
+                <div class="friend-info">
+                    <div class="friend-avatar">
+                        <img src="${j.foto || 'https://via.placeholder.com/50'}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">
+                        <div class="status-dot ${j.disponibleHoy ? 'online' : ''}" title="${j.disponibleHoy ? 'Disponible para jugar hoy' : ''}"></div>
+                    </div>
+                    <div>
+                        <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
+                        <span class="friend-pos">${j.posicion || 'JUG'}</span>
+                        <span style="font-size:0.7rem; color:#aaa; margin-left:5px;">⭐ ${j.rating || 'Nuevo'}</span>
+                    </div>
+                </div>
+                <a href="https://wa.me/${String(j.telefono||'').replace(/\D/g,'')}" target="_blank" style="background:#25D366; color:#000; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo"></i></a>
+            </div>
+        `).join('');
+    }
+
+    // Filtros Tácticos Click
+    document.querySelectorAll('#filtros-posiciones .filtro-chip').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('#filtros-posiciones .filtro-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderizarAmigos(btn.dataset.pos);
+        }
+    });
+
+    // =====================================
+    // BUSCAR Y SOLICITUDES
+    // =====================================
+    document.getElementById('btn-buscar-jugador').onclick = async () => {
+        const qTexto = document.getElementById('input-buscar-jugador').value.trim().toLowerCase();
+        if(!qTexto) return;
+        const lista = document.getElementById('lista-busqueda');
+        lista.innerHTML = '<p style="text-align:center; grid-column:1/-1;">Buscando...</p>';
+        try {
+            const snap = await getDocs(collection(db, 'jugadores_perfiles'));
+            let html = '';
+            snap.forEach(d => {
+                const j = d.data();
+                if(d.id === currentUser.uid) return; // No yo mismo
+                const match = (j.nombre||'').toLowerCase().includes(qTexto) || (j.apodo||'').toLowerCase().includes(qTexto);
+                if(match) {
+                    const esAmigo = miPerfil.amigos_uids && miPerfil.amigos_uids.includes(d.id);
+                    const btnHtml = esAmigo 
+                        ? `<button class="btn" style="padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid #aaa; color:#aaa;" disabled><i class="ph-bold ph-check"></i> Amigo</button>` 
+                        : `<button class="btn" style="padding:6px 12px; font-size:0.75rem; background:#f1c40f; color:#000; border:none; font-weight:bold;" onclick="enviarSolicitudAmistad('${d.id}')"><i class="ph-bold ph-user-plus"></i> Agregar</button>`;
+
+                    html += `<div class="friend-card"><div class="friend-info"><img src="${j.foto||'https://via.placeholder.com/50'}" class="friend-avatar"><div><h4 class="friend-name">${j.nombre}</h4><span class="friend-pos">${j.posicion||'JUG'}</span></div></div>${btnHtml}</div>`;
+                }
+            });
+            lista.innerHTML = html || '<p style="text-align:center; grid-column:1/-1; color:#aaa;">No se encontraron jugadores.</p>';
+        } catch(e) { lista.innerHTML = '<p style="color:red; text-align:center;">Error en búsqueda.</p>'; }
+    };
+
+    window.enviarSolicitudAmistad = async function(receptorUid) {
+        try {
+            const reqId = `${currentUser.uid}_${receptorUid}`;
+            await setDoc(doc(db, 'solicitudes_amistad', reqId), {
+                deUid: currentUser.uid, deNombre: currentUser.displayName || 'Jugador',
+                paraUid: receptorUid, estado: 'pendiente', fecha: serverTimestamp()
+            });
+            window.toast("Solicitud enviada");
+        } catch(e) { window.toast("Error al enviar", "error"); }
+    };
+
+    async function escucharSolicitudes() {
+        const q = query(collection(db, 'solicitudes_amistad'), where('paraUid', '==', currentUser.uid), where('estado', '==', 'pendiente'));
+        const snap = await getDocs(q);
+        const caja = document.getElementById('caja-solicitudes');
+        const badge = document.getElementById('badge-solicitudes');
+        const lista = document.getElementById('lista-solicitudes');
+        
+        if(snap.empty) { caja.style.display = 'none'; badge.style.display = 'none'; return; }
+        
+        caja.style.display = 'block'; badge.style.display = 'inline-block'; badge.textContent = snap.size;
+        let html = '';
+        snap.forEach(d => {
+            const s = d.data();
+            html += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px;">
+                <span style="color:#fff; font-size:0.9rem;"><b>${s.deNombre}</b> quiere agregarte</span>
+                <div style="display:flex; gap:5px;">
+                    <button style="background:#2ecc71; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;" onclick="responderSolicitud('${d.id}', '${s.deUid}', true)"><i class="ph-bold ph-check" style="color:#000;"></i></button>
+                    <button style="background:#e74c3c; border:none; padding:5px 10px; border-radius:6px; cursor:pointer;" onclick="responderSolicitud('${d.id}', '${s.deUid}', false)"><i class="ph-bold ph-x" style="color:#fff;"></i></button>
+                </div>
+            </div>`;
+        });
+        lista.innerHTML = html;
+    }
+
+    window.responderSolicitud = async function(reqId, senderUid, aceptar) {
+        try {
+            if(aceptar) {
+                // Agregar a mis amigos
+                let misAmigos = miPerfil.amigos_uids || [];
+                if(!misAmigos.includes(senderUid)) misAmigos.push(senderUid);
+                await updateDoc(doc(db, 'jugadores_perfiles', currentUser.uid), { amigos_uids: misAmigos });
+                
+                // Agregarme a sus amigos
+                const senderRef = doc(db, 'jugadores_perfiles', senderUid);
+                const senderSnap = await getDoc(senderRef);
+                if(senderSnap.exists()){
+                    let susAmigos = senderSnap.data().amigos_uids || [];
+                    if(!susAmigos.includes(currentUser.uid)) susAmigos.push(currentUser.uid);
+                    await updateDoc(senderRef, { amigos_uids: susAmigos });
+                }
+                
+                await updateDoc(doc(db, 'solicitudes_amistad', reqId), { estado: 'aceptada' });
+                window.toast("Nuevo jugador en tu vestuario!");
+                await cargarMiPerfil(); cargarAmigos();
+            } else {
+                await deleteDoc(doc(db, 'solicitudes_amistad', reqId));
+                window.toast("Solicitud rechazada");
+            }
+            escucharSolicitudes();
+        } catch(e) { window.toast("Error", "error"); }
+    };
+
+    // =====================================
+    // CONVOCATORIA (PARTIDO PRIVADO)
+    // =====================================
+    document.getElementById('btn-abrir-convocatoria').onclick = () => {
+        document.getElementById('modal-convocar').style.display = 'flex';
+        const contenedor = document.getElementById('lista-checkbox-amigos');
+        if(misAmigosData.length === 0) { contenedor.innerHTML = '<p style="color:#aaa; text-align:center;">No tienes amigos para invitar.</p>'; return; }
+        
+        contenedor.innerHTML = misAmigosData.map(j => `
+            <div class="convocar-item">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <img src="${j.foto||'https://via.placeholder.com/40'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;">
+                    <span style="color:#fff; font-weight:bold;">${j.nombre}</span>
+                </div>
+                <input type="checkbox" class="chk-amigo-convocar" value="${j.nombre}" data-wsp="${j.telefono}">
+            </div>
+        `).join('');
+    };
+
+    document.getElementById('cerrar-convocar').onclick = () => document.getElementById('modal-convocar').style.display = 'none';
+
+    document.getElementById('btn-generar-whatsapp').onclick = () => {
+        const seleccionados = Array.from(document.querySelectorAll('.chk-amigo-convocar:checked')).map(chk => chk.value);
+        if(seleccionados.length === 0) { window.toast("Selecciona al menos 1 amigo", "warning"); return; }
+        
+        const lugar = document.getElementById('convocar-lugar').value || 'la cancha de siempre';
+        const fecha = document.getElementById('convocar-fecha').value || 'pronto';
+        const hora = document.getElementById('convocar-hora').value || '--:--';
+        
+        const texto = `⚽ *¡CONVOCATORIA CHALACAPP!* ⚽\n\nGente, estoy armando partido:\n📍 *Lugar:* ${lugar}\n📅 *Fecha:* ${fecha}\n⏰ *Hora:* ${hora}\n\n*Convocados:* \n${seleccionados.map((n, i) => `${i+1}. ${n}`).join('\n')}\n\n👉 *Por favor confirmen asistencia por aquí para cerrar lista.*`;
+        
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const url = isMobile ? `whatsapp://send?text=${encodeURIComponent(texto)}` : `https://web.whatsapp.com/send?text=${encodeURIComponent(texto)}`;
+        window.open(url, '_blank');
+        document.getElementById('modal-convocar').style.display = 'none';
+    };
+
+    // =====================================
+    // MI EQUIPO IDEAL (RANKING)
+    // =====================================
+    document.querySelectorAll('#filtros-deportes-ranking .filtro-chip').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('#filtros-deportes-ranking .filtro-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            dibujarEquipoIdeal(btn.dataset.dep);
+        }
+    });
+
+    function dibujarEquipoIdeal(deporte) {
+        const contenedor = document.getElementById('contenedor-cancha-ranking');
+        if(misAmigosData.length === 0) { contenedor.innerHTML = '<p style="text-align:center; color:#aaa; margin-top:30px;">Agrega amigos para ver tu 11 ideal.</p>'; return; }
+
+        // MOCK: Generar scores aleatorios o usar stats reales si existen
+        let ranking = misAmigosData.map(j => ({ ...j, score: j.rating ? Math.round(j.rating * 20) : Math.floor(Math.random()*40 + 60) }));
+        ranking.sort((a, b) => b.score - a.score);
+
+        // También nos incluimos a nosotros mismos
+        const yo = { uid: currentUser.uid, nombre: currentUser.displayName, foto: currentUser.photoURL || 'https://via.placeholder.com/50', score: 99, posicion: miPerfil.posicion || 'JUG' };
+        ranking.push(yo); ranking.sort((a,b)=>b.score - a.score);
+
+        const generarCarta = (j) => {
+            if(!j) return `<div class="player-pitch-card" style="opacity:0.3;"><div class="player-pitch-photo-container"><div style="width:100%; height:100%; background:#333; border:2px dashed #aaa; border-radius:10px 10px 25px 25px;"></div></div><div class="player-pitch-name">Falta</div></div>`;
+            return `
+            <div class="player-pitch-card" title="${j.nombre}">
+                <div class="player-pitch-photo-container"><img src="${j.foto || 'https://via.placeholder.com/50'}"><div class="player-pitch-score">${j.score}</div></div>
+                <div class="player-pitch-name">${j.nombre.split(' ')[0]}</div>
+                <div style="background: rgba(0,0,0,0.8); color: #f1c40f; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; margin-top: 2px; border: 1px solid #f1c40f;">${j.posAsignada || j.posicion || 'JUG'}</div>
+            </div>`;
+        };
+
+        function armarEquipo(rank, reqs) {
+            let seleccionados = []; let disponibles = [...rank];
+            reqs.forEach(req => {
+                let idx = disponibles.findIndex(jug => jug.posicion && jug.posicion.includes(req));
+                if (idx !== -1) { seleccionados.push({...disponibles[idx], posAsignada: req}); disponibles.splice(idx, 1); } 
+                else if (disponibles.length > 0) { seleccionados.push({...disponibles[0], posAsignada: 'POL'}); disponibles.splice(0, 1); }
+                else { seleccionados.push(null); } // Espacio vacío
+            });
+            return seleccionados;
+        }
+
+        let html = '';
+        if (deporte === 'Fútbol') {
+            const team = armarEquipo(ranking, ['ARQ', 'DEF', 'DEF', 'MED', 'MED', 'DEL', 'DEL']);
+            html = `
+            <div class="soccer-pitch">
+                <div class="pitch-line pitch-center"></div><div class="pitch-line pitch-circle"></div>
+                <div class="formation-row">${team.slice(5,7).map(generarCarta).join('')}</div>
+                <div class="formation-row">${team.slice(3,5).map(generarCarta).join('')}</div>
+                <div class="formation-row">${team.slice(1,3).map(generarCarta).join('')}</div>
+                <div class="formation-row">${generarCarta(team[0])}</div>
+            </div>`;
+        } else if (deporte === 'Vóley') {
+            const team = armarEquipo(ranking, ['ARM', 'OPU', 'ATQ', 'ATQ', 'CEN', 'LIB']);
+            html = `
+            <div class="voley-pitch">
+                <div class="voley-line voley-center"></div>
+                <div class="formation-row">${team.slice(2,5).map(generarCarta).join('')}</div>
+                <div class="formation-row" style="margin-top:20px;">${team.slice(0,2).map(generarCarta).join('')}${generarCarta(team[5])}</div>
+            </div>`;
+        } else if (deporte === 'Básquet') {
+            const team = armarEquipo(ranking, ['BAS', 'ESC', 'ALE', 'API', 'PIV']);
+            html = `
+            <div class="basket-pitch">
+                <div class="basket-line basket-center"></div><div class="basket-line basket-circle"></div>
+                <div class="formation-row" style="margin-top:20px;">${team.slice(3,5).map(generarCarta).join('')}</div>
+                <div class="formation-row">${team.slice(1,3).map(generarCarta).join('')}</div>
+                <div class="formation-row">${generarCarta(team[0])}</div>
+            </div>`;
+        } else {
+            html = `<div style="background:rgba(0,0,0,0.5); padding:15px; border-radius:12px;">
+                ${ranking.slice(0,10).map((j, i) => `
+                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <div style="display:flex; gap:10px; align-items:center;"><b>${i+1}.</b><img src="${j.foto||'https://via.placeholder.com/30'}" style="width:30px; height:30px; border-radius:50%; object-fit:cover;"><span>${j.nombre}</span></div>
+                    <span style="color:#f1c40f; font-weight:bold;">${j.score} pts</span>
+                </div>`).join('')}
+            </div>`;
+        }
+
+        contenedor.innerHTML = html;
+    }
+</script>
+</body>
+</html>
