@@ -28,9 +28,10 @@
         .grupo-card-title { font-size: 1.4rem; margin: 0 0 5px; color: #fff; }
         .grupo-card-sport { display: inline-block; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ccc; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); }
         
-        /* TABS VESTUARIO */
+        /* TABS VESTUARIO (CORREGIDO EL HOVER PARA MEJOR CONTRASTE) */
         .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: nowrap; overflow-x: auto; }
         .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: all 0.3s ease; white-space: nowrap; }
+        .tab-btn:hover { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.08) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
         .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
 
         /* LISTAS DE TARJETAS */
@@ -41,8 +42,8 @@
         .friend-name { font-weight: bold; font-size: 1rem; color: #fff; margin: 0 0 2px; }
         
         /* BUSCADOR */
-        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
-        .search-input { flex: 1; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
+        .search-input { flex: 1; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; min-width: 0; box-sizing: border-box; }
         
         /* BOTÓN FLOTANTE */
         .fab-convocar { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; border: none; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 5px 20px rgba(241,196,15,0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
@@ -94,7 +95,7 @@
                 <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Mis Grupos</h1>
                 <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.9rem;">Organiza a tus amigos por deporte (Máx. 3).</p>
             </div>
-            <button id="btn-crear-grupo" class="btn" style="background:var(--primary-green); color:#000; font-weight:bold; border:none; border-radius:8px;"><i class="ph-bold ph-plus"></i> Crear Grupo</button>
+            <button id="btn-crear-grupo" class="btn" style="width: auto !important; padding: 10px 18px; background:var(--primary-green); color:#000; font-weight:bold; border:none; border-radius:8px; display:inline-flex; align-items:center; gap:6px;"><i class="ph-bold ph-plus"></i> Crear Grupo</button>
         </div>
 
         <div id="lista-mis-grupos" class="grupos-grid">
@@ -104,11 +105,12 @@
 
 
     <div id="vista-vestuario-grupo" style="display: none;">
-        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
-            <button id="btn-volver-lobby" class="btn" style="background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:8px 12px; border-radius:8px;"><i class="ph-bold ph-arrow-left"></i></button>
-            <div>
-                <h1 id="vestuario-nombre" style="margin: 0; font-size: 1.6rem; color: #fff;">...</h1>
-                <span id="vestuario-deporte" style="color: var(--primary-green); font-size: 0.85rem; font-weight: bold; background: rgba(46, 204, 113, 0.1); padding: 2px 8px; border-radius: 4px;">...</span>
+        
+        <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 15px; justify-content: flex-start;">
+            <button id="btn-volver-lobby" class="btn" style="width: auto !important; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:8px 14px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="ph-bold ph-arrow-left" style="font-size:1.2rem;"></i></button>
+            <div style="text-align: left;">
+                <h1 id="vestuario-nombre" style="margin: 0; font-size: 1.6rem; color: #fff; line-height: 1.2;">...</h1>
+                <span id="vestuario-deporte" style="color: var(--primary-green); font-size: 0.8rem; font-weight: bold; background: rgba(46, 204, 113, 0.1); padding: 2px 8px; border-radius: 4px; display:inline-block; margin-top:4px;">...</span>
             </div>
         </div>
 
@@ -124,10 +126,12 @@
         </div>
 
         <div id="seccion-explorar" style="display: none;">
+            
             <div class="search-box">
                 <input type="text" id="input-buscar-jugador" class="search-input" placeholder="Buscar jugador globalmente...">
-                <button id="btn-buscar-jugador" class="btn" style="background:var(--primary-green); color:#000;"><i class="ph-bold ph-magnifying-glass"></i></button>
+                <button id="btn-buscar-jugador" class="btn" style="width: auto !important; background:var(--primary-green); color:#000; padding: 0 20px; border-radius: 10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0;"><i class="ph-bold ph-magnifying-glass" style="font-size: 1.2rem;"></i></button>
             </div>
+            
             <div id="lista-busqueda" class="friend-list">
                 <p style="color:#aaa; text-align:center; grid-column:1/-1; padding: 20px;">Busca jugadores para añadirlos directamente a este grupo.</p>
             </div>
@@ -143,7 +147,9 @@
 
 <div id="modal-crear-grupo" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:400px; position:relative; border:1px solid var(--primary-green); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
-        <button id="cerrar-crear-grupo" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        
+        <button id="cerrar-crear-grupo" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.3s;"><i class="ph-bold ph-x"></i></button>
+        
         <h2 style="margin-top:0; color:#fff;">Nuevo Grupo</h2>
         <form id="form-crear-grupo">
             <input type="text" id="cg-nombre" required placeholder="Nombre (ej. Los del Barrio)" maxlength="30" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; margin-bottom:15px; box-sizing:border-box;">
@@ -206,8 +212,7 @@
             const snap = await getDocs(q);
             misGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-            // Límite de 3 grupos
-            document.getElementById('btn-crear-grupo').style.display = misGrupos.length >= 3 ? 'none' : 'block';
+            document.getElementById('btn-crear-grupo').style.display = misGrupos.length >= 3 ? 'none' : 'inline-flex';
 
             if(misGrupos.length === 0) {
                 lista.innerHTML = `
@@ -215,7 +220,7 @@
                         <i class="ph-bold ph-users-three" style="font-size:3rem; color:#666; margin-bottom:10px;"></i>
                         <h3 style="margin:0 0 10px; color:#fff;">No tienes grupos aún</h3>
                         <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">Crea tu primer vestuario para organizar a tus amigos según el deporte que juegan.</p>
-                        <button onclick="document.getElementById('modal-crear-grupo').style.display='flex';" class="btn" style="background:var(--primary-green); color:#000; border:none;">Crear mi primer Grupo</button>
+                        <button onclick="document.getElementById('modal-crear-grupo').style.display='flex';" class="btn" style="width:auto !important; background:var(--primary-green); color:#000; border:none; padding: 10px 20px;">Crear mi primer Grupo</button>
                     </div>`;
                 return;
             }
@@ -239,7 +244,7 @@
         e.preventDefault();
         if(misGrupos.length >= 3) { window.toast("Ya alcanzaste el máximo de 3 grupos."); return; }
         
-        const btn = e.target.querySelector('button'); btn.disabled = true; btn.innerHTML = 'Creando...';
+        const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.innerHTML = 'Creando...';
         try {
             await addDoc(collection(db, 'grupos_amigos'), {
                 ownerUid: currentUser.uid,
@@ -262,7 +267,7 @@
         document.getElementById('vista-vestuario-grupo').style.display = 'none';
         document.getElementById('vista-lobby-grupos').style.display = 'block';
         grupoActivo = null;
-        cargarMisGrupos(); // Refrescar conteos
+        cargarMisGrupos(); 
     };
 
     window.abrirVestuario = async function(grupoId) {
@@ -309,7 +314,7 @@
                             <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241,196,15,0.1); padding: 2px 6px; border-radius: 4px;">${j.posicion || 'JUG'}</span>
                         </div>
                     </div>
-                    <button class="btn" style="background:rgba(231,76,60,0.1); color:#e74c3c; border:none; padding:6px; border-radius:8px;" onclick="quitarDelGrupo('${j.uid}')" title="Quitar del grupo"><i class="ph-bold ph-trash"></i></button>
+                    <button class="btn" style="width: auto !important; background:rgba(231,76,60,0.1); color:#e74c3c; border:none; padding:8px; border-radius:8px; display:flex; align-items:center;" onclick="quitarDelGrupo('${j.uid}')" title="Quitar del grupo"><i class="ph-bold ph-trash"></i></button>
                 </div>
             `).join('');
 
@@ -332,8 +337,8 @@
                 if(match) {
                     const yaEsta = grupoActivo.miembros_uids && grupoActivo.miembros_uids.includes(d.id);
                     const btnHtml = yaEsta 
-                        ? `<button class="btn" style="padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid #aaa; color:#aaa;" disabled><i class="ph-bold ph-check"></i> En grupo</button>` 
-                        : `<button class="btn" style="padding:6px 12px; font-size:0.75rem; background:var(--primary-green); color:#000; border:none; font-weight:bold;" onclick="agregarAlGrupo('${d.id}')"><i class="ph-bold ph-plus"></i> Añadir</button>`;
+                        ? `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid #aaa; color:#aaa;" disabled><i class="ph-bold ph-check"></i> En grupo</button>` 
+                        : `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:var(--primary-green); color:#000; border:none; font-weight:bold;" onclick="agregarAlGrupo('${d.id}')"><i class="ph-bold ph-plus"></i> Añadir</button>`;
 
                     html += `<div class="friend-card"><div class="friend-info"><img src="${j.foto||'https://via.placeholder.com/50'}" class="friend-avatar"><div><h4 class="friend-name">${j.nombre}</h4></div></div>${btnHtml}</div>`;
                 }
@@ -351,7 +356,6 @@
             grupoActivo.miembros_uids = actualizados;
             window.toast("¡Jugador añadido al grupo!");
             
-            // Refrescar vista de búsqueda
             document.getElementById('btn-buscar-jugador').click();
             cargarMiembrosDelGrupo();
         } catch(e) { window.toast("Error al añadir"); }
@@ -376,7 +380,6 @@
 
         let ranking = miembrosDataGrupoActivo.map(j => ({ ...j, score: j.rating ? Math.round(j.rating * 20) : Math.floor(Math.random()*30 + 70) }));
         
-        // Incluir al dueño del grupo en la alineación automáticamente
         const yo = { uid: currentUser.uid, nombre: currentUser.displayName || 'Tú', foto: currentUser.photoURL || 'https://via.placeholder.com/50', score: 99, posicion: 'CAPI' };
         ranking.push(yo);
         ranking.sort((a, b) => b.score - a.score);
