@@ -21,18 +21,22 @@
 
         .container { max-width: 900px; margin: 0 auto; padding: 25px 20px 80px; width: 100%; box-sizing: border-box; }
         
-        /* TARJETAS DE GRUPOS */
-        .grupos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
-        .grupo-card { background: linear-gradient(135deg, rgba(20,25,22,0.9) 0%, rgba(10,15,12,0.9) 100%); border: 1px solid rgba(46, 204, 113, 0.3); border-radius: 16px; padding: 20px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; }
-        .grupo-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.2); }
-        .grupo-card-title { font-size: 1.4rem; margin: 0 0 5px; color: #fff; }
-        .grupo-card-sport { display: inline-block; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ccc; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); }
+        /* OVERRIDES: EVITAR BOTONES CORTADOS Y LUCES EXCESIVAS */
+        .btn { transition: background 0.2s, color 0.2s, opacity 0.2s !important; }
+        .btn:hover { transform: none !important; box-shadow: none !important; opacity: 0.85; }
         
-        /* TABS VESTUARIO (CORREGIDO EL HOVER PARA MEJOR CONTRASTE) */
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: nowrap; overflow-x: auto; }
-        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: all 0.3s ease; white-space: nowrap; }
-        .tab-btn:hover { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.08) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
-        .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
+        /* TARJETAS DE GRUPOS (ELIMINADO EFECTO DE SUBIR Y LUZ VERDE) */
+        .grupos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .grupo-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; cursor: pointer; transition: background 0.2s, border-color 0.2s; position: relative; }
+        .grupo-card:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+        .grupo-card-title { font-size: 1.4rem; margin: 0 0 5px; color: #fff; }
+        .grupo-card-sport { display: inline-block; background: rgba(255,255,255,0.05); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; color: #ccc; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.15); }
+        
+        /* TABS VESTUARIO (ESTILO LIMPIO BLANCO/GRIS, SIN VERDE RADIACTIVO) */
+        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: background 0.2s, color 0.2s; white-space: nowrap; }
+        .tab-btn:hover { color: #fff !important; background: rgba(255, 255, 255, 0.05) !important; transform: none !important; }
+        .tab-btn.active { color: #fff !important; background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; }
 
         /* LISTAS DE TARJETAS */
         .friend-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
@@ -46,8 +50,8 @@
         .search-input { flex: 1; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; min-width: 0; box-sizing: border-box; }
         
         /* BOTÓN FLOTANTE */
-        .fab-convocar { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; border: none; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 5px 20px rgba(241,196,15,0.4); cursor: pointer; z-index: 100; transition: transform 0.2s; }
-        .fab-convocar:hover { transform: scale(1.1); }
+        .fab-convocar { position: fixed; bottom: 85px; right: 20px; background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; border: none; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 5px 20px rgba(0,0,0,0.5); cursor: pointer; z-index: 100; transition: transform 0.2s; }
+        .fab-convocar:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(0,0,0,0.8); }
 
         /* CANCHAS DINÁMICAS (RANKING) */
         .soccer-pitch { position: relative; background: repeating-linear-gradient(0deg, #1b4924, #1b4924 10%, #153c1d 10%, #153c1d 20%); border: 2px solid rgba(255,255,255,0.4); border-radius: 12px; padding: 15px 10px; display: flex; flex-direction: column; justify-content: space-around; height: 480px; overflow: hidden; margin-top: 15px; box-shadow: inset 0 0 30px rgba(0,0,0,0.6); }
@@ -110,13 +114,13 @@
             <button id="btn-volver-lobby" class="btn" style="width: auto !important; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#fff; padding:8px 14px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;"><i class="ph-bold ph-arrow-left" style="font-size:1.2rem;"></i></button>
             <div style="text-align: left;">
                 <h1 id="vestuario-nombre" style="margin: 0; font-size: 1.6rem; color: #fff; line-height: 1.2;">...</h1>
-                <span id="vestuario-deporte" style="color: var(--primary-green); font-size: 0.8rem; font-weight: bold; background: rgba(46, 204, 113, 0.1); padding: 2px 8px; border-radius: 4px; display:inline-block; margin-top:4px;">...</span>
+                <span id="vestuario-deporte" style="color: #aaa; font-size: 0.8rem; font-weight: bold; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; display:inline-block; margin-top:4px;">...</span>
             </div>
         </div>
 
         <div class="tabs-container">
-            <button class="tab-btn active" id="tab-miembros">Miembros</button>
-            <button class="tab-btn" id="tab-explorar">Buscar Jugadores</button>
+            <button class="tab-btn active" id="tab-miembros">Alineación</button>
+            <button class="tab-btn" id="tab-explorar">Añadir Jugadores</button>
             <button class="tab-btn" id="tab-ranking"><i class="ph-fill ph-star" style="color:#f1c40f;"></i> El 11 Ideal</button>
         </div>
 
@@ -133,7 +137,7 @@
             </div>
             
             <div id="lista-busqueda" class="friend-list">
-                <p style="color:#aaa; text-align:center; grid-column:1/-1; padding: 20px;">Busca jugadores para añadirlos directamente a este grupo.</p>
+                <p style="color:#aaa; text-align:center; grid-column:1/-1; padding: 20px;">Escribe un nombre para buscar jugadores y sumarlos a este vestuario.</p>
             </div>
         </div>
 
@@ -146,7 +150,7 @@
 </main>
 
 <div id="modal-crear-grupo" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:400px; position:relative; border:1px solid var(--primary-green); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:400px; position:relative; border:1px solid rgba(255,255,255,0.1); box-shadow:0 10px 30px rgba(0,0,0,0.8);">
         
         <button id="cerrar-crear-grupo" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; transition:all 0.3s;"><i class="ph-bold ph-x"></i></button>
         
@@ -250,7 +254,7 @@
                 ownerUid: currentUser.uid,
                 nombre: document.getElementById('cg-nombre').value.trim(),
                 deporte: document.getElementById('cg-deporte').value,
-                miembros_uids: [], // Nace vacío
+                miembros_uids: [], 
                 createdAt: serverTimestamp()
             });
             window.toast("¡Grupo creado!");
@@ -289,7 +293,7 @@
         const uids = grupoActivo.miembros_uids || [];
         
         if (uids.length === 0) {
-            lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1; padding:30px;">Vestuario vacío. Ve a "Buscar Jugadores" para añadir a tu equipo.</p>';
+            lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1; padding:30px;">Vestuario vacío. Ve a "Añadir Jugadores" para armar tu equipo.</p>';
             miembrosDataGrupoActivo = [];
             return;
         }
@@ -311,7 +315,7 @@
                         <img src="${j.foto || 'https://via.placeholder.com/50'}" class="friend-avatar">
                         <div>
                             <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
-                            <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241,196,15,0.1); padding: 2px 6px; border-radius: 4px;">${j.posicion || 'JUG'}</span>
+                            <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);">${j.posicion || 'JUG'}</span>
                         </div>
                     </div>
                     <button class="btn" style="width: auto !important; background:rgba(231,76,60,0.1); color:#e74c3c; border:none; padding:8px; border-radius:8px; display:flex; align-items:center;" onclick="quitarDelGrupo('${j.uid}')" title="Quitar del grupo"><i class="ph-bold ph-trash"></i></button>
@@ -337,7 +341,7 @@
                 if(match) {
                     const yaEsta = grupoActivo.miembros_uids && grupoActivo.miembros_uids.includes(d.id);
                     const btnHtml = yaEsta 
-                        ? `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid #aaa; color:#aaa;" disabled><i class="ph-bold ph-check"></i> En grupo</button>` 
+                        ? `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#888;" disabled><i class="ph-bold ph-check"></i> En grupo</button>` 
                         : `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:var(--primary-green); color:#000; border:none; font-weight:bold;" onclick="agregarAlGrupo('${d.id}')"><i class="ph-bold ph-plus"></i> Añadir</button>`;
 
                     html += `<div class="friend-card"><div class="friend-info"><img src="${j.foto||'https://via.placeholder.com/50'}" class="friend-avatar"><div><h4 class="friend-name">${j.nombre}</h4></div></div>${btnHtml}</div>`;
@@ -428,7 +432,7 @@
             const team = armarEquipo(ranking, ['BAS', 'ESC', 'ALE', 'API', 'PIV']);
             html = `
             <div class="basket-pitch">
-                <div class="basket-line basket-center"></div><div class="basket-line basket-circle"></div>
+                <div class="basket-line basket-center"></div><div class="basket-line basket-circle\"></div>
                 <div class="formation-row" style="margin-top:20px;">${team.slice(3,5).map(generarCarta).join('')}</div>
                 <div class="formation-row">${team.slice(1,3).map(generarCarta).join('')}</div>
                 <div class="formation-row">${generarCarta(team[0])}</div>
