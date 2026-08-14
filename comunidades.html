@@ -421,8 +421,16 @@
         document.getElementById('an-tipo').value = tipoPreseleccionado;
         document.getElementById('modal-anunciar').style.display = 'flex';
     };
+    
     document.getElementById('cerrar-anunciar').onclick = () => document.getElementById('modal-anunciar').style.display = 'none';
 
+    // NUEVO: CONECTAR EL BOTÓN DE REGISTRAR COMUNIDAD
+    const btnCrearComunidad = document.getElementById('btn-solicitar-creacion-comunidad');
+    if(btnCrearComunidad) {
+        btnCrearComunidad.onclick = () => {
+            abrirModalAnuncio('comunidad');
+        };
+    }
     document.getElementById('form-anuncio-promocional').onsubmit = async (e) => {
         e.preventDefault();
         const btn = e.target.querySelector('button[type="submit"]'); btn.disabled = true; btn.innerHTML = 'Enviando...';
