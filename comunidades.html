@@ -4,16 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
-    <title>Ligas & Academias | CHALACAPP</title>
+    <title>Ligas, Torneos & Academias | CHALACAPP</title>
     
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
     
     <style>
-        /* FONDO CORREGIDO: Hereda la imagen de styles.css */
         body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
         
+        /* BARRA SUPERIOR RESPONSIVA */
         .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(8, 11, 10, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; width: 100%; box-sizing: border-box; }
         .topbar-nav { display: flex; gap: 12px; align-items: center; flex-wrap: nowrap; }
         .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; font-size: 0.55rem; font-weight: 800; gap: 3px; letter-spacing: 0.5px; white-space: nowrap; }
@@ -22,16 +22,19 @@
 
         .container { max-width: 900px; margin: 0 auto; padding: 25px 20px 80px; width: 100%; box-sizing: border-box; }
 
-        /* TABS PRINCIPALES */
+        /* TABS PRINCIPALES (LIGAS) */
         .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.9rem; font-weight: 700; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: background 0.2s, color 0.2s; white-space: nowrap; }
-        .tab-btn:hover { color: #fff !important; background: rgba(255,255,255,0.05) !important; transform: none !important; }
+        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: background 0.2s, color 0.2s; white-space: nowrap; }
+        .tab-btn:hover { color: #fff !important; background: rgba(255, 255, 255, 0.05) !important; }
         .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3) !important; }
         
-        .tab-btn-reto { color: #e74c3c !important; }
-        .tab-btn-reto.active { background: rgba(231, 76, 60, 0.12) !important; border: 1px solid rgba(231, 76, 60, 0.4) !important; }
+        /* MINI SUB-TABS (DENTRO DE COMUNIDADES) */
+        .subtabs-container { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .subtab-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #aaa; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; white-space: nowrap; }
+        .subtab-btn.active { color: #fff; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
+        .subtab-btn-reto.active { color: #e74c3c; background: rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.4); }
 
-        /* TARJETAS DE LIGAS, TORNEOS Y ACADEMIAS */
+        /* TARJETAS */
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
         .promo-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; transition: border-color 0.2s; position: relative; backdrop-filter: blur(10px); }
         .promo-card:hover { border-color: rgba(255,255,255,0.25); }
@@ -44,12 +47,18 @@
         .detail-label { color: #aaa; font-weight: 600; }
         .detail-val { color: #fff; font-weight: 700; text-align: right; }
 
-        /* BOTONES SOBREESCRIBIR EFECTO LEVITAR */
+        /* HEADER DE SECCIÓN Y BOTONES TOP */
+        .section-banner-top { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .btn-anunciar-top { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; font-weight: 800; border: none; padding: 10px 18px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; transition: opacity 0.2s; }
+        .btn-anunciar-top:hover { opacity: 0.88; }
+
+        .community-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; cursor: pointer; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+        .community-card:hover { border-color: var(--primary-green); }
+        .sport-tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+        .sport-tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; color: #ddd; font-weight: 600; }
+
         .btn { transition: background 0.2s, color 0.2s, opacity 0.2s !important; }
         .btn:hover { transform: none !important; box-shadow: none !important; opacity: 0.88; }
-        
-        .btn-anunciar { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; font-weight: 800; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; transition: background 0.2s, opacity 0.2s; }
-        .btn-anunciar:hover { opacity: 0.85; transform: none !important; }
     </style>
 </head>
 <body>
@@ -68,42 +77,74 @@
 </header>
 
 <main class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
-        <div>
-            <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Ligas & Academias</h1>
-            <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Torneos verified, escuelas deportivas y comunidades.</p>
-        </div>
-        <button id="btn-abrir-anuncio-modal" class="btn-anunciar"><i class="ph-bold ph-megaphone"></i> Anunciar mi Torneo / Academia</button>
+    <div style="margin-bottom: 20px;">
+        <h1 style="margin: 0; font-size: 1.8rem; color: #fff;">Ligas & Deporte</h1>
+        <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.88rem;">Explora torneos verificados, academias y comunidades de juego.</p>
     </div>
     
     <div class="tabs-container">
         <button class="tab-btn active" id="tab-torneos">🏆 Torneos & Copas</button>
         <button class="tab-btn" id="tab-academias">⚽ Academias & Escuelas</button>
         <button class="tab-btn" id="tab-comunidades">👥 Comunidades</button>
-        <button class="tab-btn tab-btn-reto" id="tab-retos">⚔️ Zona de Retos</button>
     </div>
 
-    <div id="seccion-torneos" class="grid-cards">
-        <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando torneos verificados...</p>
+    <div id="seccion-torneos">
+        <div class="section-banner-top">
+            <div>
+                <h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-fill ph-trophy" style="color:#f1c40f;"></i> Campeonatos Verificados</h3>
+                <p style="margin:3px 0 0; color:#aaa; font-size:0.8rem;">Inscribe a tu equipo en torneos oficiales y transparentes.</p>
+            </div>
+            <button class="btn-anunciar-top" onclick="abrirModalAnuncio('torneo')"><i class="ph-bold ph-plus-circle"></i> Promocionar mi Torneo</button>
+        </div>
+
+        <div id="grid-torneos" class="grid-cards">
+            <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando torneos verificados...</p>
+        </div>
     </div>
 
-    <div id="seccion-academias" class="grid-cards" style="display: none;">
-        <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando academias...</p>
+    <div id="seccion-academias" style="display: none;">
+        <div class="section-banner-top">
+            <div>
+                <h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-fill ph-soccer-ball" style="color:#2ecc71;"></i> Escuelas & Academias</h3>
+                <p style="margin:3px 0 0; color:#aaa; font-size:0.8rem;">Encuentra formación deportiva verificada para niños y jóvenes.</p>
+            </div>
+            <button class="btn-anunciar-top" onclick="abrirModalAnuncio('academia')"><i class="ph-bold ph-plus-circle"></i> Anunciar mi Academia</button>
+        </div>
+
+        <div id="grid-academias" class="grid-cards">
+            <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando academias...</p>
+        </div>
     </div>
 
-    <div id="seccion-comunidades" class="grid-cards" style="display: none;">
-        <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando comunidades...</p>
-    </div>
+    <div id="seccion-comunidades" style="display: none;">
+        <div class="section-banner-top">
+            <div>
+                <h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-fill ph-shield-checkered" style="color:var(--primary-green);"></i> Comunidades & Pichangas</h3>
+                <p style="margin:3px 0 0; color:#aaa; font-size:0.8rem;">Únete a grupos fijos para pichanguear o desafía a otros equipos.</p>
+            </div>
+            <button id="btn-solicitar-creacion-comunidad" class="btn" style="width:auto !important; background:rgba(46, 204, 113, 0.15); color:var(--primary-green); border:1px dashed var(--primary-green); font-weight:bold; font-size:0.85rem; padding:8px 14px; border-radius:8px;"><i class="ph-bold ph-plus-circle"></i> Registrar Comunidad</button>
+        </div>
 
-    <div id="seccion-retos" class="grid-cards" style="display: none;">
-        <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando desafíos...</p>
+        <div class="subtabs-container">
+            <button class="subtab-btn active" id="subtab-mis-comunidades">Mis Comunidades</button>
+            <button class="subtab-btn" id="subtab-explorar-comunidades">Explorar Comunidades</button>
+            <button class="subtab-btn subtab-btn-reto" id="subtab-retos-comunidades">⚔️ Zona de Retos 🔥</button>
+        </div>
+
+        <div id="subseccion-mis-comunidades" class="grid-cards">
+            <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p>
+        </div>
+
+        <div id="subseccion-explorar-comunidades" class="grid-cards" style="display: none;"></div>
+
+        <div id="subseccion-retos-comunidades" class="grid-cards" style="display: none;"></div>
     </div>
 </main>
 
 <div id="modal-anunciar" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:25px; border-radius:16px; width:100%; max-width:480px; position:relative; border:1px solid #f1c40f; max-height:90vh; overflow-y:auto;">
         
-        <button id="cerrar-anunciar" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; transition:background 0.2s;"><i class="ph-bold ph-x"></i></button>
+        <button id="cerrar-anunciar" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
         
         <h2 style="margin-top:0; color:#f1c40f; font-size:1.3rem;"><i class="ph-bold ph-megaphone"></i> Solicitud de Anuncio</h2>
         <p style="color:#aaa; font-size:0.82rem; margin-bottom:15px;">Completa la ficha de transparencia. Un administrador revisará la información antes de publicarla.</p>
@@ -134,7 +175,7 @@
             <label style="color:#f1c40f; font-size:0.8rem; font-weight:bold; margin-bottom:4px; display:block;"><i class="ph-bold ph-shield-check"></i> Enlace de Verificación / Transparencia:</label>
             <input type="url" id="an-link-verificacion" required placeholder="Página de Facebook / Instagram / RUC / Reglamento" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(241,196,15,0.4); border-radius:8px; color:#fff; margin-bottom:18px; box-sizing:border-box;">
 
-            <button type="submit" class="btn-anunciar" style="width:100%; justify-content:center; padding:12px;"><i class="ph-bold ph-whatsapp-logo"></i> Enviar a Aprobación por WhatsApp</button>
+            <button type="submit" class="btn-anunciar-top" style="width:100%; justify-content:center; padding:12px;"><i class="ph-bold ph-whatsapp-logo"></i> Enviar a Aprobación por WhatsApp</button>
         </form>
     </div>
 </div>
@@ -149,26 +190,41 @@
 
     let currentUser = null;
 
-    // TABS
+    // PESTAÑAS PRINCIPALES
     const btnTorneos = document.getElementById('tab-torneos');
     const btnAcademias = document.getElementById('tab-academias');
     const btnComunidades = document.getElementById('tab-comunidades');
-    const btnRetos = document.getElementById('tab-retos');
 
     const secTorneos = document.getElementById('seccion-torneos');
     const secAcademias = document.getElementById('seccion-academias');
     const secComunidades = document.getElementById('seccion-comunidades');
-    const secRetos = document.getElementById('seccion-retos');
 
-    function resetTabs() {
-        [btnTorneos, btnAcademias, btnComunidades, btnRetos].forEach(b => b.classList.remove('active'));
-        [secTorneos, secAcademias, secComunidades, secRetos].forEach(s => s.style.display = 'none');
+    function resetMainTabs() {
+        [btnTorneos, btnAcademias, btnComunidades].forEach(b => b.classList.remove('active'));
+        [secTorneos, secAcademias, secComunidades].forEach(s => s.style.display = 'none');
     }
 
-    btnTorneos.onclick = () => { resetTabs(); btnTorneos.classList.add('active'); secTorneos.style.display = 'grid'; cargarTorneos(); };
-    btnAcademias.onclick = () => { resetTabs(); btnAcademias.classList.add('active'); secAcademias.style.display = 'grid'; cargarAcademias(); };
-    btnComunidades.onclick = () => { resetTabs(); btnComunidades.classList.add('active'); secComunidades.style.display = 'grid'; cargarComunidades(); };
-    btnRetos.onclick = () => { resetTabs(); btnRetos.classList.add('active'); secRetos.style.display = 'grid'; cargarRetos(); };
+    btnTorneos.onclick = () => { resetMainTabs(); btnTorneos.classList.add('active'); secTorneos.style.display = 'block'; cargarTorneos(); };
+    btnAcademias.onclick = () => { resetMainTabs(); btnAcademias.classList.add('active'); secAcademias.style.display = 'block'; cargarAcademias(); };
+    btnComunidades.onclick = () => { resetMainTabs(); btnComunidades.classList.add('active'); secComunidades.style.display = 'block'; cargarComunidades('mis'); };
+
+    // MINI SUB-PESTAÑAS DE COMUNIDADES
+    const subMis = document.getElementById('subtab-mis-comunidades');
+    const subExp = document.getElementById('subtab-explorar-comunidades');
+    const subRet = document.getElementById('subtab-retos-comunidades');
+
+    const subSecMis = document.getElementById('subseccion-mis-comunidades');
+    const subSecExp = document.getElementById('subseccion-explorar-comunidades');
+    const subSecRet = document.getElementById('subseccion-retos-comunidades');
+
+    function resetSubTabs() {
+        [subMis, subExp, subRet].forEach(b => b.classList.remove('active'));
+        [subSecMis, subSecExp, subSecRet].forEach(s => s.style.display = 'none');
+    }
+
+    subMis.onclick = () => { resetSubTabs(); subMis.classList.add('active'); subSecMis.style.display = 'grid'; cargarComunidades('mis'); };
+    subExp.onclick = () => { resetSubTabs(); subExp.classList.add('active'); subSecExp.style.display = 'grid'; cargarComunidades('explorar'); };
+    subRet.onclick = () => { resetSubTabs(); subRet.classList.add('active'); subSecRet.style.display = 'grid'; cargarRetos(); };
 
     onAuthStateChanged(auth, u => {
         currentUser = u || null;
@@ -177,17 +233,18 @@
 
     // CARGAR TORNEOS
     async function cargarTorneos() {
-        secTorneos.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando torneos verificados...</p>';
+        const container = document.getElementById('grid-torneos');
+        container.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando torneos verificados...</p>';
         try {
             const q = query(collection(db, 'anuncios_ligas'), where('tipo', '==', 'torneo'), where('estado', '==', 'aprobado'));
             const snap = await getDocs(q);
             
             if(snap.empty) {
-                secTorneos.innerHTML = `
+                container.innerHTML = `
                     <div style="grid-column:1/-1; text-align:center; padding:40px 20px; background:rgba(255,255,255,0.02); border:1px dashed #444; border-radius:16px;">
                         <i class="ph-bold ph-trophy" style="font-size:3rem; color:#666; margin-bottom:10px;"></i>
                         <h3 style="margin:0 0 8px; color:#fff;">Aún no hay torneos anunciados</h3>
-                        <p style="color:#aaa; font-size:0.85rem;">¿Organizas un campeonato? Haz clic en "Anunciar mi Torneo" para aparecer aquí.</p>
+                        <p style="color:#aaa; font-size:0.85rem;">¿Organizas un campeonato? Haz clic en "Promocionar mi Torneo" arriba para aparecer aquí.</p>
                     </div>`;
                 return;
             }
@@ -214,23 +271,24 @@
                     </div>
                 </div>`;
             });
-            secTorneos.innerHTML = html;
-        } catch(e) { secTorneos.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar torneos.</p>'; }
+            container.innerHTML = html;
+        } catch(e) { container.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar torneos.</p>'; }
     }
 
     // CARGAR ACADEMIAS
     async function cargarAcademias() {
-        secAcademias.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando academias...</p>';
+        const container = document.getElementById('grid-academias');
+        container.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando academias...</p>';
         try {
             const q = query(collection(db, 'anuncios_ligas'), where('tipo', '==', 'academia'), where('estado', '==', 'aprobado'));
             const snap = await getDocs(q);
             
             if(snap.empty) {
-                secAcademias.innerHTML = `
+                container.innerHTML = `
                     <div style="grid-column:1/-1; text-align:center; padding:40px 20px; background:rgba(255,255,255,0.02); border:1px dashed #444; border-radius:16px;">
                         <i class="ph-bold ph-soccer-ball" style="font-size:3rem; color:#666; margin-bottom:10px;"></i>
                         <h3 style="margin:0 0 8px; color:#fff;">Aún no hay academias registradas</h3>
-                        <p style="color:#aaa; font-size:0.85rem;">Si tienes una escuela deportiva, promociónate aquí.</p>
+                        <p style="color:#aaa; font-size:0.85rem;">Si tienes una escuela deportiva, promociónate haciendo clic arriba.</p>
                     </div>`;
                 return;
             }
@@ -257,16 +315,98 @@
                     </div>
                 </div>`;
             });
-            secAcademias.innerHTML = html;
-        } catch(e) { secAcademias.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar academias.</p>'; }
+            container.innerHTML = html;
+        } catch(e) { container.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar academias.</p>'; }
     }
 
-    async function cargarComunidades() { secComunidades.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;">Pronto aquí la lista de ligas comunitarias de barrio.</p>'; }
-    async function cargarRetos() { secRetos.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;">Pronto la cartelera de desafíos.</p>'; }
+    // CARGAR COMUNIDADES (MIS O EXPLORAR)
+    async function cargarComunidades(subTipo) {
+        const container = subTipo === 'mis' ? subSecMis : subSecExp;
+        container.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando comunidades...</p>';
+        
+        if(!currentUser) {
+            container.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;">Inicia sesión con Google para ver tus comunidades.</p>';
+            return;
+        }
 
-    // MODAL ANUNCIAR
-    document.getElementById('btn-abrir-anuncio-modal').onclick = () => {
+        try {
+            const snap = await getDocs(collection(db, 'comunidades'));
+            let html = '';
+            let contador = 0;
+
+            snap.forEach(d => {
+                const c = d.data(); c.id = d.id;
+                const soyLider = currentUser.uid === c.liderUid;
+                const soyMiembro = soyLider || (c.miembros_uids && c.miembros_uids.includes(currentUser.uid));
+                
+                const corresponde = (subTipo === 'mis' && soyMiembro) || (subTipo === 'explorar' && !soyMiembro);
+
+                if (corresponde) {
+                    contador++;
+                    const deportesArray = (c.deporte || 'Fútbol').split(',').map(dp => dp.trim());
+                    const tagsHTML = deportesArray.map(dp => `<span class="sport-tag">${dp}</span>`).join('');
+                    const logoImg = c.logo ? `<img src="${c.logo}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>`;
+
+                    html += `
+                    <div class="community-card">
+                        <div style="display:flex; align-items:center; gap:15px;">
+                            <div style="width:50px; height:50px; background:#111; border: 1px solid var(--primary-green); border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden;">
+                                ${logoImg}
+                            </div>
+                            <div>
+                                <h3 style="margin:0; font-size:1.15rem; color:#fff;">${c.nombre} ${soyLider ? '<i class="ph-fill ph-crown" style="color:#f1c40f;"></i>' : ''}</h3>
+                                <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</p>
+                            </div>
+                        </div>
+                        <div class="sport-tags">${tagsHTML}</div>
+                    </div>`;
+                }
+            });
+
+            if (contador === 0) {
+                html = subTipo === 'mis' 
+                    ? '<p style="color:#aaa; grid-column:1/-1; text-align:center; padding:20px;">Aún no te has unido a ninguna comunidad.</p>' 
+                    : '<p style="color:#aaa; grid-column:1/-1; text-align:center; padding:20px;">No hay comunidades nuevas para explorar.</p>';
+            }
+
+            container.innerHTML = html;
+        } catch(e) { container.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar comunidades.</p>'; }
+    }
+
+    async function cargarRetos() {
+        subSecRet.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando Zona de Retos...</p>';
+        try {
+            const q = query(collection(db, 'retos_comunidades'), where('estado', 'in', ['buscando_rival', 'coordinando']));
+            const snap = await getDocs(q);
+
+            if(snap.empty) {
+                subSecRet.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;">No hay retos activos en este momento.</p>';
+                return;
+            }
+
+            let html = '';
+            snap.forEach(d => {
+                const r = d.data();
+                html += `
+                <div class="promo-card" style="border-color:rgba(231,76,60,0.4);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h3 style="margin:0; font-size:1.1rem; color:#fff;">⚔️ ${r.nombreComunidad}</h3>
+                        <span style="background:rgba(231,76,60,0.15); color:#e74c3c; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">${r.formato}</span>
+                    </div>
+                    <div class="detail-row"><span class="detail-label">Deporte:</span><span class="detail-val" style="color:#f1c40f;">${r.deporte}</span></div>
+                    <div class="detail-row"><span class="detail-label">Fecha / Hora:</span><span class="detail-val">${r.fecha} - ${r.hora}</span></div>
+                    
+                    <a href="https://wa.me/51${r.whatsappLider}?text=${encodeURIComponent(`Hola! Vengo desde la ZONA DE RETOS de CHALACAPP para aceptar el clásico contra ${r.nombreComunidad}`)}" target="_blank" class="btn" style="margin-top:15px; background:#e74c3c; color:#fff; font-weight:bold; text-align:center; padding:10px; border-radius:8px; text-decoration:none; display:block;"><i class="ph-bold ph-swords"></i> Aceptar Reto</a>
+                </div>`;
+            });
+            subSecRet.innerHTML = html;
+        } catch(e) { subSecRet.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar retos.</p>'; }
+    }
+
+    // MODAL
+    window.abrirModalAnuncio = function(tipoPreseleccionado) {
         if(!currentUser) return alert("Inicia sesión con Google para enviar una solicitud.");
+        document.getElementById('an-tipo').value = tipoPreseleccionado;
         document.getElementById('modal-anunciar').style.display = 'flex';
     };
     document.getElementById('cerrar-anunciar').onclick = () => document.getElementById('modal-anunciar').style.display = 'none';
@@ -298,7 +438,6 @@
             document.getElementById('modal-anunciar').style.display = 'none';
             e.target.reset();
             
-            // Redirige al WhatsApp del SuperAdmin (pon aquí tu número)
             window.open(`https://wa.me/51961341323?text=${encodeURIComponent(msjWa)}`, '_blank');
             alert("¡Solicitud enviada! En breve un administrador revisará tu pago y enlace de verificación.");
         } catch(err) {
