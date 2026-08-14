@@ -671,12 +671,6 @@ if (window.location.pathname.includes('cancha.html')) {
 }
 
 // ==========================================
-// MÓDULO INTELIGENTE: GPS, SLIDER Y FILTROS
-// ==========================================
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-const bdLocal = getFirestore();
-
-// ==========================================
 // MÓDULO INTELIGENTE: GPS, SLIDER Y FILTROS (CORREGIDO)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
