@@ -144,3 +144,79 @@
 .btn-confirm-yes:hover { filter: brightness(1.1); transform: scale(1.02); }
 .btn-confirm-no { background: rgba(255,255,255,0.1); color: #fff; }
 .btn-confirm-no:hover { background: rgba(255,255,255,0.2); }
+
+/* ==========================================
+   PESTAÑAS MINIMALISTAS (SIN RECTÁNGULOS)
+   ========================================== */
+
+/* Contenedor invisible sin cajas */
+.tabs-container, .subtabs-container {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 25px;
+    padding-bottom: 8px;
+    border: none !important; /* Elimina cualquier borde de caja */
+    background: transparent !important; /* Elimina fondos de caja */
+    box-shadow: none !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Botones de Pestañas (Estilo Línea / Minimalista) */
+.tab-btn, .subtab-btn {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0 !important; /* Sin esquinas de caja */
+    color: #888888 !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    padding: 8px 4px !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.25s ease !important;
+    box-shadow: none !important;
+}
+
+/* Hover: Brillo suave del texto */
+.tab-btn:hover, .subtab-btn:hover {
+    color: #ffffff !important;
+    border-bottom-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Estado Activo: Línea inferior Verde Neón sin fondo rectangular */
+.tab-btn.active, .subtab-btn.active {
+    color: var(--primary-green, #00D968) !important;
+    border-bottom: 3px solid var(--primary-green, #00D968) !important;
+    background: transparent !important;
+}
+
+/* Sub-pestañas especiales (como Zona de Retos) */
+.subtab-btn-reto.active {
+    color: #FF4545 !important;
+    border-bottom-color: #FF4545 !important;
+}
+
+/* ==========================================
+   AJUSTE DE BOTONES DEL HÉROE Y ACCIONES
+   ========================================== */
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 25px;
+    max-width: 620px;
+}
+
+.hero-actions .btn {
+    width: auto !important;
+    flex: 1;
+    min-width: 160px;
+}
+
+@media (max-width: 600px) {
+    .hero-actions .btn {
+        width: 100% !important;
+        flex: none;
+    }
+}
