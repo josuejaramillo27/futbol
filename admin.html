@@ -287,14 +287,19 @@
                     <input type="text" id="admin-nombre" placeholder="Ej. Complejo Deportivo El 10" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
                 </label>
                 
-                <div class="form-two" style="display:flex; gap:15px; margin-bottom:15px; flex-wrap: wrap;">
-                    <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Departamento
-                        <input type="text" id="admin-departamento" placeholder="Ej. Piura" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
-                    </label>
-                    <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Distrito
-                        <input type="text" id="admin-distrito" placeholder="Ej. Castilla" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
-                    </label>
-                </div>
+                <div class="form-group">
+    <label for="admin-cancha-departamento">Departamento del Complejo</label>
+    <select id="admin-cancha-departamento" required class="admin-input">
+        <option value="">Selecciona departamento...</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="admin-cancha-distrito">Distrito / Provincia</label>
+    <select id="admin-cancha-distrito" required disabled class="admin-input">
+        <option value="">Primero elige un departamento</option>
+    </select>
+</div>
 
                 <div style="display:flex; gap:15px; margin-bottom:25px;">
                     <label style="flex:1; color:#aaa; font-size:0.85rem;">WhatsApp de Reservas
@@ -542,5 +547,60 @@
 <script type="module" src="admin-operations.js"></script>
 <script type="module" src="admin-hours.js"></script>
 
+<script>
+    const peruDataAdmin = {
+        "Amazonas": ["Chachapoyas", "Bagua", "Utcubamba"],
+        "Áncash": ["Huaraz", "Chimbote", "Casma", "Huarmey"],
+        "Apurímac": ["Abancay", "Andahuaylas"],
+        "Arequipa": ["Arequipa", "Yanahuara", "Cayma", "Cerro Colorado", "Camaná"],
+        "Ayacucho": ["Huamanga", "Huanta"],
+        "Cajamarca": ["Cajamarca", "Jaén", "Chota"],
+        "Callao": ["Callao", "Bellavista", "La Perla", "La Punta", "Ventanilla"],
+        "Cusco": ["Cusco", "Wanchaq", "San Sebastián", "San Jerónimo", "Urubamba"],
+        "Huancavelica": ["Huancavelica", "Tayacaja"],
+        "Huánuco": ["Huánuco", "Tingo María"],
+        "Ica": ["Ica", "Chincha", "Pisco", "Nazca"],
+        "Junín": ["Huancayo", "El Tambo", "Chanchamayo", "Tarma"],
+        "La Libertad": ["Trujillo", "Víctor Larco", "Huanchaco", "Moche", "Pacasmayo"],
+        "Lambayeque": ["Chiclayo", "Lambayeque", "Ferreñafe"],
+        "Lima": ["Miraflores", "San Isidro", "Surco", "San Borja", "La Molina", "Los Olivos", "San Juan de Lurigancho", "Lima Centro", "Ate", "Chorrillos"],
+        "Loreto": ["Iquitos", "Yurimaguas"],
+        "Madre de Dios": ["Puerto Maldonado"],
+        "Moquegua": ["Moquegua", "Ilo"],
+        "Pasco": ["Cerro de Pasco", "Oxapampa"],
+        "Piura": ["Piura", "Castilla", "Sullana", "Talara", "Paita"],
+        "Puno": ["Puno", "Juliaca"],
+        "San Martín": ["Tarapoto", "Moyobamba"],
+        "Tacna": ["Tacna"],
+        "Tumbes": ["Tumbes", "Zarumilla"],
+        "Ucayali": ["Pucallpa", "Yarinacocha"]
+    };
+
+    const selDeptoAdmin = document.getElementById('admin-cancha-departamento');
+    const selDistAdmin = document.getElementById('admin-cancha-distrito');
+
+    if (selDeptoAdmin && selDistAdmin) {
+        // Cargar Departamentos
+        Object.keys(peruDataAdmin).forEach(dpto => {
+            selDeptoAdmin.innerHTML += `<option value="${dpto}">${dpto}</option>`;
+        });
+
+        // Cambiar Distritos al elegir Departamento
+        selDeptoAdmin.addEventListener('change', function() {
+            const deptoSel = this.value;
+            selDistAdmin.innerHTML = '<option value="">Selecciona distrito...</option>';
+            
+            if (deptoSel && peruDataAdmin[deptoSel]) {
+                selDistAdmin.disabled = false;
+                peruDataAdmin[deptoSel].forEach(dist => {
+                    selDistAdmin.innerHTML += `<option value="${dist}">${dist}</option>`;
+                });
+            } else {
+                selDistAdmin.disabled = true;
+                selDistAdmin.innerHTML = '<option value="">Primero elige un departamento</option>';
+            }
+        });
+    }
+</script>
 </body>
 </html>
