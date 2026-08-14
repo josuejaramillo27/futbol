@@ -206,6 +206,63 @@
         </div>
     </div>
 
-    <script type="module" src="auth.js"></script> 
+    <script type="module" src="auth.js"></script>
+    <script>
+    // BASE DE DATOS OPTIMIZADA DEL PERÚ (Puedes agregar más distritos luego)
+    const peruData = {
+        "Amazonas": ["Chachapoyas", "Bagua", "Utcubamba"],
+        "Áncash": ["Huaraz", "Chimbote", "Casma", "Huarmey"],
+        "Apurímac": ["Abancay", "Andahuaylas"],
+        "Arequipa": ["Arequipa", "Yanahuara", "Cayma", "Cerro Colorado", "Camaná"],
+        "Ayacucho": ["Huamanga", "Huanta"],
+        "Cajamarca": ["Cajamarca", "Jaén", "Chota"],
+        "Callao": ["Callao", "Bellavista", "La Perla", "La Punta", "Ventanilla"],
+        "Cusco": ["Cusco", "Wanchaq", "San Sebastián", "San Jerónimo", "Urubamba"],
+        "Huancavelica": ["Huancavelica", "Tayacaja"],
+        "Huánuco": ["Huánuco", "Tingo María"],
+        "Ica": ["Ica", "Chincha", "Pisco", "Nazca"],
+        "Junín": ["Huancayo", "El Tambo", "Chanchamayo", "Tarma"],
+        "La Libertad": ["Trujillo", "Víctor Larco", "Huanchaco", "Moche", "Pacasmayo"],
+        "Lambayeque": ["Chiclayo", "Lambayeque", "Ferreñafe"],
+        "Lima": ["Miraflores", "San Isidro", "Surco", "San Borja", "La Molina", "Los Olivos", "San Juan de Lurigancho", "Lima Centro", "Ate", "Chorrillos"],
+        "Loreto": ["Iquitos", "Yurimaguas"],
+        "Madre de Dios": ["Puerto Maldonado"],
+        "Moquegua": ["Moquegua", "Ilo"],
+        "Pasco": ["Cerro de Pasco", "Oxapampa"],
+        "Piura": ["Piura", "Castilla", "Sullana", "Talara", "Paita"],
+        "Puno": ["Puno", "Juliaca"],
+        "San Martín": ["Tarapoto", "Moyobamba"],
+        "Tacna": ["Tacna", "Coronel Portillo"],
+        "Tumbes": ["Tumbes", "Zarumilla"],
+        "Ucayali": ["Pucallpa", "Yarinacocha"]
+    };
+
+    const selectDepto = document.getElementById('reg-departamento');
+    const selectDist = document.getElementById('reg-distrito');
+
+    if(selectDepto && selectDist) {
+        // Llenar departamentos
+        Object.keys(peruData).forEach(depto => {
+            selectDepto.innerHTML += `<option value="${depto}">${depto}</option>`;
+        });
+
+        // Evento al cambiar departamento
+        selectDepto.addEventListener('change', function() {
+            const seleccionado = this.value;
+            selectDist.innerHTML = '<option value="">Selecciona tu distrito...</option>';
+            
+            if(seleccionado && peruData[seleccionado]) {
+                selectDist.disabled = false;
+                peruData[seleccionado].forEach(dist => {
+                    selectDist.innerHTML += `<option value="${dist}">${dist}</option>`;
+                });
+                selectDist.innerHTML += `<option value="Otro">Otro Distrito</option>`;
+            } else {
+                selectDist.disabled = true;
+                selectDist.innerHTML = '<option value="">Primero elige un departamento</option>';
+            }
+        });
+    }
+</script>
 </body>
 </html>
