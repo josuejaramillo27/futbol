@@ -11,9 +11,9 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-        body { background: #080B0A; min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
+        /* FONDO CORREGIDO: Hereda la imagen de styles.css */
+        body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
         
-        /* BARRA SUPERIOR RESPONSIVA */
         .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(8, 11, 10, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; width: 100%; box-sizing: border-box; }
         .topbar-nav { display: flex; gap: 12px; align-items: center; flex-wrap: nowrap; }
         .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; font-size: 0.55rem; font-weight: 800; gap: 3px; letter-spacing: 0.5px; white-space: nowrap; }
@@ -24,16 +24,16 @@
 
         /* TABS PRINCIPALES */
         .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.9rem; font-weight: 700; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: all 0.2s; white-space: nowrap; }
-        .tab-btn:hover { color: #fff !important; background: rgba(255,255,255,0.05); }
-        .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3); }
+        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.9rem; font-weight: 700; cursor: pointer; padding: 8px 16px; border-radius: 8px; transition: background 0.2s, color 0.2s; white-space: nowrap; }
+        .tab-btn:hover { color: #fff !important; background: rgba(255,255,255,0.05) !important; transform: none !important; }
+        .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3) !important; }
         
         .tab-btn-reto { color: #e74c3c !important; }
         .tab-btn-reto.active { background: rgba(231, 76, 60, 0.12) !important; border: 1px solid rgba(231, 76, 60, 0.4) !important; }
 
         /* TARJETAS DE LIGAS, TORNEOS Y ACADEMIAS */
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .promo-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; transition: border-color 0.2s; position: relative; }
+        .promo-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; transition: border-color 0.2s; position: relative; backdrop-filter: blur(10px); }
         .promo-card:hover { border-color: rgba(255,255,255,0.25); }
         .promo-card.verified-border { border-color: rgba(52, 152, 219, 0.4); }
 
@@ -48,7 +48,8 @@
         .btn { transition: background 0.2s, color 0.2s, opacity 0.2s !important; }
         .btn:hover { transform: none !important; box-shadow: none !important; opacity: 0.88; }
         
-        .btn-anunciar { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; font-weight: 800; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; }
+        .btn-anunciar { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; font-weight: 800; border: none; padding: 10px 16px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; transition: background 0.2s, opacity 0.2s; }
+        .btn-anunciar:hover { opacity: 0.85; transform: none !important; }
     </style>
 </head>
 <body>
@@ -102,7 +103,7 @@
 <div id="modal-anunciar" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:25px; border-radius:16px; width:100%; max-width:480px; position:relative; border:1px solid #f1c40f; max-height:90vh; overflow-y:auto;">
         
-        <button id="cerrar-anunciar" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="ph-bold ph-x"></i></button>
+        <button id="cerrar-anunciar" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; transition:background 0.2s;"><i class="ph-bold ph-x"></i></button>
         
         <h2 style="margin-top:0; color:#f1c40f; font-size:1.3rem;"><i class="ph-bold ph-megaphone"></i> Solicitud de Anuncio</h2>
         <p style="color:#aaa; font-size:0.82rem; margin-bottom:15px;">Completa la ficha de transparencia. Un administrador revisará la información antes de publicarla.</p>
