@@ -676,29 +676,31 @@ if (window.location.pathname.includes('cancha.html')) {
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 const bdLocal = getFirestore();
 
+// ==========================================
+// MÓDULO INTELIGENTE: GPS, SLIDER Y FILTROS (CORREGIDO)
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. LLENAR EL FILTRO DE TIPOS DINÁMICAMENTE LEYENDO LA BD
+    // 1. LLENAR EL FILTRO DE TIPOS DINÁMICAMENTE USANDO LA BD EXISTENTE (db)
     async function cargarTiposDinamicos() {
         try {
-            const snap = await getDocs(collection(bdLocal, 'canchas'));
-            const tipos = new Set();
-            snap.forEach(d => { if(d.data().tipo) tipos.add(d.data().tipo); });
-            const selectTipo = document.getElementById('filtro-tipo');
-            if(selectTipo && tipos.size > 0) {
-                selectTipo.innerHTML = '<option value="">Todos los tipos</option>' + 
-                    [...tipos].map(t => `<option value="${t}">${t}</option>`).join('');
-            } else if(selectTipo) {
-                selectTipo.innerHTML = '<option value="">Sin tipos registrados</option>';
+            if (typeof db !== 'undefined') {
+                const snap = await getDocs(collection(db, 'canchas'));
+                const tipos = new Set();
+                snap.forEach(d => { if(d.data().tipo) tipos.add(d.data().tipo); });
+                const selectTipo = document.getElementById('filtro-tipo');
+                if(selectTipo && tipos.size > 0) {
+                    selectTipo.innerHTML = '<option value="">Todos los tipos</option>' + 
+                        [...tipos].map(t => `<option value="${t}">${t}</option>`).join('');
+                }
             }
-        } catch(e) { console.error("Error al cargar tipos dinámicos"); }
+        } catch(e) { console.error("Error al cargar tipos dinámicos", e); }
     }
     cargarTiposDinamicos();
 
     // 2. EFECTO DESENFOQUE (BLUR) PARA EL CARRUSEL
     const sliderLista = document.getElementById('lista-canchas');
     if (sliderLista) {
-        // Observador que detecta qué cancha está en el centro
         const blurObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -706,7 +708,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'scale(1)';
                 } else {
-                    // Desenfoca las que están a los lados
                     entry.target.style.filter = 'blur(4px)';
                     entry.target.style.opacity = '0.4';
                     entry.target.style.transform = 'scale(0.92)';
@@ -714,7 +715,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }, { root: sliderLista, threshold: 0.6 });
 
-        // MutationObserver para aplicar el efecto a las canchas conforme Firebase las dibuja
         const domObserver = new MutationObserver((mutations) => {
             mutations.forEach(mut => {
                 mut.addedNodes.forEach(node => {
@@ -726,34 +726,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         domObserver.observe(sliderLista, { childList: true });
 
-        // 3. BOTONES DE NAVEGACIÓN DEL CARRUSEL
+        // BOTONES DE NAVEGACIÓN DEL CARRUSEL
         const btnPrev = document.getElementById('slider-prev');
         const btnNext = document.getElementById('slider-next');
-        const scrollAmount = 300; // Cuánto avanza por clic
+        const scrollAmount = 320;
 
-        btnNext.onclick = () => sliderLista.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-        btnPrev.onclick = () => sliderLista.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        if (btnNext && btnPrev) {
+            btnNext.onclick = () => sliderLista.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            btnPrev.onclick = () => sliderLista.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
 
-        // Ocultar botones si llegamos a los límites
-        sliderLista.addEventListener('scroll', () => {
-            btnPrev.style.display = sliderLista.scrollLeft <= 10 ? 'none' : 'flex';
-            const maxScroll = sliderLista.scrollWidth - sliderLista.clientWidth;
-            btnNext.style.display = sliderLista.scrollLeft >= (maxScroll - 10) ? 'none' : 'flex';
-        });
-        // Disparar una vez para esconder el "prev" al inicio
-        setTimeout(() => sliderLista.dispatchEvent(new Event('scroll')), 500);
+            sliderLista.addEventListener('scroll', () => {
+                btnPrev.style.display = sliderLista.scrollLeft <= 10 ? 'none' : 'flex';
+                const maxScroll = sliderLista.scrollWidth - sliderLista.clientWidth;
+                btnNext.style.display = sliderLista.scrollLeft >= (maxScroll - 10) ? 'none' : 'flex';
+            });
+            setTimeout(() => sliderLista.dispatchEvent(new Event('scroll')), 500);
+        }
     }
 
-    // 4. MODAL GPS (GEOLOCALIZACIÓN DEL DEPARTAMENTO)
+    // 3. MODAL GPS (GEOLOCALIZACIÓN DEL DEPARTAMENTO)
     const modalGps = document.getElementById('modal-ubicacion');
     if (modalGps && !localStorage.getItem('gpsPreguntado')) {
-        // Mostrar modal tras 2 segundos de entrar a la app
-        setTimeout(() => { modalGps.style.display = 'flex'; }, 2000);
+        setTimeout(() => { modalGps.style.display = 'flex'; }, 1500);
     }
 
     document.getElementById('btn-cerrar-gps')?.addEventListener('click', () => {
         localStorage.setItem('gpsPreguntado', 'true');
-        modalGps.style.display = 'none';
+        if (modalGps) modalGps.style.display = 'none';
     });
 
     document.getElementById('btn-detectar-gps')?.addEventListener('click', () => {
@@ -765,39 +764,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
                 try {
-                    // Consultar API Gratuita de OpenStreetMap para obtener el departamento de Perú
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                     const data = await res.json();
                     let dpto = data.address.state || data.address.region || '';
                     
-                    // Limpiar la palabra "Department" si la API la arroja
                     dpto = dpto.replace(' Department', '').replace(' Región', '').trim();
                     
-                    // Buscar si existe ese departamento en el Select y autoseleccionarlo
                     const selectDept = document.getElementById('filtro-ciudad');
                     let encontrado = false;
-                    for (let i = 0; i < selectDept.options.length; i++) {
-                        if (selectDept.options[i].value.toLowerCase() === dpto.toLowerCase()) {
-                            selectDept.selectedIndex = i;
-                            encontrado = true;
-                            // Disparar evento para que la app filtre las canchas
-                            selectDept.dispatchEvent(new Event('change'));
-                            break;
+                    if (selectDept) {
+                        for (let i = 0; i < selectDept.options.length; i++) {
+                            if (selectDept.options[i].value.toLowerCase() === dpto.toLowerCase()) {
+                                selectDept.selectedIndex = i;
+                                encontrado = true;
+                                selectDept.dispatchEvent(new Event('change'));
+                                break;
+                            }
                         }
                     }
                     
                     localStorage.setItem('gpsPreguntado', 'true');
-                    modalGps.style.display = 'none';
-                    if(encontrado) alert(`¡Genial! Hemos filtrado las canchas de ${dpto}.`);
+                    if (modalGps) modalGps.style.display = 'none';
+                    if (encontrado) alert(`¡Detectado! Mostrando canchas en ${dpto}.`);
                     
                 } catch(e) {
-                    alert("No logramos detectar el departamento. Puedes seleccionarlo manualmente en la lupa.");
-                    modalGps.style.display = 'none';
+                    alert("No pudimos obtener tu departamento exacto. Puedes seleccionarlo manualmente.");
+                    if (modalGps) modalGps.style.display = 'none';
                 }
             }, () => {
-                alert("Permiso denegado. Puedes elegir tu ubicación manualmente en los filtros.");
+                alert("Permiso de ubicación denegado.");
                 localStorage.setItem('gpsPreguntado', 'true');
-                modalGps.style.display = 'none';
+                if (modalGps) modalGps.style.display = 'none';
             });
         }
     });
