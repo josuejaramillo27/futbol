@@ -202,21 +202,25 @@
    ========================================== */
 .hero-actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Permite que se acomoden según el espacio */
     gap: 12px;
-    margin-top: 25px;
-    max-width: 620px;
+    margin-top: 27px;
+    max-width: 780px; /* Ampliamos el ancho para que quepan holgadamente en PC */
+    width: 100%;
 }
 
 .hero-actions .btn {
     width: auto !important;
-    flex: 1;
-    min-width: 160px;
+    white-space: nowrap !important; /* 🔥 Obliga a que el texto siempre esté en UNA SOLA línea */
+    flex: 0 0 auto; /* Evita que el botón se aplaste */
 }
 
+/* En celulares se siguen apilando uno debajo de otro perfectamente */
 @media (max-width: 600px) {
+    .hero-actions {
+        flex-direction: column;
+    }
     .hero-actions .btn {
         width: 100% !important;
-        flex: none;
     }
 }
