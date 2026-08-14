@@ -140,11 +140,14 @@
                 <input id="filtro-busqueda" type="search" placeholder="Busca una cancha, zona o distrito..." autocomplete="off">
             </div>
             <div class="filter-row">
-                <label class="filter-field"><span>Distrito</span>
-                    <select id="filtro-ciudad"><option value="">Todos los distritos</option></select>
+                <label class="filter-field"><span>Departamento</span>
+                    <select id="filtro-ciudad">
+                        <option value="">Todo el Perú</option>
+                        <option value="Amazonas">Amazonas</option><option value="Áncash">Áncash</option><option value="Apurímac">Apurímac</option><option value="Arequipa">Arequipa</option><option value="Ayacucho">Ayacucho</option><option value="Cajamarca">Cajamarca</option><option value="Callao">Callao</option><option value="Cusco">Cusco</option><option value="Huancavelica">Huancavelica</option><option value="Huánuco">Huánuco</option><option value="Ica">Ica</option><option value="Junín">Junín</option><option value="La Libertad">La Libertad</option><option value="Lambayeque">Lambayeque</option><option value="Lima">Lima</option><option value="Loreto">Loreto</option><option value="Madre de Dios">Madre de Dios</option><option value="Moquegua">Moquegua</option><option value="Pasco">Pasco</option><option value="Piura">Piura</option><option value="Puno">Puno</option><option value="San Martín">San Martín</option><option value="Tacna">Tacna</option><option value="Tumbes">Tumbes</option><option value="Ucayali">Ucayali</option>
+                    </select>
                 </label>
                 <label class="filter-field"><span>Tipo</span>
-                    <select id="filtro-tipo"><option value="">Todos los tipos</option></select>
+                    <select id="filtro-tipo"><option value="">Cargando tipos...</option></select>
                 </label>
                 <label class="filter-field"><span>Precio</span>
                     <select id="filtro-precio">
@@ -176,7 +179,11 @@
             <i class="ph-fill ph-map-trifold" style="color: var(--primary-green);"></i> Explorar canchas en el mapa
         </button>
         
-        <div id="lista-canchas"></div>
+        <div class="canchas-slider-wrapper">
+            <button id="slider-prev" class="slider-btn"><i class="ph-bold ph-caret-left"></i></button>
+            <div id="lista-canchas" class="canchas-slider"></div>
+            <button id="slider-next" class="slider-btn"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
     </section>
 
     <!-- ==============================================
@@ -296,5 +303,16 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script type="module" src="app.js"></script>
 <script type="module" src="maps.js"></script>
+    <div id="modal-ubicacion" class="modal-oculto">
+    <div class="modal-contenido" style="text-align:center; max-width:400px; padding: 35px 25px; border: 1px solid var(--primary-green);">
+        <div style="width: 80px; height: 80px; background: rgba(0,217,104,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+            <i class="ph-fill ph-map-pin" style="font-size: 3rem; color: var(--primary-green);"></i>
+        </div>
+        <h2 style="color: #fff; margin-bottom: 10px; font-size: 1.5rem;">¿Dónde juegas?</h2>
+        <p style="color: #aaa; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;">Permítenos detectar tu departamento para mostrarte al instante las mejores canchas cerca de ti.</p>
+        <button id="btn-detectar-gps" class="btn" style="width: 100%; margin-bottom: 12px; background: var(--primary-green); color: #000;"><i class="ph-bold ph-navigation-arrow"></i> Detectar mi ubicación</button>
+        <button id="btn-cerrar-gps" class="btn btn-outline" style="width: 100%; border: none;">Elegir departamento manualmente</button>
+    </div>
+</div>
 </body>
 </html>
