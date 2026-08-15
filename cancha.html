@@ -4,253 +4,306 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
-    <title>Perfil de Cancha | CHALACAPP</title>
+    <title>Perfil del Complejo | CHALACAPP</title>
     
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="booking.css">
-    <link rel="stylesheet" href="phase34-public.css">
     
     <style>
         body { background: #080B0A; min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
         
         /* BARRA SUPERIOR */
         .topbar-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 20px;
-            background: rgba(8, 11, 10, 0.95);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 20px; background: rgba(8, 11, 10, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08); position: sticky; top: 0; z-index: 100;
         }
 
-        .back-link-top {
-            color: #ffffff;
-            text-decoration: none;
+        /* DISEÑO DE PESTAÑAS (TABS ESTILO CHROME) */
+        .canchas-tabs-container {
+            display: flex;
+            gap: 4px;
+            margin: 20px 20px 0 20px;
+            overflow-x: auto;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .canchas-tabs-container::-webkit-scrollbar { display: none; }
+        
+        .cancha-tab {
+            background: rgba(255,255,255,0.03);
+            color: #888;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-bottom: none;
+            padding: 12px 22px;
+            border-radius: 12px 12px 0 0;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            transition: color 0.2s ease;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.2);
         }
-        .back-link-top:hover { color: var(--primary-green); }
-        .back-link-top i { font-size: 1.1rem; color: var(--primary-green); }
-
-        /* CONTENEDOR BASE (MÓVIL) */
-        .bio-container {
-            max-width: 520px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0;
-            box-sizing: border-box;
-            background: #080B0A;
-            transition: max-width 0.3s ease;
+        .cancha-tab:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.06);
         }
-
-        /* PORTADA Y LOGO */
-        .bio-header { position: relative; height: 160px; width: 100%; overflow: visible; }
-        .bio-cover-box { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 0 0 16px 16px; }
-        .bio-cover { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65); }
-        .bio-cover-gradient { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; background: linear-gradient(to top, #080B0A, transparent); }
         
-        .bio-logo-wrapper { position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); width: 85px; height: 85px; border-radius: 50%; border: 3px solid #080B0A; overflow: hidden; background: #111; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
-        .bio-logo { width: 100%; height: 100%; object-fit: cover; }
-
-        .bio-body { padding: 45px 20px 40px; text-align: center; box-sizing: border-box; }
-        .bio-title { font-size: 1.5rem; color: #fff; margin: 0 0 4px 0; font-weight: 900; letter-spacing: -0.3px; }
-        .bio-location { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 15px; }
-        
-        /* MÉTRICAS */
-        .bio-metrics { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .bio-metric-box { background: rgba(255,255,255,0.04); padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); min-width: 90px; }
-        .bio-metric-icon { color: var(--primary-green); font-size: 1.2rem; margin-bottom: 2px; }
-        .bio-metric-val { color: #fff; font-size: 0.85rem; font-weight: bold; }
-
-        /* BOTONES */
-        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 900; font-size: 1rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
-        .bio-btn:active { transform: scale(0.98); }
-        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.25); color: #fff; box-shadow: none; }
-        .bio-btn-outline:hover { border-color: var(--primary-green); color: var(--primary-green); }
-
-        /* DESCRIPCIÓN */
-        .bio-desc-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 15px; text-align: left; margin-top: 20px; }
-        .bio-desc-title { font-size: 0.95rem; color: #fff; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px; }
-        .bio-desc { color: #ccc; font-size: 0.88rem; margin: 0; line-height: 1.5; font-style: italic; }
-
-        /* ESTRUCTURA SPLIT-SCREEN SOLO PARA PC (min-width: 850px) */
-        .pc-split-grid { display: block; }
-
-        @media (min-width: 850px) {
-            .bio-container {
-                max-width: 1050px;
-                padding: 30px 20px;
-            }
-            .bio-header {
-                height: 240px;
-            }
-            .bio-cover-box {
-                border-radius: 16px;
-            }
-            .bio-logo-wrapper {
-                width: 105px;
-                height: 105px;
-                bottom: -40px;
-                left: 60px;
-                transform: none;
-            }
-            .bio-body {
-                padding: 0;
-            }
-            
-            /* GRID DE 2 COLUMNAS PARA PC */
-            .pc-split-grid {
-                display: grid;
-                grid-template-columns: 1.1fr 0.9fr;
-                gap: 35px;
-                align-items: start;
-                margin-top: 55px;
-                text-align: left;
-            }
-
-            .left-column {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-            }
-
-            .right-column {
-                background: rgba(255,255,255,0.02);
-                border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 16px;
-                padding: 25px;
-                position: sticky;
-                top: 80px;
-            }
-
-            .bio-title {
-                font-size: 2.2rem;
-                text-align: left;
-            }
-            .bio-location {
-                font-size: 1rem;
-                text-align: left;
-            }
-            .bio-metrics {
-                justify-content: flex-start;
-            }
-            .bio-desc-container {
-                margin-top: 0;
-            }
+        /* Pestaña Activa (Integrada al fondo) */
+        .cancha-tab.active {
+            background: rgba(255,255,255,0.02); 
+            color: #fff;
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: none;
+            position: relative;
         }
+        .cancha-tab.active::after {
+            content: ''; position: absolute;
+            bottom: -2px; left: 0; width: 100%; height: 3px;
+            background: #080B0A; /* Oculta la línea inferior para fusionarse con la caja */
+        }
+        .cancha-tab.active::before {
+            content: ''; position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: var(--primary-green);
+            border-radius: 12px 12px 0 0;
+        }
+
+        /* CAJA DE DETALLES (UNIDA AL TAB ACTIVO) */
+        .cancha-detalles-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-top: none;
+            padding: 20px;
+            margin: 0 20px 20px 20px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .info-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;
+        }
+        .info-card {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 5px;
+        }
+        .info-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .info-value { font-size: 1.1rem; color: #fff; font-weight: bold; display: flex; align-items: center; gap: 6px; }
+
+        .btn { transition: transform 0.2s, opacity 0.2s; }
+        .btn:hover { transform: scale(1.02); opacity: 0.9; }
     </style>
 </head>
 <body>
 
-    <header class="topbar-header">
-        <a href="index.html" class="back-link-top">
-            <i class="ph-bold ph-arrow-left"></i> Explorar más
-        </a>
-        <span style="font-size: 0.9rem; font-weight: 900; letter-spacing: 1px; color: #fff;">CHALACAPP</span>
-    </header>
+<header class="topbar-header">
+    <a href="index.html" style="color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: bold;">
+        <i class="ph-bold ph-arrow-left"></i> Volver
+    </a>
+    <button id="btn-share" style="background:none; border:none; color:#fff; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-share-network"></i></button>
+</header>
 
-    <main class="bio-container">
-        <div class="bio-header">
-            <div class="bio-cover-box">
-                <img id="bio-cover" class="bio-cover" src="" alt="Portada">
-                <div class="bio-cover-gradient"></div>
-            </div>
-            <div class="bio-logo-wrapper">
-                <img id="bio-logo" class="bio-logo" src="" alt="Logo">
-            </div>
-        </div>
-
-        <div class="bio-body">
-            <div class="pc-split-grid">
-                
-                <div class="left-column">
-                    <div>
-                        <h1 id="bio-title" class="bio-title">Cargando...</h1>
-                        <p id="bio-location" class="bio-location"><i class="ph-bold ph-map-pin"></i> ...</p>
-                    </div>
-
-                    <div class="bio-metrics">
-                        <div class="bio-metric-box">
-                            <i class="ph-fill ph-soccer-ball bio-metric-icon"></i>
-                            <div id="bio-tipo" class="bio-metric-val">...</div>
-                        </div>
-                        <div class="bio-metric-box">
-                            <i class="ph-fill ph-money bio-metric-icon"></i>
-                            <div id="bio-precio" class="bio-metric-val">...</div>
-                        </div>
-                    </div>
-
-                    <div class="bio-desc-container">
-                        <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre la cancha</h3>
-                        <p id="bio-desc" class="bio-desc"></p>
-                    </div>
-
-                    <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline"><i class="ph-bold ph-navigation-arrow"></i> Cómo llegar (GPS)</a>
-                </div>
-
-                <div class="right-column">
-                    <div id="court-rating" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center;"></div>
-                    
-                    <button id="btn-reservar-bio" class="bio-btn"><i class="ph-bold ph-calendar-check"></i> Ver Horarios y Reservar</button>
-
-                    <hr style="border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 25px 0;">
-
-                    <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem; text-align: center;">¿Ya jugaste aquí?</h3>
-                    <p id="star-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; text-align: center;">Ayuda a otros tocando las estrellas</p>
-                    <div id="star-picker" style="font-size: 2.4rem; color: #333; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; gap: 6px;">
-                        <i class="ph-fill ph-star" data-val="1"></i>
-                        <i class="ph-fill ph-star" data-val="2"></i>
-                        <i class="ph-fill ph-star" data-val="3"></i>
-                        <i class="ph-fill ph-star" data-val="4"></i>
-                        <i class="ph-fill ph-star" data-val="5"></i>
-                    </div>
-                    
-                    <div id="quick-tags-box" style="display: none; margin-bottom: 22px;">
-                        <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 12px; text-align: center;">¿Qué destacarías?</p>
-                        <div id="quick-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
-                    </div>
-
-                    <button id="btn-submit-review" class="btn" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); width: 100%; font-size: 0.9rem; padding: 12px;" disabled>Publicar Calificación</button>
-                </div>
-
-            </div>
-        </div>
-    </main>
-
-    <div id="modal-cancha" class="modal-oculto">
-        <div class="modal-contenido bottom-sheet" style="padding: 20px 16px; text-align: left; max-height: 85vh; overflow-y: auto;">
-            <button id="cerrar-modal" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-            <span class="mini-label" style="color: var(--primary-green);">DISPONIBILIDAD EN VIVO</span>
-            <h2 id="modal-nombre-interno" style="margin-bottom: 15px; color: #fff; font-size: 1.3rem;">Elige un horario</h2>
-            <div id="modal-disponibilidad"></div>
+<main class="bio-container">
+    <div class="bio-cover-wrapper">
+        <img id="bio-cover" src="https://via.placeholder.com/800x400" alt="Cover" class="bio-cover-img" style="width: 100%; height: 220px; object-fit: cover;">
+        <div class="bio-avatar-wrapper" style="position: absolute; bottom: -30px; left: 20px;">
+            <img id="bio-logo" src="https://via.placeholder.com/150" alt="Logo" class="bio-avatar-img" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #080B0A; background: #111; object-fit: cover;">
         </div>
     </div>
 
-    <div id="modal-reserva" class="modal-oculto">
-        <div class="modal-contenido center-modal" style="background:#111; border:1px solid var(--primary-green); padding: 20px;">
-            <button id="cerrar-reserva" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-            <h2 style="color: var(--primary-green); margin-top:0; font-size: 1.3rem;"><i class="ph-fill ph-calendar-plus"></i> Tu Reserva</h2>
-            <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:10px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
-                <p id="booking-cancha-nombre" style="margin:0 0 4px 0; color:#fff; font-weight:bold; font-size:1rem;"></p>
-                <p id="booking-hora" style="margin:0; color:var(--primary-green); font-size:1.1rem; font-weight:900;"></p>
+    <div class="bio-content" style="padding-top: 40px;">
+        <div class="bio-header" style="padding: 0 20px;">
+            <h1 id="bio-title" class="bio-title" style="margin: 0 0 5px; font-size: 1.6rem; color: #fff;">Cargando...</h1>
+            <p id="bio-location" class="bio-location" style="margin: 0; color: #aaa; font-size: 0.9rem;"><i class="ph-bold ph-map-pin"></i> Ubicación</p>
+            <div id="court-rating" style="margin-top:12px;"></div>
+        </div>
+
+        <div id="contenedor-tabs-canchas" class="canchas-tabs-container" style="display: none;"></div>
+
+        <div id="cancha-detalles-box" class="cancha-detalles-box" style="display: none;">
+            <div class="info-grid">
+                <div class="info-card">
+                    <span class="info-label">Deporte</span>
+                    <strong id="bio-tipo" class="info-value">...</strong>
+                </div>
+                <div class="info-card">
+                    <span class="info-label">Precio x Hora</span>
+                    <strong id="bio-precio" class="info-value" style="color: var(--primary-green);">...</strong>
+                </div>
             </div>
-            <div class="filter-field" style="margin-bottom:12px;"><span>Tu Nombre</span><input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff;"></div>
-            <div class="filter-field" style="margin-bottom:15px;"><span>WhatsApp de contacto</span><input type="tel" id="booking-telefono" placeholder="Ej. 987654321" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff;"></div>
             
-            <button id="btn-confirmar-reserva" class="btn hero-primary" style="width:100%; padding: 12px; font-size: 0.95rem;"><i class="ph-bold ph-whatsapp-logo"></i> Confirmar por WhatsApp</button>
-            <div id="booking-status"></div>
+            <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                <h3 style="margin: 0 0 10px; font-size: 1rem; color: #fff;">Características</h3>
+                <p id="bio-desc" style="color: #aaa; font-size: 0.9rem; line-height: 1.6; margin: 0;">Cargando detalles...</p>
+            </div>
+        </div>
+        
+        <div class="bio-actions" style="padding: 0 20px; display: flex; gap: 10px; margin-bottom: 25px;">
+            <button id="btn-reservar-bio" class="btn btn-primary" style="flex:2; background: var(--primary-green); color: #000; font-weight: bold; border: none; padding: 14px; border-radius: 10px;"><i class="ph-bold ph-calendar-plus"></i> Ver Horarios</button>
+            <a id="btn-mapa-bio" href="#" target="_blank" class="btn btn-outline" style="flex:1; border: 1px solid rgba(255,255,255,0.2); color: #fff; background: rgba(255,255,255,0.05); text-align: center; text-decoration: none; padding: 14px; border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;"><i class="ph-bold ph-navigation-arrow"></i> Mapa</a>
+        </div>
+
+        <div class="bio-section" style="padding: 0 20px;">
+            <h3 style="margin-bottom: 15px; color: #fff;"><i class="ph-bold ph-star"></i> Deja tu calificación</h3>
+            <div class="rating-box" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center;">
+                <div class="stars-picker" id="star-picker" style="font-size: 2rem; display: flex; justify-content: center; gap: 10px; margin-bottom: 10px;">
+                    <i class="ph-fill ph-star" data-val="1" style="color:#444; cursor:pointer; transition:color 0.2s;"></i>
+                    <i class="ph-fill ph-star" data-val="2" style="color:#444; cursor:pointer; transition:color 0.2s;"></i>
+                    <i class="ph-fill ph-star" data-val="3" style="color:#444; cursor:pointer; transition:color 0.2s;"></i>
+                    <i class="ph-fill ph-star" data-val="4" style="color:#444; cursor:pointer; transition:color 0.2s;"></i>
+                    <i class="ph-fill ph-star" data-val="5" style="color:#444; cursor:pointer; transition:color 0.2s;"></i>
+                </div>
+                <span id="star-label" style="color: var(--text-muted); font-size: 0.9rem; font-weight: bold;">Toca las estrellas para calificar</span>
+                
+                <div id="quick-tags-box" style="display: none; margin-top: 20px;">
+                    <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 10px;">¿Qué fue lo mejor? (Opcional)</p>
+                    <div id="quick-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
+                </div>
+                
+                <button id="btn-submit-review" class="btn" disabled style="width: 100%; margin-top: 20px; background: rgba(255,255,255,0.05); color: #888; border: none; padding: 12px; border-radius: 8px;">Publicar Calificación</button>
+            </div>
         </div>
     </div>
+</main>
 
-    <script type="module" src="app.js"></script>
+<div id="modal-cancha" class="modal-booking"><div class="modal-content"><button id="cerrar-modal" class="modal-close"><i class="ph-bold ph-x"></i></button><h2 id="modal-nombre-interno">...</h2><div id="modal-disponibilidad"></div></div></div>
+<div id="modal-reserva" class="modal-booking"><div class="modal-content"><button id="cerrar-reserva" class="modal-close"><i class="ph-bold ph-x"></i></button><h2 style="color: var(--primary-green); margin-top:0; font-size: 1.3rem;"><i class="ph-fill ph-calendar-plus"></i> Tu Reserva</h2><div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:10px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);"><p id="booking-cancha-nombre" style="margin:0 0 4px 0; color:#fff; font-weight:bold; font-size:1rem;"></p><p id="booking-hora" style="margin:0; color:var(--primary-green); font-size:1.1rem; font-weight:900;"></p></div><div class="filter-field" style="margin-bottom:12px;"><span>Tu Nombre</span><input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff;"></div><div class="filter-field" style="margin-bottom:15px;"><span>WhatsApp de contacto</span><input type="tel" id="booking-telefono" placeholder="Ej. 987654321" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff;"></div><button id="btn-confirmar-reserva" class="btn btn-primary" style="width:100%; font-weight:bold; font-size:1rem; background:var(--primary-green); color:#000; border:none; padding:12px; border-radius:8px;"><i class="ph-bold ph-check-circle"></i> Solicitar Reserva</button><div id="booking-status"></div></div></div>
+
+<script type="module" src="app.js"></script>
+
+<script type="module">
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    const db = getFirestore();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const idInicial = urlParams.get('id');
+
+    let canchasDelComplejo = [];
+    let canchaActual = null;
+
+    async function iniciar() {
+        if (!idInicial) { document.getElementById('bio-title').textContent = 'Cancha no encontrada'; return; }
+        
+        try {
+            // 1. Obtener la cancha principal por URL
+            const docPrincipal = await getDoc(doc(db, 'canchas', idInicial));
+            if (!docPrincipal.exists()) return;
+            const dataPrincipal = docPrincipal.data();
+            
+            // 2. Buscar todas las canchas que tengan el mismo dueño (usuarioUid)
+            const q = query(collection(db, 'canchas'), where('usuarioUid', '==', dataPrincipal.usuarioUid));
+            const snap = await getDocs(q);
+            
+            snap.forEach(d => {
+                const data = d.data();
+                // Solo mostrar las publicadas o configuradas
+                if(data.estadoPublicacion === 'published' || data.configurado === true) {
+                    canchasDelComplejo.push({ id: d.id, ...data });
+                }
+            });
+
+            // Si por error de red no trae hermanos, se agrega al menos a sí misma
+            if(canchasDelComplejo.length === 0) canchasDelComplejo.push({ id: idInicial, ...dataPrincipal });
+
+            // 3. Dibujar la estructura
+            dibujarTabs();
+            // Seleccionar por defecto la que clickeó el usuario
+            seleccionarCancha(idInicial);
+
+        } catch (e) { console.error("Error al cargar complejo:", e); }
+    }
+
+    function dibujarTabs() {
+        const contenedor = document.getElementById('contenedor-tabs-canchas');
+        const cajaDetalles = document.getElementById('cancha-detalles-box');
+        
+        // Si el dueño solo tiene 1 cancha, no mostramos los tabs
+        if (canchasDelComplejo.length <= 1) {
+            contenedor.style.display = 'none';
+            cajaDetalles.style.display = 'block';
+            cajaDetalles.style.borderRadius = '12px'; // Redondeado normal
+            return;
+        }
+
+        contenedor.style.display = 'flex';
+        cajaDetalles.style.display = 'block';
+
+        let html = '';
+        canchasDelComplejo.forEach((c, i) => {
+            // Usa el tipo de deporte o un nombre si existe
+            const nombreTab = c.nombreCancha || c.tipo || `Cancha ${i + 1}`; 
+            html += `<button class="cancha-tab" data-id="${c.id}">
+                        <i class="ph-bold ph-soccer-ball"></i> ${nombreTab}
+                     </button>`;
+        });
+        contenedor.innerHTML = html;
+
+        contenedor.querySelectorAll('.cancha-tab').forEach(btn => {
+            btn.addEventListener('click', () => seleccionarCancha(btn.dataset.id));
+        });
+    }
+
+    function seleccionarCancha(idCancha) {
+        canchaActual = canchasDelComplejo.find(c => c.id === idCancha);
+        if(!canchaActual) return;
+
+        // 1. Animación de los Tabs
+        document.querySelectorAll('.cancha-tab').forEach(btn => {
+            if (btn.dataset.id === idCancha) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        // 2. Llenar los datos visuales
+        document.getElementById('bio-cover').src = canchaActual.fotos?.length ? canchaActual.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
+        document.getElementById('bio-logo').src = canchaActual.logo || 'https://via.placeholder.com/150';
+        
+        // El título principal suele ser el nombre del negocio general
+        document.getElementById('bio-title').textContent = canchaActual.nombre || 'Cancha';
+        document.getElementById('bio-location').innerHTML = `<i class="ph-bold ph-map-pin"></i> ${canchaActual.ubicacionTexto || canchaActual.distrito || 'Ubicación'}`;
+        
+        document.getElementById('bio-tipo').innerHTML = `<i class="ph-bold ph-soccer-ball" style="color:var(--primary-green);"></i> ${canchaActual.tipo || 'Fútbol'}`;
+        document.getElementById('bio-precio').innerHTML = `S/ ${canchaActual.precio ?? '--'} <span style="font-size:0.75rem; color:#888; font-weight:normal;">/ hora</span>`;
+        document.getElementById('bio-desc').textContent = canchaActual.descripcion || 'Sin descripción disponible para esta cancha.';
+
+        const btnMapa = document.getElementById('btn-mapa-bio');
+        if (canchaActual.ubicacionLink) { btnMapa.href = canchaActual.ubicacionLink; btnMapa.style.display = 'inline-flex'; }
+        else { btnMapa.style.display = 'none'; }
+
+        // 3. Modificar el Botón de Reserva para que mande el ID correcto
+        const btnReservar = document.getElementById('btn-reservar-bio');
+        const nuevoBtn = btnReservar.cloneNode(true);
+        btnReservar.parentNode.replaceChild(nuevoBtn, btnReservar);
+        nuevoBtn.addEventListener('click', () => {
+            if (window.abrirModal) {
+                // Truco para que app.js reconozca esta cancha temporalmente
+                window.canchasGlobales = [canchaActual]; 
+                window.abrirModal(canchaActual.id);
+            }
+        });
+
+        // 4. Refrescar el rating visual para la cancha especifica
+        if (window.refrescarPromedio) window.refrescarPromedio(canchaActual.id);
+    }
+
+    document.addEventListener('DOMContentLoaded', iniciar);
+
+    document.getElementById('btn-share')?.addEventListener('click', async () => {
+        try {
+            await navigator.share({
+                title: canchaActual?.nombre || 'CHALACAPP',
+                text: '¡Mira esta cancha para nuestra próxima pichanga!',
+                url: window.location.href
+            });
+        } catch (e) {
+            navigator.clipboard.writeText(window.location.href);
+            alert("Enlace copiado al portapapeles.");
+        }
+    });
+</script>
 </body>
 </html>
