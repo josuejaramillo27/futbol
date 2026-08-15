@@ -102,3 +102,36 @@
     text-overflow: ellipsis !important;
     width: 100% !important;
 }
+/* ==========================================
+   VISTA MÓVIL EN EL PANEL DE DUEÑO (admin.html)
+   ========================================== */
+@media (max-width: 768px) {
+
+    /* Contenedores de las canchas del dueño en vertical */
+    #contenedor-canchas-admin,
+    #lista-canchas-admin,
+    #mis-canchas,
+    .canchas-admin-grid,
+    .admin-canchas-list,
+    .espacios-grid {
+        display: flex !important;
+        flex-direction: column !important; /* Coloca una cancha debajo de la otra */
+        gap: 16px !important;
+        width: 100% !important;
+        overflow-x: hidden !important; /* Elimina el desplazamiento horizontal */
+    }
+
+    /* Tarjeta de cada cancha al 100% de ancho */
+    #contenedor-canchas-admin .card,
+    #contenedor-canchas-admin .admin-card,
+    #lista-canchas-admin .card,
+    .canchas-admin-grid .card,
+    .espacios-grid .card,
+    .admin-cancha-item {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        box-sizing: border-box !important;
+        margin-bottom: 0 !important;
+    }
+}
