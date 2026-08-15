@@ -226,19 +226,27 @@
 }
 
 /* ==========================================
-   FORZAR CARRUSEL HORIZONTAL (SOBREESCRIBIR REGLAS VIEJAS)
+   CARRUSEL Y NAVEGACIÓN RESPONSIVA
    ========================================== */
+.canchas-slider-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 15px;
+}
+
 #lista-canchas.canchas-slider {
     display: flex !important;
-    flex-direction: row !important; /* Fuerza a que estén una al lado de otra */
-    flex-wrap: nowrap !important;   /* Prohíbe que bajen a la siguiente línea */
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
     gap: 15px !important;
     overflow-x: auto !important;
     scroll-snap-type: x mandatory !important;
     scroll-behavior: smooth !important;
     padding: 15px 0 35px 0 !important;
     width: 100% !important;
-    -webkit-overflow-scrolling: touch !important; /* Suavidad en iPhone/Android */
+    -webkit-overflow-scrolling: touch !important;
     -ms-overflow-style: none !important;
     scrollbar-width: none !important;
 }
@@ -247,12 +255,47 @@
     display: none !important; 
 }
 
-/* Forzar que las tarjetas se vean al lado en celulares */
+/* Tarjetas en horizontal */
 #lista-canchas.canchas-slider .card {
-    flex: 0 0 calc(88% - 15px) !important; /* Ocupa el 88% de la pantalla, dejando asomar la siguiente */
+    flex: 0 0 calc(88% - 15px) !important;
     max-width: 320px !important;
     scroll-snap-align: center !important;
-    margin-bottom: 0 !important; /* Elimina el margen inferior viejo */
+    margin-bottom: 0 !important;
     transition: filter 0.4s ease, transform 0.4s ease, opacity 0.4s ease !important;
     will-change: transform, filter;
+}
+
+/* BOTONES DE NAVEGACIÓN (Para Computadora / PC) */
+.slider-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%); /* Centrado vertical perfecto al costado */
+    z-index: 25;
+    width: 42px; 
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(0, 217, 104, 0.95);
+    color: #000;
+    border: none;
+    cursor: pointer;
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.slider-btn:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+#slider-prev { left: -18px; }
+#slider-next { right: -18px; }
+
+/* 📱 EN CELULARES: Ocultamos las flechas gigantes para que la vista quede limpia */
+@media (max-width: 768px) {
+    .slider-btn {
+        display: none !important; /* Desaparece los botones en celulares */
+    }
 }
