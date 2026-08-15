@@ -124,29 +124,72 @@ const slotsDeCancha = (c, reservas, fechaReq) => {
 if(esInicio()){
  const contenedor=document.getElementById('lista-canchas'),inputBusqueda=document.getElementById('filtro-busqueda'),filtroCiudad=document.getElementById('filtro-ciudad'),filtroTipo=document.getElementById('filtro-tipo'),filtroPrecio=document.getElementById('filtro-precio'),filtroOrden=document.getElementById('filtro-orden'),contador=document.getElementById('contador-canchas'),filtroActivo=document.getElementById('filtro-activo');let soloAbiertas=false,soloCerca=false,soloTop=false;
  function llenarSelect(select,valores,placeholder){if(!select)return;const actual=select.value;select.innerHTML=`<option value="">${placeholder}</option>`;[...new Set(valores.map(v=>String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;select.appendChild(o)});if([...select.options].some(o=>o.value===actual))select.value=actual}
- function renderizarCanchas(){if(!contenedor)return;const texto=normalizar(inputBusqueda?.value),ciudad=normalizar(filtroCiudad?.value),tipo=normalizar(filtroTipo?.value),rango=filtroPrecio?.value||'',orden=filtroOrden?.value||'recomendadas';let resultados=canchasGlobales.filter(c=>{const buscable=normalizar(`${c.nombre} ${c.ubicacionTexto||''} ${obtenerCiudad(c)} ${obtenerTipo(c)}`),precio=precioNumero(c);let rp=true;if(rango){const[min,max]=rango.split('-').map(Number);rp=precio>=min&&precio<=max}return(!texto||buscable.includes(texto))&&(!ciudad||normalizar(obtenerCiudad(c))===ciudad)&&(!tipo||normalizar(obtenerTipo(c))===tipo)&&rp&&(!soloAbiertas||c.isOpen)&&(!soloTop||c.rating>=4.5)&&(!soloCerca||distanciaCerca(c)<=10)});resultados.sort((a,b)=>orden==='rating'?b.rating-a.rating:orden==='precio-asc'?precioNumero(a)-precioNumero(b):orden==='precio-desc'?precioNumero(b)-precioNumero(a):orden==='cerca'?distanciaCerca(a)-distanciaCerca(b):a.isOpen!==b.isOpen?(a.isOpen?-1:1):b.rating-a.rating);if(contador)contador.textContent=`${resultados.length} ${resultados.length===1?'cancha encontrada':'canchas encontradas'}`;if(filtroActivo){const a=[];if(ciudad)a.push(filtroCiudad.value);if(tipo)a.push(filtroTipo.value);if(rango)a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text);if(soloAbiertas)a.push('Abiertas ahora');if(soloTop)a.push('4.5+ estrellas');if(soloCerca)a.push(ubicacionUsuario?'Cerca de mí':'Cerca de mí*');filtroActivo.textContent=a.length?a.join(' · '):''}contenedor.innerHTML='';if(!resultados.length){contenedor.innerHTML='<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos esa cancha</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';document.getElementById('btn-reset-empty')?.addEventListener('click',limpiarFiltros);return}resultados.forEach(c=>{const estado=c.isOpen?'<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>':'<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>',logo=c.logo||'https://via.placeholder.com/100',portada=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85',d=distanciaCerca(c),dist=Number.isFinite(d)&&d<999999?` · ${d.toFixed(1)} km`:'';contenedor.innerHTML+=`<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><h3>${c.nombre||'Cancha'}</h3><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating>0?c.rating.toFixed(1):'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto||'Ubicación'}${obtenerCiudad(c)?` · ${obtenerCiudad(c)}`:''}${dist}</p><div class="court-meta"><span><i class="ph-bold ph-soccer-ball"></i> ${obtenerTipo(c)||'Fútbol'}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver perfil y reservar</span><i class="ph-bold ph-arrow-right"></i></button></div></div></article>`});
  
- // 🔥 ESTE ES EL BOTÓN CORREGIDO PARA QUE VAYA A LA LANDING PAGE
- contenedor.querySelectorAll('[data-court-id]').forEach(b=>b.addEventListener('click',()=> window.location.href = `cancha.html?id=${b.dataset.courtId}`))}
+ function renderizarCanchas(){
+     if(!contenedor)return;
+     const texto=normalizar(inputBusqueda?.value),ciudad=normalizar(filtroCiudad?.value),tipo=normalizar(filtroTipo?.value),rango=filtroPrecio?.value||'',orden=filtroOrden?.value||'recomendadas';
+     let resultados=canchasGlobales.filter(c=>{
+         const buscable=normalizar(`${c.nombre} ${c.ubicacionTexto||''} ${obtenerCiudad(c)} ${obtenerTipo(c)} ${c.tiposMulti||''}`),precio=precioNumero(c);
+         let rp=true;if(rango){const[min,max]=rango.split('-').map(Number);rp=precio>=min&&precio<=max}
+         return(!texto||buscable.includes(texto))&&(!ciudad||normalizar(obtenerCiudad(c))===ciudad)&&(!tipo||(normalizar(obtenerTipo(c))===tipo || normalizar(c.tiposMulti||'').includes(tipo)))&&rp&&(!soloAbiertas||c.isOpen)&&(!soloTop||c.rating>=4.5)&&(!soloCerca||distanciaCerca(c)<=10);
+     });
+     resultados.sort((a,b)=>orden==='rating'?b.rating-a.rating:orden==='precio-asc'?precioNumero(a)-precioNumero(b):orden==='precio-desc'?precioNumero(b)-precioNumero(a):orden==='cerca'?distanciaCerca(a)-distanciaCerca(b):a.isOpen!==b.isOpen?(a.isOpen?-1:1):b.rating-a.rating);
+     if(contador)contador.textContent=`${resultados.length} ${resultados.length===1?'complejo encontrado':'complejos encontrados'}`;
+     if(filtroActivo){const a=[];if(ciudad)a.push(filtroCiudad.value);if(tipo)a.push(filtroTipo.value);if(rango)a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text);if(soloAbiertas)a.push('Abiertas ahora');if(soloTop)a.push('4.5+ estrellas');if(soloCerca)a.push(ubicacionUsuario?'Cerca de mí':'Cerca de mí*');filtroActivo.textContent=a.length?a.join(' · '):''}
+     contenedor.innerHTML='';
+     if(!resultados.length){
+         contenedor.innerHTML='<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos canchas</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';
+         document.getElementById('btn-reset-empty')?.addEventListener('click',limpiarFiltros);return;
+     }
+     resultados.forEach(c=>{
+         const estado=c.isOpen?'<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>':'<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>',logo=c.logo||'https://via.placeholder.com/100',portada=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85',d=distanciaCerca(c),dist=Number.isFinite(d)&&d<999999?` · ${d.toFixed(1)} km`:'';
+         
+         // 🔥 TEXTO QUE AVISA SI HAY MÁS CANCHAS
+         const multiBadge = c.multiCancha ? `<p style="margin: 6px 0 0 0; font-size: 0.8rem; color: #f1c40f; font-weight: bold;"><i class="ph-bold ph-copy"></i> ${c.cantidadCanchas} Canchas (${c.tiposMulti})</p>` : '';
+
+         contenedor.innerHTML+=`<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><h3>${c.nombre||'Cancha'}</h3><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating>0?c.rating.toFixed(1):'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto||'Ubicación'}${obtenerCiudad(c)?` · ${obtenerCiudad(c)}`:''}${dist}</p>
+         ${multiBadge}
+         <div class="court-meta" style="${c.multiCancha ? 'margin-top:8px;' : ''}"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c)||'Fútbol')}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver perfil y reservar</span><i class="ph-bold ph-arrow-right"></i></button></div></div></article>`
+     });
+     contenedor.querySelectorAll('[data-court-id]').forEach(b=>b.addEventListener('click',()=> window.location.href = `cancha.html?id=${b.dataset.courtId}`));
+ }
  
  function limpiarFiltros(){if(inputBusqueda)inputBusqueda.value='';if(filtroCiudad)filtroCiudad.value='';if(filtroTipo)filtroTipo.value='';if(filtroPrecio)filtroPrecio.value='';if(filtroOrden)filtroOrden.value='recomendadas';soloAbiertas=soloCerca=soloTop=false;document.querySelectorAll('.quick-filter').forEach(b=>b.classList.remove('active'));renderizarCanchas()}
+ 
  async function cargar(){
      if(!contenedor)return;
      contenedor.innerHTML='<div class="card loading-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted)"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando canchas...</div>';
      try{
          const s=await Promise.race([getDocs(collection(db,'canchas')),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Timeout')),12000))]);
-         canchasGlobales=[];
+         const agrupados = {};
          s.forEach(ds=>{
              const d=ds.data();
              if(d.estadoPublicacion === 'published' || (d.configurado === true && !d.estadoPublicacion)) {
-                 canchasGlobales.push({id:ds.id, ...d, isOpen:canchaEstaAbierta(d), rating:Number(d.ratingPromedio||d.rating||0)});
+                 const uid = d.usuarioUid || ds.id; // Agrupa por el dueño
+                 if(!agrupados[uid]) agrupados[uid] = [];
+                 agrupados[uid].push({id:ds.id, ...d, isOpen:canchaEstaAbierta(d), rating:Number(d.ratingPromedio||d.rating||0)});
              }
          });
+
+         canchasGlobales = Object.values(agrupados).map(grupo => {
+             const main = grupo[0];
+             if (grupo.length > 1) {
+                 const tiposUnicos = [...new Set(grupo.map(c => c.tipo))].filter(Boolean).join(', ');
+                 main.multiCancha = true;
+                 main.cantidadCanchas = grupo.length;
+                 main.tiposMulti = tiposUnicos;
+             }
+             return main;
+         });
+
          llenarSelect(filtroCiudad,canchasGlobales.map(obtenerCiudad),'Todas las ciudades');
-         llenarSelect(filtroTipo,canchasGlobales.map(obtenerTipo),'Todos los tipos');
+         
+         const todosLosTipos = [];
+         Object.values(agrupados).forEach(g => g.forEach(c => { if(c.tipo) todosLosTipos.push(c.tipo); }));
+         llenarSelect(filtroTipo, todosLosTipos, 'Todos los tipos');
+         
          renderizarCanchas();
      }catch(e){
-         console.error(e);
          contenedor.innerHTML=`<div class="card" style="grid-column:1/-1;text-align:center;color:var(--danger);padding:28px">Error cargando las canchas.</div>`;
      }
  }
