@@ -226,12 +226,11 @@
 }
 
 /* ==========================================
-   CARRUSEL Y NAVEGACIÓN RESPONSIVA
+   CARRUSEL Y NAVEGACIÓN RESPONSIVA (ARREGLO DEFINITIVO)
    ========================================== */
 .canchas-slider-wrapper {
     position: relative;
-    display: flex;
-    align-items: center;
+    display: block !important; /* 🔥 ESTO ERA LO QUE APLASTABA TODO, AHORA ES BLOCK */
     width: 100%;
     margin-top: 15px;
 }
@@ -255,21 +254,23 @@
     display: none !important; 
 }
 
-/* Tarjetas en horizontal */
+/* Tarjetas (Canchas) - BLINDADAS CONTRA DEFORMACIONES */
 #lista-canchas.canchas-slider .card {
-    flex: 0 0 calc(88% - 15px) !important;
-    max-width: 320px !important;
+    display: flex !important;
+    flex-direction: column !important; /* Devuelve la forma original a la tarjeta */
+    flex: 0 0 calc(85% - 15px) !important;
+    min-width: 280px !important; /* 🔥 EL ESCUDO: Evita que el navegador las encoja y aplaste */
+    max-width: 340px !important;
     scroll-snap-align: center !important;
     margin-bottom: 0 !important;
     transition: filter 0.4s ease, transform 0.4s ease, opacity 0.4s ease !important;
-    will-change: transform, filter;
 }
 
-/* BOTONES DE NAVEGACIÓN (Para Computadora / PC) */
+/* BOTONES DE NAVEGACIÓN (Solo en Computadora/PC) */
 .slider-btn {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%); /* Centrado vertical perfecto al costado */
+    transform: translateY(-50%);
     z-index: 25;
     width: 42px; 
     height: 42px;
@@ -293,9 +294,16 @@
 #slider-prev { left: -18px; }
 #slider-next { right: -18px; }
 
-/* 📱 EN CELULARES: Ocultamos las flechas gigantes para que la vista quede limpia */
+/* 📱 EN CELULARES: Ocultamos flechas para navegar deslizando */
 @media (max-width: 768px) {
     .slider-btn {
-        display: none !important; /* Desaparece los botones en celulares */
+        display: none !important;
+    }
+}
+
+/* 💻 EN PC: Ajustar el tamaño para que se vean varias canchas (3 a la vez) */
+@media (min-width: 768px) {
+    #lista-canchas.canchas-slider .card {
+        flex: 0 0 calc(33.333% - 15px) !important;
     }
 }
