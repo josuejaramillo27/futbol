@@ -553,55 +553,92 @@ if (window.location.pathname.includes('cancha.html')) {
         1: [{ icon: "ph-prohibit", text: "Pésimo estado" }, { icon: "ph-lightbulb", text: "Luces quemadas" }, { icon: "ph-clock", text: "Impuntualidad" }, { icon: "ph-smiley-sad", text: "Mala atención" }]
     };
 
+    // 🔥 ESTA ES LA FUNCIÓN NUEVA QUE RENDERIZA LA LISTA
     async function cargarDetalleCancha() {
-        if (!canchaId) { document.getElementById('bio-title').textContent = 'Cancha no especificada'; return; }
+        if (!canchaId) { document.getElementById('bio-title').textContent = 'Cancha no encontrada'; return; }
+        
         try {
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
             if (docSnap.exists()) {
-                const c = docSnap.data();
-                c.id = docSnap.id; 
+                const cPrincipal = docSnap.data();
+                cPrincipal.id = docSnap.id; 
                 
-                canchasGlobales = [{...c, isOpen: canchaEstaAbierta(c)}];
-
+                // 1. PINTAR LA INFORMACIÓN DEL COMPLEJO
                 const coverEl = document.getElementById('bio-cover');
-                if (coverEl) coverEl.src = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
+                if (coverEl) coverEl.src = cPrincipal.fotos?.length ? cPrincipal.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
                 
                 const logoEl = document.getElementById('bio-logo');
-                if (logoEl) logoEl.src = c.logo || 'https://via.placeholder.com/100';
+                if (logoEl) logoEl.src = cPrincipal.logo || 'https://via.placeholder.com/100';
                 
                 const titleEl = document.getElementById('bio-title');
-                if (titleEl) titleEl.textContent = c.nombre || 'Cancha';
+                if (titleEl) titleEl.textContent = cPrincipal.nombre || 'Complejo Deportivo';
                 
                 const locEl = document.getElementById('bio-location');
-                if (locEl) locEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || c.distrito || 'Ubicación'}`;
+                if (locEl) locEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${cPrincipal.ubicacionTexto || cPrincipal.distrito || 'Ubicación'}`;
 
                 const descEl = document.getElementById('bio-desc');
-                if (descEl) descEl.textContent = c.descripcion || 'Sin descripción disponible.';
-
-                const tipoEl = document.getElementById('bio-tipo');
-                if (tipoEl) tipoEl.textContent = obtenerTipo(c) || 'Fútbol';
-
-                const precioEl = document.getElementById('bio-precio');
-                if (precioEl) precioEl.textContent = `S/ ${c.precio ?? '--'}`;
+                if (descEl) descEl.textContent = cPrincipal.descripcion || 'Sin descripción disponible.';
 
                 const btnMapa = document.getElementById('btn-mapa-bio');
                 if (btnMapa) {
-                    if (c.ubicacionLink) { btnMapa.href = c.ubicacionLink; }
+                    if (cPrincipal.ubicacionLink) { btnMapa.href = cPrincipal.ubicacionLink; }
                     else { btnMapa.style.display = 'none'; }
                 }
 
-                const btnReservar = document.getElementById('btn-reservar-bio');
-                if (btnReservar) {
-                    btnReservar.addEventListener('click', () => {
-                        abrirModal(c.id);
+                // 2. BUSCAR TODAS LAS CANCHAS DEL MISMO DUEÑO
+                const q = query(collection(db, 'canchas'), where('usuarioUid', '==', cPrincipal.usuarioUid));
+                const snap = await getDocs(q);
+                
+                canchasGlobales = []; // Reiniciamos el array global
+                snap.forEach(d => {
+                    const data = d.data();
+                    if(data.estadoPublicacion === 'published' || data.configurado === true) {
+                        canchasGlobales.push({id: d.id, ...data, isOpen: canchaEstaAbierta(data)});
+                    }
+                });
+
+                // Si por alguna razón de red falla, cargamos al menos la principal
+                if(canchasGlobales.length === 0) {
+                    canchasGlobales.push({id: cPrincipal.id, ...cPrincipal, isOpen: true});
+                }
+
+                // 3. DIBUJAR LA LISTA DE CANCHAS EXACTAMENTE COMO LO PEDISTE
+                const contenedorLista = document.getElementById('lista-canchas-complejo');
+                if (contenedorLista) {
+                    let htmlLista = `<h3 style="color:#fff; margin-bottom:15px; font-size:1.15rem;"><i class="ph-bold ph-list-dashes" style="color:var(--primary-green);"></i> Canchas disponibles:</h3>`;
+                    
+                    canchasGlobales.forEach((c, i) => {
+                        // Si el dueño no le puso nombre a su cancha, le ponemos Cancha 1, Cancha 2, etc.
+                        const nombreEspecifico = c.nombreCancha || c.tipo || `Cancha ${i + 1}`;
+                        
+                        htmlLista += `
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                            <div>
+                                <h4 style="margin:0 0 5px 0; color:#fff; font-size:1.1rem;">${nombreEspecifico}</h4>
+                                <p style="margin:0; color:#aaa; font-size:0.85rem;"><i class="ph-bold ph-soccer-ball"></i> ${c.tipo || 'Fútbol'} <span style="margin:0 5px;">|</span> <span style="color:var(--primary-green); font-weight:bold; font-size:0.95rem;">S/ ${c.precio || '--'}</span> <small>/ hr</small></p>
+                            </div>
+                            <button class="btn btn-reservar-dinamico" data-id="${c.id}" style="background:linear-gradient(45deg, var(--primary-green), #27ae60); color:#000; font-weight:900; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-size:0.9rem; box-shadow:0 4px 10px rgba(0,217,104,0.2);"><i class="ph-bold ph-calendar-plus"></i> Reservar</button>
+                        </div>
+                        `;
+                    });
+                    
+                    contenedorLista.innerHTML = htmlLista;
+
+                    // 4. DARLE VIDA A LOS BOTONES DE "RESERVAR"
+                    contenedorLista.querySelectorAll('.btn-reservar-dinamico').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            if (window.abrirModal) {
+                                window.abrirModal(btn.dataset.id);
+                            }
+                        });
                     });
                 }
             }
         } catch (e) { console.error(e); }
+        
         await refrescarPromedio();
         setupRatingForm();
     }
-
     async function refrescarPromedio() {
         try {
             const q = query(collection(db, 'resenas'), where('canchaId', '==', canchaId));
