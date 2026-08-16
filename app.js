@@ -585,19 +585,22 @@ if (window.location.pathname.includes('cancha.html')) {
                     else { btnMapa.style.display = 'none'; }
                 }
 
-                // 2. BUSCAR TODAS LAS CANCHAS DEL MISMO DUEÑO
-                const q = query(collection(db, 'canchas'), where('usuarioUid', '==', cPrincipal.usuarioUid));
-                const snap = await getDocs(q);
-                
+                // 2. BUSCAR TODAS LAS CANCHAS DEL MISMO DUEÑO (Blindado contra errores)
                 canchasGlobales = []; // Reiniciamos el array global
-                snap.forEach(d => {
-                    const data = d.data();
-                    if(data.estadoPublicacion === 'published' || data.configurado === true) {
-                        canchasGlobales.push({id: d.id, ...data, isOpen: canchaEstaAbierta(data)});
-                    }
-                });
+                
+                if (cPrincipal.usuarioUid) {
+                    const q = query(collection(db, 'canchas'), where('usuarioUid', '==', cPrincipal.usuarioUid));
+                    const snap = await getDocs(q);
+                    
+                    snap.forEach(d => {
+                        const data = d.data();
+                        if(data.estadoPublicacion === 'published' || data.configurado === true) {
+                            canchasGlobales.push({id: d.id, ...data, isOpen: canchaEstaAbierta(data)});
+                        }
+                    });
+                }
 
-                // Si por alguna razón de red falla, cargamos al menos la principal
+                // Si por alguna razón de red falla, o si la cancha es antigua y no tiene 'usuarioUid', cargamos al menos la principal
                 if(canchasGlobales.length === 0) {
                     canchasGlobales.push({id: cPrincipal.id, ...cPrincipal, isOpen: true});
                 }
