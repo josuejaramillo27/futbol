@@ -64,12 +64,6 @@
         .bio-body { padding: 45px 20px 40px; text-align: center; box-sizing: border-box; }
         .bio-title { font-size: 1.5rem; color: #fff; margin: 0 0 4px 0; font-weight: 900; letter-spacing: -0.3px; }
         .bio-location { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 15px; }
-        
-        /* MÉTRICAS */
-        .bio-metrics { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .bio-metric-box { background: rgba(255,255,255,0.04); padding: 8px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); min-width: 90px; }
-        .bio-metric-icon { color: var(--primary-green); font-size: 1.2rem; margin-bottom: 2px; }
-        .bio-metric-val { color: #fff; font-size: 0.85rem; font-weight: bold; }
 
         /* BOTONES */
         .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 900; font-size: 1rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
@@ -82,47 +76,26 @@
         .bio-desc-title { font-size: 0.95rem; color: #fff; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px; }
         .bio-desc { color: #ccc; font-size: 0.88rem; margin: 0; line-height: 1.5; font-style: italic; }
 
-        /* ESTRUCTURA SPLIT-SCREEN SOLO PARA PC (min-width: 850px) */
+        /* ESTRUCTURA SPLIT-SCREEN SOLO PARA PC */
         .pc-split-grid { display: block; }
 
         @media (min-width: 850px) {
-            .bio-container {
-                max-width: 1050px;
-                padding: 30px 20px;
-            }
-            .bio-header {
-                height: 240px;
-            }
-            .bio-cover-box {
-                border-radius: 16px;
-            }
-            .bio-logo-wrapper {
-                width: 105px;
-                height: 105px;
-                bottom: -40px;
-                left: 60px;
-                transform: none;
-            }
-            .bio-body {
-                padding: 0;
-            }
+            .bio-container { max-width: 1050px; padding: 30px 20px; }
+            .bio-header { height: 240px; }
+            .bio-cover-box { border-radius: 16px; }
+            .bio-logo-wrapper { width: 105px; height: 105px; bottom: -40px; left: 60px; transform: none; }
+            .bio-body { padding: 0; }
             
-            /* GRID DE 2 COLUMNAS PARA PC */
             .pc-split-grid {
                 display: grid;
-                grid-template-columns: 1.1fr 0.9fr;
+                grid-template-columns: 1fr 1fr;
                 gap: 35px;
                 align-items: start;
                 margin-top: 55px;
                 text-align: left;
             }
 
-            .left-column {
-                display: flex;
-                flex-direction: column;
-                gap: 20px;
-            }
-
+            .left-column { display: flex; flex-direction: column; gap: 20px; }
             .right-column {
                 background: rgba(255,255,255,0.02);
                 border: 1px solid rgba(255,255,255,0.08);
@@ -132,20 +105,9 @@
                 top: 80px;
             }
 
-            .bio-title {
-                font-size: 2.2rem;
-                text-align: left;
-            }
-            .bio-location {
-                font-size: 1rem;
-                text-align: left;
-            }
-            .bio-metrics {
-                justify-content: flex-start;
-            }
-            .bio-desc-container {
-                margin-top: 0;
-            }
+            .bio-title { font-size: 2.2rem; text-align: left; }
+            .bio-location { font-size: 1rem; text-align: left; }
+            .bio-desc-container { margin-top: 0; }
         }
     </style>
 </head>
@@ -178,19 +140,8 @@
                         <p id="bio-location" class="bio-location"><i class="ph-bold ph-map-pin"></i> ...</p>
                     </div>
 
-                    <div class="bio-metrics">
-                        <div class="bio-metric-box">
-                            <i class="ph-fill ph-soccer-ball bio-metric-icon"></i>
-                            <div id="bio-tipo" class="bio-metric-val">...</div>
-                        </div>
-                        <div class="bio-metric-box">
-                            <i class="ph-fill ph-money bio-metric-icon"></i>
-                            <div id="bio-precio" class="bio-metric-val">...</div>
-                        </div>
-                    </div>
-
                     <div class="bio-desc-container">
-                        <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre la cancha</h3>
+                        <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre el complejo</h3>
                         <p id="bio-desc" class="bio-desc"></p>
                     </div>
 
@@ -200,7 +151,9 @@
                 <div class="right-column">
                     <div id="court-rating" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center;"></div>
                     
-                    <button id="btn-reservar-bio" class="bio-btn"><i class="ph-bold ph-calendar-check"></i> Ver Horarios y Reservar</button>
+                    <div id="lista-canchas-complejo" style="margin-bottom: 25px;">
+                        <div style="text-align:center; color:#888;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando canchas...</div>
+                    </div>
 
                     <hr style="border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 25px 0;">
 
