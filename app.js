@@ -563,7 +563,7 @@ if (window.location.pathname.includes('cancha.html')) {
                 const cPrincipal = docSnap.data();
                 cPrincipal.id = docSnap.id; 
                 
-                // 1. PINTAR LA INFORMACIÓN DEL COMPLEJO
+                // 1. PINTAR LA INFORMACIÓN GENERAL DEL COMPLEJO
                 const coverEl = document.getElementById('bio-cover');
                 if (coverEl) coverEl.src = cPrincipal.fotos?.length ? cPrincipal.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
                 
@@ -585,34 +585,41 @@ if (window.location.pathname.includes('cancha.html')) {
                     else { btnMapa.style.display = 'none'; }
                 }
 
-                // 2. BUSCAR TODAS LAS CANCHAS DEL MISMO DUEÑO (Blindado contra errores)
-                canchasGlobales = []; // Reiniciamos el array global
+                // 2. OBTENER TODAS LAS CANCHAS DEL DUEÑO (INCLUYENDO LA PRINCIPAL Y SECUNDARIAS)
+                const mapCanchas = new Map();
                 
-                if (cPrincipal.usuarioUid) {
-                    const q = query(collection(db, 'canchas'), where('usuarioUid', '==', cPrincipal.usuarioUid));
-                    const snap = await getDocs(q);
-                    
-                    snap.forEach(d => {
-                        const data = d.data();
-                        if(data.estadoPublicacion === 'published' || data.configurado === true) {
-                            canchasGlobales.push({id: d.id, ...data, isOpen: canchaEstaAbierta(data)});
-                        }
-                    });
+                // A) Agregar SIEMPRE la cancha principal
+                mapCanchas.set(cPrincipal.id, {
+                    id: cPrincipal.id,
+                    ...cPrincipal,
+                    isOpen: canchaEstaAbierta(cPrincipal)
+                });
+
+                // B) Buscar otras canchas asociadas al mismo dueño (por usuarioUid o por cPrincipal.id)
+                const ownerUid = cPrincipal.usuarioUid || cPrincipal.uid || cPrincipal.id;
+                
+                if (ownerUid) {
+                    try {
+                        const q = query(collection(db, 'canchas'), where('usuarioUid', '==', ownerUid));
+                        const snap = await getDocs(q);
+                        snap.forEach(d => {
+                            const data = d.data();
+                            mapCanchas.set(d.id, { id: d.id, ...data, isOpen: canchaEstaAbierta(data) });
+                        });
+                    } catch(eQuery) {
+                        console.warn("Consulta por usuarioUid omitida o fallida:", eQuery);
+                    }
                 }
 
-                // Si por alguna razón de red falla, o si la cancha es antigua y no tiene 'usuarioUid', cargamos al menos la principal
-                if(canchasGlobales.length === 0) {
-                    canchasGlobales.push({id: cPrincipal.id, ...cPrincipal, isOpen: true});
-                }
+                canchasGlobales = Array.from(mapCanchas.values());
 
-                // 3. DIBUJAR LA LISTA DE CANCHAS EXACTAMENTE COMO LO PEDISTE
+                // 3. DIBUJAR LA LISTA DE TODAS LAS CANCHAS DEL COMPLEJO
                 const contenedorLista = document.getElementById('lista-canchas-complejo');
                 if (contenedorLista) {
                     let htmlLista = `<h3 style="color:#fff; margin-bottom:15px; font-size:1.15rem;"><i class="ph-bold ph-list-dashes" style="color:var(--primary-green);"></i> Canchas disponibles:</h3>`;
                     
                     canchasGlobales.forEach((c, i) => {
-                        // Si el dueño no le puso nombre a su cancha, le ponemos Cancha 1, Cancha 2, etc.
-                        const nombreEspecifico = c.nombreCancha || c.tipo || `Cancha ${i + 1}`;
+                        const nombreEspecifico = c.nombreCancha || c.nombreEspacio || c.tipo || `Cancha ${i + 1}`;
                         
                         htmlLista += `
                         <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
@@ -627,7 +634,6 @@ if (window.location.pathname.includes('cancha.html')) {
                     
                     contenedorLista.innerHTML = htmlLista;
 
-                    // 4. DARLE VIDA A LOS BOTONES DE "RESERVAR"
                     contenedorLista.querySelectorAll('.btn-reservar-dinamico').forEach(btn => {
                         btn.addEventListener('click', () => {
                             if (window.abrirModal) {
@@ -637,7 +643,7 @@ if (window.location.pathname.includes('cancha.html')) {
                     });
                 }
             }
-        } catch (e) { console.error(e); }
+        } catch (e) { console.error("Error cargando detalle:", e); }
         
         await refrescarPromedio();
         setupRatingForm();
