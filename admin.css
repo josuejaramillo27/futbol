@@ -118,16 +118,32 @@
         flex-direction: column !important; /* Coloca una cancha debajo de la otra */
         gap: 16px !important;
         width: 100% !important;
-        overflow-x: hidden !important; /* Elimina el desplazamiento horizontal */
+        overflow-x: hidden !im/* ==========================================
+   VISTA MÓVIL PANEL DE DUEÑO (UNA DEBAJO DE OTRA)
+   ========================================== */
+@media (max-width: 768px) {
+    #lista-canchas-admin,
+    #contenedor-canchas-admin,
+    #mis-canchas,
+    #grid-espacios,
+    .espacios-grid,
+    .canchas-admin-grid,
+    .admin-canchas-list {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        overflow-x: hidden !important;
+        width: 100% !important;
+        gap: 16px !important;
     }
 
-    /* Tarjeta de cada cancha al 100% de ancho */
-    #contenedor-canchas-admin .card,
-    #contenedor-canchas-admin .admin-card,
     #lista-canchas-admin .card,
-    .canchas-admin-grid .card,
-    .espacios-grid .card,
-    .admin-cancha-item {
+    #contenedor-canchas-admin .card,
+    #mis-canchas .card,
+    #grid-espacios .espacio-card,
+    .espacios-grid .espacio-card,
+    .admin-canchas-list .card,
+    .admin-card {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 100% !important;
