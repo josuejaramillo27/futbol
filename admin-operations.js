@@ -44,9 +44,25 @@ async function cargarEspacios(){
         });
     } catch(e) { console.error("Error cargando secundarias:", e); }
 
+    // 🔥 Hacer variables globales para que otros archivos (como admin-hours.js) puedan filtrar
+    window.espaciosAdmin = espacios;
+
     // 3. Llamar a tus funciones originales para pintar en pantalla
     renderEspacios();
     llenarEspaciosEvento();
+    actualizarSelectorGrid(); // <-- NUEVO: Llena el selector de canchas de la cuadrícula
+}
+
+// 🔥 NUEVA FUNCIÓN: Actualiza el selector de la cuadrícula
+function actualizarSelectorGrid() {
+    const selector = $('filtro-cancha-grid');
+    if (!selector) return;
+
+    let options = '<option value="todas">Todas las canchas</option>';
+    espacios.forEach(e => {
+        options += `<option value="${e.id}">${esc(e.nombre || 'Cancha')} (${esc(e.tipo || 'Fútbol')})</option>`;
+    });
+    selector.innerHTML = options;
 }
 
 function renderEspacios(){
@@ -75,6 +91,10 @@ function editarEspacio(id){
     $('espacio-nombre').value=e.nombre||'';
     $('espacio-tipo').value=e.tipo||'Sintética';
     $('espacio-precio').value=e.precio??'';
+    
+    // 🔥 POBLAR HORARIOS SI EXISTEN
+    if($('espacio-hora-apertura')) $('espacio-hora-apertura').value = e.horaApertura || '';
+    if($('espacio-hora-cierre')) $('espacio-hora-cierre').value = e.horaCierre || '';
     
     // MAGIA COMERCIAL: Carga de tarifa nocturna
     const checkNoche = $('espacio-check-noche');
@@ -105,6 +125,11 @@ $('btn-nuevo-espacio')?.addEventListener('click',()=>{
     $('espacio-modal-title').textContent='Agregar cancha';
     $('espacio-check-noche').checked = false;
     $('caja-noche').style.display = 'none';
+    
+    // 🔥 LIMPIAR HORARIOS
+    if($('espacio-hora-apertura')) $('espacio-hora-apertura').value = '';
+    if($('espacio-hora-cierre')) $('espacio-hora-cierre').value = '';
+
     openModal('modal-espacio');
 });
 
@@ -112,6 +137,10 @@ $('form-espacio')?.addEventListener('submit',async e=>{
     e.preventDefault();
     const id=$('espacio-id').value;
     const tieneNoche = $('espacio-check-noche').checked;
+    
+    // 🔥 LEER HORARIOS OPCIONALES
+    const hApertura = $('espacio-hora-apertura')?.value || null;
+    const hCierre = $('espacio-hora-cierre')?.value || null;
     
     // FASE 8: Creación/Edición con OwnerUid estricto + TARIFAS DINÁMICAS
     const data={
@@ -122,6 +151,8 @@ $('form-espacio')?.addEventListener('submit',async e=>{
         tienePrecioNoche: tieneNoche,
         precioNoche: tieneNoche ? Number($('espacio-precio-noche').value||0) : null,
         horaInicioNoche: tieneNoche ? $('espacio-hora-noche').value : null,
+        horaApertura: hApertura, // <-- SE GUARDA APERTURA OPCIONAL
+        horaCierre: hCierre,     // <-- SE GUARDA CIERRE OPCIONAL
         activo:true,
         updatedAt:serverTimestamp()
     };
