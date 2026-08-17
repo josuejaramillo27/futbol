@@ -604,41 +604,49 @@ if (window.location.pathname.includes('cancha.html')) {
             // 3. CONSULTAR CANCHAS PRINCIPALES Y SECUNDARIAS (ESPACIOS) DEL DUEÑO
             const mapCanchas = new Map();
 
-            // A) Agregar la cancha principal
-            mapCanchas.set(cPrincipal.id, {
-                id: cPrincipal.id,
-                nombreCancha: cPrincipal.nombreCancha || cPrincipal.nombre || 'Cancha Principal',
-                tipo: cPrincipal.tipo || (Array.isArray(cPrincipal.tiposCancha) ? cPrincipal.tiposCancha[0] : cPrincipal.tipoCancha) || 'Fútbol',
-                precio: Number(cPrincipal.precio || 0),
-                isOpen: canchaEstaAbierta(cPrincipal),
-                ...cPrincipal
+            // A) Agregar la cancha principal con sus horarios
+const aperturaBase = cPrincipal.horaApertura || cPrincipal.horaInicio || '08:00';
+const cierreBase = cPrincipal.horaCierre || cPrincipal.horaFin || '23:00';
+
+mapCanchas.set(cPrincipal.id, {
+    id: cPrincipal.id,
+    nombreCancha: cPrincipal.nombreCancha || cPrincipal.nombre || 'Cancha Principal',
+    tipo: cPrincipal.tipo || (Array.isArray(cPrincipal.tiposCancha) ? cPrincipal.tiposCancha[0] : cPrincipal.tipoCancha) || 'Fútbol',
+    precio: Number(cPrincipal.precio || 0),
+    horaApertura: aperturaBase,
+    horaCierre: cierreBase,
+    isOpen: canchaEstaAbierta(cPrincipal),
+    ...cPrincipal
+});
+
+// B) Buscar en la colección 'espacios' asignando herencia de horarios
+if (ownerUid) {
+    try {
+        const qEspacios = query(collection(db, 'espacios'), where('ownerUid', '==', ownerUid));
+        const snapEspacios = await getDocs(qEspacios);
+        snapEspacios.forEach(d => {
+            const data = d.data();
+            mapCanchas.set(d.id, {
+                id: d.id,
+                nombreCancha: data.nombre || 'Cancha Individual',
+                tipo: data.tipo || 'Fútbol',
+                precio: Number(data.precio || cPrincipal.precio || 0),
+                // 🔥 HERENCIA AUTOMÁTICA DE HORARIOS: Si el espacio no especifica, usa los del complejo
+                horaApertura: data.horaApertura || aperturaBase,
+                horaCierre: data.horaCierre || cierreBase,
+                precioNoche: data.precioNoche,
+                tienePrecioNoche: data.tienePrecioNoche,
+                horaInicioNoche: data.horaInicioNoche,
+                isOpen: true,
+                ...data,
+                nombreComplejo: cPrincipal.nombre,
+                usuarioUid: ownerUid
             });
-
-            // B) Buscar en la colección 'espacios' (creadas en admin.html)
-            if (ownerUid) {
-                try {
-                    const qEspacios = query(collection(db, 'espacios'), where('ownerUid', '==', ownerUid));
-                    const snapEspacios = await getDocs(qEspacios);
-                    snapEspacios.forEach(d => {
-                        const data = d.data();
-                        mapCanchas.set(d.id, {
-                            id: d.id,
-                            nombreCancha: data.nombre || 'Cancha Individual',
-                            tipo: data.tipo || 'Fútbol',
-                            precio: Number(data.precio || cPrincipal.precio || 0),
-                            precioNoche: data.precioNoche,
-                            tienePrecioNoche: data.tienePrecioNoche,
-                            horaInicioNoche: data.horaInicioNoche,
-                            isOpen: true,
-                            ...data,
-                            nombreComplejo: cPrincipal.nombre,
-                            usuarioUid: ownerUid
-                        });
-                    });
-                } catch (eEspacios) {
-                    console.warn("Error al consultar espacios:", eEspacios);
-                }
-
+        });
+    } catch (eEspacios) {
+        console.warn("Error al consultar espacios:", eEspacios);
+    }
+}
                 // C) Buscar en la colección 'canchas' por si hay otras secundarias
                 try {
                     const qCanchas = query(collection(db, 'canchas'), where('usuarioUid', '==', ownerUid));
