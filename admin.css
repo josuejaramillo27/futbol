@@ -151,3 +151,22 @@
         margin-bottom: 0 !important;
     }
 }
+
+/* ==========================================
+   VISTA MÓVIL PANEL DE DUEÑO (UNA DEBAJO DE OTRA)
+   ========================================== */
+@media (max-width: 768px) {
+    #lista-espacios {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        width: 100% !important;
+    }
+
+    .space-card {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
