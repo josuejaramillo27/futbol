@@ -553,7 +553,6 @@ if (window.location.pathname.includes('cancha.html')) {
         1: [{ icon: "ph-prohibit", text: "Pésimo estado" }, { icon: "ph-lightbulb", text: "Luces quemadas" }, { icon: "ph-clock", text: "Impuntualidad" }, { icon: "ph-smiley-sad", text: "Mala atención" }]
     };
 
-    // 🔥 ESTA ES LA FUNCIÓN NUEVA QUE RENDERIZA LA LISTA
     async function cargarDetalleCancha() {
         if (!canchaId) { document.getElementById('bio-title').textContent = 'Cancha no encontrada'; return; }
         
