@@ -103,70 +103,24 @@
     width: 100% !important;
 }
 /* ==========================================
-   VISTA MÓVIL EN EL PANEL DE DUEÑO (admin.html)
+   FORZAR VISTA VERTICAL DE CANCHAS EN EL PANEL
    ========================================== */
-@media (max-width: 768px) {
-
-    /* Contenedores de las canchas del dueño en vertical */
-    #contenedor-canchas-admin,
-    #lista-canchas-admin,
-    #mis-canchas,
-    .canchas-admin-grid,
-    .admin-canchas-list,
-    .espacios-grid {
-        display: flex !important;
-        flex-direction: column !important; /* Coloca una cancha debajo de la otra */
-        gap: 16px !important;
-        width: 100% !important;
-        overflow-x: hidden !im/* ==========================================
-   VISTA MÓVIL PANEL DE DUEÑO (UNA DEBAJO DE OTRA)
-   ========================================== */
-@media (max-width: 768px) {
-    #lista-canchas-admin,
-    #contenedor-canchas-admin,
-    #mis-canchas,
-    #grid-espacios,
-    .espacios-grid,
-    .canchas-admin-grid,
-    .admin-canchas-list {
-        display: flex !important;
-        flex-direction: column !important;
-        flex-wrap: nowrap !important;
-        overflow-x: hidden !important;
-        width: 100% !important;
-        gap: 16px !important;
-    }
-
-    #lista-canchas-admin .card,
-    #contenedor-canchas-admin .card,
-    #mis-canchas .card,
-    #grid-espacios .espacio-card,
-    .espacios-grid .espacio-card,
-    .admin-canchas-list .card,
-    .admin-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 100% !important;
-        box-sizing: border-box !important;
-        margin-bottom: 0 !important;
-    }
+#lista-espacios,
+div#lista-espacios,
+.admin-section #lista-espacios {
+    display: flex !important;
+    flex-direction: column !important; /* Fuerza el orden hacia abajo */
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;  /* Desactiva el scroll horizontal */
+    width: 100% !important;
+    gap: 14px !important;
 }
 
-/* ==========================================
-   VISTA MÓVIL PANEL DE DUEÑO (UNA DEBAJO DE OTRA)
-   ========================================== */
-@media (max-width: 768px) {
-    #lista-espacios {
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 15px !important;
-        width: 100% !important;
-    }
-
-    .space-card {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-bottom: 0 !important;
-        box-sizing: border-box !important;
-    }
+#lista-espacios .space-card,
+.space-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex: 0 0 100% !important;
+    box-sizing: border-box !important;
 }
