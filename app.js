@@ -667,7 +667,6 @@ if (ownerUid) {
                 } catch (eCanchas) {
                     console.warn("Error al consultar canchas secundarias:", eCanchas);
                 }
-            }
 
             // Convertir a Array global para el modal de reservas
             canchasGlobales = Array.from(mapCanchas.values());
