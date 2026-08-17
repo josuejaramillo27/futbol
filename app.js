@@ -554,95 +554,154 @@ if (window.location.pathname.includes('cancha.html')) {
     };
 
     async function cargarDetalleCancha() {
-        if (!canchaId) { document.getElementById('bio-title').textContent = 'Cancha no encontrada'; return; }
+        if (!canchaId) { 
+            const titleEl = document.getElementById('bio-title');
+            if (titleEl) titleEl.textContent = 'Cancha no encontrada'; 
+            return; 
+        }
         
         try {
+            // 1. Obtener los datos del complejo principal
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
-            if (docSnap.exists()) {
-                const cPrincipal = docSnap.data();
-                cPrincipal.id = docSnap.id; 
-                
-                // 1. PINTAR LA INFORMACIÓN GENERAL DEL COMPLEJO
-                const coverEl = document.getElementById('bio-cover');
-                if (coverEl) coverEl.src = cPrincipal.fotos?.length ? cPrincipal.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
-                
-                const logoEl = document.getElementById('bio-logo');
-                if (logoEl) logoEl.src = cPrincipal.logo || 'https://via.placeholder.com/100';
-                
+            if (!docSnap.exists()) {
                 const titleEl = document.getElementById('bio-title');
-                if (titleEl) titleEl.textContent = cPrincipal.nombre || 'Complejo Deportivo';
-                
-                const locEl = document.getElementById('bio-location');
-                if (locEl) locEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${cPrincipal.ubicacionTexto || cPrincipal.distrito || 'Ubicación'}`;
+                if (titleEl) titleEl.textContent = 'Cancha no encontrada';
+                return;
+            }
 
-                const descEl = document.getElementById('bio-desc');
-                if (descEl) descEl.textContent = cPrincipal.descripcion || 'Sin descripción disponible.';
+            const cPrincipal = docSnap.data();
+            cPrincipal.id = docSnap.id; 
 
-                const btnMapa = document.getElementById('btn-mapa-bio');
-                if (btnMapa) {
-                    if (cPrincipal.ubicacionLink) { btnMapa.href = cPrincipal.ubicacionLink; }
-                    else { btnMapa.style.display = 'none'; }
-                }
+            // Determinar el UID del dueño
+            const ownerUid = cPrincipal.usuarioUid || cPrincipal.ownerUid || cPrincipal.uid || docSnap.id;
+            
+            // 2. Pintar cabecera e información general del complejo
+            const coverEl = document.getElementById('bio-cover');
+            if (coverEl) coverEl.src = cPrincipal.fotos?.length ? cPrincipal.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
+            
+            const logoEl = document.getElementById('bio-logo');
+            if (logoEl) logoEl.src = cPrincipal.logo || 'https://via.placeholder.com/100';
+            
+            const titleEl = document.getElementById('bio-title');
+            if (titleEl) titleEl.textContent = cPrincipal.nombre || 'Complejo Deportivo';
+            
+            const locEl = document.getElementById('bio-location');
+            if (locEl) locEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${cPrincipal.ubicacionTexto || cPrincipal.distrito || 'Ubicación'}`;
 
-                // 2. OBTENER TODAS LAS CANCHAS DEL DUEÑO (INCLUYENDO LA PRINCIPAL Y SECUNDARIAS)
-                const mapCanchas = new Map();
-                
-                // A) Agregar SIEMPRE la cancha principal
-                mapCanchas.set(cPrincipal.id, {
-                    id: cPrincipal.id,
-                    ...cPrincipal,
-                    isOpen: canchaEstaAbierta(cPrincipal)
-                });
+            const descEl = document.getElementById('bio-desc');
+            if (descEl) descEl.textContent = cPrincipal.descripcion || 'Sin descripción disponible.';
 
-                // B) Buscar otras canchas asociadas al mismo dueño (por usuarioUid o por cPrincipal.id)
-                const ownerUid = cPrincipal.usuarioUid || cPrincipal.uid || cPrincipal.id;
-                
-                if (ownerUid) {
-                    try {
-                        const q = query(collection(db, 'canchas'), where('usuarioUid', '==', ownerUid));
-                        const snap = await getDocs(q);
-                        snap.forEach(d => {
-                            const data = d.data();
-                            mapCanchas.set(d.id, { id: d.id, ...data, isOpen: canchaEstaAbierta(data) });
-                        });
-                    } catch(eQuery) {
-                        console.warn("Consulta por usuarioUid omitida o fallida:", eQuery);
-                    }
-                }
-
-                canchasGlobales = Array.from(mapCanchas.values());
-
-                // 3. DIBUJAR LA LISTA DE TODAS LAS CANCHAS DEL COMPLEJO
-                const contenedorLista = document.getElementById('lista-canchas-complejo');
-                if (contenedorLista) {
-                    let htmlLista = `<h3 style="color:#fff; margin-bottom:15px; font-size:1.15rem;"><i class="ph-bold ph-list-dashes" style="color:var(--primary-green);"></i> Canchas disponibles:</h3>`;
-                    
-                    canchasGlobales.forEach((c, i) => {
-                        const nombreEspecifico = c.nombreCancha || c.nombreEspacio || c.tipo || `Cancha ${i + 1}`;
-                        
-                        htmlLista += `
-                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                            <div>
-                                <h4 style="margin:0 0 5px 0; color:#fff; font-size:1.1rem;">${nombreEspecifico}</h4>
-                                <p style="margin:0; color:#aaa; font-size:0.85rem;"><i class="ph-bold ph-soccer-ball"></i> ${c.tipo || 'Fútbol'} <span style="margin:0 5px;">|</span> <span style="color:var(--primary-green); font-weight:bold; font-size:0.95rem;">S/ ${c.precio || '--'}</span> <small>/ hr</small></p>
-                            </div>
-                            <button class="btn btn-reservar-dinamico" data-id="${c.id}" style="background:linear-gradient(45deg, var(--primary-green), #27ae60); color:#000; font-weight:900; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-size:0.9rem; box-shadow:0 4px 10px rgba(0,217,104,0.2);"><i class="ph-bold ph-calendar-plus"></i> Reservar</button>
-                        </div>
-                        `;
-                    });
-                    
-                    contenedorLista.innerHTML = htmlLista;
-
-                    contenedorLista.querySelectorAll('.btn-reservar-dinamico').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            if (window.abrirModal) {
-                                window.abrirModal(btn.dataset.id);
-                            }
-                        });
-                    });
+            const btnMapa = document.getElementById('btn-mapa-bio');
+            if (btnMapa) {
+                if (cPrincipal.ubicacionLink) { 
+                    btnMapa.href = cPrincipal.ubicacionLink; 
+                    btnMapa.style.display = 'inline-flex';
+                } else { 
+                    btnMapa.style.display = 'none'; 
                 }
             }
-        } catch (e) { console.error("Error cargando detalle:", e); }
+
+            // 3. CONSULTAR CANCHAS PRINCIPALES Y SECUNDARIAS (ESPACIOS) DEL DUEÑO
+            const mapCanchas = new Map();
+
+            // A) Agregar la cancha principal
+            mapCanchas.set(cPrincipal.id, {
+                id: cPrincipal.id,
+                nombreCancha: cPrincipal.nombreCancha || cPrincipal.nombre || 'Cancha Principal',
+                tipo: cPrincipal.tipo || (Array.isArray(cPrincipal.tiposCancha) ? cPrincipal.tiposCancha[0] : cPrincipal.tipoCancha) || 'Fútbol',
+                precio: Number(cPrincipal.precio || 0),
+                isOpen: canchaEstaAbierta(cPrincipal),
+                ...cPrincipal
+            });
+
+            // B) Buscar en la colección 'espacios' (creadas en admin.html)
+            if (ownerUid) {
+                try {
+                    const qEspacios = query(collection(db, 'espacios'), where('ownerUid', '==', ownerUid));
+                    const snapEspacios = await getDocs(qEspacios);
+                    snapEspacios.forEach(d => {
+                        const data = d.data();
+                        mapCanchas.set(d.id, {
+                            id: d.id,
+                            nombreCancha: data.nombre || 'Cancha Individual',
+                            tipo: data.tipo || 'Fútbol',
+                            precio: Number(data.precio || cPrincipal.precio || 0),
+                            precioNoche: data.precioNoche,
+                            tienePrecioNoche: data.tienePrecioNoche,
+                            horaInicioNoche: data.horaInicioNoche,
+                            isOpen: true,
+                            ...data,
+                            nombreComplejo: cPrincipal.nombre,
+                            usuarioUid: ownerUid
+                        });
+                    });
+                } catch (eEspacios) {
+                    console.warn("Error al consultar espacios:", eEspacios);
+                }
+
+                // C) Buscar en la colección 'canchas' por si hay otras secundarias
+                try {
+                    const qCanchas = query(collection(db, 'canchas'), where('usuarioUid', '==', ownerUid));
+                    const snapCanchas = await getDocs(qCanchas);
+                    snapCanchas.forEach(d => {
+                        const data = d.data();
+                        if (!mapCanchas.has(d.id)) {
+                            mapCanchas.set(d.id, {
+                                id: d.id,
+                                nombreCancha: data.nombreCancha || data.nombre || 'Cancha',
+                                tipo: data.tipo || 'Fútbol',
+                                precio: Number(data.precio || 0),
+                                isOpen: canchaEstaAbierta(data),
+                                ...data
+                            });
+                        }
+                    });
+                } catch (eCanchas) {
+                    console.warn("Error al consultar canchas secundarias:", eCanchas);
+                }
+            }
+
+            // Convertir a Array global para el modal de reservas
+            canchasGlobales = Array.from(mapCanchas.values());
+            window.canchasGlobales = canchasGlobales;
+
+            // 4. DIBUJAR LA LISTA COMPLETA DE CANCHAS DISPONIBLES
+            const contenedorLista = document.getElementById('lista-canchas-complejo');
+            if (contenedorLista) {
+                let htmlLista = `<h3 style="color:#fff; margin-bottom:15px; font-size:1.15rem;"><i class="ph-bold ph-list-dashes" style="color:var(--primary-green);"></i> Canchas disponibles:</h3>`;
+                
+                canchasGlobales.forEach((c) => {
+                    const nombreMostrar = c.nombreCancha || c.nombre || 'Cancha';
+                    const deporteMostrar = c.tipo || 'Fútbol';
+                    const precioMostrar = c.precio ? `S/ ${c.precio}` : 'Consultar';
+
+                    htmlLista += `
+                    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <h4 style="margin:0 0 5px 0; color:#fff; font-size:1.05rem;">${nombreMostrar}</h4>
+                            <p style="margin:0; color:#aaa; font-size:0.85rem;"><i class="ph-bold ph-soccer-ball" style="color:var(--primary-green);"></i> ${deporteMostrar} <span style="margin:0 5px;">|</span> <span style="color:var(--primary-green); font-weight:bold; font-size:0.95rem;">${precioMostrar}</span> <small>/ hr</small></p>
+                        </div>
+                        <button class="btn btn-reservar-dinamico" data-id="${c.id}" style="background:linear-gradient(45deg, var(--primary-green), #27ae60); color:#000; font-weight:900; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-size:0.9rem; box-shadow:0 4px 10px rgba(0,217,104,0.2);"><i class="ph-bold ph-calendar-plus"></i> Reservar</button>
+                    </div>
+                    `;
+                });
+                
+                contenedorLista.innerHTML = htmlLista;
+
+                // Conectar botones de reservar con el modal de horarios
+                contenedorLista.querySelectorAll('.btn-reservar-dinamico').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const targetId = btn.dataset.id;
+                        if (window.abrirModal) {
+                            window.abrirModal(targetId);
+                        }
+                    });
+                });
+            }
+
+        } catch (e) { 
+            console.error("Error cargando detalle:", e); 
+        }
         
         await refrescarPromedio();
         setupRatingForm();
