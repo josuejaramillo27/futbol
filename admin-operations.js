@@ -14,17 +14,37 @@ function fecha(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.ge
 
 // FASE 8: Carga de Espacios múltiples asociados estrictamente al ownerUid
 async function cargarEspacios(){
-    const q=query(collection(db,'espacios'),where('ownerUid','==',uid));
-    const s=await getDocs(q);
-    espacios=s.docs.map(x=>({id:x.id,...x.data()}));
-    
-    if(!espacios.length){
-        const snap=await getDoc(doc(db,'canchas',uid));
-        if(snap.exists()){
-            const c=snap.data();
-            espacios=[{id:`legacy-${uid}`,legacy:true,ownerUid:uid,nombre:c.nombre||'Cancha principal',tipo:(Array.isArray(c.tiposCancha)?c.tiposCancha[0]:c.tipoCancha)||'Sintética',precio:Number(c.precio||0),horaApertura:c.horaApertura||'16:00',horaCierre:c.horaCierre||'23:00',caracteristicas:'Espacio principal (crea nuevos espacios para separarlos)'}];
+    espacios = [];
+
+    // 1. Cargar SIEMPRE la cancha principal (legacy)
+    try {
+        const snap = await getDoc(doc(db, 'canchas', uid));
+        if (snap.exists()) {
+            const c = snap.data();
+            espacios.push({
+                id: `legacy-${uid}`,
+                legacy: true,
+                ownerUid: uid,
+                nombre: c.nombre || 'Cancha principal',
+                tipo: (Array.isArray(c.tiposCancha) ? c.tiposCancha[0] : c.tipoCancha) || 'Sintética',
+                precio: Number(c.precio || 0),
+                horaApertura: c.horaApertura || '16:00',
+                horaCierre: c.horaCierre || '23:00',
+                caracteristicas: 'Espacio principal'
+            });
         }
-    }
+    } catch(e) { console.warn("Error cargando principal:", e); }
+
+    // 2. Cargar TODAS las canchas secundarias (espacios)
+    try {
+        const q = query(collection(db, 'espacios'), where('ownerUid', '==', uid));
+        const s = await getDocs(q);
+        s.docs.forEach(x => {
+            espacios.push({ id: x.id, ...x.data() });
+        });
+    } catch(e) { console.error("Error cargando secundarias:", e); }
+
+    // 3. Llamar a tus funciones originales para pintar en pantalla
     renderEspacios();
     llenarEspaciosEvento();
 }
