@@ -293,20 +293,21 @@
                 <label style="display:block; margin-bottom:15px; color:#aaa; font-size:0.85rem;">Nombre de tu Complejo Deportivo
                     <input type="text" id="admin-nombre" placeholder="Ej. Complejo Deportivo El 10" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
                 </label>
-                <div class="form-group" style="margin-bottom: 20px;">
-        <label style="display:block; margin-bottom:8px; font-weight:bold; color:#fff;">
-            <i class="ph-bold ph-soccer-ball" style="color:var(--primary-green, #2ecc71);"></i> ¿Qué tipos de canchas hay en tu negocio?
-        </label>
-        <div id="admin-tipos" style="display:flex; flex-wrap:wrap; gap:12px; background:rgba(255,255,255,0.03); padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.08);">
-            <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;"><input type="checkbox" value="Fútbol 5"> Fútbol 5</label>
-            <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;"><input type="checkbox" value="Fútbol 6"> Fútbol 6</label>
-            <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;"><input type="checkbox" value="Fútbol 7" checked> Fútbol 7</label>
-            <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;"><input type="checkbox" value="Fútbol 8"> Fútbol 8</label>
-            <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;"><input type="checkbox" value="Fútbol 11"> Fútbol 11</label>
-            <label style="color:#fff; cursor:pointer; display:flex; align-items:center; gap:6px;"><input type="checkbox" value="Losa / Futsal"> Losa / Futsal</label>
-        </div>
-        <small id="tipos-error" style="color:var(--danger, #e74c3c); display:block; margin-top:5px;"></small>
-    </div>
+                <div class="form-group">
+    <label for="admin-tipos">
+        <i class="ph-bold ph-soccer-ball" style="color:var(--primary-green, #2ecc71);"></i> Tipo de Cancha Principal
+    </label>
+    <select id="admin-tipos" class="admin-input">
+        <option value="Fútbol 5">Fútbol 5</option>
+        <option value="Fútbol 6">Fútbol 6</option>
+        <option value="Fútbol 7" selected>Fútbol 7</option>
+        <option value="Fútbol 8">Fútbol 8</option>
+        <option value="Fútbol 11">Fútbol 11</option>
+        <option value="Losa / Futsal">Losa / Futsal</option>
+        <option value="Pasto Natural">Pasto Natural</option>
+    </select>
+    <small id="tipos-error" style="color:var(--danger, #e74c3c); display:block; margin-top:5px;"></small>
+</div>
                 
                 <div class="form-group">
     <label for="admin-cancha-departamento">Departamento del Complejo</label>
