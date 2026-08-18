@@ -79,7 +79,8 @@ async function cargarPerfil(){
 
 async function cargarEspacios(){const q=query(collection(db,'espacios'),where('ownerUid','==',usuarioActual.uid));const snap=await getDocs(q);espacios=snap.docs.map(d=>({id:d.id,...d.data()}));const todos=[{id:usuarioActual.uid,nombre:canchaActual.nombre||'Cancha principal',tipoCancha:(Array.isArray(canchaActual.tiposCancha)?canchaActual.tiposCancha[0]:canchaActual.tipoCancha)||'Sintética',horaApertura:canchaActual.horaApertura||'16:00',horaCierre:canchaActual.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana},...espacios.map(e=>({id:e.id,nombre:e.nombre,tipoCancha:e.tipo||'Fútbol',horaApertura:e.horaApertura||'16:00',horaCierre:e.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana}))];if(!espacioSeleccionado||!todos.find(x=>x.id===espacioSeleccionado.id)){espacioSeleccionado=todos[0]}let container=document.getElementById('dashboard-space-selector');if(!container){const header=document.querySelector('.schedule-head');if(header){container=document.createElement('div');container.id='dashboard-space-selector';container.className='space-selector';header.appendChild(container)}}if(container){container.innerHTML=`<label><span>CANCHA ACTIVA</span><select id="select-cancha-activa" style="margin-left:8px; padding:6px; border-radius:8px; background:#101614; color:#fff; border:1px solid #333;">${todos.map(s=>`<option value="${s.id}" ${s.id===espacioSeleccionado.id?'selected':''}>${s.nombre} · ${s.tipoCancha}</option>`).join('')}</select></label>`;document.getElementById('select-cancha-activa').addEventListener('change',(e)=>{espacioSeleccionado=todos.find(x=>x.id===e.target.value);actualizarDia()})}}
 async function cargarReservas(){
-    const idCancha = String(canchaActual?.id || usuarioActual.uid);
+    // 🔥 Ahora lee la cancha seleccionada en el menú, no solo la principal
+    const idCancha = String(espacioSeleccionado?.id || canchaActual?.id || usuarioActual.uid);
     const fISO = fechaISO(fechaSeleccionada);
     const [snapReservas, snapBloqueos] = await Promise.all([
         getDocs(query(collection(db,'reservas'), where('canchaId', '==', idCancha), where('fecha', '==', fISO))),
@@ -149,7 +150,9 @@ async function gestionarSlot(hora, reservaId, bloqueoId){
     }
     if(!confirm(`¿Bloquear manualmente las ${hora}?\nNadie podrá reservar este horario.`)) return;
     try{
-        await addDoc(collection(db,'bloqueos'),{ ownerUid: usuarioActual.uid, canchaId: canchaActual.id, fecha: fechaISO(fechaSeleccionada), horaInicio: hora, horaFin: hora, motivo: 'Bloqueo manual', createdAt: serverTimestamp() });
+        // 🔥 Aplica el bloqueo a la cancha específica que estés viendo
+        const idCancha = espacioSeleccionado?.id || canchaActual.id;
+        await addDoc(collection(db,'bloqueos'),{ ownerUid: usuarioActual.uid, canchaId: idCancha, fecha: fechaISO(fechaSeleccionada), horaInicio: hora, horaFin: hora, motivo: 'Bloqueo manual', createdAt: serverTimestamp() });
         toast('Horario bloqueado.'); await refrescar();
     }catch(e){ console.error(e); toast('No se pudo bloquear el horario.',true); }
 }
@@ -463,7 +466,12 @@ function init(){
             if(data.estado === "rejected") { document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#080b0a;color:white;text-align:center;padding:20px;"><i class="ph-bold ph-x-circle" style="font-size:60px;color:var(--danger);"></i><h2 style="margin:20px 0 10px;">Solicitud Rechazada</h2><p style="color:var(--text-muted);margin-bottom:20px;">Lamentablemente tu solicitud para registrar la cancha ha sido rechazada.</p><button onclick="window.location.href='login.html'" class="btn btn-outline" style="width:auto;">Volver al inicio</button></div>`; auth.signOut(); return; }
         }
         usuarioActual=u; document.getElementById('admin-user-label').textContent=u.email||'';
-        try{ if(await cargarPerfil()){ actualizarDia(); } }catch(e){ console.error(e); toast('No se pudo cargar el panel.',true); }
+        try{ 
+            if(await cargarPerfil()){ 
+                await cargarEspacios(); // 🔥 ¡ESTA LÍNEA ENCIENDE EL SELECTOR DE MÚLTIPLES CANCHAS!
+                actualizarDia(); 
+            } 
+        }catch(e){ console.error(e); toast('No se pudo cargar el panel.',true); }
     });
 }
 init();
