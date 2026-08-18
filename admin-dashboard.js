@@ -70,8 +70,9 @@ async function cargarPerfil(){
 
     const campos={'admin-nombre':canchaActual.nombre,'admin-distrito':canchaActual.distrito??canchaActual.ciudad,'admin-departamento':canchaActual.departamento,'admin-whatsapp':canchaActual.whatsapp,'admin-descripcion':canchaActual.descripcion,'admin-precio':canchaActual.precio,'admin-ubicacion-texto':canchaActual.ubicacionTexto,'admin-ubicacion-link':canchaActual.ubicacionLink,'admin-intervalo':canchaActual.intervaloMinutos||canchaActual.duracionReserva||60};
     Object.entries(campos).forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.value=v??''});
-    const tipos=Array.isArray(canchaActual.tiposCancha)?canchaActual.tiposCancha:(canchaActual.tipoCancha?[canchaActual.tipoCancha]:[]);
-    document.querySelectorAll('#admin-tipos input[type=checkbox]').forEach(c=>c.checked=tipos.includes(c.value));
+    const tipos = Array.isArray(canchaActual.tiposCancha) && canchaActual.tiposCancha.length > 0 ? canchaActual.tiposCancha : (canchaActual.tipoCancha ? [canchaActual.tipoCancha] : ['Fútbol 7']);
+    const elTipos = document.getElementById('admin-tipos');
+    if (elTipos) { if (elTipos.tagName === 'SELECT') { elTipos.value = tipos[0] || 'Fútbol 7'; } else { const checkBoxes = elTipos.querySelectorAll('input[type=checkbox]'); checkBoxes.forEach(c => { c.checked = tipos.includes(c.value); }); } }
     renderWeeklyHours(canchaActual.horariosSemana||horarioDefault());
     document.getElementById('nombre-cancha-admin').textContent=canchaActual.nombre?`${canchaActual.nombre} · Panel`:'Mi Cancha';
     return true;
@@ -475,14 +476,17 @@ if(formPerfil) {
     formPerfil.addEventListener('submit', async e => {
         e.preventDefault(); if(!usuarioActual) return;
         const btn = document.getElementById('btn-guardar-admin');
-        const tipos = [...document.querySelectorAll('#admin-tipos input:checked')].map(x=>x.value);
-        if(!tipos.length){ 
-            const errorMsg = document.getElementById('tipos-error');
-            if(errorMsg) errorMsg.textContent = 'Selecciona al menos un tipo de cancha.';
-            else toast('Selecciona al menos un tipo de cancha.', true); // <-- Aquí le quitamos el window.
-            return; 
+        const elTipos = document.getElementById('admin-tipos');
+        let tipos = [];
+        if (elTipos) {
+            if (elTipos.tagName === 'SELECT') {
+                tipos = elTipos.value ? [elTipos.value] : ['Fútbol 7'];
+            } else {
+                tipos = [...elTipos.querySelectorAll('input:checked')].map(x => x.value);
+            }
         }
-        
+        if (!tipos.length) tipos = ['Fútbol 7'];
+
         const errorMsg = document.getElementById('tipos-error');
         if(errorMsg) errorMsg.textContent = ''; 
         
