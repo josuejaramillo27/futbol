@@ -17,6 +17,8 @@
             --text-main: #ffffff;
             --text-muted: #aaaaaa;
             --border-color: rgba(255,255,255,0.1);
+            --danger: #e74c3c;
+            --warning: #f1c40f;
         }
 
         body {
@@ -98,97 +100,45 @@
         }
 
         /* TABLES */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            padding: 15px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.9rem;
-        }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 15px; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
 
         /* BOTONES */
         .btn {
-            background: #222;
-            color: #fff;
-            border: 1px solid var(--border-color);
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            background: #222; color: #fff; border: 1px solid var(--border-color);
+            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 8px; font-weight: 600; transition: all 0.3s ease;
         }
-
-        .btn-primary {
-            background: var(--primary-green);
-            color: #000;
-            border: none;
-        }
-
-        .btn-danger {
-            background: transparent;
-            color: #e74c3c;
-            border: 1px solid #e74c3c;
-        }
+        .btn-primary { background: var(--primary-green); color: #000; border: none; }
+        .btn-danger { background: transparent; color: #e74c3c; border: 1px solid #e74c3c; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: #fff; }
 
         /* MODALES */
         .modal-oculto {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center;
         }
-
         .modal-oculto.mostrar { display: flex; }
-
         .modal-contenido {
-            background: #111;
-            padding: 30px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 500px;
-            position: relative;
-            border: 1px solid var(--border-color);
+            background: #111; padding: 30px; border-radius: 16px; width: 100%;
+            max-width: 500px; position: relative; border: 1px solid var(--border-color);
         }
-
         .btn-cerrar {
-            position: absolute;
-            top: 20px; right: 20px;
-            background: none; border: none;
-            color: var(--text-muted);
-            font-size: 1.5rem; cursor: pointer;
+            position: absolute; top: 20px; right: 20px; background: none; border: none;
+            color: var(--text-muted); font-size: 1.5rem; cursor: pointer;
         }
 
         /* FORMULARIOS */
         .form-group { margin-bottom: 15px; }
-        .form-group label {
-            display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px;
-        }
+        .form-group label { display: block; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 6px; }
         .form-control {
-            width: 100%; padding: 12px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--border-color);
-            color: #fff; border-radius: 8px;
-            box-sizing: border-box;
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color); color: #fff; border-radius: 8px;
+            box-sizing: border-box; outline: none;
         }
+        .form-control:focus { border-color: var(--primary-green); }
     </style>
 </head>
 <body>
@@ -204,13 +154,7 @@
                 <i class="ph-bold ph-squares-four"></i> Inicio
             </a>
             <a class="sidebar-link" data-target="tab-usuarios">
-                <i class="ph-bold ph-users"></i> Usuarios
-            </a>
-            <a class="sidebar-link" data-target="tab-canchas">
-                <i class="ph-bold ph-map-pin"></i> Canchas
-            </a>
-            <a class="sidebar-link" data-target="tab-reservas">
-                <i class="ph-bold ph-calendar-check"></i> Reservas
+                <i class="ph-bold ph-users"></i> Solicitudes Canchas
             </a>
             <a class="sidebar-link" data-target="tab-comunidades">
                 <i class="ph-bold ph-shield-checkered"></i> Comunidades
@@ -227,23 +171,27 @@
     <main class="main-content">
         
         <div id="tab-dashboard" class="tab-content mostrar">
-            <h2>Bienvenido, Admin</h2>
-            <p style="color: var(--text-muted);">Selecciona una opción en el menú lateral para gestionar la plataforma.</p>
+            <h2>Bienvenido, Admin Maestro</h2>
+            <p style="color: var(--text-muted);">Selecciona una opción en el menú lateral para revisar solicitudes de canchas o comunidades.</p>
         </div>
 
         <div id="tab-usuarios" class="tab-content">
-            <h2>Gestión de Usuarios</h2>
-            <div class="card"><p style="color: var(--text-muted);">Aquí aparecerá tu lista de usuarios...</p></div>
-        </div>
+            <h2>Gestión de Cuentas y Canchas</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Revisa y aprueba el acceso de los dueños, y aprueba la publicación de sus canchas.</p>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <input type="text" id="search-input" class="form-control" placeholder="Buscar por dueño, email o complejo..." style="flex: 1;">
+                <select id="filter-status" class="form-control" style="width: auto;">
+                    <option value="all">Todos los estados</option>
+                    <option value="pending">Solicitudes de Cuenta Pendientes</option>
+                    <option value="approved">Cuentas Aprobadas</option>
+                    <option value="pending_review">Canchas Pendientes de Publicar</option>
+                </select>
+            </div>
 
-        <div id="tab-canchas" class="tab-content">
-            <h2>Gestión de Canchas</h2>
-            <div class="card"><p style="color: var(--text-muted);">Aquí aparecerá tu lista de canchas...</p></div>
-        </div>
-
-        <div id="tab-reservas" class="tab-content">
-            <h2>Reservas de la plataforma</h2>
-            <div class="card"><p style="color: var(--text-muted);">Aquí aparecerán las reservas...</p></div>
+            <div id="owners-list" style="display: flex; flex-direction: column; gap: 12px;">
+                <p style="color: var(--text-muted);"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando base de datos...</p>
+            </div>
         </div>
 
         <div id="tab-comunidades" class="tab-content">
@@ -266,7 +214,7 @@
                         </tr>
                     </thead>
                     <tbody id="admin-lista-comunidades">
-                        <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Selecciona la pestaña para cargar...</td></tr>
+                        <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Cargando comunidades...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -274,11 +222,30 @@
 
     </main>
 
+    <div id="modal-details" class="modal-oculto">
+        <div class="modal-contenido">
+            <button id="close-modal" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+            <h2 style="margin-top: 0; color: var(--primary-green);">Detalles de la Solicitud</h2>
+            
+            <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; line-height: 1.6;">
+                <p style="margin: 5px 0;"><strong>Complejo:</strong> <span id="det-complejo" style="color: #fff;"></span></p>
+                <p style="margin: 5px 0;"><strong>Dueño:</strong> <span id="det-nombre" style="color: #fff;"></span></p>
+                <p style="margin: 5px 0;"><strong>Documento:</strong> <span id="det-dni" style="color: #fff;"></span></p>
+                <p style="margin: 5px 0;"><strong>Email:</strong> <span id="det-email" style="color: #fff;"></span></p>
+                <p style="margin: 5px 0;"><strong>Teléfono:</strong> <span id="det-telefono" style="color: #fff;"></span></p>
+                <p style="margin: 5px 0;"><strong>Estado de Cuenta:</strong> <span id="det-estado" style="font-weight: bold;"></span></p>
+            </div>
+
+            <div id="modal-actions" style="display: flex; flex-direction: column; gap: 10px;">
+                </div>
+        </div>
+    </div>
+
     <div id="modal-admin-comunidad" class="modal-oculto">
         <div class="modal-contenido">
             <button id="cerrar-admin-comunidad" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
             <h2 style="margin-top: 0;">Alta de Comunidad</h2>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Acepta y registra un grupo para que aparezca en la app.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Registra un grupo para que aparezca en la app.</p>
             
             <form id="form-admin-comunidad">
                 <div class="form-group">
@@ -286,21 +253,19 @@
                     <input type="text" id="admin-com-nombre" class="form-control" required placeholder="Ej: Liga Piura Centro">
                 </div>
                 <div class="form-group">
-    <label>ID del Líder (UID de Google del Creador)</label>
-    <input type="text" id="admin-com-lider-uid" class="form-control" required placeholder="Pega el UID de Google del líder">
-    <small style="color: var(--text-muted); font-size: 0.75rem;">Tip: Puedes ver tu propio UID en la pestaña Usuarios de este panel.</small>
-</div>
+                    <label>ID del Líder (UID de Google del Creador)</label>
+                    <input type="text" id="admin-com-lider-uid" class="form-control" required placeholder="Pega el UID de Google del líder">
+                </div>
                 <div style="display: flex; gap: 15px;">
                     <div class="form-group" style="flex: 1;">
-    <label>Deportes (separados por coma)</label>
-    <input type="text" id="admin-com-deporte" class="form-control" required placeholder="Ej: Fútbol, Vóley, Básquet">
-</div>
+                        <label>Deportes</label>
+                        <input type="text" id="admin-com-deporte" class="form-control" required placeholder="Ej: Fútbol, Vóley">
+                    </div>
                     <div class="form-group" style="flex: 1;">
                         <label>Categoría</label>
                         <input type="text" id="admin-com-categoria" class="form-control" required placeholder="Ej: Libre / Amateur">
                     </div>
                 </div>
-
                 <div style="display: flex; gap: 15px;">
                     <div class="form-group" style="flex: 1;">
                         <label>Ciudad</label>
@@ -311,12 +276,10 @@
                         <input type="text" id="admin-com-wsp" class="form-control" required placeholder="Ej: 51999999999">
                     </div>
                 </div>
-
                 <div class="form-group" style="margin-bottom: 25px;">
                     <label>Breve Descripción</label>
                     <textarea id="admin-com-desc" rows="3" class="form-control" required placeholder="Describe la comunidad..."></textarea>
                 </div>
-
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
                     <i class="ph-bold ph-check"></i> Publicar Comunidad
                 </button>
@@ -327,9 +290,11 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, getDoc, updateDoc, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // 1. Configuración Firebase
+        // ==========================================
+        // 1. CONFIGURACIÓN FIREBASE
+        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
             authDomain: "app-futbol-acd0f.firebaseapp.com",
@@ -343,141 +308,305 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // 2. Sistema de Pestañas (Navegación)
+        let adminUser = null;
+        let allOwners = [];
+
+        // ==========================================
+        // 2. SEGURIDAD DE ADMINISTRADOR MAESTRO
+        // ==========================================
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+                return;
+            }
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+            if (userDoc.exists() && userDoc.data().rol === "admin" && userDoc.data().estado === "approved") {
+                adminUser = user.uid;
+                loadOwnersAndCourts();
+                cargarComunidadesAdmin();
+            } else {
+                alert("Acceso Denegado. No eres Administrador Maestro.");
+                signOut(auth).then(() => window.location.href = "login.html");
+            }
+        });
+
+        // ==========================================
+        // 3. NAVEGACIÓN DE PESTAÑAS
+        // ==========================================
         const links = document.querySelectorAll('.sidebar-link');
         const tabs = document.querySelectorAll('.tab-content');
 
         links.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                // Quitar activo a todos
                 links.forEach(l => l.classList.remove('active'));
                 tabs.forEach(t => t.classList.remove('mostrar'));
                 
-                // Activar el seleccionado
                 link.classList.add('active');
                 const targetId = link.getAttribute('data-target');
                 document.getElementById(targetId).classList.add('mostrar');
 
-                // Si entramos a la pestaña de comunidades, cargar datos
-                if (targetId === 'tab-comunidades') {
-                    cargarComunidadesAdmin();
-                }
+                if(targetId === 'tab-usuarios') loadOwnersAndCourts();
+                if(targetId === 'tab-comunidades') cargarComunidadesAdmin();
             });
         });
 
-        // 3. Cerrar Sesión
+        // Cerrar sesión
         document.getElementById('btn-logout')?.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                window.location.href = 'index.html';
-            });
+            signOut(auth).then(() => window.location.href = 'index.html');
         });
 
         // ==========================================
-        // LÓGICA DE COMUNIDADES
+        // 4. MÓDULO: GESTIÓN DE DUEÑOS Y CANCHAS
+        // ==========================================
+        const listContainer = document.getElementById('owners-list');
+        const searchInput = document.getElementById('search-input');
+        const filterStatus = document.getElementById('filter-status');
+        const modalDetails = document.getElementById('modal-details');
+
+        async function loadOwnersAndCourts() {
+            try {
+                const [snapUsuarios, snapCanchas] = await Promise.all([
+                    getDocs(collection(db, "usuarios")),
+                    getDocs(collection(db, "canchas"))
+                ]);
+
+                const canchasMap = new Map();
+                snapCanchas.forEach(d => canchasMap.set(d.id, { id: d.id, ...d.data() }));
+
+                allOwners = [];
+                snapUsuarios.forEach((d) => {
+                    const data = d.data();
+                    if (data.rol === "owner") {
+                        const canchaInfo = canchasMap.get(data.uid) || {};
+                        allOwners.push({
+                            ...data,
+                            canchaData: canchaInfo,
+                            estadoPublicacion: canchaInfo.estadoPublicacion || (canchaInfo.configurado ? 'published' : 'draft')
+                        });
+                    }
+                });
+                renderOwners();
+            } catch (error) {
+                console.error("Error al cargar datos:", error);
+                listContainer.innerHTML = `<p style="color:var(--danger); text-align:center;">Error conectando a la base de datos.</p>`;
+            }
+        }
+
+        function renderOwners() {
+            const searchTerm = (searchInput?.value || "").toLowerCase();
+            const statusFilter = filterStatus?.value || "all";
+
+            const filtered = allOwners.filter(owner => {
+                const searchStr = `${owner.nombre} ${owner.email} ${owner.documento} ${owner.complejo} ${owner.canchaData?.nombre}`.toLowerCase();
+                const matchesSearch = searchStr.includes(searchTerm);
+                
+                let matchesStatus = true;
+                if (statusFilter === "pending") matchesStatus = owner.estado === "pending";
+                else if (statusFilter === "approved") matchesStatus = owner.estado === "approved";
+                else if (statusFilter === "rejected") matchesStatus = owner.estado === "rejected";
+                else if (statusFilter === "pending_review") matchesStatus = owner.estadoPublicacion === "pending_review";
+                
+                return matchesSearch && matchesStatus;
+            });
+
+            listContainer.innerHTML = "";
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius:12px;">No se encontraron solicitudes.</div>`;
+                return;
+            }
+
+            filtered.forEach(owner => {
+                const estadoCuenta = owner.estado === "approved" ? "approved" : owner.estado === "rejected" ? "rejected" : "pending";
+                const estadoCuentaTexto = owner.estado === "approved" ? "Cuenta Aprobada" : owner.estado === "rejected" ? "Cuenta Rechazada" : "Cuenta Pendiente";
+                
+                const estPub = owner.estadoPublicacion;
+                let badgePublicacion = `<span style="color:var(--warning); background:rgba(255,193,7,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cancha Borrador</span>`;
+                if (estPub === 'pending_review') badgePublicacion = `<span style="color:#17a2b8; background:rgba(23,162,184,0.15); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">⚽ SOLICITA PUBLICACIÓN</span>`;
+                if (estPub === 'published') badgePublicacion = `<span style="color:var(--primary-green); background:rgba(0,217,104,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">WEB ACTIVA</span>`;
+
+                const card = document.createElement('div');
+                card.style.cssText = "background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:12px; padding:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;";
+                
+                card.innerHTML = `
+                    <div>
+                        <h3 style="margin:0 0 5px; font-size:1.1rem; color:#fff;">${owner.complejo || owner.canchaData?.nombre || "Cancha Nueva (Sin Datos)"}</h3>
+                        <p style="margin:2px 0; font-size:0.85rem; color:var(--text-muted);">
+                            Dueño: ${owner.nombre} | Email: ${owner.email}
+                        </p>
+                        <div style="margin-top:8px; display:flex; gap:10px; align-items:center;">
+                            <span style="font-size:0.75rem; font-weight:bold; color:var(--${estadoCuenta === 'pending' ? 'warning' : estadoCuenta === 'approved' ? 'primary-green' : 'danger'})">${estadoCuentaTexto}</span>
+                            ${owner.estado === 'approved' ? ' • ' + badgePublicacion : ''}
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline btn-view" data-uid="${owner.uid}">
+                            <i class="ph-bold ph-sliders-horizontal"></i> Gestionar
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+
+            document.querySelectorAll('.btn-view').forEach(btn => {
+                btn.addEventListener('click', (e) => viewDetails(e.currentTarget.dataset.uid));
+            });
+        }
+
+        searchInput?.addEventListener('input', renderOwners);
+        filterStatus?.addEventListener('change', renderOwners);
+
+        document.getElementById('close-modal')?.addEventListener('click', () => modalDetails.classList.remove('mostrar'));
+
+        function viewDetails(uid) {
+            const owner = allOwners.find(o => o.uid === uid);
+            if (!owner) return;
+
+            const cancha = owner.canchaData || {};
+            document.getElementById('det-complejo').innerText = owner.complejo || cancha.nombre || "No especificado";
+            document.getElementById('det-nombre').innerText = owner.nombre || "No especificado";
+            document.getElementById('det-dni').innerText = owner.documento || "No especificado";
+            document.getElementById('det-email').innerText = owner.email || "No especificado";
+            document.getElementById('det-telefono').innerText = owner.telefono || cancha.whatsapp || "No especificado";
+            
+            const estadoEl = document.getElementById('det-estado');
+            estadoEl.innerText = owner.estado.toUpperCase();
+            estadoEl.style.color = owner.estado === 'pending' ? 'var(--warning)' : owner.estado === 'approved' ? 'var(--primary-green)' : 'var(--danger)';
+
+            const actionsContainer = document.getElementById('modal-actions');
+            actionsContainer.innerHTML = "";
+
+            // 1. Acciones de la Cuenta (Acceso al Panel)
+            if (owner.estado === "pending" || owner.estado === "rejected") {
+                const btnApprove = document.createElement('button');
+                btnApprove.className = "btn btn-primary";
+                btnApprove.innerHTML = `<i class="ph-bold ph-check-circle"></i> Aprobar Acceso al Sistema`;
+                btnApprove.onclick = () => changeAccountStatus(uid, "approved");
+                actionsContainer.appendChild(btnApprove);
+            }
+
+            if (owner.estado === "pending" || owner.estado === "approved") {
+                const btnReject = document.createElement('button');
+                btnReject.className = "btn";
+                btnReject.style.background = "var(--danger)";
+                btnReject.style.borderColor = "var(--danger)";
+                btnReject.innerHTML = `<i class="ph-bold ph-x-circle"></i> Rechazar / Suspender Cuenta`;
+                btnReject.onclick = () => changeAccountStatus(uid, "rejected");
+                actionsContainer.appendChild(btnReject);
+            }
+
+            // 2. Acciones de la Web Pública (Cancha visible a jugadores)
+            if (owner.estado === "approved") {
+                const hr = document.createElement('hr');
+                hr.style.cssText = "border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;";
+                actionsContainer.appendChild(hr);
+
+                if (owner.estadoPublicacion === "pending_review" || owner.estadoPublicacion === "draft") {
+                    const btnPublish = document.createElement('button');
+                    btnPublish.className = "btn";
+                    btnPublish.style.background = "#fff";
+                    btnPublish.style.color = "#000";
+                    btnPublish.innerHTML = `<i class="ph-bold ph-globe-hemisphere-west"></i> Aprobar y PUBLICAR Cancha en la Web`;
+                    btnPublish.onclick = () => changePublicationStatus(uid, "published");
+                    actionsContainer.appendChild(btnPublish);
+                } else if (owner.estadoPublicacion === "published") {
+                    const btnUnpublish = document.createElement('button');
+                    btnUnpublish.className = "btn btn-outline";
+                    btnUnpublish.style.color = "var(--warning)";
+                    btnUnpublish.style.borderColor = "var(--warning)";
+                    btnUnpublish.innerHTML = `<i class="ph-bold ph-eye-slash"></i> Pausar / Ocultar de la Web`;
+                    btnUnpublish.onclick = () => changePublicationStatus(uid, "draft");
+                    actionsContainer.appendChild(btnUnpublish);
+                }
+            }
+            modalDetails.classList.add('mostrar');
+        }
+
+        async function changeAccountStatus(uid, newStatus) {
+            if (!confirm(`¿Cambiar estado de CUENTA a: ${newStatus.toUpperCase()}?`)) return;
+            try {
+                await updateDoc(doc(db, "usuarios", uid), { estado: newStatus, approvedBy: adminUser, approvedAt: serverTimestamp() });
+                alert(`Cuenta actualizada.`);
+                modalDetails.classList.remove('mostrar');
+                loadOwnersAndCourts();
+            } catch (error) { console.error(error); alert("Error al actualizar la cuenta."); }
+        }
+
+        async function changePublicationStatus(uid, newStatus) {
+            if (!confirm(`¿Cambiar PUBLICACIÓN de la cancha a: ${newStatus.toUpperCase()}?`)) return;
+            try {
+                await updateDoc(doc(db, "canchas", uid), { estadoPublicacion: newStatus, publicadoPor: adminUser, publicadoEn: serverTimestamp() });
+                alert(newStatus === 'published' ? '¡Cancha PUBLICADA y visible!' : 'Cancha ocultada.');
+                modalDetails.classList.remove('mostrar');
+                loadOwnersAndCourts();
+            } catch (error) { console.error(error); alert("Error cambiando publicación."); }
+        }
+
+        // ==========================================
+        // 5. MÓDULO: GESTIÓN DE COMUNIDADES
         // ==========================================
         const modalComunidad = document.getElementById('modal-admin-comunidad');
         const formComunidad = document.getElementById('form-admin-comunidad');
 
-        // Abrir/Cerrar Modal
-        document.getElementById('btn-abrir-crear-comunidad').addEventListener('click', () => {
-            modalComunidad.classList.add('mostrar');
-        });
-        document.getElementById('cerrar-admin-comunidad').addEventListener('click', () => {
-            modalComunidad.classList.remove('mostrar');
-        });
+        document.getElementById('btn-abrir-crear-comunidad').addEventListener('click', () => modalComunidad.classList.add('mostrar'));
+        document.getElementById('cerrar-admin-comunidad').addEventListener('click', () => modalComunidad.classList.remove('mostrar'));
 
-        // Función para cargar las comunidades desde Firebase
         async function cargarComunidadesAdmin() {
             const tbody = document.getElementById('admin-lista-comunidades');
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando base de datos...</td></tr>';
-            
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando...</td></tr>';
             try {
-                const q = query(collection(db, 'comunidades'));
-                const snap = await getDocs(q);
-                
+                const snap = await getDocs(query(collection(db, 'comunidades')));
                 tbody.innerHTML = '';
-                
                 if (snap.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--text-muted);">No hay comunidades creadas aún.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">No hay comunidades.</td></tr>';
                     return;
                 }
-
                 snap.forEach(docSnap => {
                     const c = docSnap.data();
                     tbody.innerHTML += `
                         <tr>
-                            <td style="font-weight: bold; color: #fff;">
-                                <i class="ph-fill ph-shield-checkered" style="color: var(--primary-green);"></i> ${c.nombre}
-                            </td>
+                            <td style="font-weight:bold; color:#fff;"><i class="ph-fill ph-shield-checkered" style="color:var(--primary-green);"></i> ${c.nombre}</td>
                             <td>${c.deporte} / ${c.categoria}</td>
-                            <td><i class="ph-bold ph-map-pin"></i> ${c.ciudad}</td>
-                            <td><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider}</td>
-                            <td>
-                                <button class="btn btn-danger btn-borrar-comunidad" data-id="${docSnap.id}" style="padding: 6px 10px; font-size: 0.8rem;">
-                                    <i class="ph-bold ph-trash"></i> Eliminar
-                                </button>
-                            </td>
+                            <td>${c.ciudad}</td>
+                            <td>${c.whatsappLider}</td>
+                            <td><button class="btn btn-danger btn-borrar-comunidad" data-id="${docSnap.id}" style="padding:6px 10px; font-size:0.8rem;"><i class="ph-bold ph-trash"></i> Eliminar</button></td>
                         </tr>
                     `;
                 });
-
-                // Funcionalidad para eliminar comunidad
                 document.querySelectorAll('.btn-borrar-comunidad').forEach(btn => {
                     btn.addEventListener('click', async (e) => {
-                        if(confirm('¿Eliminar esta comunidad definitivamente? Esta acción no se puede deshacer.')) {
+                        if(confirm('¿Eliminar esta comunidad?')) {
                             const btnReal = e.target.closest('.btn-borrar-comunidad');
-                            const idEliminar = btnReal.getAttribute('data-id');
-                            
                             btnReal.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>';
-                            try {
-                                await deleteDoc(doc(db, 'comunidades', idEliminar));
-                                cargarComunidadesAdmin(); // Refrescar la tabla automáticamente
-                            } catch (error) {
-                                alert("Error al eliminar. Revisa tus permisos.");
-                            }
+                            await deleteDoc(doc(db, 'comunidades', btnReal.getAttribute('data-id')));
+                            cargarComunidadesAdmin();
                         }
                     });
                 });
-
-            } catch (error) {
-                console.error("Error cargando comunidades:", error);
-                tbody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Error de conexión.</td></tr>';
-            }
+            } catch (error) { console.error(error); tbody.innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Error de conexión.</td></tr>'; }
         }
 
-        // Función para guardar (crear) una nueva comunidad
         formComunidad.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const btnSubmit = formComunidad.querySelector('button[type="submit"]');
-            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
-            btnSubmit.disabled = true;
-
-            const nuevaComunidad = {
-                nombre: document.getElementById('admin-com-nombre').value,
-                deporte: document.getElementById('admin-com-deporte').value,
-                categoria: document.getElementById('admin-com-categoria').value,
-                ciudad: document.getElementById('admin-com-ciudad').value,
-                whatsappLider: document.getElementById('admin-com-wsp').value,
-                liderUid: document.getElementById('admin-com-lider-uid').value.trim(),
-                descripcion: document.getElementById('admin-com-desc').value,
-                miembros: 0
-            };
-
+            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; btnSubmit.disabled = true;
             try {
-                await addDoc(collection(db, 'comunidades'), nuevaComunidad);
-                alert('¡Comunidad publicada exitosamente!');
+                await addDoc(collection(db, 'comunidades'), {
+                    nombre: document.getElementById('admin-com-nombre').value,
+                    deporte: document.getElementById('admin-com-deporte').value,
+                    categoria: document.getElementById('admin-com-categoria').value,
+                    ciudad: document.getElementById('admin-com-ciudad').value,
+                    whatsappLider: document.getElementById('admin-com-wsp').value,
+                    liderUid: document.getElementById('admin-com-lider-uid').value.trim(),
+                    descripcion: document.getElementById('admin-com-desc').value,
+                    miembros: 0
+                });
+                alert('¡Comunidad publicada!');
                 modalComunidad.classList.remove('mostrar');
                 formComunidad.reset();
-                cargarComunidadesAdmin(); // Refrescar tabla
-            } catch (error) {
-                console.error(error);
-                alert('Error al publicar. Asegúrate de tener rol "admin" en Firestore.');
-            } finally {
-                btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Publicar Comunidad';
-                btnSubmit.disabled = false;
-            }
+                cargarComunidadesAdmin();
+            } catch (error) { console.error(error); alert('Error al publicar.'); } 
+            finally { btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Publicar Comunidad'; btnSubmit.disabled = false; }
         });
     </script>
 </body>
