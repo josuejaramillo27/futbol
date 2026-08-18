@@ -32,14 +32,14 @@ async function load(){
 async function save(){
     if(!uid)return;
     const p={
-        yape:$('pago-yape')?.checked,
-        plin:$('pago-plin')?.checked,
-        efectivo:$('pago-efectivo')?.checked,
-        numero:$('admin-pago-numero')?.value.trim(),
-        titular:$('admin-pago-titular')?.value.trim(),
-        requiereSena:$('admin-req-sena')?.checked,
+        yape:$('pago-yape')?.checked || false,
+        plin:$('pago-plin')?.checked || false,
+        efectivo:$('pago-efectivo')?.checked || false,
+        numero:$('admin-pago-numero')?.value?.trim() || '',
+        titular:$('admin-pago-titular')?.value?.trim() || '',
+        requiereSena:$('admin-req-sena')?.checked || false,
         montoSena:Number($('admin-monto-sena')?.value||0),
-        nota:$('admin-pago-nota')?.value.trim()
+        nota:$('admin-pago-nota')?.value?.trim() || ''
     };
     if(!p.yape&&!p.plin&&!p.efectivo){toast('Selecciona al menos un método de pago.',true);return}
     if((p.yape||p.plin)&&!p.numero){toast('Añade el número de Yape / Plin.',true);return}
