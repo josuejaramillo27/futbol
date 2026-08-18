@@ -479,7 +479,7 @@ if(formPerfil) {
         if(!tipos.length){ 
             const errorMsg = document.getElementById('tipos-error');
             if(errorMsg) errorMsg.textContent = 'Selecciona al menos un tipo de cancha.';
-            else window.toast('Selecciona al menos un tipo de cancha.', true);
+            else toast('Selecciona al menos un tipo de cancha.', true); // <-- Aquí le quitamos el window.
             return; 
         }
         
