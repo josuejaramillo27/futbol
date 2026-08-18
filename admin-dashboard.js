@@ -77,7 +77,63 @@ async function cargarPerfil(){
     return true;
 }
 
-async function cargarEspacios(){const q=query(collection(db,'espacios'),where('ownerUid','==',usuarioActual.uid));const snap=await getDocs(q);espacios=snap.docs.map(d=>({id:d.id,...d.data()}));const todos=[{id:usuarioActual.uid,nombre:canchaActual.nombre||'Cancha principal',tipoCancha:(Array.isArray(canchaActual.tiposCancha)?canchaActual.tiposCancha[0]:canchaActual.tipoCancha)||'Sintética',horaApertura:canchaActual.horaApertura||'16:00',horaCierre:canchaActual.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana},...espacios.map(e=>({id:e.id,nombre:e.nombre,tipoCancha:e.tipo||'Fútbol',horaApertura:e.horaApertura||'16:00',horaCierre:e.horaCierre||'23:00',horariosSemana:canchaActual.horariosSemana}))];if(!espacioSeleccionado||!todos.find(x=>x.id===espacioSeleccionado.id)){espacioSeleccionado=todos[0]}let container=document.getElementById('dashboard-space-selector');if(!container){const header=document.querySelector('.schedule-head');if(header){container=document.createElement('div');container.id='dashboard-space-selector';container.className='space-selector';header.appendChild(container)}}if(container){container.innerHTML=`<label><span>CANCHA ACTIVA</span><select id="select-cancha-activa" style="margin-left:8px; padding:6px; border-radius:8px; background:#101614; color:#fff; border:1px solid #333;">${todos.map(s=>`<option value="${s.id}" ${s.id===espacioSeleccionado.id?'selected':''}>${s.nombre} · ${s.tipoCancha}</option>`).join('')}</select></label>`;document.getElementById('select-cancha-activa').addEventListener('change',(e)=>{espacioSeleccionado=todos.find(x=>x.id===e.target.value);actualizarDia()})}}
+async function cargarEspacios(){
+    const q = query(collection(db,'espacios'), where('ownerUid','==',usuarioActual.uid));
+    const snap = await getDocs(q);
+    espacios = snap.docs.map(d=>({id:d.id,...d.data()}));
+    
+    // Lista completa con la cancha principal y las secundarias
+    const todos = [
+        {
+            id: usuarioActual.uid,
+            nombre: canchaActual.nombre || 'Cancha principal',
+            tipoCancha: (Array.isArray(canchaActual.tiposCancha) ? canchaActual.tiposCancha[0] : canchaActual.tipoCancha) || 'Sintética',
+            horaApertura: canchaActual.horaApertura || '16:00',
+            horaCierre: canchaActual.horaCierre || '23:00',
+            horariosSemana: canchaActual.horariosSemana
+        },
+        ...espacios.map(e => ({
+            id: e.id,
+            nombre: e.nombre,
+            tipoCancha: e.tipo || 'Fútbol',
+            horaApertura: e.horaApertura || '16:00',
+            horaCierre: e.horaCierre || '23:00',
+            horariosSemana: canchaActual.horariosSemana
+        }))
+    ];
+
+    if(!espacioSeleccionado || !todos.find(x => x.id === espacioSeleccionado.id)){
+        espacioSeleccionado = todos[0];
+    }
+
+    // Dibujar el selector único en el contenedor
+    let container = document.getElementById('dashboard-space-selector');
+    if(!container){
+        const header = document.querySelector('.schedule-head');
+        if(header){
+            container = document.createElement('div');
+            container.id = 'dashboard-space-selector';
+            header.appendChild(container);
+        }
+    }
+
+    if(container){
+        // Inyecta únicamente el dropdown selector estilizado
+        container.innerHTML = `
+            <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1);">
+                <i class="ph-bold ph-soccer-ball" style="color:var(--primary-green, #2ecc71); font-size:1.1rem;"></i>
+                <select id="select-cancha-activa" style="background:transparent; color:#fff; border:none; font-size:0.9rem; font-weight:bold; outline:none; cursor:pointer;">
+                    ${todos.map(s => `<option value="${s.id}" ${s.id === espacioSeleccionado.id ? 'selected' : ''} style="background:#111; color:#fff;">${s.nombre} (${s.tipoCancha})</option>`).join('')}
+                </select>
+            </div>
+        `;
+
+        document.getElementById('select-cancha-activa').addEventListener('change', (e) => {
+            espacioSeleccionado = todos.find(x => x.id === e.target.value);
+            actualizarDia();
+        });
+    }
+}
 async function cargarReservas(){
     // 🔥 Ahora lee la cancha seleccionada en el menú, no solo la principal
     const idCancha = String(espacioSeleccionado?.id || canchaActual?.id || usuarioActual.uid);
