@@ -216,29 +216,20 @@
 
         <div class="dashboard-grid">
             <section class="schedule-card card" style="height: fit-content; position: relative; overflow: hidden;">
-                <div class="schedule-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <span class="mini-label">CUADRÍCULA DE CANCHAS</span>
-                        <h2 id="schedule-title" style="margin:0; display: flex; align-items: center; gap: 8px;">
-                            Disponibilidad
-                        </h2>
-                    </div>
-                    <div id="canchas-carousel-controls" style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
-                        <button id="btn-cancha-prev" class="btn-scroll-cal" style="width: 30px; height: 30px;"><i class="ph-bold ph-caret-left"></i></button>
-                        <span id="cancha-actual-label" style="font-size: 0.85rem; font-weight: bold; color: #f1c40f; min-width: 90px; text-align: center;">Cancha 1</span>
-                        <button id="btn-cancha-next" class="btn-scroll-cal" style="width: 30px; height: 30px;"><i class="ph-bold ph-caret-right"></i></button>
-                    </div>
-                </div>
+    <div class="schedule-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <div>
+            <span class="mini-label">CUADRÍCULA DE CANCHAS</span>
+            <h2 id="schedule-title" style="margin:0; display: flex; align-items: center; gap: 8px;">
+                Disponibilidad
+            </h2>
+        </div>
+        <div id="dashboard-space-selector"></div>
+    </div>
 
-                <div id="canchas-slider-container" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; gap: 20px; padding-bottom: 10px; scrollbar-width: none;">
-                    <style>#canchas-slider-container::-webkit-scrollbar { display: none; }</style>
-                    <div class="cancha-slide" style="min-width: 100%; scroll-snap-align: start; flex-shrink: 0;">
-                        <div id="admin-schedule" class="admin-schedule">
-                            <div class="admin-loading"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando horarios...</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+    <div id="admin-schedule" class="admin-schedule">
+        <div class="admin-loading"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando horarios...</div>
+    </div>
+</section>
 
             <section class="card reservations-card" style="height: fit-content;">
                 <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">
