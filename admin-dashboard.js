@@ -476,6 +476,8 @@ if(formPerfil) {
     formPerfil.addEventListener('submit', async e => {
         e.preventDefault(); if(!usuarioActual) return;
         const btn = document.getElementById('btn-guardar-admin');
+        
+        // 🔥 FIX 1: Lectura compatible del Menú Desplegable
         const elTipos = document.getElementById('admin-tipos');
         let tipos = [];
         if (elTipos) {
@@ -491,23 +493,37 @@ if(formPerfil) {
         if(errorMsg) errorMsg.textContent = ''; 
         
         btn.disabled=true; 
-        btn.innerHTML='<i class="ph-bold ph-spinner-gap"></i> Guardando...';
+        btn.innerHTML='<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
+        
         try{
             const uid = usuarioActual.uid;
             const files = [document.getElementById('admin-foto1')?.files[0], document.getElementById('admin-foto2')?.files[0], document.getElementById('admin-foto3')?.files[0]];
             const fotos = await Promise.all(files.map((f,i) => subirImagen(f,`canchas/${uid}/foto${i+1}`)));
             const logo = await subirImagen(document.getElementById('admin-logo')?.files[0], `canchas/${uid}/logo`);
             
+            // 🔥 FIX 2: Blindaje contra "null" usando ?.value (Si no existe el input, se guarda vacío)
             const dataToSave = {
-                ownerUid: uid, nombre: document.getElementById('admin-nombre').value.trim(), departamento: document.getElementById('admin-departamento').value.trim(),
-                distrito: document.getElementById('admin-distrito').value.trim(), whatsapp: document.getElementById('admin-whatsapp').value.trim(),
-                precio: Number(document.getElementById('admin-precio').value||0), tiposCancha: tipos, descripcion: document.getElementById('admin-descripcion').value.trim(),
-                ubicacionTexto: document.getElementById('admin-ubicacion-texto').value.trim(), ubicacionLink: document.getElementById('admin-ubicacion-link').value.trim(),
-                lat: document.getElementById('admin-lat').value.trim(), lng: document.getElementById('admin-lng').value.trim(),
-                intervaloMinutos: Number(document.getElementById('admin-intervalo').value||60), horaApertura: document.getElementById('admin-hora-inicio')?.value || '16:00',
-                horaCierre: document.getElementById('admin-hora-cierre')?.value || '23:00', horariosSemana: readWeeklyHours(), configurado: true,
-                estadoPublicacion: canchaActual?.estadoPublicacion || 'draft', updatedAt: serverTimestamp()
+                ownerUid: uid, 
+                nombre: document.getElementById('admin-nombre')?.value?.trim() || '', 
+                departamento: document.getElementById('admin-departamento')?.value?.trim() || '',
+                distrito: document.getElementById('admin-distrito')?.value?.trim() || '', 
+                whatsapp: document.getElementById('admin-whatsapp')?.value?.trim() || '',
+                precio: Number(document.getElementById('admin-precio')?.value || 0), 
+                tiposCancha: tipos, 
+                descripcion: document.getElementById('admin-descripcion')?.value?.trim() || '',
+                ubicacionTexto: document.getElementById('admin-ubicacion-texto')?.value?.trim() || '', 
+                ubicacionLink: document.getElementById('admin-ubicacion-link')?.value?.trim() || '',
+                lat: document.getElementById('admin-lat')?.value?.trim() || '', 
+                lng: document.getElementById('admin-lng')?.value?.trim() || '',
+                intervaloMinutos: Number(document.getElementById('admin-intervalo')?.value || 60), 
+                horaApertura: document.getElementById('admin-hora-inicio')?.value || '16:00',
+                horaCierre: document.getElementById('admin-hora-cierre')?.value || '23:00', 
+                horariosSemana: readWeeklyHours(), 
+                configurado: true,
+                estadoPublicacion: canchaActual?.estadoPublicacion || 'draft', 
+                updatedAt: serverTimestamp()
             };
+            
             if(logo) dataToSave.logo = logo;
             const fotosFiltradas = [...fotos.map((x,i) => x || canchaActual?.fotos?.[i]).filter(Boolean)];
             if(fotosFiltradas.length > 0) dataToSave.fotos = fotosFiltradas;
