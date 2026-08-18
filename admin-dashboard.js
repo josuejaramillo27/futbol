@@ -476,9 +476,18 @@ if(formPerfil) {
         e.preventDefault(); if(!usuarioActual) return;
         const btn = document.getElementById('btn-guardar-admin');
         const tipos = [...document.querySelectorAll('#admin-tipos input:checked')].map(x=>x.value);
-        if(!tipos.length){ document.getElementById('tipos-error').textContent='Selecciona al menos un tipo de cancha.'; return; }
+        if(!tipos.length){ 
+            const errorMsg = document.getElementById('tipos-error');
+            if(errorMsg) errorMsg.textContent = 'Selecciona al menos un tipo de cancha.';
+            else window.toast('Selecciona al menos un tipo de cancha.', true);
+            return; 
+        }
         
-        document.getElementById('tipos-error').textContent=''; btn.disabled=true; btn.innerHTML='<i class="ph-bold ph-spinner-gap"></i> Guardando...';
+        const errorMsg = document.getElementById('tipos-error');
+        if(errorMsg) errorMsg.textContent = ''; 
+        
+        btn.disabled=true; 
+        btn.innerHTML='<i class="ph-bold ph-spinner-gap"></i> Guardando...';
         try{
             const uid = usuarioActual.uid;
             const files = [document.getElementById('admin-foto1')?.files[0], document.getElementById('admin-foto2')?.files[0], document.getElementById('admin-foto3')?.files[0]];
