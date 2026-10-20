@@ -563,8 +563,6 @@ const btnHoy = document.getElementById('btn-hoy'); btnHoy?.addEventListener('cli
 async function subirImagen(archivo, ruta) { if (!archivo) return null; const storageRef = ref(storage, ruta); await uploadBytes(storageRef, archivo); return await getDownloadURL(storageRef) }
 const formPerfil = document.getElementById('form-perfil-cancha');
 if (formPerfil) {
-    const formPerfil = document.getElementById('form-perfil-cancha');
-if (formPerfil) {
     formPerfil.addEventListener('submit', async e => {
         e.preventDefault(); 
         if (!usuarioActual) return;
