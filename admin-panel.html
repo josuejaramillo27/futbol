@@ -106,14 +106,32 @@
 
         /* BOTONES */
         .btn {
-            background: #222; color: #fff; border: 1px solid var(--border-color);
-            padding: 10px 20px; border-radius: 8px; cursor: pointer;
+            background: #222; color: #fff; border: 1.5px solid var(--border-color);
+            padding: 10px 18px; border-radius: 10px; cursor: pointer;
             display: inline-flex; align-items: center; justify-content: center;
-            gap: 8px; font-weight: 600; transition: all 0.3s ease;
+            gap: 8px; font-weight: 700; transition: all 0.22s ease;
+            white-space: nowrap; font-size: 0.88rem; text-decoration: none;
         }
-        .btn-primary { background: var(--primary-green); color: #000; border: none; }
-        .btn-danger { background: transparent; color: #e74c3c; border: 1px solid #e74c3c; }
-        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: #fff; }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { 
+            background: var(--primary-green, #2ecc71); 
+            color: #080b0a; 
+            font-weight: 800; 
+            border: 1px solid var(--primary-green, #2ecc71); 
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.25);
+        }
+        .btn-primary:hover { 
+            background: #27ae60; 
+            border-color: #27ae60;
+            color: #080b0a;
+            box-shadow: 0 8px 24px rgba(46, 204, 113, 0.35);
+        }
+        .btn-danger { background: rgba(231, 76, 60, 0.12); color: #e74c3c; border: 1.5px solid rgba(231, 76, 60, 0.35); }
+        .btn-danger:hover { background: #e74c3c; color: #fff; border-color: #e74c3c; }
+        .btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.22); color: #fff; }
+        .btn-outline:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.45); }
+        .btn-ghost { background: transparent; border: none; color: var(--text-muted); }
+        .btn-ghost:hover { color: var(--primary-green); background: rgba(46,204,113,0.08); }
 
         /* MODALES */
         .modal-oculto {
@@ -139,6 +157,50 @@
             box-sizing: border-box; outline: none;
         }
         .form-control:focus { border-color: var(--primary-green); }
+
+        /* RESPONSIVE MOBILE ADAPTATION */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+                overflow: auto;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 12px 16px;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                box-sizing: border-box;
+            }
+            .brand {
+                padding: 0 0 10px;
+                margin-bottom: 10px;
+            }
+            .sidebar-menu {
+                flex-direction: row;
+                overflow-x: auto;
+                padding: 0;
+                gap: 8px;
+            }
+            .sidebar-link {
+                padding: 8px 12px;
+                font-size: 0.82rem;
+                white-space: nowrap;
+            }
+            .main-content {
+                padding: 20px 16px;
+            }
+            .card {
+                padding: 16px;
+            }
+            table {
+                font-size: 0.8rem;
+            }
+            th, td {
+                padding: 10px 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -422,7 +484,7 @@
                 
                 const estPub = owner.estadoPublicacion;
                 let badgePublicacion = `<span style="color:var(--warning); background:rgba(255,193,7,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cancha Borrador</span>`;
-                if (estPub === 'pending_review') badgePublicacion = `<span style="color:#17a2b8; background:rgba(23,162,184,0.15); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">⚽ SOLICITA PUBLICACIÓN</span>`;
+                if (estPub === 'pending_review') badgePublicacion = `<span style="color:#17a2b8; background:rgba(23,162,184,0.15); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-hourglass-medium"></i> SOLICITA PUBLICACIÓN</span>`;
                 if (estPub === 'published') badgePublicacion = `<span style="color:var(--primary-green); background:rgba(0,217,104,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">WEB ACTIVA</span>`;
 
                 const card = document.createElement('div');

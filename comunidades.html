@@ -11,54 +11,46 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-        body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
+        body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; background-color: var(--bg-dark, #080B0A); }
         
         /* BARRA SUPERIOR RESPONSIVA */
-        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(8, 11, 10, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; width: 100%; box-sizing: border-box; }
-        .topbar-nav { display: flex; gap: 12px; align-items: center; flex-wrap: nowrap; }
-        .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; font-size: 0.55rem; font-weight: 800; gap: 3px; letter-spacing: 0.5px; white-space: nowrap; }
-        .topbar-nav a.active { color: var(--primary-green); }
+        .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; width: 100%; box-sizing: border-box; }
+        .topbar-nav { display: flex; gap: 16px; align-items: center; flex-wrap: nowrap; }
+        .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; transition: color 0.25s ease; font-size: 0.6rem; font-weight: 700; gap: 3px; letter-spacing: 0.5px; white-space: nowrap; }
+        .topbar-nav a:hover, .topbar-nav a.active { color: var(--primary-green, #2ecc71); }
         .topbar-nav i { font-size: 1.25rem; }
 
-        .container { max-width: 900px; margin: 0 auto; padding: 25px 20px 80px; width: 100%; box-sizing: border-box; }
-
-        /* TABS PRINCIPALES (LIGAS) */
-        .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .tab-btn { background: transparent; border: 1px solid transparent; color: #888; font-size: 0.95rem; font-weight: 700; cursor: pointer; padding: 8px 18px; border-radius: 8px; transition: background 0.2s, color 0.2s; white-space: nowrap; }
-        .tab-btn:hover { color: #fff !important; background: rgba(255, 255, 255, 0.05) !important; }
-        .tab-btn.active { color: var(--primary-green) !important; background: rgba(46, 204, 113, 0.12) !important; border: 1px solid rgba(46, 204, 113, 0.3) !important; }
-        
-        /* MINI SUB-TABS (DENTRO DE COMUNIDADES) */
-        .subtabs-container { display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
-        .subtab-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #aaa; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 6px 14px; border-radius: 20px; transition: all 0.2s; white-space: nowrap; }
-        .subtab-btn.active { color: #fff; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); }
-        .subtab-btn-reto.active { color: #e74c3c; background: rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.4); }
+        .container { max-width: 980px; margin: 0 auto; padding: 25px 20px 80px; width: 100%; box-sizing: border-box; }
 
         /* TARJETAS */
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .promo-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; transition: border-color 0.2s; position: relative; backdrop-filter: blur(10px); }
-        .promo-card:hover { border-color: rgba(255,255,255,0.25); }
-        .promo-card.verified-border { border-color: rgba(52, 152, 219, 0.4); }
+        .promo-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 22px; transition: all 0.22s ease; position: relative; backdrop-filter: blur(10px); display: flex; flex-direction: column; justify-content: space-between; }
+        .promo-card:hover { border-color: rgba(46,204,113,0.4); transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .promo-card.verified-border { border-color: rgba(52, 152, 219, 0.35); }
 
         .badge-verified { background: rgba(52, 152, 219, 0.15); color: #3498db; border: 1px solid rgba(52, 152, 219, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
         .badge-featured { background: rgba(241, 196, 15, 0.15); color: #f1c40f; border: 1px solid rgba(241, 196, 15, 0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
 
-        .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); font-size: 0.85rem; }
+        .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); font-size: 0.85rem; }
         .detail-label { color: #aaa; font-weight: 600; }
         .detail-val { color: #fff; font-weight: 700; text-align: right; }
 
         /* HEADER DE SECCIÓN Y BOTONES TOP */
-        .section-banner-top { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-        .btn-anunciar-top { background: linear-gradient(45deg, #f1c40f, #e67e22); color: #000; font-weight: 800; border: none; padding: 10px 18px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; transition: opacity 0.2s; }
-        .btn-anunciar-top:hover { opacity: 0.88; }
+        .section-banner-top { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); padding: 18px 22px; border-radius: 14px; margin-bottom: 22px; flex-wrap: wrap; gap: 14px; }
+        .btn-anunciar-top { background: var(--primary-green, #2ecc71); color: #080b0a; font-weight: 800; border: 1px solid var(--primary-green, #2ecc71); padding: 10px 18px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.84rem; transition: all 0.22s ease; width: auto; white-space: nowrap; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); }
+        .btn-anunciar-top:hover { background: var(--primary-hover, #27ae60); border-color: var(--primary-hover, #27ae60); color: #080b0a; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(46, 204, 113, 0.35); }
 
         .community-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; cursor: pointer; backdrop-filter: blur(10px); transition: border-color 0.2s; }
-        .community-card:hover { border-color: var(--primary-green); }
+        .community-card:hover { border-color: var(--primary-green, #2ecc71); }
         .sport-tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
         .sport-tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; color: #ddd; font-weight: 600; }
 
-        .btn { transition: background 0.2s, color 0.2s, opacity 0.2s !important; }
-        .btn:hover { transform: none !important; box-shadow: none !important; opacity: 0.88; }
+        @media (max-width: 650px) {
+            .section-banner-top { flex-direction: column; align-items: stretch; text-align: center; }
+            .section-banner-top .btn-anunciar-top { width: 100% !important; justify-content: center; }
+            #btn-solicitar-creacion-comunidad { width: 100% !important; justify-content: center; }
+            .grid-cards { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -163,9 +155,9 @@
         <form id="form-anuncio-promocional">
             <label style="color:#fff; font-size:0.85rem; font-weight:bold; margin-bottom:6px; display:block;">¿Qué deseas anunciar?</label>
             <select id="an-tipo" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; margin-bottom:12px; box-sizing:border-box;">
-                <option value="torneo">🏆 Torneo / Campeonato</option>
-                <option value="academia">⚽ Academia / Escuela Deportiva</option>
-                <option value="comunidad">👥 Comunidad de Jugadores</option>
+                <option value="torneo">Torneo / Campeonato</option>
+                <option value="academia">Academia / Escuela Deportiva</option>
+                <option value="comunidad">Comunidad de Jugadores</option>
             </select>
 
             <input type="text" id="an-nombre" required placeholder="Nombre Oficial del Torneo o Academia" maxlength="40" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; margin-bottom:10px; box-sizing:border-box;">
@@ -268,7 +260,7 @@
                 <div class="promo-card verified-border">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <span class="badge-verified"><i class="ph-fill ph-seal-check"></i> Verificado</span>
-                        <span class="badge-featured">🏆 ${item.deporte}</span>
+                        <span class="badge-featured"><i class="ph-fill ph-trophy"></i> ${item.deporte}</span>
                     </div>
                     <h3 style="margin:0 0 12px; color:#fff; font-size:1.2rem;">${item.nombre}</h3>
                     
@@ -312,7 +304,7 @@
                 <div class="promo-card verified-border">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                         <span class="badge-verified"><i class="ph-fill ph-seal-check"></i> Verificada</span>
-                        <span style="color:#2ecc71; font-weight:bold; font-size:0.8rem;">⚽ ${item.deporte}</span>
+                        <span style="color:var(--primary-green, #2ecc71); font-weight:bold; font-size:0.8rem; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-soccer-ball"></i> ${item.deporte}</span>
                     </div>
                     <h3 style="margin:0 0 12px; color:#fff; font-size:1.2rem;">${item.nombre}</h3>
                     
@@ -402,7 +394,7 @@
                 html += `
                 <div class="promo-card" style="border-color:rgba(231,76,60,0.4);">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                        <h3 style="margin:0; font-size:1.1rem; color:#fff;">⚔️ ${r.nombreComunidad}</h3>
+                        <h3 style="margin:0; font-size:1.1rem; color:#fff; display:flex; align-items:center; gap:6px;"><i class="ph-fill ph-swords" style="color:#e74c3c;"></i> ${r.nombreComunidad}</h3>
                         <span style="background:rgba(231,76,60,0.15); color:#e74c3c; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">${r.formato}</span>
                     </div>
                     <div class="detail-row"><span class="detail-label">Deporte:</span><span class="detail-val" style="color:#f1c40f;">${r.deporte}</span></div>
@@ -453,7 +445,7 @@
                 createdAt: serverTimestamp()
             });
 
-            const msjWa = `Hola *CHALACAPP*! 🏆\nSolicito la aprobación para anunciar mi *${tipo.toUpperCase()}*:\n\n*Nombre:* ${nombre}\n*Deporte:* ${deporte}\n*Enlace Verificación:* ${linkVerificacion}\n\nQuedo a la espera del pago de la tarifa y activación.`;
+            const msjWa = `Hola *CHALACAPP*!\nSolicito la aprobación para anunciar mi *${tipo.toUpperCase()}*:\n\n*Nombre:* ${nombre}\n*Deporte:* ${deporte}\n*Enlace Verificación:* ${linkVerificacion}\n\nQuedo a la espera del pago de la tarifa y activación.`;
             
             document.getElementById('modal-anunciar').style.display = 'none';
             e.target.reset();

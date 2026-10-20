@@ -119,7 +119,7 @@ if(btnRegister) {
             // FIX 2: Alerta por WhatsApp segura contra bloqueos
             // ==========================================
             const tuNumeroWhatsApp = "51953066853"; // <-- CAMBIA ESTO POR TU NÚMERO
-            const mensajeWhatsApp = `Hola CHALACAPP ⚽, acabo de enviar una solicitud en la web para registrar mi complejo "${complejo}". Mi nombre es ${nombre} y mi DNI es ${dni}. Quedo a la espera de la aprobación.`;
+            const mensajeWhatsApp = `Hola CHALACAPP, acabo de enviar una solicitud en la web para registrar mi complejo "${complejo}". Mi nombre es ${nombre} y mi DNI es ${dni}. Quedo a la espera de la aprobación.`;
             
             // Forzamos la redirección en la misma ventana para evitar pop-up blockers
             window.location.href = `https://wa.me/${tuNumeroWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`;

@@ -233,11 +233,11 @@ function abrirGestionReserva(r){
     
     // SEMÁFORO DE COLORES
     const statusLabels = {
-        'pending': '<span style="color:#f1c40f; background:rgba(241,196,15,0.1); padding:4px 8px; border-radius:6px; border:1px solid #f1c40f;">Pendiente de Validar ⏳</span>',
-        'confirmed': '<span style="color:var(--primary-green); background:rgba(46,204,113,0.1); padding:4px 8px; border-radius:6px; border:1px solid var(--primary-green);">Confirmada ✅</span>',
-        'completed': '<span style="color:#a777e8">Completada (Jugada)</span>',
-        'cancelled': '<span style="color:var(--text-muted)">Cancelada</span>',
-        'rejected': '<span style="color:var(--danger)">Rechazada por la Cancha</span>'
+        'pending': '<span style="color:#f1c40f; background:rgba(241,196,15,0.1); padding:4px 8px; border-radius:6px; border:1px solid #f1c40f; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-hourglass-medium"></i> Pendiente de Validar</span>',
+        'confirmed': '<span style="color:var(--primary-green); background:rgba(46,204,113,0.1); padding:4px 8px; border-radius:6px; border:1px solid var(--primary-green); display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-check-circle"></i> Confirmada</span>',
+        'completed': '<span style="color:#a777e8; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-check"></i> Completada (Jugada)</span>',
+        'cancelled': '<span style="color:var(--text-muted); display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-x"></i> Cancelada</span>',
+        'rejected': '<span style="color:var(--danger); display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-prohibit"></i> Rechazada por la Cancha</span>'
     };
 
     const senaBadge = r.senaPagada 
@@ -279,7 +279,7 @@ function abrirGestionReserva(r){
     } else if (st === 'completed') {
         if(!r.calificadoPorDueno) {
             btnContainer.innerHTML += `
-                <button onclick="abrirCalificacionJugador('${r.usuarioUid}', '${r.id}', '${clienteNombre}')" class="btn" style="background:#f1c40f; color:#000; border:none; margin-top:10px;"><i class="ph-fill ph-star"></i> ⭐ Calificar y Reportar Equipo</button>
+                <button onclick="abrirCalificacionJugador('${r.usuarioUid}', '${r.id}', '${clienteNombre}')" class="btn" style="background:#f1c40f; color:#000; border:none; margin-top:10px; font-weight:700;"><i class="ph-fill ph-star"></i> Calificar y Reportar Equipo</button>
             `;
         } else {
             btnContainer.innerHTML += `<div style="text-align:center; color:#aaa; font-size:0.85rem;"><i class="ph-fill ph-check-circle" style="color:#2ecc71;"></i> Ya calificaste a este equipo.</div>`;
@@ -346,7 +346,7 @@ window.abrirCalificacionJugador = function(jugadorUid, reservaId, nombreJugador)
             selRating = Number(star.dataset.val);
             selTags.clear();
             stars.forEach(s => { s.style.color = Number(s.dataset.val) <= selRating ? '#f1c40f' : '#444'; });
-            const labels = {1:"Pésimos / Peligrosos 😡", 2:"Mal comportamiento 👎", 3:"Regulares 😐", 4:"Buenos 👍", 5:"¡Excelentes! ⭐"};
+            const labels = {1:"Pésimos / Peligrosos", 2:"Mal comportamiento", 3:"Regulares", 4:"Buenos", 5:"¡Excelentes!"};
             label.textContent = labels[selRating];
             
             tagsCont.innerHTML = TAGS_DUEÑO[selRating].map(t => `<div class="tag-chip" data-text="${t.text}" style="padding:6px 12px; border:1px solid #555; border-radius:20px; font-size:0.8rem; color:#aaa; cursor:pointer;"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`).join('');
@@ -397,10 +397,10 @@ window.cambiarEstadoGestion = async function(reservaId, nuevoEstado){
 
     // DICCIONARIO PARA TRADUCIR EL ESTADO SOLO EN LA ALERTA VISUAL
     const nombresEstados = {
-        'confirmed': 'CONFIRMADA ✅',
-        'completed': 'JUGADA 🏁',
-        'cancelled': 'CANCELADA ❌',
-        'rejected': 'RECHAZADA 🚫'
+        'confirmed': 'CONFIRMADA',
+        'completed': 'JUGADA',
+        'cancelled': 'CANCELADA',
+        'rejected': 'RECHAZADA'
     };
     
     // Si encuentra la traducción la usa, si no, usa el original en mayúsculas
@@ -553,7 +553,7 @@ function init(){
         usuarioActual=u; document.getElementById('admin-user-label').textContent=u.email||'';
         try{ 
             if(await cargarPerfil()){ 
-                await cargarEspacios(); // 🔥 ¡ESTA LÍNEA ENCIENDE EL SELECTOR DE MÚLTIPLES CANCHAS!
+                await cargarEspacios(); // Enciende el selector de múltiples canchas
                 actualizarDia(); 
             } 
         }catch(e){ console.error(e); toast('No se pudo cargar el panel.',true); }

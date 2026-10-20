@@ -141,7 +141,7 @@ window.cancelarReserva = async function(id) {
 
 // SISTEMA DE RESEÑAS
 window.dejarResena = async function(reservaId, canchaId) {
-    const rating = prompt("⚽ Califica la cancha del 1 al 5:");
+    const rating = prompt("Califica la cancha del 1 al 5:");
     if(!rating || isNaN(rating) || rating < 1 || rating > 5) return alert("Calificación inválida.");
     const comentario = prompt("Escribe un breve comentario (Opcional):");
 

@@ -23,8 +23,33 @@
         .player-name { font-size: 1.1rem; color: #fff; margin: 0 0 4px 0; display: flex; align-items: center; gap: 6px; }
         .player-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
         .stat-pill { background: rgba(255,255,255,0.05); padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; color: #ccc; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-edit-profile { width: 100%; background: rgba(46, 204, 113, 0.1); border: 1px dashed var(--primary-green); color: var(--primary-green); transition: all 0.3s ease; }
-        .btn-edit-profile:hover { background: var(--primary-green) !important; color: #080B0A !important; border: 1px solid var(--primary-green); }
+        .btn-edit-profile { 
+            width: auto;
+            max-width: 100%;
+            background: rgba(46, 204, 113, 0.1); 
+            border: 1px dashed var(--primary-green, #2ecc71); 
+            color: var(--primary-green, #2ecc71); 
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            transition: all 0.25s ease; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: none;
+        }
+        .btn-edit-profile:hover { 
+            background: var(--primary-green, #2ecc71) !important; 
+            color: #080B0A !important; 
+            border: 1px solid var(--primary-green, #2ecc71);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+        }
+        @media (max-width: 600px) {
+            .btn-edit-profile { width: 100% !important; }
+        }
     </style>
 </head>
 <body>
@@ -65,9 +90,9 @@
         <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-users-three"></i></div>
     </section>
 
-    <section style="max-width:760px; margin: 0 auto 20px; padding: 0 20px;">
+    <section style="max-width:760px; margin: 0 auto 20px; padding: 0 20px; text-align: center;">
         <button id="btn-abrir-perfil" class="btn btn-edit-profile">
-            <i class="ph-bold ph-user-circle"></i> Configurar mi Tarjeta de Jugador
+            <i class="ph-bold ph-user-circle" style="font-size:1.25rem;"></i> Configurar mi Tarjeta de Jugador
         </button>
     </section>
 
@@ -460,7 +485,7 @@
                 if(redFlags.some(rf => tag.includes(rf))) alertsHtml += `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-warning"></i> ${tag} (${count})</span>`;
                 else if(count >= 1) goodTagsHtml += `<span style="background:rgba(255,255,255,0.05); color:#ccc; border:1px solid rgba(255,255,255,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-flex; align-items:center; gap:4px;">${tag} (${count})</span>`;
             });
-            if(alertsHtml) alertsHtml = `<div style="margin-top:15px; display:flex; flex-direction:column; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#e74c3c; font-weight:bold;">🚨 Reportes de Indisciplina:</small>${alertsHtml}</div>`;
+            if(alertsHtml) alertsHtml = `<div style="margin-top:15px; display:flex; flex-direction:column; gap:5px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.1);"><small style="color:#e74c3c; font-weight:bold; display:inline-flex; align-items:center; gap:5px;"><i class="ph-bold ph-warning-circle"></i> Reportes de Indisciplina:</small>${alertsHtml}</div>`;
             if(goodTagsHtml) goodTagsHtml = `<div style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px;">${goodTagsHtml}</div>`;
 
             let badgesComunidad = '';

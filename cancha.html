@@ -65,11 +65,12 @@
         .bio-title { font-size: 1.5rem; color: #fff; margin: 0 0 4px 0; font-weight: 900; letter-spacing: -0.3px; }
         .bio-location { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 15px; }
 
-        /* BOTONES */
-        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 14px 20px; background: linear-gradient(45deg, var(--primary-green), #27ae60); color: #000; font-weight: 900; font-size: 1rem; border: none; border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: transform 0.2s; box-sizing: border-box; }
-        .bio-btn:active { transform: scale(0.98); }
-        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.25); color: #fff; box-shadow: none; }
-        .bio-btn-outline:hover { border-color: var(--primary-green); color: var(--primary-green); }
+        /* BOTONES ESTANDARIZADOS */
+        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 20px; background: var(--primary-green, #2ecc71); color: #080b0a; font-weight: 800; font-size: 0.95rem; border: 1px solid var(--primary-green, #2ecc71); border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; }
+        .bio-btn:hover { background: var(--primary-hover, #27ae60); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3); }
+        .bio-btn:active { transform: translateY(0); }
+        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: #fff; box-shadow: none; }
+        .bio-btn-outline:hover { border-color: var(--primary-green, #2ecc71); color: var(--primary-green, #2ecc71); background: rgba(46,204,113,0.06); }
 
         /* DESCRIPCIÓN */
         .bio-desc-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 15px; text-align: left; margin-top: 20px; }
@@ -108,6 +109,7 @@
             .bio-title { font-size: 2.2rem; text-align: left; }
             .bio-location { font-size: 1rem; text-align: left; }
             .bio-desc-container { margin-top: 0; }
+            .left-column .bio-btn-outline { width: auto; align-self: flex-start; min-width: 190px; }
         }
     </style>
 </head>

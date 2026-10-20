@@ -102,7 +102,7 @@ function renderOwners() {
         
         const estPub = owner.estadoPublicacion;
         let badgePublicacion = `<span style="color:var(--warning); background:rgba(255,193,7,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cancha en Borrador</span>`;
-        if (estPub === 'pending_review') badgePublicacion = `<span style="color:#17a2b8; background:rgba(23,162,184,0.15); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">⚠️ SOLICITUD DE PUBLICACIÓN PENDIENTE</span>`;
+        if (estPub === 'pending_review') badgePublicacion = `<span style="color:#17a2b8; background:rgba(23,162,184,0.15); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-warning-circle"></i> SOLICITUD DE PUBLICACIÓN PENDIENTE</span>`;
         if (estPub === 'published') badgePublicacion = `<span style="color:var(--primary-green); background:rgba(0,217,104,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">PÚBLICA Y ACTIVA</span>`;
 
         const card = document.createElement('div');

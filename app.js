@@ -267,7 +267,7 @@ async function confirmarReserva(){
         const telOwner = formatWsp(c?.whatsapp); 
         
         if (telOwner) {
-            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en la APP:\n👤 *Nombre:* ${nombre}\n📅 *Fecha:* ${fechaReq}\n⏰ *Hora:* ${hora}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
+            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en la APP:\n*Nombre:* ${nombre}\n*Fecha:* ${fechaReq}\n*Hora:* ${hora}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
             setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); }, 2500);
         }
     } catch(e) {
@@ -336,7 +336,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                 } else if (yaPostulo) {
                     if (miPostulacion.estado === 'aceptado') {
                         interaccionHTML = `<div style="margin-top:15px; padding:15px; background:rgba(46,204,113,0.1); border:1px solid #2ecc71; border-radius:8px; text-align:center;">
-                            <span style="color:#2ecc71; font-weight:bold; font-size:0.95rem; display:block; margin-bottom:8px;">🎉 ¡Has sido fichado!</span>
+                            <span style="color:var(--primary-green); font-weight:bold; font-size:0.95rem; display:inline-flex; align-items:center; gap:6px; margin-bottom:8px;"><i class="ph-bold ph-check-circle"></i> ¡Has sido fichado!</span>
                             <a href="https://wa.me/${formatWsp(d.contacto)}" target="_blank" style="display:inline-flex; align-items:center; gap:5px; background:#25D366; color:#000; font-weight:bold; padding:8px 15px; border-radius:6px; text-decoration:none; font-size:0.85rem;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir al Capitán</a>
                         </div>`;
                     } else {
@@ -345,7 +345,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                         </div>`;
                     }
                 } else {
-                    interaccionHTML = `<button class="btn btn-postular" data-anuncio="${d.id}" style="width:100%; margin-top:15px; background:linear-gradient(45deg, #f1c40f, #e67e22); color:#000; font-weight:bold; border:none; box-shadow: 0 4px 15px rgba(241,196,15,0.2);"><i class="ph-bold ph-hand-raising" style="font-size:1.2rem;"></i> ✋ ¡Me Apunto!</button>`;
+                    interaccionHTML = `<button class="btn btn-postular" data-anuncio="${d.id}" style="width:100%; margin-top:15px; background:linear-gradient(45deg, #f1c40f, #e67e22); color:#000; font-weight:bold; border:none; box-shadow: 0 4px 15px rgba(241,196,15,0.2);"><i class="ph-bold ph-hand-palm" style="font-size:1.2rem;"></i> ¡Me Apunto!</button>`;
                 }
             }
 
@@ -397,7 +397,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                         }
                     });
                     window.toast('¡Te has apuntado con éxito!', 'success');
-                } catch(e) { window.toast('Error al apuntarse.', 'error'); b.innerHTML = '✋ ¡Me Apunto!'; b.disabled = false; }
+                } catch(e) { window.toast('Error al apuntarse.', 'error'); b.innerHTML = '<i class="ph-bold ph-hand-palm"></i> ¡Me Apunto!'; b.disabled = false; }
             });
         });
 
