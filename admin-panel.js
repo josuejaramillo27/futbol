@@ -1,7 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, getDoc, updateDoc, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+// ==========================================
+// 1. CONFIGURACIÓN FIREBASE
+// ==========================================
 const firebaseConfig = {
     apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
     authDomain: "app-futbol-acd0f.firebaseapp.com",
@@ -17,29 +20,363 @@ const db = getFirestore(app);
 
 let adminUser = null;
 let allOwners = [];
+let chartReservasInstance = null;
+let chartCanchasInstance = null;
 
-const listContainer = document.getElementById('owners-list');
-const searchInput = document.getElementById('search-input');
-const filterStatus = document.getElementById('filter-status');
-const modal = document.getElementById('modal-details');
-
-// Validar Seguridad: Solo Admins Maestros
+// ==========================================
+// 2. SEGURIDAD Y GUARD DE ACCESO
+// ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
         window.location.href = "login.html";
         return;
     }
-    const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-    if (userDoc.exists() && userDoc.data().rol === "admin" && userDoc.data().estado === "approved") {
-        adminUser = user.uid;
-        loadOwnersAndCourts();
-    } else {
-        alert("Acceso Denegado. No eres Administrador.");
+    try {
+        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+        if (userDoc.exists() && userDoc.data().rol === "admin" && userDoc.data().estado === "approved") {
+            adminUser = user.uid;
+            const adminName = userDoc.data().nombre || user.displayName || user.email || "Admin Maestro";
+            const displayEl = document.getElementById("admin-user-display");
+            if (displayEl) displayEl.textContent = adminName;
+            
+            cargarDashboardEstadisticas();
+            loadOwnersAndCourts();
+            cargarComunidadesAdmin();
+        } else {
+            alert("Acceso Denegado. Esta sección es exclusiva para el Administrador Maestro.");
+            signOut(auth).then(() => window.location.href = "login.html");
+        }
+    } catch (err) {
+        console.error("Error autenticando admin:", err);
+        alert("Error de autenticación con el servidor.");
         signOut(auth).then(() => window.location.href = "login.html");
     }
 });
 
-// Cargar a todos los dueños y cruzar los datos con la colección de canchas
+// ==========================================
+// 3. NAVEGACIÓN ENTRE PESTAÑAS
+// ==========================================
+const links = document.querySelectorAll('.sidebar-link');
+const tabs = document.querySelectorAll('.tab-content');
+
+links.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault();
+        links.forEach(l => l.classList.remove('active'));
+        tabs.forEach(t => t.classList.remove('mostrar'));
+        
+        link.classList.add('active');
+        const targetId = link.getAttribute('data-target');
+        const targetTab = document.getElementById(targetId);
+        if (targetTab) targetTab.classList.add('mostrar');
+
+        if (targetId === 'tab-dashboard') cargarDashboardEstadisticas();
+        if (targetId === 'tab-usuarios') loadOwnersAndCourts();
+        if (targetId === 'tab-comunidades') cargarComunidadesAdmin();
+    });
+});
+
+// Cerrar sesión
+document.getElementById('btn-logout')?.addEventListener('click', () => {
+    signOut(auth).then(() => window.location.href = 'index.html');
+});
+
+// Botón Actualizar Métricas
+document.getElementById('btn-refresh-kpis')?.addEventListener('click', () => {
+    cargarDashboardEstadisticas(true);
+});
+
+// ==========================================
+// 4. ANIMACIÓN SUAVE DE CONTADORES (KPIS)
+// ==========================================
+function animateCounter(el, target, duration = 1100) {
+    if (!el) return;
+    const start = 0;
+    const startTime = performance.now();
+    const update = (now) => {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - (1 - progress) * (1 - progress);
+        const current = Math.floor(start + (target - start) * ease);
+        el.textContent = current.toLocaleString('es-PE');
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            el.textContent = Number(target).toLocaleString('es-PE');
+        }
+    };
+    requestAnimationFrame(update);
+}
+
+// ==========================================
+// 5. MÓDULO: CARGAR DASHBOARD DE ESTADÍSTICAS
+// ==========================================
+async function cargarDashboardEstadisticas(isManualRefresh = false) {
+    const refreshIcon = document.getElementById('icon-refresh-kpis');
+    if (refreshIcon && isManualRefresh) refreshIcon.classList.add('ph-spin');
+
+    try {
+        const [snapUsuarios, snapCanchas, snapReservas, snapComunidades] = await Promise.all([
+            getDocs(collection(db, "usuarios")),
+            getDocs(collection(db, "canchas")),
+            getDocs(collection(db, "reservas")),
+            getDocs(collection(db, "comunidades"))
+        ]);
+
+        // 1. Usuarios
+        let totalJugadores = 0;
+        let totalDuenos = 0;
+        let totalUsuariosValidos = 0;
+
+        snapUsuarios.forEach(docSnap => {
+            const u = docSnap.data();
+            const rol = (u.rol || "").toLowerCase().trim();
+            if (rol === "player") {
+                totalJugadores++;
+                totalUsuariosValidos++;
+            } else if (rol === "owner") {
+                totalDuenos++;
+                totalUsuariosValidos++;
+            } else if (rol !== "admin") {
+                totalUsuariosValidos++;
+            }
+        });
+
+        // 2. Canchas
+        let canchasPublicadas = 0;
+        let canchasRevision = 0;
+        let canchasBorrador = 0;
+
+        snapCanchas.forEach(docSnap => {
+            const c = docSnap.data();
+            const estado = (c.estadoPublicacion || "").toLowerCase();
+            if (estado === "published") {
+                canchasPublicadas++;
+            } else if (estado === "pending_review") {
+                canchasRevision++;
+            } else if (c.configurado === true && !estado) {
+                canchasPublicadas++;
+            } else {
+                canchasBorrador++;
+            }
+        });
+
+        const navBadge = document.getElementById("nav-pending-badge");
+        if (navBadge) {
+            if (canchasRevision > 0) {
+                navBadge.textContent = canchasRevision;
+                navBadge.style.display = "inline-block";
+            } else {
+                navBadge.style.display = "none";
+            }
+        }
+
+        // 3. Reservas
+        let reservasConfirmadas = 0;
+        let reservasPendientes = 0;
+        let reservasSena = 0;
+        let reservasCanceladas = 0;
+        const totalReservas = snapReservas.size;
+
+        snapReservas.forEach(docSnap => {
+            const r = docSnap.data();
+            const st = (r.estado || "").toLowerCase().trim();
+            if (["confirmada", "confirmed", "completed", "jugada"].includes(st)) {
+                reservasConfirmadas++;
+            } else if (["pendiente", "pending"].includes(st)) {
+                reservasPendientes++;
+            } else if (st.includes("seña") || st.includes("sena")) {
+                reservasSena++;
+            } else if (["cancelada", "cancelado", "cancelled", "rejected"].includes(st)) {
+                reservasCanceladas++;
+            } else {
+                reservasConfirmadas++;
+            }
+        });
+
+        // 4. Comunidades
+        const totalComunidades = snapComunidades.size;
+
+        // 5. Actualizar KPIs con contadores animados
+        animateCounter(document.getElementById('kpi-usuarios'), totalUsuariosValidos);
+        animateCounter(document.getElementById('kpi-canchas'), canchasPublicadas);
+        animateCounter(document.getElementById('kpi-reservas'), reservasConfirmadas);
+        animateCounter(document.getElementById('kpi-comunidades'), totalComunidades);
+
+        const jugEl = document.getElementById('kpi-jugadores');
+        if (jugEl) jugEl.textContent = totalJugadores;
+        const dueEl = document.getElementById('kpi-duenos');
+        if (dueEl) dueEl.textContent = totalDuenos;
+        const canPubEl = document.getElementById('kpi-canchas-pub');
+        if (canPubEl) canPubEl.textContent = canchasPublicadas;
+        const canPendEl = document.getElementById('kpi-canchas-pend');
+        if (canPendEl) canPendEl.textContent = canchasRevision;
+        const resTotEl = document.getElementById('kpi-reservas-total');
+        if (resTotEl) resTotEl.textContent = totalReservas;
+
+        // 6. Gráficos Chart.js
+        renderizarGraficosDashboard({
+            reservas: {
+                confirmadas: reservasConfirmadas,
+                pendientes: reservasPendientes,
+                seña: reservasSena,
+                canceladas: reservasCanceladas
+            },
+            canchas: {
+                publicadas: canchasPublicadas,
+                revision: canchasRevision,
+                borrador: canchasBorrador
+            }
+        });
+
+    } catch (error) {
+        console.error("Error al cargar dashboard de estadísticas:", error);
+    } finally {
+        if (refreshIcon && isManualRefresh) {
+            setTimeout(() => refreshIcon.classList.remove('ph-spin'), 600);
+        }
+    }
+}
+
+// ==========================================
+// 6. RENDERIZADO DE GRÁFICOS CON CHART.JS
+// ==========================================
+function renderizarGraficosDashboard(data) {
+    if (typeof Chart === 'undefined') return;
+
+    Chart.defaults.color = '#929C97';
+    Chart.defaults.font.family = "'Poppins', sans-serif";
+    Chart.defaults.font.size = 12;
+
+    // Gráfico 1: Reservas por Estado
+    const ctxReservas = document.getElementById('chart-reservas')?.getContext('2d');
+    if (ctxReservas) {
+        if (chartReservasInstance) chartReservasInstance.destroy();
+
+        chartReservasInstance = new Chart(ctxReservas, {
+            type: 'bar',
+            data: {
+                labels: ['Confirmadas / Jugadas', 'Pendientes', 'Seña Recibida', 'Canceladas'],
+                datasets: [{
+                    label: 'Total Reservas',
+                    data: [
+                        data.reservas.confirmadas,
+                        data.reservas.pendientes,
+                        data.reservas.seña,
+                        data.reservas.canceladas
+                    ],
+                    backgroundColor: [
+                        'rgba(46, 204, 113, 0.75)',
+                        'rgba(255, 200, 87, 0.75)',
+                        'rgba(52, 152, 219, 0.75)',
+                        'rgba(255, 69, 69, 0.65)'
+                    ],
+                    borderColor: [
+                        '#2ecc71',
+                        '#FFC857',
+                        '#3498db',
+                        '#FF4545'
+                    ],
+                    borderWidth: 1.5,
+                    borderRadius: 8,
+                    maxBarThickness: 45
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#111613',
+                        titleColor: '#ffffff',
+                        bodyColor: '#F5F7F6',
+                        borderColor: 'rgba(46, 204, 113, 0.3)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 10,
+                        boxPadding: 6,
+                        usePointStyle: true
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: { color: '#929C97', font: { weight: '600' } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: { precision: 0, color: '#929C97' },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfico 2: Estado de Canchas
+    const ctxCanchas = document.getElementById('chart-canchas')?.getContext('2d');
+    if (ctxCanchas) {
+        if (chartCanchasInstance) chartCanchasInstance.destroy();
+
+        chartCanchasInstance = new Chart(ctxCanchas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Publicadas (Web)', 'En Revisión', 'En Borrador'],
+                datasets: [{
+                    data: [
+                        data.canchas.publicadas,
+                        data.canchas.revision,
+                        data.canchas.borrador
+                    ],
+                    backgroundColor: [
+                        '#2ecc71',
+                        '#2bd1ea',
+                        'rgba(255, 255, 255, 0.18)'
+                    ],
+                    borderColor: '#0f1512',
+                    borderWidth: 3,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            color: '#F5F7F6',
+                            font: { weight: '600' }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#111613',
+                        titleColor: '#ffffff',
+                        bodyColor: '#F5F7F6',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 10
+                    }
+                }
+            }
+        });
+    }
+}
+
+// ==========================================
+// 7. MÓDULO: GESTIÓN DE DUEÑOS Y CANCHAS
+// ==========================================
+const listContainer = document.getElementById('owners-list');
+const searchInput = document.getElementById('search-input');
+const filterStatus = document.getElementById('filter-status');
+const modalDetails = document.getElementById('modal-details');
+
 async function loadOwnersAndCourts() {
     try {
         const [snapUsuarios, snapCanchas] = await Promise.all([
@@ -65,21 +402,20 @@ async function loadOwnersAndCourts() {
 
         renderOwners();
     } catch (error) {
-        console.error("Error al cargar datos:", error);
-        listContainer.innerHTML = `<p style="color:var(--danger); text-align:center;">Error cargando datos del servidor.</p>`;
+        console.error("Error al cargar dueños y canchas:", error);
+        if (listContainer) {
+            listContainer.innerHTML = `<div style="text-align:center; padding:30px; color:var(--danger);"><i class="ph-bold ph-warning-octagon" style="font-size:2rem;"></i><p style="margin-top:8px;">Error conectando a la base de datos.</p></div>`;
+        }
     }
 }
 
-// Renderizar lista en el panel
 function renderOwners() {
-    const searchTerm = (searchInput?.value || "").toLowerCase();
+    const searchTerm = (searchInput?.value || "").toLowerCase().trim();
     const statusFilter = filterStatus?.value || "all";
 
     const filtered = allOwners.filter(owner => {
-        const matchesSearch = (owner.nombre || "").toLowerCase().includes(searchTerm) || 
-                              (owner.email || "").toLowerCase().includes(searchTerm) ||
-                              (owner.documento || "").toLowerCase().includes(searchTerm) ||
-                              (owner.complejo || owner.canchaData?.nombre || "").toLowerCase().includes(searchTerm);
+        const searchStr = `${owner.nombre || ''} ${owner.email || ''} ${owner.documento || ''} ${owner.complejo || ''} ${owner.canchaData?.nombre || ''}`.toLowerCase();
+        const matchesSearch = !searchTerm || searchStr.includes(searchTerm);
         
         let matchesStatus = true;
         if (statusFilter === "pending") matchesStatus = owner.estado === "pending";
@@ -90,169 +426,267 @@ function renderOwners() {
         return matchesSearch && matchesStatus;
     });
 
+    if (!listContainer) return;
     listContainer.innerHTML = "";
+
     if (filtered.length === 0) {
-        listContainer.innerHTML = `<div style="text-align: center; padding: 30px; color: var(--text-muted); grid-column:1/-1;">No se encontraron registros.</div>`;
+        listContainer.innerHTML = `
+            <div style="text-align: center; padding: 45px 20px; color: var(--text-muted); background: rgba(255,255,255,0.02); border: 1px dashed var(--card-border); border-radius: var(--radius-lg);">
+                <i class="ph-bold ph-magnifying-glass" style="font-size: 2.2rem; color: var(--text-dim); margin-bottom: 8px;"></i>
+                <h4 style="margin: 0; color: #fff; font-size: 1rem;">No se encontraron solicitudes</h4>
+                <p style="font-size: 0.8rem; margin: 4px 0 0;">Intenta con otro filtro o término de búsqueda.</p>
+            </div>
+        `;
         return;
     }
 
     filtered.forEach(owner => {
         const estadoCuenta = owner.estado === "approved" ? "approved" : owner.estado === "rejected" ? "rejected" : "pending";
-        const estadoCuentaTexto = owner.estado === "approved" ? "Cuenta Aprobada" : owner.estado === "rejected" ? "Cuenta Rechazada" : "Cuenta Pendiente";
+        const estadoCuentaTexto = owner.estado === "approved" ? "Cuenta Aprobada" : owner.estado === "rejected" ? "Cuenta Suspendida" : "Cuenta Pendiente";
         
         const estPub = owner.estadoPublicacion;
-        let badgePublicacion = `<span style="color:var(--warning); background:rgba(255,193,7,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cancha en Borrador</span>`;
-        if (estPub === 'pending_review') badgePublicacion = `<span style="color:#17a2b8; background:rgba(23,162,184,0.15); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-warning-circle"></i> SOLICITUD DE PUBLICACIÓN PENDIENTE</span>`;
-        if (estPub === 'published') badgePublicacion = `<span style="color:var(--primary-green); background:rgba(0,217,104,0.1); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">PÚBLICA Y ACTIVA</span>`;
+        let badgePublicacion = `<span class="badge badge-draft"><i class="ph-bold ph-file-dashed"></i> Borrador</span>`;
+        if (estPub === 'pending_review') {
+            badgePublicacion = `<span class="badge badge-review"><i class="ph-bold ph-hourglass-medium"></i> SOLICITA PUBLICACIÓN</span>`;
+        } else if (estPub === 'published') {
+            badgePublicacion = `<span class="badge badge-published"><i class="ph-bold ph-globe"></i> PÚBLICA EN WEB</span>`;
+        }
 
         const card = document.createElement('div');
-        card.className = `master-card ${estadoCuenta}`;
-        card.style.cssText = "background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:12px; padding:18px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px;";
+        card.className = `owner-card status-${estadoCuenta}`;
         
         card.innerHTML = `
-            <div class="master-info">
-                <h3 style="margin:0 0 5px; font-size:1.1rem;">${owner.complejo || owner.canchaData?.nombre || "Sin Complejo Registrado"}</h3>
-                <p style="margin:2px 0; font-size:0.85rem; color:var(--text-muted);">
-                    <strong>Dueño:</strong> ${owner.nombre} | <strong>Email:</strong> ${owner.email}
-                </p>
-                <div style="margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                    <span style="font-size:0.75rem; font-weight:bold; color:var(--${estadoCuenta === 'pending' ? 'warning' : estadoCuenta === 'approved' ? 'primary-green' : 'danger'})">${estadoCuentaTexto}</span>
-                    ${owner.estado === 'approved' ? ' • ' + badgePublicacion : ''}
+            <div style="flex: 1; min-width: 250px;">
+                <h3 class="owner-title">${owner.complejo || owner.canchaData?.nombre || "Complejo Sin Nombre"}</h3>
+                <div class="owner-meta">
+                    <span><i class="ph-bold ph-user"></i> ${owner.nombre || "Dueño no registrado"}</span>
+                    <span><i class="ph-bold ph-envelope"></i> ${owner.email || "Sin email"}</span>
+                    ${owner.documento ? `<span><i class="ph-bold ph-identification-card"></i> Doc: ${owner.documento}</span>` : ''}
+                </div>
+                <div class="owner-badges">
+                    <span class="badge badge-${estadoCuenta}">
+                        <i class="ph-bold ph-${estadoCuenta === 'approved' ? 'check-circle' : estadoCuenta === 'pending' ? 'clock' : 'x-circle'}"></i>
+                        ${estadoCuentaTexto}
+                    </span>
+                    ${owner.estado === 'approved' ? badgePublicacion : ''}
                 </div>
             </div>
-            <div class="master-actions">
-                <button class="btn btn-outline btn-view" data-uid="${owner.uid}" style="width:auto; padding:8px 16px;">Gestionar / Revisar</button>
+            <div>
+                <button class="btn btn-outline btn-view" data-uid="${owner.uid}">
+                    <i class="ph-bold ph-sliders-horizontal"></i> Gestionar
+                </button>
             </div>
         `;
         listContainer.appendChild(card);
     });
 
     document.querySelectorAll('.btn-view').forEach(btn => {
-        btn.addEventListener('click', (e) => viewDetails(e.target.dataset.uid));
+        btn.addEventListener('click', (e) => viewDetails(e.currentTarget.dataset.uid));
     });
 }
 
-// Ver Detalles Completos y Controlar Publicación
+searchInput?.addEventListener('input', renderOwners);
+filterStatus?.addEventListener('change', renderOwners);
+document.getElementById('close-modal')?.addEventListener('click', () => modalDetails?.classList.remove('mostrar'));
+
 function viewDetails(uid) {
     const owner = allOwners.find(o => o.uid === uid);
     if (!owner) return;
 
     const cancha = owner.canchaData || {};
-
-    document.getElementById('det-complejo').innerText = owner.complejo || cancha.nombre || "No especificado";
-    document.getElementById('det-nombre').innerText = owner.nombre || "No especificado";
-    document.getElementById('det-dni').innerText = owner.documento || "No especificado";
-    document.getElementById('det-email').innerText = owner.email || "No especificado";
-    document.getElementById('det-telefono').innerText = owner.telefono || cancha.whatsapp || "No especificado";
-    document.getElementById('det-direccion').innerText = owner.direccion || cancha.ubicacionTexto || "No especificado";
+    const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    setTxt('det-complejo', owner.complejo || cancha.nombre || "No especificado");
+    setTxt('det-nombre', owner.nombre || "No especificado");
+    setTxt('det-dni', owner.documento || "No especificado");
+    setTxt('det-email', owner.email || "No especificado");
+    setTxt('det-telefono', owner.telefono || cancha.whatsapp || "No especificado");
     
     const estadoEl = document.getElementById('det-estado');
-    estadoEl.innerText = owner.estado.toUpperCase();
-    estadoEl.style.color = owner.estado === 'pending' ? 'var(--warning)' : owner.estado === 'approved' ? 'var(--primary-green)' : 'var(--danger)';
+    if (estadoEl) {
+        estadoEl.innerText = (owner.estado || "PENDING").toUpperCase();
+        estadoEl.style.color = owner.estado === 'pending' ? 'var(--warning)' : owner.estado === 'approved' ? 'var(--primary-green)' : 'var(--danger)';
+    }
 
     const actionsContainer = document.getElementById('modal-actions');
+    if (!actionsContainer) return;
     actionsContainer.innerHTML = "";
-    actionsContainer.style.cssText = "display:flex; flex-direction:column; gap:10px; margin-top:20px;";
 
-    // 1. ACCIONES DE CUENTA DE USUARIO (Aprobar / Rechazar Registro)
+    // 1. Acciones de Cuenta
     if (owner.estado === "pending" || owner.estado === "rejected") {
         const btnApprove = document.createElement('button');
-        btnApprove.className = "btn hero-primary";
-        btnApprove.innerHTML = `<i class="ph-bold ph-check-circle"></i> Aprobar Solicitud de Cuenta`;
+        btnApprove.className = "btn btn-primary";
+        btnApprove.innerHTML = `<i class="ph-bold ph-check-circle"></i> Aprobar Acceso al Sistema`;
         btnApprove.onclick = () => changeAccountStatus(uid, "approved");
         actionsContainer.appendChild(btnApprove);
     }
 
     if (owner.estado === "pending" || owner.estado === "approved") {
         const btnReject = document.createElement('button');
-        btnReject.className = "btn";
-        btnReject.style.background = "var(--danger)";
+        btnReject.className = "btn btn-danger";
         btnReject.innerHTML = `<i class="ph-bold ph-x-circle"></i> Rechazar / Suspender Cuenta`;
         btnReject.onclick = () => changeAccountStatus(uid, "rejected");
         actionsContainer.appendChild(btnReject);
     }
 
-    // 2. ACCIONES DE PUBLICACIÓN EN LA WEB (Si el usuario ya está aprobado)
+    // 2. Acciones de Publicación
     if (owner.estado === "approved") {
-        const hr = document.createElement('hr');
-        hr.style.cssText = "border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;";
-        actionsContainer.appendChild(hr);
-
-        const labelPub = document.createElement('small');
-        labelPub.style.cssText = "color:var(--text-muted); font-weight:bold; letter-spacing:0.05em;";
-        labelPub.innerText = "ESTADO DE PUBLICACIÓN PÚBLICA:";
-        actionsContainer.appendChild(labelPub);
+        const divider = document.createElement('div');
+        divider.style.cssText = "border-top: 1px solid var(--card-border); margin: 8px 0; padding-top: 8px;";
+        actionsContainer.appendChild(divider);
 
         if (owner.estadoPublicacion === "pending_review" || owner.estadoPublicacion === "draft") {
             const btnPublish = document.createElement('button');
-            btnPublish.className = "btn";
-            btnPublish.style.cssText = "background: var(--primary-green); color: #000; font-weight: bold;";
-            btnPublish.innerHTML = `<i class="ph-bold ph-globe-hemisphere-west"></i> Aprobar y PUBLICAR Cancha en la Web`;
+            btnPublish.className = "btn btn-primary";
+            btnPublish.style.background = "#ffffff";
+            btnPublish.style.color = "#080B0A";
+            btnPublish.style.borderColor = "#ffffff";
+            btnPublish.innerHTML = `<i class="ph-bold ph-globe"></i> Aprobar y PUBLICAR Cancha en la Web`;
             btnPublish.onclick = () => changePublicationStatus(uid, "published");
             actionsContainer.appendChild(btnPublish);
         } else if (owner.estadoPublicacion === "published") {
             const btnUnpublish = document.createElement('button');
             btnUnpublish.className = "btn btn-outline";
-            btnUnpublish.style.cssText = "color: var(--warning); border-color: var(--warning);";
-            btnUnpublish.innerHTML = `<i class="ph-bold ph-eye-slash"></i> Pausar / Ocultar de la Web (Borrador)`;
+            btnUnpublish.style.color = "var(--warning)";
+            btnUnpublish.style.borderColor = "rgba(255, 200, 87, 0.4)";
+            btnUnpublish.innerHTML = `<i class="ph-bold ph-eye-slash"></i> Pausar / Ocultar de la Web`;
             btnUnpublish.onclick = () => changePublicationStatus(uid, "draft");
             actionsContainer.appendChild(btnUnpublish);
         }
     }
-
-    modal.classList.add('mostrar');
+    modalDetails?.classList.add('mostrar');
 }
 
-// Cambiar estado de Cuenta (Aprobado/Rechazado)
 async function changeAccountStatus(uid, newStatus) {
-    if (!confirm(`¿Estás seguro de cambiar el estado de la CUENTA a: ${newStatus.toUpperCase()}?`)) return;
-    
+    if (!confirm(`¿Confirmas cambiar el estado de la CUENTA a: ${newStatus.toUpperCase()}?`)) return;
     try {
         await updateDoc(doc(db, "usuarios", uid), {
             estado: newStatus,
             approvedBy: adminUser,
             approvedAt: serverTimestamp()
         });
-        
-        await updateDoc(doc(db, "solicitudes_duenos", uid), {
-            estado: newStatus,
-            reviewedBy: adminUser,
-            reviewedAt: serverTimestamp()
-        }).catch(() => {}); // Opcional si no existe el doc
-
-        alert(`Cuenta actualizada a: ${newStatus}`);
-        modal.classList.remove('mostrar');
+        alert(`Cuenta actualizada a: ${newStatus.toUpperCase()}`);
+        modalDetails?.classList.remove('mostrar');
         loadOwnersAndCourts();
+        cargarDashboardEstadisticas();
     } catch (error) {
-        console.error("Error actualizando estado de cuenta:", error);
+        console.error("Error al actualizar la cuenta:", error);
         alert("Error al actualizar la cuenta.");
     }
 }
 
-// Cambiar estado de PUBLICACIÓN DE LA CANCHA (Publicar / Ocultar)
 async function changePublicationStatus(uid, newStatus) {
-    if (!confirm(`¿Confirmas que deseas cambiar la PUBLICACIÓN de la cancha a: ${newStatus.toUpperCase()}?`)) return;
-    
+    if (!confirm(`¿Confirmas cambiar la PUBLICACIÓN de la cancha a: ${newStatus.toUpperCase()}?`)) return;
     try {
         await updateDoc(doc(db, "canchas", uid), {
             estadoPublicacion: newStatus,
             publicadoPor: adminUser,
             publicadoEn: serverTimestamp()
         });
-
-        alert(newStatus === 'published' ? '¡Cancha PUBLICADA! Ya es visible para todos los jugadores.' : 'Cancha ocultada de la web.');
-        modal.classList.remove('mostrar');
+        alert(newStatus === 'published' ? '¡Cancha PUBLICADA y visible para todos los jugadores!' : 'Cancha ocultada de la web (en borrador).');
+        modalDetails?.classList.remove('mostrar');
         loadOwnersAndCourts();
+        cargarDashboardEstadisticas();
     } catch (error) {
         console.error("Error cambiando publicación:", error);
-        alert("No se pudo actualizar la publicación de la cancha.");
+        alert("Error cambiando publicación.");
     }
 }
 
-// Listeners
-searchInput?.addEventListener('input', renderOwners);
-filterStatus?.addEventListener('change', renderOwners);
-document.getElementById('close-modal')?.addEventListener('click', () => modal.classList.remove('mostrar'));
-document.getElementById('btn-logout')?.addEventListener('click', () => {
-    signOut(auth).then(() => window.location.href = "login.html");
+// ==========================================
+// 8. MÓDULO: GESTIÓN DE COMUNIDADES
+// ==========================================
+const modalComunidad = document.getElementById('modal-admin-comunidad');
+const formComunidad = document.getElementById('form-admin-comunidad');
+
+document.getElementById('btn-abrir-crear-comunidad')?.addEventListener('click', () => modalComunidad?.classList.add('mostrar'));
+document.getElementById('cerrar-admin-comunidad')?.addEventListener('click', () => modalComunidad?.classList.remove('mostrar'));
+
+async function cargarComunidadesAdmin() {
+    const tbody = document.getElementById('admin-lista-comunidades');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 1.5rem; color: var(--primary-green);"></i><p style="margin-top:6px; color:var(--text-muted);">Cargando comunidades...</p></td></tr>';
+    try {
+        const snap = await getDocs(query(collection(db, 'comunidades')));
+        tbody.innerHTML = '';
+        if (snap.empty) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--text-muted);"><i class="ph-bold ph-shield-warning" style="font-size: 1.8rem; margin-bottom: 6px;"></i><br>No se encontraron comunidades registradas.</td></tr>';
+            return;
+        }
+        snap.forEach(docSnap => {
+            const c = docSnap.data();
+            tbody.innerHTML += `
+                <tr>
+                    <td style="font-weight: 700; color: #fff;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="ph-fill ph-shield-checkered" style="color: var(--primary-green); font-size: 1.1rem;"></i>
+                            <span>${c.nombre || "Sin nombre"}</span>
+                        </div>
+                    </td>
+                    <td>${c.deporte || "Fútbol"} • <span style="color: var(--text-muted);">${c.categoria || "Libre"}</span></td>
+                    <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${c.ciudad || "No especificada"}</td>
+                    <td><a href="https://wa.me/${String(c.whatsappLider || '').replace(/\\D/g,'')}" target="_blank" style="color: var(--primary-green); font-weight: 600; text-decoration: none;"><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider || "Sin teléfono"}</a></td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-danger btn-borrar-comunidad" data-id="${docSnap.id}" style="padding: 6px 12px; font-size: 0.78rem;">
+                            <i class="ph-bold ph-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+        document.querySelectorAll('.btn-borrar-comunidad').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const btnReal = e.target.closest('.btn-borrar-comunidad');
+                const docId = btnReal.getAttribute('data-id');
+                if (confirm('¿Estás seguro de eliminar esta comunidad de la plataforma?')) {
+                    btnReal.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>';
+                    btnReal.disabled = true;
+                    try {
+                        await deleteDoc(doc(db, 'comunidades', docId));
+                        cargarComunidadesAdmin();
+                        cargarDashboardEstadisticas();
+                    } catch (err) {
+                        console.error("Error al eliminar comunidad:", err);
+                        alert("No se pudo eliminar la comunidad.");
+                        btnReal.innerHTML = '<i class="ph-bold ph-trash"></i> Eliminar';
+                        btnReal.disabled = false;
+                    }
+                }
+            });
+        });
+    } catch (error) {
+        console.error("Error al cargar comunidades:", error);
+        tbody.innerHTML = '<tr><td colspan="5" style="color: var(--danger); text-align: center; padding: 25px;">Error conectando con la base de datos de comunidades.</td></tr>';
+    }
+}
+
+formComunidad?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btnSubmit = formComunidad.querySelector('button[type="submit"]');
+    btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
+    btnSubmit.disabled = true;
+    try {
+        await addDoc(collection(db, 'comunidades'), {
+            nombre: document.getElementById('admin-com-nombre').value.trim(),
+            deporte: document.getElementById('admin-com-deporte').value.trim(),
+            categoria: document.getElementById('admin-com-categoria').value.trim(),
+            ciudad: document.getElementById('admin-com-ciudad').value.trim(),
+            whatsappLider: document.getElementById('admin-com-wsp').value.trim(),
+            liderUid: document.getElementById('admin-com-lider-uid').value.trim(),
+            descripcion: document.getElementById('admin-com-desc').value.trim(),
+            miembros: 0,
+            creadoPor: adminUser,
+            creadoEn: serverTimestamp()
+        });
+        alert('¡Comunidad publicada exitosamente en CHALACAPP!');
+        modalComunidad?.classList.remove('mostrar');
+        formComunidad.reset();
+        cargarComunidadesAdmin();
+        cargarDashboardEstadisticas();
+    } catch (error) {
+        console.error("Error al publicar comunidad:", error);
+        alert('Error al publicar comunidad.');
+    } finally {
+        btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Publicar Comunidad';
+        btnSubmit.disabled = false;
+    }
 });

@@ -566,7 +566,7 @@ if (formPerfil) {
     formPerfil.addEventListener('submit', async e => {
         e.preventDefault(); 
         if (!usuarioActual) return;
-        
+
         // 🔥 EL BLINDAJE: Capturamos el botón para que NUNCA vuelva a ser 'undefined'
         const btn = document.getElementById('btn-guardar-admin');
         if (!btn) {
@@ -658,7 +658,7 @@ if (formPerfil) {
             toast('¡Configuración guardada exitosamente!');
             
             try { await actualizarDia(); } catch (diaErr) { console.warn('Error al actualizar día:', diaErr); }
-            
+
             window.scrollTo({
                 top: 0,
                 behavior: 'smooth'
