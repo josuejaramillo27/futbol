@@ -222,16 +222,44 @@ async function pintarDisponibilidadModal(c, fechaElegida){
     } catch (e) { box.innerHTML='<span style="color:var(--danger)">Error cargando horarios.</span>'; }
 }
 
-function abrirReserva(c, hora, fechaElegida){
+function abrirReserva(c, hora, fechaElegida) {
     const modal = document.getElementById('modal-reserva');
-    if(!modal) return;
+    if (!modal) return;
+    
     document.getElementById('booking-cancha-nombre').textContent = c.nombre;
     const dateObj = new Date(`${fechaElegida}T12:00:00`);
-    document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE',{weekday:'long',day:'numeric',month:'short'}).format(dateObj).toUpperCase()} · ${hora}`;
+    document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
-    document.getElementById('booking-status').innerHTML = ''; 
-    modal.dataset.courtId = c.id; modal.dataset.time = hora; modal.dataset.date = fechaElegida;
-    modal.classList.add('mostrar'); modal.setAttribute('aria-hidden','false');
+    
+    // 🔥 LÓGICA DEL AVISO DE ADELANTO Y MÉTODOS DE PAGO
+    const metodos = c.metodosPago || {};
+    let avisoHTML = '';
+    
+    if (metodos.requiereSena && metodos.montoSena > 0) {
+        avisoHTML = `
+            <div style="background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:12px; border-radius:8px; margin-bottom:15px; color:#f1c40f;">
+                <b style="display:block; margin-bottom:5px;"><i class="ph-bold ph-warning-circle"></i> Esta cancha exige un adelanto de S/ ${metodos.montoSena}</b>
+                <span style="font-size:0.85rem; color:#ccc;">Al confirmar, deberás transferir este monto al dueño (Yape/Plin: <b>${metodos.numero || 'No especificado'}</b> a nombre de <b>${metodos.titular || 'el dueño'}</b>) y enviarle el comprobante por WhatsApp para validar tu reserva.</span>
+            </div>
+        `;
+    } else {
+        avisoHTML = `
+            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); padding:10px; border-radius:8px; margin-bottom:15px; color:#2ecc71; font-size:0.85rem; text-align:center;">
+                <i class="ph-bold ph-check-circle"></i> <b>Reserva Directa:</b> El pago total se realiza en el local.
+            </div>
+        `;
+    }
+
+    const bookingStatus = document.getElementById('booking-status');
+    if (bookingStatus) {
+        bookingStatus.innerHTML = avisoHTML; 
+    }
+
+    modal.dataset.courtId = c.id; 
+    modal.dataset.time = hora; 
+    modal.dataset.date = fechaElegida;
+    modal.classList.add('mostrar'); 
+    modal.setAttribute('aria-hidden', 'false');
 }
 
 async function confirmarReserva(){
