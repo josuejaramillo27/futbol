@@ -563,9 +563,20 @@ const btnHoy = document.getElementById('btn-hoy'); btnHoy?.addEventListener('cli
 async function subirImagen(archivo, ruta) { if (!archivo) return null; const storageRef = ref(storage, ruta); await uploadBytes(storageRef, archivo); return await getDownloadURL(storageRef) }
 const formPerfil = document.getElementById('form-perfil-cancha');
 if (formPerfil) {
+    const formPerfil = document.getElementById('form-perfil-cancha');
+if (formPerfil) {
     formPerfil.addEventListener('submit', async e => {
-        e.preventDefault(); if (!usuarioActual) return;
-        // 🔥 Lectura dinámica de Formato y Superficie con validación
+        e.preventDefault(); 
+        if (!usuarioActual) return;
+        
+        // 🔥 EL BLINDAJE: Capturamos el botón para que NUNCA vuelva a ser 'undefined'
+        const btn = document.getElementById('btn-guardar-admin');
+        if (!btn) {
+            console.error("No se encontró el botón de guardar en el HTML");
+            return;
+        }
+
+        // Lectura dinámica de Formato y Superficie con validación
         const elFormato = document.getElementById('admin-formato');
         const elSuperficie = document.getElementById('admin-superficie');
 
@@ -590,7 +601,7 @@ if (formPerfil) {
         try {
             const uid = usuarioActual.uid;
 
-            // Subida blindada de archivos (evita que un fallo de storage cancele todo el guardado)
+            // Subida blindada de archivos
             let fotos = [];
             try {
                 const files = [document.getElementById('admin-foto1')?.files?.[0], document.getElementById('admin-foto2')?.files?.[0], document.getElementById('admin-foto3')?.files?.[0]].filter(Boolean);
