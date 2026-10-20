@@ -656,7 +656,14 @@ if (formPerfil) {
             canchaActual = { ...canchaActual, ...dataToSave };
             document.getElementById('mensaje-exito')?.classList.add('show');
             toast('¡Configuración guardada exitosamente!');
+            
             try { await actualizarDia(); } catch (diaErr) { console.warn('Error al actualizar día:', diaErr); }
+            
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
         } catch (err) {
             console.error('Error al guardar configuración:', err);
             toast(`No se pudo guardar: ${err?.message || 'Error de conexión'}`, true);
