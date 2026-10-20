@@ -84,12 +84,69 @@ function llenarEspaciosEvento(){
     s.innerHTML=espacios.length?espacios.map(e=>`<option value="${e.id}" ${e.legacy?'disabled':''}>${esc(e.nombre)} · ${esc(e.tipo||'Fútbol')}${e.legacy?' · principal':''}</option>`).join(''):'<option disabled>No hay canchas creadas</option>';
 }
 
+function normalizarSuperficie(s) {
+    if (!s) return 'Sintética';
+    const str = String(s).trim();
+    if (/losa|futsal|cemento/i.test(str)) return 'Losa / Cemento';
+    if (/pasto\s*natural/i.test(str)) return 'Pasto Natural';
+    if (/parquet|coliseo/i.test(str)) return 'Parquet / Coliseo';
+    if (/arena/i.test(str)) return 'Arena';
+    if (/sint[eé]tica/i.test(str)) return 'Sintética';
+    const validas = ['Sintética', 'Losa / Cemento', 'Pasto Natural', 'Parquet / Coliseo', 'Arena'];
+    return validas.includes(str) ? str : 'Sintética';
+}
+
+function parsearTipoEspacio(e) {
+    let formato = 7;
+    let superficie = 'Sintética';
+
+    if (e?.formatoJugadores != null || e?.formato != null) {
+        const f = parseInt(e.formatoJugadores ?? e.formato, 10);
+        if (!isNaN(f)) formato = Math.min(11, Math.max(5, f));
+    }
+    if (e?.superficie) {
+        superficie = e.superficie;
+    }
+
+    if ((e?.formatoJugadores == null && e?.formato == null) || !e?.superficie) {
+        const raw = e?.tipo || '';
+        if (raw) {
+            const matchSeparado = raw.match(/Fútbol\s+(\d+)\s*-\s*(.+)/i);
+            if (matchSeparado) {
+                if (e?.formatoJugadores == null && e?.formato == null) {
+                    const f = parseInt(matchSeparado[1], 10);
+                    if (!isNaN(f)) formato = Math.min(11, Math.max(5, f));
+                }
+                if (!e?.superficie) {
+                    superficie = normalizarSuperficie(matchSeparado[2].trim());
+                }
+            } else {
+                const matchFutbol = raw.match(/Fútbol\s+(\d+)/i);
+                if (matchFutbol && e?.formatoJugadores == null && e?.formato == null) {
+                    const f = parseInt(matchFutbol[1], 10);
+                    if (!isNaN(f)) formato = Math.min(11, Math.max(5, f));
+                }
+                if (!e?.superficie) {
+                    superficie = normalizarSuperficie(raw);
+                }
+            }
+        }
+    }
+
+    return { formato, superficie: normalizarSuperficie(superficie) };
+}
+
 function editarEspacio(id){
     const e=espacios.find(x=>x.id===id);if(!e||e.legacy)return;
     $('espacio-id').value=e.id;
     $('espacio-modal-title').textContent='Editar cancha';
     $('espacio-nombre').value=e.nombre||'';
-    $('espacio-tipo').value=e.tipo||'Sintética';
+
+    const parsed = parsearTipoEspacio(e);
+    if($('espacio-formato')) $('espacio-formato').value = parsed.formato;
+    if($('espacio-superficie')) $('espacio-superficie').value = parsed.superficie;
+    if($('espacio-tipo')) $('espacio-tipo').value = e.tipo || `Fútbol ${parsed.formato} - ${parsed.superficie}`;
+
     $('espacio-precio').value=e.precio??'';
     
     // 🔥 POBLAR HORARIOS SI EXISTEN
@@ -125,6 +182,9 @@ $('btn-nuevo-espacio')?.addEventListener('click',()=>{
     $('espacio-modal-title').textContent='Agregar cancha';
     $('espacio-check-noche').checked = false;
     $('caja-noche').style.display = 'none';
+
+    if($('espacio-formato')) $('espacio-formato').value = '7';
+    if($('espacio-superficie')) $('espacio-superficie').value = 'Sintética';
     
     // 🔥 LIMPIAR HORARIOS
     if($('espacio-hora-apertura')) $('espacio-hora-apertura').value = '';
@@ -132,6 +192,21 @@ $('btn-nuevo-espacio')?.addEventListener('click',()=>{
 
     openModal('modal-espacio');
 });
+
+// Validación interactiva de Formato (Jugadores) para Espacios
+const fEspacio = $('espacio-formato');
+if (fEspacio) {
+    fEspacio.addEventListener('input', () => {
+        let v = parseInt(fEspacio.value, 10);
+        if (isNaN(v)) return;
+        if (v > 11) fEspacio.value = 11;
+    });
+    fEspacio.addEventListener('blur', () => {
+        let v = parseInt(fEspacio.value, 10);
+        if (isNaN(v) || v < 5) fEspacio.value = 5;
+        else if (v > 11) fEspacio.value = 11;
+    });
+}
 
 $('form-espacio')?.addEventListener('submit',async e=>{
     e.preventDefault();
@@ -141,12 +216,22 @@ $('form-espacio')?.addEventListener('submit',async e=>{
     // 🔥 LEER HORARIOS OPCIONALES
     const hApertura = $('espacio-hora-apertura')?.value || null;
     const hCierre = $('espacio-hora-cierre')?.value || null;
-    
+
+    let formato = parseInt($('espacio-formato')?.value, 10);
+    if (isNaN(formato) || formato < 5) formato = 5;
+    else if (formato > 11) formato = 11;
+    if ($('espacio-formato')) $('espacio-formato').value = formato;
+
+    const superficie = $('espacio-superficie')?.value?.trim() || 'Sintética';
+    const tipoConcatenado = `Fútbol ${formato} - ${superficie}`;
+
     // FASE 8: Creación/Edición con OwnerUid estricto + TARIFAS DINÁMICAS
     const data={
         ownerUid:uid,
         nombre:$('espacio-nombre').value.trim(),
-        tipo:$('espacio-tipo').value,
+        tipo: tipoConcatenado,
+        formatoJugadores: formato,
+        superficie: superficie,
         precio:Number($('espacio-precio').value||0),
         tienePrecioNoche: tieneNoche,
         precioNoche: tieneNoche ? Number($('espacio-precio-noche').value||0) : null,

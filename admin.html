@@ -107,6 +107,23 @@
             .admin-kpis { grid-template-columns: 1fr !important; }
             .admin-date { width: 100%; } 
         }
+
+        .admin-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .admin-input:focus {
+            border-color: var(--primary-green, #2ecc71);
+            box-shadow: 0 0 0 2px rgba(46,204,113,0.2);
+        }
     </style>
 </head>
 <body class="admin-page">
@@ -266,21 +283,27 @@
                 <label style="display:block; margin-bottom:15px; color:#aaa; font-size:0.85rem;">Nombre de tu Complejo Deportivo
                     <input type="text" id="admin-nombre" placeholder="Ej. Complejo Deportivo El 10" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
                 </label>
-                <div class="form-group">
-    <label for="admin-tipos">
-        <i class="ph-bold ph-soccer-ball" style="color:var(--primary-green, #2ecc71);"></i> Tipo de Cancha Principal
-    </label>
-    <select id="admin-tipos" class="admin-input">
-        <option value="Fútbol 5">Fútbol 5</option>
-        <option value="Fútbol 6">Fútbol 6</option>
-        <option value="Fútbol 7" selected>Fútbol 7</option>
-        <option value="Fútbol 8">Fútbol 8</option>
-        <option value="Fútbol 11">Fútbol 11</option>
-        <option value="Losa / Futsal">Losa / Futsal</option>
-        <option value="Pasto Natural">Pasto Natural</option>
-    </select>
-    <small id="tipos-error" style="color:var(--danger, #e74c3c); display:block; margin-top:5px;"></small>
-</div>
+                <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div class="form-group" style="flex: 1; min-width: 140px; margin-bottom: 0;">
+                        <label for="admin-formato" style="display:block; margin-bottom:6px; color:#aaa; font-size:0.85rem;">
+                            <i class="ph-bold ph-users-three" style="color:var(--primary-green, #2ecc71);"></i> Formato (Jugadores)
+                        </label>
+                        <input type="number" id="admin-formato" class="admin-input" min="5" max="11" placeholder="Ej. 7" value="7" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                        <small id="tipos-error" style="color:var(--danger, #e74c3c); display:block; margin-top:5px;"></small>
+                    </div>
+                    <div class="form-group" style="flex: 1; min-width: 140px; margin-bottom: 0;">
+                        <label for="admin-superficie" style="display:block; margin-bottom:6px; color:#aaa; font-size:0.85rem;">
+                            <i class="ph-bold ph-soccer-ball" style="color:var(--primary-green, #2ecc71);"></i> Superficie
+                        </label>
+                        <select id="admin-superficie" class="admin-input" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                            <option value="Sintética">Sintética</option>
+                            <option value="Losa / Cemento">Losa / Cemento</option>
+                            <option value="Pasto Natural">Pasto Natural</option>
+                            <option value="Parquet / Coliseo">Parquet / Coliseo</option>
+                            <option value="Arena">Arena</option>
+                        </select>
+                    </div>
+                </div>
                 
                 <div class="form-group">
     <label for="admin-cancha-departamento">Departamento del Complejo</label>
@@ -398,18 +421,20 @@
             </label>
             
             <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap:wrap;">
-                <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Tipo / Tamaño
-                    <select id="espacio-tipo" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
-                        <option>Sintética</option>
-                        <option>Fútbol 5</option>
-                        <option>Fútbol 6</option>
-                        <option>Fútbol 7</option>
-                        <option>Fútbol 8</option>
-                        <option>Fútbol 11</option>
-                        <option>Losa deportiva</option>
-                        <option>Pasto natural</option>
+                <div style="flex: 1; min-width: 140px;">
+                    <label for="espacio-formato" style="display:block; color:#aaa; font-size:0.85rem; margin-bottom:5px;">Formato (Jugadores)</label>
+                    <input type="number" id="espacio-formato" class="admin-input" min="5" max="11" placeholder="Ej. 7" value="7" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                </div>
+                <div style="flex: 1; min-width: 140px;">
+                    <label for="espacio-superficie" style="display:block; color:#aaa; font-size:0.85rem; margin-bottom:5px;">Superficie</label>
+                    <select id="espacio-superficie" class="admin-input" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; box-sizing:border-box;">
+                        <option value="Sintética">Sintética</option>
+                        <option value="Losa / Cemento">Losa / Cemento</option>
+                        <option value="Pasto Natural">Pasto Natural</option>
+                        <option value="Parquet / Coliseo">Parquet / Coliseo</option>
+                        <option value="Arena">Arena</option>
                     </select>
-                </label>
+                </div>
             </div>
             <div class="admin-form-group">
     <label style="color:#aaa; font-size:0.85rem;">Horario de atención (Opcional - Deja vacío para usar el del complejo):</label>
