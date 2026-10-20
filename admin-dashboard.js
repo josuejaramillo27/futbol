@@ -136,8 +136,21 @@ async function cargarPerfil() {
         bannerEstado.innerHTML = `<div><strong style="color:var(--primary-green); display:block;">Cancha Publicada y Activa</strong><span style="font-size:0.8rem; color:#ccc;">Tu negocio es visible para todos los jugadores.</span></div>`;
     }
 
-    const campos = { 'admin-nombre': canchaActual.nombre, 'admin-distrito': canchaActual.distrito ?? canchaActual.ciudad, 'admin-departamento': canchaActual.departamento, 'admin-whatsapp': canchaActual.whatsapp, 'admin-descripcion': canchaActual.descripcion, 'admin-precio': canchaActual.precio, 'admin-ubicacion-texto': canchaActual.ubicacionTexto, 'admin-ubicacion-link': canchaActual.ubicacionLink, 'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60 };
+    const campos = { 'admin-nombre': canchaActual.nombre, 'admin-whatsapp': canchaActual.whatsapp, 'admin-descripcion': canchaActual.descripcion, 'admin-precio': canchaActual.precio, 'admin-ubicacion-texto': canchaActual.ubicacionTexto, 'admin-ubicacion-link': canchaActual.ubicacionLink, 'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60 };
     Object.entries(campos).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v ?? '' });
+
+    // Sincronizar Departamento y Distrito con los selectores
+    const dpto = canchaActual.departamento || '';
+    const dist = canchaActual.distrito ?? canchaActual.ciudad ?? '';
+    const elDpto = document.getElementById('admin-cancha-departamento') || document.getElementById('admin-departamento');
+    const elDist = document.getElementById('admin-cancha-distrito') || document.getElementById('admin-distrito');
+    if (elDpto && dpto) {
+        elDpto.value = dpto;
+        elDpto.dispatchEvent(new Event('change'));
+    }
+    if (elDist && dist) {
+        elDist.value = dist;
+    }
 
     // Poblar Formato y Superficie
     const parsed = parsearTipoCancha(canchaActual);
@@ -576,30 +589,51 @@ if (formPerfil) {
 
         try {
             const uid = usuarioActual.uid;
-            const files = [document.getElementById('admin-foto1')?.files[0], document.getElementById('admin-foto2')?.files[0], document.getElementById('admin-foto3')?.files[0]];
-            const fotos = await Promise.all(files.map((f, i) => subirImagen(f, `canchas/${uid}/foto${i + 1}`)));
-            const logo = await subirImagen(document.getElementById('admin-logo')?.files[0], `canchas/${uid}/logo`);
 
-            // 🔥 FIX 2: Blindaje contra "null" usando ?.value (Si no existe el input, se guarda vacío)
+            // Subida blindada de archivos (evita que un fallo de storage cancele todo el guardado)
+            let fotos = [];
+            try {
+                const files = [document.getElementById('admin-foto1')?.files?.[0], document.getElementById('admin-foto2')?.files?.[0], document.getElementById('admin-foto3')?.files?.[0]].filter(Boolean);
+                if (files.length > 0) {
+                    fotos = await Promise.all(files.map((f, i) => subirImagen(f, `canchas/${uid}/foto${i + 1}`)));
+                }
+            } catch (errFoto) {
+                console.warn('Advertencia al subir fotos:', errFoto);
+            }
+
+            let logo = null;
+            try {
+                const logoFile = document.getElementById('admin-logo')?.files?.[0];
+                if (logoFile) {
+                    logo = await subirImagen(logoFile, `canchas/${uid}/logo`);
+                }
+            } catch (errLogo) {
+                console.warn('Advertencia al subir logo:', errLogo);
+            }
+
+            // Lectura compatible y segura de campos
+            const valDpto = (document.getElementById('admin-cancha-departamento')?.value || document.getElementById('admin-departamento')?.value || '').trim();
+            const valDist = (document.getElementById('admin-cancha-distrito')?.value || document.getElementById('admin-distrito')?.value || '').trim();
+
             const dataToSave = {
-                ownerUid: uid,
-                nombre: document.getElementById('admin-nombre')?.value?.trim() || '',
-                departamento: document.getElementById('admin-departamento')?.value?.trim() || '',
-                distrito: document.getElementById('admin-distrito')?.value?.trim() || '',
-                whatsapp: document.getElementById('admin-whatsapp')?.value?.trim() || '',
+                ownerUid: uid || '',
+                nombre: (document.getElementById('admin-nombre')?.value || '').trim(),
+                departamento: valDpto,
+                distrito: valDist,
+                whatsapp: (document.getElementById('admin-whatsapp')?.value || '').trim(),
                 precio: Number(document.getElementById('admin-precio')?.value || 0),
-                tiposCancha: tipos,
-                formatoJugadores: formato,
-                superficie: superficie,
-                descripcion: document.getElementById('admin-descripcion')?.value?.trim() || '',
-                ubicacionTexto: document.getElementById('admin-ubicacion-texto')?.value?.trim() || '',
-                ubicacionLink: document.getElementById('admin-ubicacion-link')?.value?.trim() || '',
-                lat: document.getElementById('admin-lat')?.value?.trim() || '',
-                lng: document.getElementById('admin-lng')?.value?.trim() || '',
+                tiposCancha: tipos || ['Fútbol 7 - Sintética'],
+                formatoJugadores: formato || 7,
+                superficie: superficie || 'Sintética',
+                descripcion: (document.getElementById('admin-descripcion')?.value || '').trim(),
+                ubicacionTexto: (document.getElementById('admin-ubicacion-texto')?.value || '').trim(),
+                ubicacionLink: (document.getElementById('admin-ubicacion-link')?.value || '').trim(),
+                lat: (document.getElementById('admin-lat')?.value || '').trim(),
+                lng: (document.getElementById('admin-lng')?.value || '').trim(),
                 intervaloMinutos: Number(document.getElementById('admin-intervalo')?.value || 60),
                 horaApertura: document.getElementById('admin-hora-inicio')?.value || '16:00',
                 horaCierre: document.getElementById('admin-hora-cierre')?.value || '23:00',
-                horariosSemana: readWeeklyHours(),
+                horariosSemana: readWeeklyHours() || {},
                 configurado: true,
                 estadoPublicacion: canchaActual?.estadoPublicacion || 'draft',
                 updatedAt: serverTimestamp()
@@ -611,8 +645,16 @@ if (formPerfil) {
 
             await setDoc(doc(db, 'canchas', uid), dataToSave, { merge: true });
             canchaActual = { ...canchaActual, ...dataToSave };
-            document.getElementById('mensaje-exito')?.classList.add('show'); toast('¡Configuración guardada exitosamente!'); await actualizarDia();
-        } catch (err) { console.error(err); toast(`No se pudo guardar.`, true); } finally { btn.disabled = false; btn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar configuración'; }
+            document.getElementById('mensaje-exito')?.classList.add('show');
+            toast('¡Configuración guardada exitosamente!');
+            try { await actualizarDia(); } catch (diaErr) { console.warn('Error al actualizar día:', diaErr); }
+        } catch (err) {
+            console.error('Error al guardar configuración:', err);
+            toast(`No se pudo guardar: ${err?.message || 'Error de conexión'}`, true);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Ajustes Generales';
+        }
     });
 }
 

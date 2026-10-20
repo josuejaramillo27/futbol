@@ -41,9 +41,12 @@ async function save(){
         montoSena:Number($('admin-monto-sena')?.value||0),
         nota:$('admin-pago-nota')?.value?.trim() || ''
     };
-    if(!p.yape&&!p.plin&&!p.efectivo){toast('Selecciona al menos un método de pago.',true);return}
-    if((p.yape||p.plin)&&!p.numero){toast('Añade el número de Yape / Plin.',true);return}
-    if(p.requiereSena && p.montoSena <= 0){toast('Si requieres seña, ingresa un monto mayor a 0.',true);return}
+    if (!p.yape && !p.plin && !p.efectivo) {
+        p.efectivo = true;
+        if ($('pago-efectivo')) $('pago-efectivo').checked = true;
+    }
+    if ((p.yape || p.plin) && !p.numero) { toast('Añade el número de Yape / Plin.', true); return; }
+    if (p.requiereSena && p.montoSena <= 0) { toast('Si requieres seña, ingresa un monto mayor a 0.', true); return; }
     
     try{
         await setDoc(doc(db,'canchas',uid),{metodosPago:p,updatedAt:serverTimestamp()},{merge:true});
