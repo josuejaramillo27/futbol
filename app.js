@@ -149,9 +149,11 @@ if(esInicio()){
 
          contenedor.innerHTML+=`<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><h3>${c.nombre||'Cancha'}</h3><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating>0?c.rating.toFixed(1):'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto||'Ubicación'}${obtenerCiudad(c)?` · ${obtenerCiudad(c)}`:''}${dist}</p>
          ${multiBadge}
-         <div class="court-meta" style="${c.multiCancha ? 'margin-top:8px;' : ''}"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c)||'Fútbol')}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver perfil y reservar</span><i class="ph-bold ph-arrow-right"></i></button></div></div></article>`
+         <div class="court-meta" style="${c.multiCancha ? 'margin-top:8px;' : ''}"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c)||'Fútbol')}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`
      });
-     contenedor.querySelectorAll('[data-court-id]').forEach(b=>b.addEventListener('click',()=> window.location.href = `cancha.html?id=${b.dataset.courtId}`));
+     contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
+    if(window.abrirModal) window.abrirModal(b.dataset.courtId);
+ }));
  }
  
  function limpiarFiltros(){if(inputBusqueda)inputBusqueda.value='';if(filtroCiudad)filtroCiudad.value='';if(filtroTipo)filtroTipo.value='';if(filtroPrecio)filtroPrecio.value='';if(filtroOrden)filtroOrden.value='recomendadas';soloAbiertas=soloCerca=soloTop=false;document.querySelectorAll('.quick-filter').forEach(b=>b.classList.remove('active'));renderizarCanchas()}
