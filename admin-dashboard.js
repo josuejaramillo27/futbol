@@ -139,21 +139,21 @@ async function cargarPerfil() {
     const campos = { 'admin-nombre': canchaActual.nombre, 'admin-whatsapp': canchaActual.whatsapp, 'admin-descripcion': canchaActual.descripcion, 'admin-precio': canchaActual.precio, 'admin-ubicacion-texto': canchaActual.ubicacionTexto, 'admin-ubicacion-link': canchaActual.ubicacionLink, 'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60 };
     Object.entries(campos).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v ?? '' });
     // 🔥 NUEVO: Cargar configuración de pagos y adelantos
-    if(canchaActual.metodosPago) {
+    if (canchaActual.metodosPago) {
         const elMetodos = document.getElementById('admin-pago-metodos');
-        if(elMetodos) elMetodos.value = canchaActual.metodosPago.textoMetodos || '';
-        
+        if (elMetodos) elMetodos.value = canchaActual.metodosPago.textoMetodos || '';
+
         const elNumero = document.getElementById('admin-pago-numero');
-        if(elNumero) elNumero.value = canchaActual.metodosPago.numero || '';
-        
+        if (elNumero) elNumero.value = canchaActual.metodosPago.numero || '';
+
         const elTitular = document.getElementById('admin-pago-titular');
-        if(elTitular) elTitular.value = canchaActual.metodosPago.titular || '';
-        
+        if (elTitular) elTitular.value = canchaActual.metodosPago.titular || '';
+
         const elReqSena = document.getElementById('admin-req-sena');
-        if(elReqSena) elReqSena.checked = !!canchaActual.metodosPago.requiereSena;
-        
+        if (elReqSena) elReqSena.checked = !!canchaActual.metodosPago.requiereSena;
+
         const elMontoSena = document.getElementById('admin-monto-sena');
-        if(elMontoSena) elMontoSena.value = canchaActual.metodosPago.montoSena || '';
+        if (elMontoSena) elMontoSena.value = canchaActual.metodosPago.montoSena || '';
     }
 
     // Sincronizar Departamento y Distrito con los selectores
@@ -581,7 +581,7 @@ async function subirImagen(archivo, ruta) { if (!archivo) return null; const sto
 const formPerfil = document.getElementById('form-perfil-cancha');
 if (formPerfil) {
     formPerfil.addEventListener('submit', async e => {
-        e.preventDefault(); 
+        e.preventDefault();
         if (!usuarioActual) return;
 
         // 🔥 EL BLINDAJE: Capturamos el botón para que NUNCA vuelva a ser 'undefined'
@@ -682,7 +682,7 @@ if (formPerfil) {
             canchaActual = { ...canchaActual, ...dataToSave };
             document.getElementById('mensaje-exito')?.classList.add('show');
             toast('¡Configuración guardada exitosamente!');
-            
+
             try { await actualizarDia(); } catch (diaErr) { console.warn('Error al actualizar día:', diaErr); }
 
             window.scrollTo({

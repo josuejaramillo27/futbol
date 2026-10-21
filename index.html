@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
     <meta name="description" content="Encuentra canchas, jugadores y tu próximo partido.">
     <title>CHALACAPP | Encuentra dónde jugar</title>
-    
+
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
-    
+
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <link rel="stylesheet" href="styles.css">
@@ -24,7 +25,7 @@
             align-items: center;
             padding: 12px 20px;
             background: rgba(8, 11, 10, 0.95);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -60,247 +61,310 @@
             .topbar {
                 padding: 10px 12px !important;
             }
+
             .brand-sub {
                 display: none !important;
             }
+
             .topbar-nav {
                 gap: 12px !important;
             }
+
             .topbar-nav-link i {
                 font-size: 1.15rem !important;
             }
+
             .topbar-nav-link span {
                 font-size: 0.55rem !important;
             }
         }
     </style>
 </head>
+
 <body class="home-page">
 
-<header class="topbar" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100;">
-    <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
-        <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp" style="height: 28px; width: auto; object-fit: contain;">
-        <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
-    </a>
-    
-    <nav style="display: flex; gap: 15px; align-items: center;">
-        <a href="index.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
-            <i class="ph-bold ph-map-pin" style="font-size: 1.2rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
+    <header class="topbar"
+        style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100;">
+        <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 8px; text-decoration: none;">
+            <img src="logo-chalacapp-nav.png" alt="Logo Chalacapp"
+                style="height: 28px; width: auto; object-fit: contain;">
+            <span style="font-size: 1.2rem; letter-spacing: 1px; color: #fff; font-weight: 900;">CHALACAPP</span>
         </a>
-        <a href="jugadores.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
-            <i class="ph-bold ph-users" style="font-size: 1.2rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">JALES</span>
-        </a>
-        <a href="amigos.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;">
-        <i class="ph-bold ph-address-book" style="font-size: 1.2rem;"></i>
-        <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">PATAS</span>
-    </a>
-        <a href="comunidades.html" style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
-            <i class="ph-bold ph-trophy" style="font-size: 1.2rem;"></i>
-            <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">LIGAS</span>
-        </a>
-    </nav>
-</header>
 
-<main>
-    <!-- ==============================================
+        <nav style="display: flex; gap: 15px; align-items: center;">
+            <a href="index.html"
+                style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: var(--primary-green);">
+                <i class="ph-bold ph-map-pin" style="font-size: 1.2rem;"></i>
+                <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">CANCHAS</span>
+            </a>
+            <a href="jugadores.html"
+                style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;"
+                onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+                <i class="ph-bold ph-users" style="font-size: 1.2rem;"></i>
+                <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">JALES</span>
+            </a>
+            <a href="amigos.html"
+                style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;">
+                <i class="ph-bold ph-address-book" style="font-size: 1.2rem;"></i>
+                <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">PATAS</span>
+            </a>
+            <a href="comunidades.html"
+                style="display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s;"
+                onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#aaa'">
+                <i class="ph-bold ph-trophy" style="font-size: 1.2rem;"></i>
+                <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">LIGAS</span>
+            </a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ==============================================
          1. EL HÉROE (Llamado a la acción principal)
          ============================================== -->
-    <section class="hero-section">
-        <div class="hero-copy">
-            <div class="eyebrow"><span></span> TU FÚTBOL, TU COMUNIDAD</div>
-            <h1>Encuentra dónde<br><strong>jugar hoy.</strong></h1>
-            <p>Descubre canchas, encuentra jugadores y arma tu próximo partido. Todo en un solo lugar.</p>
-            <div class="hero-actions">
-                <a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Encontrar cancha</a>
-                <a href="jugadores.html" class="btn btn-outline hero-secondary"><i class="ph-bold ph-users-three"></i> Buscar jugadores</a>
-                <a href="mis-reservas.html" class="btn btn-outline hero-secondary"><i class="ph-bold ph-ticket"></i> Mis reservas</a>
+        <section class="hero-section">
+            <div class="hero-copy">
+                <div class="eyebrow"><span></span> TU FÚTBOL, TU COMUNIDAD</div>
+                <h1>Encuentra dónde<br><strong>jugar hoy.</strong></h1>
+                <p>Descubre canchas, encuentra jugadores y arma tu próximo partido. Todo en un solo lugar.</p>
+                <div class="hero-actions">
+                    <a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Encontrar
+                        cancha</a>
+                    <a href="jugadores.html" class="btn btn-outline hero-secondary"><i
+                            class="ph-bold ph-users-three"></i> Buscar jugadores</a>
+                    <a href="mis-reservas.html" class="btn btn-outline hero-secondary"><i class="ph-bold ph-ticket"></i>
+                        Mis reservas</a>
+                </div>
             </div>
-        </div>
-        <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-soccer-ball"></i></div>
-    </section>
+            <div class="hero-orb" aria-hidden="true"><i class="ph-fill ph-soccer-ball"></i></div>
+        </section>
 
-    <!-- ==============================================
+        <!-- ==============================================
          2 Y 3. BUSCADOR, MAPA Y LISTA DE CANCHAS
          ============================================== -->
-    <section id="canchas" class="courts-section">
-        <div class="section-heading">
-            <div>
-                <div class="eyebrow"><span></span> DESCUBRE TU PRÓXIMO PARTIDO</div>
-                <h2>Canchas disponibles</h2>
-                <p>Filtra por distrito, tipo, precio y disponibilidad.</p>
+        <section id="canchas" class="courts-section">
+            <div class="section-heading">
+                <div>
+                    <div class="eyebrow"><span></span> DESCUBRE TU PRÓXIMO PARTIDO</div>
+                    <h2>Canchas disponibles</h2>
+                    <p>Filtra por distrito, tipo, precio y disponibilidad.</p>
+                </div>
+                <div class="live-indicator"><span></span> Actualizado ahora</div>
             </div>
-            <div class="live-indicator"><span></span> Actualizado ahora</div>
-        </div>
-        
-        <div class="discover-panel">
-            <div class="discover-search">
-                <i class="ph-bold ph-magnifying-glass"></i>
-                <input id="filtro-busqueda" type="search" placeholder="Busca una cancha, zona o distrito..." autocomplete="off">
-            </div>
-            <div class="filter-row">
-                <label class="filter-field"><span>Departamento</span>
-                    <select id="filtro-ciudad">
-                        <option value="">Todo el Perú</option>
-                        <option value="Amazonas">Amazonas</option><option value="Áncash">Áncash</option><option value="Apurímac">Apurímac</option><option value="Arequipa">Arequipa</option><option value="Ayacucho">Ayacucho</option><option value="Cajamarca">Cajamarca</option><option value="Callao">Callao</option><option value="Cusco">Cusco</option><option value="Huancavelica">Huancavelica</option><option value="Huánuco">Huánuco</option><option value="Ica">Ica</option><option value="Junín">Junín</option><option value="La Libertad">La Libertad</option><option value="Lambayeque">Lambayeque</option><option value="Lima">Lima</option><option value="Loreto">Loreto</option><option value="Madre de Dios">Madre de Dios</option><option value="Moquegua">Moquegua</option><option value="Pasco">Pasco</option><option value="Piura">Piura</option><option value="Puno">Puno</option><option value="San Martín">San Martín</option><option value="Tacna">Tacna</option><option value="Tumbes">Tumbes</option><option value="Ucayali">Ucayali</option>
-                    </select>
-                </label>
-                <label class="filter-field"><span>Tipo</span>
-                    <select id="filtro-tipo"><option value="">Cargando tipos...</option></select>
-                </label>
-                <label class="filter-field"><span>Precio</span>
-                    <select id="filtro-precio">
-                        <option value="">Cualquier precio</option>
-                        <option value="0-30">Hasta S/ 30</option>
-                        <option value="31-50">S/ 31 – 50</option>
-                        <option value="51-80">S/ 51 – 80</option>
-                        <option value="81-9999">S/ 81+</option>
-                    </select>
-                </label>
-                <label class="filter-field"><span>Ordenar</span>
-                    <select id="filtro-orden">
-                        <option value="recomendadas">Recomendadas</option>
-                        <option value="rating">Mejor calificadas</option>
-                        <option value="precio-asc">Menor precio</option>
-                        <option value="precio-desc">Mayor precio</option>
-                    </select>
-                </label>
-            </div>
-        </div>
-        
-        <div class="results-meta">
-            <span id="contador-canchas">Buscando canchas...</span>
-            <span id="filtro-activo"></span>
-        </div>
-        
-        <!-- Botón del Mapa interactivo justo antes de las canchas -->
-        <div style="margin-bottom: 20px; display: flex;">
-            <button id="btn-abrir-mapa" class="btn btn-outline" style="border-color: rgba(46,204,113,0.4); color: #fff;">
-                <i class="ph-fill ph-map-trifold" style="color: var(--primary-green);"></i> Explorar canchas en el mapa
-            </button>
-        </div>
-        
-        <div class="canchas-slider-wrapper">
-            <button id="slider-prev" class="slider-btn"><i class="ph-bold ph-caret-left"></i></button>
-            <div id="lista-canchas" class="canchas-slider"></div>
-            <button id="slider-next" class="slider-btn"><i class="ph-bold ph-caret-right"></i></button>
-        </div>
-    </section>
 
-    <!-- ==============================================
+            <div class="discover-panel">
+                <div class="discover-search">
+                    <i class="ph-bold ph-magnifying-glass"></i>
+                    <input id="filtro-busqueda" type="search" placeholder="Busca una cancha, zona o distrito..."
+                        autocomplete="off">
+                </div>
+                <div class="filter-row">
+                    <label class="filter-field"><span>Departamento</span>
+                        <select id="filtro-ciudad">
+                            <option value="">Todo el Perú</option>
+                            <option value="Amazonas">Amazonas</option>
+                            <option value="Áncash">Áncash</option>
+                            <option value="Apurímac">Apurímac</option>
+                            <option value="Arequipa">Arequipa</option>
+                            <option value="Ayacucho">Ayacucho</option>
+                            <option value="Cajamarca">Cajamarca</option>
+                            <option value="Callao">Callao</option>
+                            <option value="Cusco">Cusco</option>
+                            <option value="Huancavelica">Huancavelica</option>
+                            <option value="Huánuco">Huánuco</option>
+                            <option value="Ica">Ica</option>
+                            <option value="Junín">Junín</option>
+                            <option value="La Libertad">La Libertad</option>
+                            <option value="Lambayeque">Lambayeque</option>
+                            <option value="Lima">Lima</option>
+                            <option value="Loreto">Loreto</option>
+                            <option value="Madre de Dios">Madre de Dios</option>
+                            <option value="Moquegua">Moquegua</option>
+                            <option value="Pasco">Pasco</option>
+                            <option value="Piura">Piura</option>
+                            <option value="Puno">Puno</option>
+                            <option value="San Martín">San Martín</option>
+                            <option value="Tacna">Tacna</option>
+                            <option value="Tumbes">Tumbes</option>
+                            <option value="Ucayali">Ucayali</option>
+                        </select>
+                    </label>
+                    <label class="filter-field"><span>Tipo</span>
+                        <select id="filtro-tipo">
+                            <option value="">Cargando tipos...</option>
+                        </select>
+                    </label>
+                    <label class="filter-field"><span>Precio</span>
+                        <select id="filtro-precio">
+                            <option value="">Cualquier precio</option>
+                            <option value="0-30">Hasta S/ 30</option>
+                            <option value="31-50">S/ 31 – 50</option>
+                            <option value="51-80">S/ 51 – 80</option>
+                            <option value="81-9999">S/ 81+</option>
+                        </select>
+                    </label>
+                    <label class="filter-field"><span>Ordenar</span>
+                        <select id="filtro-orden">
+                            <option value="recomendadas">Recomendadas</option>
+                            <option value="rating">Mejor calificadas</option>
+                            <option value="precio-asc">Menor precio</option>
+                            <option value="precio-desc">Mayor precio</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            <div class="results-meta">
+                <span id="contador-canchas">Buscando canchas...</span>
+                <span id="filtro-activo"></span>
+            </div>
+
+            <!-- Botón del Mapa interactivo justo antes de las canchas -->
+            <div style="margin-bottom: 20px; display: flex;">
+                <button id="btn-abrir-mapa" class="btn btn-outline"
+                    style="border-color: rgba(46,204,113,0.4); color: #fff;">
+                    <i class="ph-fill ph-map-trifold" style="color: var(--primary-green);"></i> Explorar canchas en el
+                    mapa
+                </button>
+            </div>
+
+            <div class="canchas-slider-wrapper">
+                <button id="slider-prev" class="slider-btn"><i class="ph-bold ph-caret-left"></i></button>
+                <div id="lista-canchas" class="canchas-slider"></div>
+                <button id="slider-next" class="slider-btn"><i class="ph-bold ph-caret-right"></i></button>
+            </div>
+        </section>
+
+        <!-- ==============================================
          4. COMUNIDAD / BOLSA DE JUGADORES (Retención)
          ============================================== -->
-    <section class="community-banner">
-        <div class="community-icon"><i class="ph-fill ph-users-three"></i></div>
-        <div class="community-copy">
-            <span class="mini-label">NUEVO · EN TIEMPO REAL</span>
-            <h2>Bolsa de Jugadores</h2>
-            <p>¿Te falta uno? ¿Buscas equipo o retadores para hoy?</p>
-        </div>
-        <a href="jugadores.html" class="btn community-btn">Entrar <i class="ph-bold ph-arrow-up-right"></i></a>
-    </section>
+        <section class="community-banner">
+            <div class="community-icon"><i class="ph-fill ph-users-three"></i></div>
+            <div class="community-copy">
+                <span class="mini-label">NUEVO · EN TIEMPO REAL</span>
+                <h2>Bolsa de Jugadores</h2>
+                <p>¿Te falta uno? ¿Buscas equipo o retadores para hoy?</p>
+            </div>
+            <a href="jugadores.html" class="btn community-btn">Entrar <i class="ph-bold ph-arrow-up-right"></i></a>
+        </section>
 
-    <!-- ==============================================
+        <!-- ==============================================
          5. CAPTACIÓN DE DUEÑOS (Crecimiento)
          ============================================== -->
-    <section id="publicidad-dueños" class="owner-cta">
-        <div class="owner-icon"><i class="ph-fill ph-buildings"></i></div>
-        <div class="owner-copy">
-            <span class="mini-label">PARA DUEÑOS DE CANCHAS</span>
-            <h2>Haz crecer tu cancha con CHALACAPP.</h2>
-            <p>Digitaliza reservas, reduce inasistencias y consigue nuevos jugadores.</p>
-        </div>
-        <a href="login.html" id="btn-contacto-admin" class="btn">Únete a la red <i class="ph-bold ph-arrow-up-right"></i></a>
-    </section>
+        <section id="publicidad-dueños" class="owner-cta">
+            <div class="owner-icon"><i class="ph-fill ph-buildings"></i></div>
+            <div class="owner-copy">
+                <span class="mini-label">PARA DUEÑOS DE CANCHAS</span>
+                <h2>Haz crecer tu cancha con CHALACAPP.</h2>
+                <p>Digitaliza reservas, reduce inasistencias y consigue nuevos jugadores.</p>
+            </div>
+            <a href="login.html" id="btn-contacto-admin" class="btn">Únete a la red <i
+                    class="ph-bold ph-arrow-up-right"></i></a>
+        </section>
 
-</main>
+    </main>
 
-<!-- ==============================================
+    <!-- ==============================================
      MODALES (Ventanas Ocultas)
      ============================================== -->
 
-<!-- 1. Modal Horarios Rápidos (SIN FOTOS, DIRECTO A LA RESERVA) -->
-<div id="modal-cancha" class="modal-booking">
-    <div class="modal-content" style="max-width: 450px; padding: 30px 25px; position: relative;">
-        <button id="cerrar-modal" class="modal-close"><i class="ph-bold ph-x"></i></button>
-        <span class="mini-label" style="color: var(--primary-green); font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 5px;">DISPONIBILIDAD EN VIVO</span>
-        <h2 id="modal-nombre-interno" style="margin-top: 0; margin-bottom: 20px; font-size: 1.5rem; color: #fff;">...</h2>
-        <div id="modal-disponibilidad"></div>
+    <!-- 1. Modal Horarios Rápidos (DIRECTO A LA RESERVA) -->
+    <div id="modal-cancha" class="modal-oculto">
+        <div class="modal-contenido" style="max-width: 480px; padding: 28px 24px; position: relative;">
+            <button id="cerrar-modal" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label"
+                style="color: var(--primary-green); font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px;">DISPONIBILIDAD EN VIVO</span>
+            <h2 id="modal-nombre-interno" style="margin-top: 0; margin-bottom: 18px; font-size: 1.5rem; color: #fff; font-weight: 800; text-transform: uppercase;">
+                ...</h2>
+            <div id="modal-disponibilidad"></div>
+        </div>
     </div>
-</div>
 
-<!-- 2. Modal Confirmar Reserva -->
-<div id="modal-reserva" class="modal-booking">
-    <div class="modal-content" style="max-width: 450px; padding: 30px 25px; position: relative;">
-        <button id="cerrar-reserva" class="modal-close"><i class="ph-bold ph-x"></i></button>
-        <h2 style="color: var(--primary-green); margin-top:0; font-size: 1.3rem;"><i class="ph-fill ph-calendar-plus"></i> Tu Reserva</h2>
-        
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.1);">
-            <p id="booking-cancha-nombre" style="margin:0 0 5px 0; color:#fff; font-weight:bold; font-size:1.1rem;"></p>
-            <p id="booking-hora" style="margin:0; color:var(--primary-green); font-size:1.2rem; font-weight:900;"></p>
+    <!-- 2. Modal Confirmar Reserva -->
+    <div id="modal-reserva" class="modal-oculto" style="z-index: 1050;">
+        <div class="modal-contenido" style="max-width: 450px; padding: 28px 24px; position: relative;">
+            <button id="cerrar-reserva" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label"
+                style="color: var(--primary-green); font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px;">PASO FINAL</span>
+            <h2 style="color: #fff; margin-top: 0; margin-bottom: 18px; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;">
+                <i class="ph-fill ph-calendar-plus" style="color: var(--primary-green);"></i> Tu Reserva
+            </h2>
+
+            <div
+                style="background: rgba(255,255,255,0.04); padding: 14px 16px; border-radius: 12px; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.08);">
+                <p id="booking-cancha-nombre" style="margin: 0 0 5px 0; color: #fff; font-weight: bold; font-size: 1.1rem;">
+                </p>
+                <p id="booking-hora" style="margin: 0; color: var(--primary-green); font-size: 1.15rem; font-weight: 800;">
+                </p>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 14px; text-align: left;">
+                <label style="color: #aaa; font-size: 0.85rem; margin-bottom: 6px; display: block; font-weight: 600;">Tu Nombre</label>
+                <input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez"
+                    style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 18px; text-align: left;">
+                <label style="color: #aaa; font-size: 0.85rem; margin-bottom: 6px; display: block; font-weight: 600;">WhatsApp de contacto</label>
+                <input type="tel" id="booking-telefono" placeholder="Ej. 987654321"
+                    style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
+
+            <div id="booking-status"></div>
+
+            <button id="btn-confirmar-reserva" class="btn"
+                style="width: 100%; padding: 13px; font-size: 1rem; font-weight: bold; background: var(--primary-green); color: #000; border: none; border-radius: 10px; margin-top: 15px; cursor: pointer;">
+                <i class="ph-bold ph-check-circle"></i> Solicitar Reserva
+            </button>
         </div>
-        
-        <div class="form-group" style="margin-bottom:15px; text-align: left;">
-            <label style="color:#aaa; font-size:0.85rem; margin-bottom:5px; display:block;">Tu Nombre</label>
-            <input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; box-sizing:border-box;">
-        </div>
-        
-        <div class="form-group" style="margin-bottom:20px; text-align: left;">
-            <label style="color:#aaa; font-size:0.85rem; margin-bottom:5px; display:block;">WhatsApp de contacto</label>
-            <input type="tel" id="booking-telefono" placeholder="Ej. 987654321" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; box-sizing:border-box;">
-        </div>
-        
-        <button id="btn-confirmar-reserva" class="btn" style="width:100%; padding:12px; font-size:1.05rem; font-weight:bold; background: var(--primary-green); color: #000; border: none; border-radius: 8px;"><i class="ph-bold ph-check-circle"></i> Solicitar Reserva</button>
-        
-        <div id="booking-status"></div>
     </div>
-</div>
 
-<!-- 3. Modal Mapa -->
-<div id="modal-mapa" class="modal-oculto">
-    <div class="modal-contenido" style="max-width: 1000px; height: 85vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
-        <div style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 20, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1);">
-            <h3 style="margin: 0; color: #fff; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
-                <i class="ph-fill ph-map-pin" style="color: var(--primary-green);"></i> Mapa CHALACAPP
-            </h3>
-            <button id="cerrar-mapa" class="btn-cerrar" style="position: static; margin: 0; background: rgba(255,255,255,0.1); border: none; color: #aaa; cursor: pointer; border-radius: 5px; width: 30px; height: 30px;"><i class="ph-bold ph-x"></i></button>
+    <!-- 3. Modal Mapa -->
+    <div id="modal-mapa" class="modal-oculto">
+        <div class="modal-contenido"
+            style="max-width: 1000px; height: 85vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+            <div
+                style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 20, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <h3 style="margin: 0; color: #fff; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="ph-fill ph-map-pin" style="color: var(--primary-green);"></i> Mapa CHALACAPP
+                </h3>
+                <button id="cerrar-mapa" class="btn-cerrar"
+                    style="position: static; margin: 0; background: rgba(255,255,255,0.1); border: none; color: #aaa; cursor: pointer; border-radius: 5px; width: 30px; height: 30px;"><i
+                        class="ph-bold ph-x"></i></button>
+            </div>
+            <div
+                style="padding: 10px 20px; background: #080b0a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <span id="map-status" style="font-size: 0.85rem; color: #aaa;">Cargando...</span>
+                <button id="btn-mi-ubicacion" class="btn btn-outline"
+                    style="padding: 6px 12px; font-size: 0.8rem; width: auto; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 6px;"><i
+                        class="ph-bold ph-navigation"></i> Mi ubicación</button>
+            </div>
+            <div id="map-canchas" style="flex: 1; width: 100%; background: #1a1a1a;"></div>
         </div>
-        <div style="padding: 10px 20px; background: #080b0a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <span id="map-status" style="font-size: 0.85rem; color: #aaa;">Cargando...</span>
-            <button id="btn-mi-ubicacion" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; width: auto; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 6px;"><i class="ph-bold ph-navigation"></i> Mi ubicación</button>
-        </div>
-        <div id="map-canchas" style="flex: 1; width: 100%; background: #1a1a1a;"></div>
     </div>
-</div>
 
-<!-- 4. Modal GPS Inicial -->
-<div id="modal-ubicacion" class="modal-oculto">
-    <div class="modal-contenido" style="text-align:center; max-width:400px; padding: 35px 25px; border: 1px solid var(--primary-green); position: relative;">
-        <div style="width: 80px; height: 80px; background: rgba(0,217,104,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-            <i class="ph-fill ph-map-pin" style="font-size: 3rem; color: var(--primary-green);"></i>
-        </div>
-        <h2 style="color: #fff; margin-bottom: 10px; font-size: 1.5rem;">¿Dónde juegas?</h2>
-        <p style="color: #aaa; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;">Permítenos detectar tu departamento para mostrarte al instante las mejores canchas cerca de ti.</p>
-        <button id="btn-detectar-gps" class="btn" style="width: 100%; margin-bottom: 12px; color: #000; font-weight:bold; background: var(--primary-green); border: none; padding: 12px; border-radius: 8px;"><i class="ph-bold ph-navigation-arrow"></i> Detectar mi ubicación</button>
-        <button id="btn-cerrar-gps" class="btn btn-outline" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff;">Elegir manualmente</button>
-    </div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script type="module" src="app.js"></script>
-<script type="module" src="maps.js"></script>
+    <!-- 4. Modal GPS Inicial -->
     <div id="modal-ubicacion" class="modal-oculto">
-    <div class="modal-contenido" style="text-align:center; max-width:400px; padding: 35px 25px; border: 1px solid var(--primary-green);">
-        <div style="width: 80px; height: 80px; background: rgba(0,217,104,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
-            <i class="ph-fill ph-map-pin" style="font-size: 3rem; color: var(--primary-green);"></i>
+        <div class="modal-contenido"
+            style="text-align:center; max-width:400px; padding: 35px 25px; border: 1px solid var(--primary-green); position: relative;">
+            <div
+                style="width: 80px; height: 80px; background: rgba(0,217,104,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                <i class="ph-fill ph-map-pin" style="font-size: 3rem; color: var(--primary-green);"></i>
+            </div>
+            <h2 style="color: #fff; margin-bottom: 10px; font-size: 1.5rem;">¿Dónde juegas?</h2>
+            <p style="color: #aaa; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;">Permítenos detectar tu
+                departamento para mostrarte al instante las mejores canchas cerca de ti.</p>
+            <button id="btn-detectar-gps" class="btn"
+                style="width: 100%; margin-bottom: 12px; color: #000; font-weight:bold; background: var(--primary-green); border: none; padding: 12px; border-radius: 8px;"><i
+                    class="ph-bold ph-navigation-arrow"></i> Detectar mi ubicación</button>
+            <button id="btn-cerrar-gps" class="btn btn-outline"
+                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff;">Elegir
+                manualmente</button>
         </div>
-        <h2 style="color: #fff; margin-bottom: 10px; font-size: 1.5rem;">¿Dónde juegas?</h2>
-        <p style="color: #aaa; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;">Permítenos detectar tu departamento para mostrarte al instante las mejores canchas cerca de ti.</p>
-        <button id="btn-detectar-gps" class="btn" style="width: 100%; margin-bottom: 12px; background: var(--primary-green); color: #000;"><i class="ph-bold ph-navigation-arrow"></i> Detectar mi ubicación</button>
-        <button id="btn-cerrar-gps" class="btn btn-outline" style="width: 100%; border: none;">Elegir departamento manualmente</button>
     </div>
-</div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="app.js"></script>
+    <script type="module" src="maps.js"></script>
 </body>
+
 </html>

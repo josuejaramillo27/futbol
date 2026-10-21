@@ -1,27 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
     <title>Panel Admin Master | CHALACAPP</title>
-    
+
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
-    
+
     <!-- Google Fonts Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
+
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Estilos Globales de la App Principal -->
     <link rel="stylesheet" href="styles.css">
-    
+
     <style>
         :root {
             --bg-dark: #080B0A;
@@ -51,7 +53,7 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-dark);
-            background-image: 
+            background-image:
                 radial-gradient(circle at 50% 0%, rgba(46, 204, 113, 0.09) 0%, transparent 55%),
                 radial-gradient(circle at 90% 90%, rgba(46, 204, 113, 0.03) 0%, transparent 40%);
             color: var(--text-main);
@@ -134,8 +136,17 @@
         }
 
         @keyframes pulseDot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.85); }
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(0.85);
+            }
         }
 
         .sidebar-menu {
@@ -276,13 +287,16 @@
         .main-content::-webkit-scrollbar {
             width: 8px;
         }
+
         .main-content::-webkit-scrollbar-track {
             background: transparent;
         }
+
         .main-content::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
         }
+
         .main-content::-webkit-scrollbar-thumb:hover {
             background: rgba(46, 204, 113, 0.4);
         }
@@ -297,8 +311,15 @@
         }
 
         @keyframes tabFadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* HEADER DE PESTAÑAS */
@@ -594,15 +615,17 @@
         .owner-card:hover {
             border-color: var(--border-hover);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
         .owner-card.status-approved {
             border-left: 3px solid var(--primary-green);
         }
+
         .owner-card.status-pending {
             border-left: 3px solid var(--warning);
         }
+
         .owner-card.status-rejected {
             border-left: 3px solid var(--danger);
         }
@@ -739,8 +762,15 @@
         }
 
         @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .modal-contenido {
@@ -817,6 +847,7 @@
             .kpi-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
             .analytics-grid {
                 grid-template-columns: 1fr;
             }
@@ -900,6 +931,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- BARRA LATERAL (SIDEBAR) -->
@@ -913,7 +945,7 @@
                 <span class="brand-badge"><span></span> ADMIN MASTER</span>
             </div>
         </div>
-        
+
         <nav class="sidebar-menu">
             <span class="sidebar-menu-title">Módulos de Control</span>
             <a class="sidebar-link active" data-target="tab-dashboard" id="nav-tab-dashboard">
@@ -930,7 +962,7 @@
                 <span>Comunidades</span>
             </a>
         </nav>
-        
+
         <div class="sidebar-footer">
             <div class="user-status-card">
                 <div class="user-status-avatar">
@@ -949,14 +981,16 @@
 
     <!-- ÁREA DE CONTENIDO PRINCIPAL -->
     <main class="main-content">
-        
+
         <!-- PESTAÑA 1: DASHBOARD DE ESTADÍSTICAS (INICIO) -->
         <section id="tab-dashboard" class="tab-content mostrar">
-            
+
             <div class="tab-header">
                 <div class="tab-header-titles">
-                    <div class="eyebrow" style="font-size: 0.68rem; font-weight: 800; color: var(--primary-green); letter-spacing: 1.2px; display: flex; align-items: center; gap: 7px; margin-bottom: 4px;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 10px var(--primary-green);"></span>
+                    <div class="eyebrow"
+                        style="font-size: 0.68rem; font-weight: 800; color: var(--primary-green); letter-spacing: 1.2px; display: flex; align-items: center; gap: 7px; margin-bottom: 4px;">
+                        <span
+                            style="width: 6px; height: 6px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 10px var(--primary-green);"></span>
                         ADMINISTRACIÓN CENTRAL
                     </div>
                     <h1>Dashboard <strong>Estadísticas.</strong></h1>
@@ -971,7 +1005,7 @@
 
             <!-- CUADRÍCULA DE KPIS FLOTANTES -->
             <div class="kpi-grid">
-                
+
                 <!-- KPI 1: Usuarios Registrados -->
                 <div class="kpi-card">
                     <div class="kpi-top">
@@ -1057,7 +1091,7 @@
 
             <!-- SECCIÓN DE GRÁFICOS VISUALES (CHART.JS) -->
             <div class="analytics-grid">
-                
+
                 <!-- Gráfico 1: Reservas por Estado -->
                 <div class="chart-card">
                     <div class="chart-header">
@@ -1090,23 +1124,28 @@
 
         <!-- PESTAÑA 2: GESTIÓN DE CUENTAS Y CANCHAS -->
         <section id="tab-usuarios" class="tab-content">
-            
+
             <div class="tab-header">
                 <div class="tab-header-titles">
-                    <div class="eyebrow" style="font-size: 0.68rem; font-weight: 800; color: var(--primary-green); letter-spacing: 1.2px; display: flex; align-items: center; gap: 7px; margin-bottom: 4px;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 10px var(--primary-green);"></span>
+                    <div class="eyebrow"
+                        style="font-size: 0.68rem; font-weight: 800; color: var(--primary-green); letter-spacing: 1.2px; display: flex; align-items: center; gap: 7px; margin-bottom: 4px;">
+                        <span
+                            style="width: 6px; height: 6px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 10px var(--primary-green);"></span>
                         MODERACIÓN
                     </div>
                     <h1>Gestión de <strong>Cuentas y Canchas.</strong></h1>
-                    <p>Revisa solicitudes de dueños de complejos, aprueba accesos y habilita la publicación de sus canchas.</p>
+                    <p>Revisa solicitudes de dueños de complejos, aprueba accesos y habilita la publicación de sus
+                        canchas.</p>
                 </div>
             </div>
-            
+
             <div class="card" style="padding: 16px; margin-bottom: 20px;">
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 240px; position: relative;">
-                        <input type="text" id="search-input" class="form-control" placeholder="Buscar por dueño, complejo, documento o correo..." style="padding-left: 38px;">
-                        <i class="ph-bold ph-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 1.05rem;"></i>
+                        <input type="text" id="search-input" class="form-control"
+                            placeholder="Buscar por dueño, complejo, documento o correo..." style="padding-left: 38px;">
+                        <i class="ph-bold ph-magnifying-glass"
+                            style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-dim); font-size: 1.05rem;"></i>
                     </div>
                     <select id="filter-status" class="form-control" style="width: auto; min-width: 210px;">
                         <option value="all">Todos los estados</option>
@@ -1129,11 +1168,13 @@
 
         <!-- PESTAÑA 3: GESTIÓN DE COMUNIDADES -->
         <section id="tab-comunidades" class="tab-content">
-            
+
             <div class="tab-header">
                 <div class="tab-header-titles">
-                    <div class="eyebrow" style="font-size: 0.68rem; font-weight: 800; color: var(--primary-green); letter-spacing: 1.2px; display: flex; align-items: center; gap: 7px; margin-bottom: 4px;">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 10px var(--primary-green);"></span>
+                    <div class="eyebrow"
+                        style="font-size: 0.68rem; font-weight: 800; color: var(--primary-green); letter-spacing: 1.2px; display: flex; align-items: center; gap: 7px; margin-bottom: 4px;">
+                        <span
+                            style="width: 6px; height: 6px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 10px var(--primary-green);"></span>
                         COMUNIDAD & LIGAS
                     </div>
                     <h1>Gestión de <strong>Comunidades.</strong></h1>
@@ -1161,7 +1202,8 @@
                         <tbody id="admin-lista-comunidades">
                             <tr>
                                 <td colspan="5" style="text-align:center; padding: 40px; color: var(--text-muted);">
-                                    <i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 1.8rem; color: var(--primary-green);"></i>
+                                    <i class="ph-bold ph-spinner-gap ph-spin"
+                                        style="font-size: 1.8rem; color: var(--primary-green);"></i>
                                     <p style="margin-top: 8px;">Cargando comunidades...</p>
                                 </td>
                             </tr>
@@ -1178,19 +1220,22 @@
     <div id="modal-details" class="modal-oculto">
         <div class="modal-contenido">
             <button id="close-modal" class="btn-cerrar" title="Cerrar ventana"><i class="ph-bold ph-x"></i></button>
-            
+
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(46,204,113,0.12); color: var(--primary-green); display: grid; place-items: center; font-size: 1.2rem;">
+                <div
+                    style="width: 36px; height: 36px; border-radius: 10px; background: rgba(46,204,113,0.12); color: var(--primary-green); display: grid; place-items: center; font-size: 1.2rem;">
                     <i class="ph-bold ph-sliders-horizontal"></i>
                 </div>
                 <div>
                     <h2 style="margin: 0; font-size: 1.2rem; color: #fff;">Gestionar Solicitud</h2>
-                    <span style="font-size: 0.75rem; color: var(--text-muted);">Detalles del dueño y complejo deportivo</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Detalles del dueño y complejo
+                        deportivo</span>
                 </div>
             </div>
-            
+
             <div class="detalles-box">
-                <p><strong>Complejo Deportivo:</strong> <span id="det-complejo" style="color: #fff; font-weight: 700;">-</span></p>
+                <p><strong>Complejo Deportivo:</strong> <span id="det-complejo"
+                        style="color: #fff; font-weight: 700;">-</span></p>
                 <p><strong>Nombre del Dueño:</strong> <span id="det-nombre" style="color: #fff;">-</span></p>
                 <p><strong>Documento / DNI:</strong> <span id="det-dni" style="color: #fff;">-</span></p>
                 <p><strong>Correo Electrónico:</strong> <span id="det-email" style="color: #fff;">-</span></p>
@@ -1208,49 +1253,58 @@
     <div id="modal-admin-comunidad" class="modal-oculto">
         <div class="modal-contenido">
             <button id="cerrar-admin-comunidad" class="btn-cerrar" title="Cerrar"><i class="ph-bold ph-x"></i></button>
-            
+
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(46,204,113,0.12); color: var(--primary-green); display: grid; place-items: center; font-size: 1.2rem;">
+                <div
+                    style="width: 36px; height: 36px; border-radius: 10px; background: rgba(46,204,113,0.12); color: var(--primary-green); display: grid; place-items: center; font-size: 1.2rem;">
                     <i class="ph-bold ph-shield-plus"></i>
                 </div>
                 <div>
                     <h2 style="margin: 0; font-size: 1.2rem; color: #fff;">Alta de Nueva Comunidad</h2>
-                    <span style="font-size: 0.75rem; color: var(--text-muted);">Publica una liga o comunidad para los jugadores</span>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">Publica una liga o comunidad para los
+                        jugadores</span>
                 </div>
             </div>
-            
+
             <form id="form-admin-comunidad" style="margin-top: 15px;">
                 <div class="form-group">
                     <label>Nombre de la Comunidad / Liga</label>
-                    <input type="text" id="admin-com-nombre" class="form-control" required placeholder="Ej: Liga Piura Centro">
+                    <input type="text" id="admin-com-nombre" class="form-control" required
+                        placeholder="Ej: Liga Piura Centro">
                 </div>
                 <div class="form-group">
                     <label>ID del Líder (UID de Google)</label>
-                    <input type="text" id="admin-com-lider-uid" class="form-control" required placeholder="Pega el UID de Firebase Auth del líder">
+                    <input type="text" id="admin-com-lider-uid" class="form-control" required
+                        placeholder="Pega el UID de Firebase Auth del líder">
                 </div>
                 <div style="display: flex; gap: 12px;">
                     <div class="form-group" style="flex: 1;">
                         <label>Deporte</label>
-                        <input type="text" id="admin-com-deporte" class="form-control" required placeholder="Ej: Fútbol 7, Vóley">
+                        <input type="text" id="admin-com-deporte" class="form-control" required
+                            placeholder="Ej: Fútbol 7, Vóley">
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label>Categoría</label>
-                        <input type="text" id="admin-com-categoria" class="form-control" required placeholder="Ej: Libre / Veteranos">
+                        <input type="text" id="admin-com-categoria" class="form-control" required
+                            placeholder="Ej: Libre / Veteranos">
                     </div>
                 </div>
                 <div style="display: flex; gap: 12px;">
                     <div class="form-group" style="flex: 1;">
                         <label>Ciudad</label>
-                        <input type="text" id="admin-com-ciudad" class="form-control" required placeholder="Ej: Piura, Callao">
+                        <input type="text" id="admin-com-ciudad" class="form-control" required
+                            placeholder="Ej: Piura, Callao">
                     </div>
                     <div class="form-group" style="flex: 1;">
                         <label>WhatsApp del Líder</label>
-                        <input type="text" id="admin-com-wsp" class="form-control" required placeholder="Ej: 51987654321">
+                        <input type="text" id="admin-com-wsp" class="form-control" required
+                            placeholder="Ej: 51987654321">
                     </div>
                 </div>
                 <div class="form-group" style="margin-bottom: 22px;">
                     <label>Descripción del Grupo</label>
-                    <textarea id="admin-com-desc" rows="3" class="form-control" required placeholder="Describe la dinámica, requisitos o premios de la comunidad..."></textarea>
+                    <textarea id="admin-com-desc" rows="3" class="form-control" required
+                        placeholder="Describe la dinámica, requisitos o premios de la comunidad..."></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
                     <i class="ph-bold ph-check"></i> Publicar Comunidad
@@ -1299,7 +1353,7 @@
                     const adminName = userDoc.data().nombre || user.displayName || user.email || "Admin Maestro";
                     const displayEl = document.getElementById("admin-user-display");
                     if (displayEl) displayEl.textContent = adminName;
-                    
+
                     // Cargar Dashboard de Estadísticas Inicial
                     cargarDashboardEstadisticas();
                     // Cargar Datos de Dueños y Comunidades
@@ -1325,7 +1379,7 @@
                 e.preventDefault();
                 links.forEach(l => l.classList.remove('active'));
                 tabs.forEach(t => t.classList.remove('mostrar'));
-                
+
                 link.classList.add('active');
                 const targetId = link.getAttribute('data-target');
                 const targetTab = document.getElementById(targetId);
@@ -1681,13 +1735,13 @@
             const filtered = allOwners.filter(owner => {
                 const searchStr = `${owner.nombre || ''} ${owner.email || ''} ${owner.documento || ''} ${owner.complejo || ''} ${owner.canchaData?.nombre || ''}`.toLowerCase();
                 const matchesSearch = !searchTerm || searchStr.includes(searchTerm);
-                
+
                 let matchesStatus = true;
                 if (statusFilter === "pending") matchesStatus = owner.estado === "pending";
                 else if (statusFilter === "approved") matchesStatus = owner.estado === "approved";
                 else if (statusFilter === "rejected") matchesStatus = owner.estado === "rejected";
                 else if (statusFilter === "pending_review") matchesStatus = owner.estadoPublicacion === "pending_review";
-                
+
                 return matchesSearch && matchesStatus;
             });
 
@@ -1708,7 +1762,7 @@
             filtered.forEach(owner => {
                 const estadoCuenta = owner.estado === "approved" ? "approved" : owner.estado === "rejected" ? "rejected" : "pending";
                 const estadoCuentaTexto = owner.estado === "approved" ? "Cuenta Aprobada" : owner.estado === "rejected" ? "Cuenta Suspendida" : "Cuenta Pendiente";
-                
+
                 const estPub = owner.estadoPublicacion;
                 let badgePublicacion = `<span class="badge badge-draft"><i class="ph-bold ph-file-dashed"></i> Borrador</span>`;
                 if (estPub === 'pending_review') {
@@ -1719,7 +1773,7 @@
 
                 const card = document.createElement('div');
                 card.className = `owner-card status-${estadoCuenta}`;
-                
+
                 card.innerHTML = `
                     <div style="flex: 1; min-width: 250px;">
                         <h3 class="owner-title">${owner.complejo || owner.canchaData?.nombre || "Complejo Sin Nombre"}</h3>
@@ -1764,7 +1818,7 @@
             document.getElementById('det-dni').innerText = owner.documento || "No especificado";
             document.getElementById('det-email').innerText = owner.email || "No especificado";
             document.getElementById('det-telefono').innerText = owner.telefono || cancha.whatsapp || "No especificado";
-            
+
             const estadoEl = document.getElementById('det-estado');
             estadoEl.innerText = (owner.estado || "PENDING").toUpperCase();
             estadoEl.style.color = owner.estado === 'pending' ? 'var(--warning)' : owner.estado === 'approved' ? 'var(--primary-green)' : 'var(--danger)';
@@ -1885,7 +1939,7 @@
                             </td>
                             <td>${c.deporte || "Fútbol"} • <span style="color: var(--text-muted);">${c.categoria || "Libre"}</span></td>
                             <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${c.ciudad || "No especificada"}</td>
-                            <td><a href="https://wa.me/${String(c.whatsappLider || '').replace(/\\D/g,'')}" target="_blank" style="color: var(--primary-green); font-weight: 600; text-decoration: none;"><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider || "Sin teléfono"}</a></td>
+                            <td><a href="https://wa.me/${String(c.whatsappLider || '').replace(/\\D/g, '')}" target="_blank" style="color: var(--primary-green); font-weight: 600; text-decoration: none;"><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider || "Sin teléfono"}</a></td>
                             <td style="text-align: right;">
                                 <button class="btn btn-danger btn-borrar-comunidad" data-id="${docSnap.id}" style="padding: 6px 12px; font-size: 0.78rem;">
                                     <i class="ph-bold ph-trash"></i> Eliminar
@@ -1953,4 +2007,5 @@
         });
     </script>
 </body>
+
 </html>

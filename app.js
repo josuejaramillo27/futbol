@@ -18,7 +18,7 @@ let canchasGlobales = [], ubicacionUsuario = null, usuarioActual = null;
 // ==========================================
 // SISTEMA DE NOTIFICACIONES ELEGANTES
 // ==========================================
-window.toast = function(mensaje, tipo = 'success') {
+window.toast = function (mensaje, tipo = 'success') {
     let container = document.getElementById('toast-container-global');
     if (!container) {
         container = document.createElement('div');
@@ -35,10 +35,10 @@ window.toast = function(mensaje, tipo = 'success') {
         setTimeout(() => toastEl.remove(), 300);
     }, 3200);
 };
-window.alert = function(mensaje) { window.toast(mensaje, 'info'); };
+window.alert = function (mensaje) { window.toast(mensaje, 'info'); };
 
 // MODAL PARA PEDIR WHATSAPP
-window.customPrompt = function(mensaje, placeholder) {
+window.customPrompt = function (mensaje, placeholder) {
     return new Promise((resolve) => {
         let overlay = document.getElementById('custom-prompt-overlay');
         if (!overlay) {
@@ -69,8 +69,8 @@ window.customPrompt = function(mensaje, placeholder) {
 
         document.getElementById('btn-prompt-ok').onclick = () => {
             const val = document.getElementById('custom-prompt-input').value.trim();
-            if(val.length !== 9) { window.toast('El número debe tener 9 dígitos.', 'warning'); return; }
-            if(confirm(`¿Tu número es ${val}?\nVerifica que esté correcto antes de enviarlo.`)) {
+            if (val.length !== 9) { window.toast('El número debe tener 9 dígitos.', 'warning'); return; }
+            if (confirm(`¿Tu número es ${val}?\nVerifica que esté correcto antes de enviarlo.`)) {
                 overlay.classList.remove('show');
                 resolve(val);
             }
@@ -87,33 +87,33 @@ window.customPrompt = function(mensaje, placeholder) {
 // ==========================================
 function formatWsp(num) {
     if (!num) return '';
-    let n = String(num).replace(/\D/g, ''); 
-    if (n.length === 9) return '51' + n;    
-    return n;                               
+    let n = String(num).replace(/\D/g, '');
+    if (n.length === 9) return '51' + n;
+    return n;
 }
 
-function normalizar(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim()}
-function obtenerCiudad(c){return c.ciudad||c.provincia||c.departamento||''} function obtenerTipo(c){return c.tipoCancha||c.tipo||c.modalidad||''}
-function precioNumero(c){const p=Number(String(c.precio??'').replace(',','.').replace(/[^0-9.]/g,''));return Number.isFinite(p)?p:0}
-function canchaEstaAbierta(c){if(!c.horaApertura||!c.horaCierre)return false;const n=new Date(),actual=n.getHours()*60+n.getMinutes(),[ha,ma]=c.horaApertura.split(':').map(Number),[hc,mc]=c.horaCierre.split(':').map(Number);if(![ha,ma,hc,mc].every(Number.isFinite))return false;const a=ha*60+ma,b=hc*60+mc;return b>a?actual>=a&&actual<=b:actual>=a||actual<=b}
-function distanciaKm(lat1,lon1,lat2,lon2){const R=6371,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180,a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a))}
-function distanciaCerca(c){if(ubicacionUsuario&&Number.isFinite(Number(c.lat))&&Number.isFinite(Number(c.lng)))return distanciaKm(ubicacionUsuario.lat,ubicacionUsuario.lng,Number(c.lat),Number(c.lng));return Number(c.distanciaKm??c.distancia??999999)}
-const esInicio=()=>{const p=window.location.pathname.replace(/\/$/,'');return p===''||p.endsWith('/index.html')||p.endsWith('/futbol')||p.endsWith('/futbol/index.html')};
-const fechaHoy=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-const minutos=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})$/);return m?Number(m[1])*60+Number(m[2]):null};
+function normalizar(v) { return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() }
+function obtenerCiudad(c) { return c.ciudad || c.provincia || c.departamento || '' } function obtenerTipo(c) { return c.tipoCancha || c.tipo || c.modalidad || '' }
+function precioNumero(c) { const p = Number(String(c.precio ?? '').replace(',', '.').replace(/[^0-9.]/g, '')); return Number.isFinite(p) ? p : 0 }
+function canchaEstaAbierta(c) { if (!c.horaApertura || !c.horaCierre) return false; const n = new Date(), actual = n.getHours() * 60 + n.getMinutes(), [ha, ma] = c.horaApertura.split(':').map(Number), [hc, mc] = c.horaCierre.split(':').map(Number); if (![ha, ma, hc, mc].every(Number.isFinite)) return false; const a = ha * 60 + ma, b = hc * 60 + mc; return b > a ? actual >= a && actual <= b : actual >= a || actual <= b }
+function distanciaKm(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180, a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) }
+function distanciaCerca(c) { if (ubicacionUsuario && Number.isFinite(Number(c.lat)) && Number.isFinite(Number(c.lng))) return distanciaKm(ubicacionUsuario.lat, ubicacionUsuario.lng, Number(c.lat), Number(c.lng)); return Number(c.distanciaKm ?? c.distancia ?? 999999) }
+const esInicio = () => { const p = window.location.pathname.replace(/\/$/, ''); return p === '' || p.endsWith('/index.html') || p.endsWith('/futbol') || p.endsWith('/futbol/index.html') };
+const fechaHoy = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` };
+const minutos = t => { const m = String(t || '').match(/^(\d{1,2}):(\d{2})$/); return m ? Number(m[1]) * 60 + Number(m[2]) : null };
 
 const slotsDeCancha = (c, reservas, fechaReq) => {
-    const a = minutos(c.horaApertura), b0 = minutos(c.horaCierre), step = Number(c.intervaloMinutos||c.duracionReserva||60);
-    if(a===null || b0===null || !Number.isFinite(step) || step<=0) return [];
-    let b = b0<=a ? b0+1440 : b0;
+    const a = minutos(c.horaApertura), b0 = minutos(c.horaCierre), step = Number(c.intervaloMinutos || c.duracionReserva || 60);
+    if (a === null || b0 === null || !Number.isFinite(step) || step <= 0) return [];
+    let b = b0 <= a ? b0 + 1440 : b0;
     const fReq = fechaReq || fechaHoy();
-    const ocupadas = new Set(reservas.filter(r => String(r.canchaId)===String(c.id) && String(r.fecha)===fReq && !['cancelada','cancelado','cancelled','rejected'].includes(normalizar(r.estado))).map(r=>minutos(r.horaInicio)).filter(Number.isFinite));
+    const ocupadas = new Set(reservas.filter(r => String(r.canchaId) === String(c.id) && String(r.fecha) === fReq && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(r.estado))).map(r => minutos(r.horaInicio)).filter(Number.isFinite));
     const isToday = fReq === fechaHoy();
-    const now = new Date(), actual = now.getHours()*60 + now.getMinutes();
+    const now = new Date(), actual = now.getHours() * 60 + now.getMinutes();
     const out = [];
-    for(let t=a; t<b; t+=step){
-        const real = t%1440, label = `${String(Math.floor(real/60)).padStart(2,'0')}:${String(real%60).padStart(2,'0')}`;
-        out.push({label, blocked: ocupadas.has(real) || (isToday && real<actual)});
+    for (let t = a; t < b; t += step) {
+        const real = t % 1440, label = `${String(Math.floor(real / 60)).padStart(2, '0')}:${String(real % 60).padStart(2, '0')}`;
+        out.push({ label, blocked: ocupadas.has(real) || (isToday && real < actual) });
     }
     return out;
 };
@@ -121,90 +121,111 @@ const slotsDeCancha = (c, reservas, fechaReq) => {
 // ==========================================
 // PÁGINA PRINCIPAL (INDEX)
 // ==========================================
-if(esInicio()){
- const contenedor=document.getElementById('lista-canchas'),inputBusqueda=document.getElementById('filtro-busqueda'),filtroCiudad=document.getElementById('filtro-ciudad'),filtroTipo=document.getElementById('filtro-tipo'),filtroPrecio=document.getElementById('filtro-precio'),filtroOrden=document.getElementById('filtro-orden'),contador=document.getElementById('contador-canchas'),filtroActivo=document.getElementById('filtro-activo');let soloAbiertas=false,soloCerca=false,soloTop=false;
- function llenarSelect(select,valores,placeholder){if(!select)return;const actual=select.value;select.innerHTML=`<option value="">${placeholder}</option>`;[...new Set(valores.map(v=>String(v).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es')).forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;select.appendChild(o)});if([...select.options].some(o=>o.value===actual))select.value=actual}
- 
- function renderizarCanchas(){
-     if(!contenedor)return;
-     const texto=normalizar(inputBusqueda?.value),ciudad=normalizar(filtroCiudad?.value),tipo=normalizar(filtroTipo?.value),rango=filtroPrecio?.value||'',orden=filtroOrden?.value||'recomendadas';
-     let resultados=canchasGlobales.filter(c=>{
-         const buscable=normalizar(`${c.nombre} ${c.ubicacionTexto||''} ${obtenerCiudad(c)} ${obtenerTipo(c)} ${c.tiposMulti||''}`),precio=precioNumero(c);
-         let rp=true;if(rango){const[min,max]=rango.split('-').map(Number);rp=precio>=min&&precio<=max}
-         return(!texto||buscable.includes(texto))&&(!ciudad||normalizar(obtenerCiudad(c))===ciudad)&&(!tipo||(normalizar(obtenerTipo(c))===tipo || normalizar(c.tiposMulti||'').includes(tipo)))&&rp&&(!soloAbiertas||c.isOpen)&&(!soloTop||c.rating>=4.5)&&(!soloCerca||distanciaCerca(c)<=10);
-     });
-     resultados.sort((a,b)=>orden==='rating'?b.rating-a.rating:orden==='precio-asc'?precioNumero(a)-precioNumero(b):orden==='precio-desc'?precioNumero(b)-precioNumero(a):orden==='cerca'?distanciaCerca(a)-distanciaCerca(b):a.isOpen!==b.isOpen?(a.isOpen?-1:1):b.rating-a.rating);
-     if(contador)contador.textContent=`${resultados.length} ${resultados.length===1?'complejo encontrado':'complejos encontrados'}`;
-     if(filtroActivo){const a=[];if(ciudad)a.push(filtroCiudad.value);if(tipo)a.push(filtroTipo.value);if(rango)a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text);if(soloAbiertas)a.push('Abiertas ahora');if(soloTop)a.push('4.5+ estrellas');if(soloCerca)a.push(ubicacionUsuario?'Cerca de mí':'Cerca de mí*');filtroActivo.textContent=a.length?a.join(' · '):''}
-     contenedor.innerHTML='';
-     if(!resultados.length){
-         contenedor.innerHTML='<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos canchas</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';
-         document.getElementById('btn-reset-empty')?.addEventListener('click',limpiarFiltros);return;
-     }
-     resultados.forEach(c=>{
-         const estado=c.isOpen?'<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>':'<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>',logo=c.logo||'https://via.placeholder.com/100',portada=c.fotos?.length?c.fotos[0]:'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85',d=distanciaCerca(c),dist=Number.isFinite(d)&&d<999999?` · ${d.toFixed(1)} km`:'';
-         
-         // 🔥 TEXTO QUE AVISA SI HAY MÁS CANCHAS
-         const multiBadge = c.multiCancha ? `<p style="margin: 6px 0 0 0; font-size: 0.8rem; color: #f1c40f; font-weight: bold;"><i class="ph-bold ph-copy"></i> ${c.cantidadCanchas} Canchas (${c.tiposMulti})</p>` : '';
+if (esInicio()) {
+    const contenedor = document.getElementById('lista-canchas'), inputBusqueda = document.getElementById('filtro-busqueda'), filtroCiudad = document.getElementById('filtro-ciudad'), filtroTipo = document.getElementById('filtro-tipo'), filtroPrecio = document.getElementById('filtro-precio'), filtroOrden = document.getElementById('filtro-orden'), contador = document.getElementById('contador-canchas'), filtroActivo = document.getElementById('filtro-activo'); let soloAbiertas = false, soloCerca = false, soloTop = false;
+    function llenarSelect(select, valores, placeholder) { if (!select) return; const actual = select.value; select.innerHTML = `<option value="">${placeholder}</option>`;[...new Set(valores.map(v => String(v).trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es')).forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; select.appendChild(o) }); if ([...select.options].some(o => o.value === actual)) select.value = actual }
 
-         contenedor.innerHTML+=`<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><h3>${c.nombre||'Cancha'}</h3><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating>0?c.rating.toFixed(1):'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto||'Ubicación'}${obtenerCiudad(c)?` · ${obtenerCiudad(c)}`:''}${dist}</p>
+    function renderizarCanchas() {
+        if (!contenedor) return;
+        const texto = normalizar(inputBusqueda?.value), ciudad = normalizar(filtroCiudad?.value), tipo = normalizar(filtroTipo?.value), rango = filtroPrecio?.value || '', orden = filtroOrden?.value || 'recomendadas';
+        let resultados = canchasGlobales.filter(c => {
+            const buscable = normalizar(`${c.nombre} ${c.ubicacionTexto || ''} ${obtenerCiudad(c)} ${obtenerTipo(c)} ${c.tiposMulti || ''}`), precio = precioNumero(c);
+            let rp = true; if (rango) { const [min, max] = rango.split('-').map(Number); rp = precio >= min && precio <= max }
+            return (!texto || buscable.includes(texto)) && (!ciudad || normalizar(obtenerCiudad(c)) === ciudad) && (!tipo || (normalizar(obtenerTipo(c)) === tipo || normalizar(c.tiposMulti || '').includes(tipo))) && rp && (!soloAbiertas || c.isOpen) && (!soloTop || c.rating >= 4.5) && (!soloCerca || distanciaCerca(c) <= 10);
+        });
+        resultados.sort((a, b) => orden === 'rating' ? b.rating - a.rating : orden === 'precio-asc' ? precioNumero(a) - precioNumero(b) : orden === 'precio-desc' ? precioNumero(b) - precioNumero(a) : orden === 'cerca' ? distanciaCerca(a) - distanciaCerca(b) : a.isOpen !== b.isOpen ? (a.isOpen ? -1 : 1) : b.rating - a.rating);
+        if (contador) contador.textContent = `${resultados.length} ${resultados.length === 1 ? 'complejo encontrado' : 'complejos encontrados'}`;
+        if (filtroActivo) { const a = []; if (ciudad) a.push(filtroCiudad.value); if (tipo) a.push(filtroTipo.value); if (rango) a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text); if (soloAbiertas) a.push('Abiertas ahora'); if (soloTop) a.push('4.5+ estrellas'); if (soloCerca) a.push(ubicacionUsuario ? 'Cerca de mí' : 'Cerca de mí*'); filtroActivo.textContent = a.length ? a.join(' · ') : '' }
+        contenedor.innerHTML = '';
+        if (!resultados.length) {
+            contenedor.innerHTML = '<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos canchas</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';
+            document.getElementById('btn-reset-empty')?.addEventListener('click', limpiarFiltros); return;
+        }
+        resultados.forEach(c => {
+            const estado = c.isOpen ? '<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>' : '<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>', logo = c.logo || 'https://via.placeholder.com/100', portada = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85', d = distanciaCerca(c), dist = Number.isFinite(d) && d < 999999 ? ` · ${d.toFixed(1)} km` : '';
+
+            // 🔥 TEXTO QUE AVISA SI HAY MÁS CANCHAS
+            const multiBadge = c.multiCancha ? `<p style="margin: 6px 0 0 0; font-size: 0.8rem; color: #f1c40f; font-weight: bold;"><i class="ph-bold ph-copy"></i> ${c.cantidadCanchas} Canchas (${c.tiposMulti})</p>` : '';
+
+            contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><a href="cancha.html?id=${c.id}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : ''}${dist}</p>
          ${multiBadge}
-         <div class="court-meta" style="${c.multiCancha ? 'margin-top:8px;' : ''}"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c)||'Fútbol')}</span><strong>S/ ${c.precio??'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`
-     });
-     contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
-    if(window.abrirModal) window.abrirModal(b.dataset.courtId);
- }));
- }
- 
- function limpiarFiltros(){if(inputBusqueda)inputBusqueda.value='';if(filtroCiudad)filtroCiudad.value='';if(filtroTipo)filtroTipo.value='';if(filtroPrecio)filtroPrecio.value='';if(filtroOrden)filtroOrden.value='recomendadas';soloAbiertas=soloCerca=soloTop=false;document.querySelectorAll('.quick-filter').forEach(b=>b.classList.remove('active'));renderizarCanchas()}
- 
- async function cargar(){
-     if(!contenedor)return;
-     contenedor.innerHTML='<div class="card loading-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted)"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando canchas...</div>';
-     try{
-         const s=await Promise.race([getDocs(collection(db,'canchas')),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Timeout')),12000))]);
-         const agrupados = {};
-         s.forEach(ds=>{
-             const d=ds.data();
-             if(d.estadoPublicacion === 'published' || (d.configurado === true && !d.estadoPublicacion)) {
-                 const uid = d.usuarioUid || ds.id; // Agrupa por el dueño
-                 if(!agrupados[uid]) agrupados[uid] = [];
-                 agrupados[uid].push({id:ds.id, ...d, isOpen:canchaEstaAbierta(d), rating:Number(d.ratingPromedio||d.rating||0)});
-             }
-         });
+         <div class="court-meta" style="${c.multiCancha ? 'margin-top:8px;' : ''}"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol')}</span><strong>S/ ${c.precio ?? 'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`
+        });
+        contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
+            if (window.abrirModal) window.abrirModal(b.dataset.courtId);
+        }));
+    }
 
-         canchasGlobales = Object.values(agrupados).map(grupo => {
-             const main = grupo[0];
-             if (grupo.length > 1) {
-                 const tiposUnicos = [...new Set(grupo.map(c => c.tipo))].filter(Boolean).join(', ');
-                 main.multiCancha = true;
-                 main.cantidadCanchas = grupo.length;
-                 main.tiposMulti = tiposUnicos;
-             }
-             return main;
-         });
+    function limpiarFiltros() { if (inputBusqueda) inputBusqueda.value = ''; if (filtroCiudad) filtroCiudad.value = ''; if (filtroTipo) filtroTipo.value = ''; if (filtroPrecio) filtroPrecio.value = ''; if (filtroOrden) filtroOrden.value = 'recomendadas'; soloAbiertas = soloCerca = soloTop = false; document.querySelectorAll('.quick-filter').forEach(b => b.classList.remove('active')); renderizarCanchas() }
 
-         llenarSelect(filtroCiudad,canchasGlobales.map(obtenerCiudad),'Todas las ciudades');
-         
-         const todosLosTipos = [];
-         Object.values(agrupados).forEach(g => g.forEach(c => { if(c.tipo) todosLosTipos.push(c.tipo); }));
-         llenarSelect(filtroTipo, todosLosTipos, 'Todos los tipos');
-         
-         renderizarCanchas();
-     }catch(e){
-         contenedor.innerHTML=`<div class="card" style="grid-column:1/-1;text-align:center;color:var(--danger);padding:28px">Error cargando las canchas.</div>`;
-     }
- }
- [inputBusqueda,filtroCiudad,filtroTipo,filtroPrecio,filtroOrden].forEach(e=>e?.addEventListener('input',renderizarCanchas));document.querySelectorAll('.quick-filter').forEach(b=>b.addEventListener('click',()=>{const f=b.dataset.filter;if(f==='limpiar')return limpiarFiltros();if(f==='abiertas')soloAbiertas=!soloAbiertas;if(f==='cerca'){if(!navigator.geolocation)return window.toast('Tu navegador no permite geolocalización.','error');navigator.geolocation.getCurrentPosition(p=>{ubicacionUsuario={lat:p.coords.latitude,lng:p.coords.longitude};soloCerca=true;b.classList.add('active');renderizarCanchas()},()=>window.toast('Activa la ubicación.','warning'));return}if(f==='top')soloTop=!soloTop;b.classList.toggle('active');renderizarCanchas()}));cargar()
+    async function cargar() {
+        if (!contenedor) return;
+        contenedor.innerHTML = '<div class="card loading-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted)"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando canchas...</div>';
+        try {
+            const s = await Promise.race([getDocs(collection(db, 'canchas')), new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 12000))]);
+            const agrupados = {};
+            s.forEach(ds => {
+                const d = ds.data();
+                if (d.estadoPublicacion === 'published' || (d.configurado === true && !d.estadoPublicacion)) {
+                    const uid = d.usuarioUid || ds.id; // Agrupa por el dueño
+                    if (!agrupados[uid]) agrupados[uid] = [];
+                    agrupados[uid].push({ id: ds.id, ...d, isOpen: canchaEstaAbierta(d), rating: Number(d.ratingPromedio || d.rating || 0) });
+                }
+            });
+
+            canchasGlobales = Object.values(agrupados).map(grupo => {
+                const main = grupo[0];
+                if (grupo.length > 1) {
+                    const tiposUnicos = [...new Set(grupo.map(c => c.tipo))].filter(Boolean).join(', ');
+                    main.multiCancha = true;
+                    main.cantidadCanchas = grupo.length;
+                    main.tiposMulti = tiposUnicos;
+                }
+                return main;
+            });
+
+            llenarSelect(filtroCiudad, canchasGlobales.map(obtenerCiudad), 'Todas las ciudades');
+
+            const todosLosTipos = [];
+            Object.values(agrupados).forEach(g => g.forEach(c => { if (c.tipo) todosLosTipos.push(c.tipo); }));
+            llenarSelect(filtroTipo, todosLosTipos, 'Todos los tipos');
+
+            renderizarCanchas();
+        } catch (e) {
+            contenedor.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;color:var(--danger);padding:28px">Error cargando las canchas.</div>`;
+        }
+    }
+    [inputBusqueda, filtroCiudad, filtroTipo, filtroPrecio, filtroOrden].forEach(e => e?.addEventListener('input', renderizarCanchas)); document.querySelectorAll('.quick-filter').forEach(b => b.addEventListener('click', () => { const f = b.dataset.filter; if (f === 'limpiar') return limpiarFiltros(); if (f === 'abiertas') soloAbiertas = !soloAbiertas; if (f === 'cerca') { if (!navigator.geolocation) return window.toast('Tu navegador no permite geolocalización.', 'error'); navigator.geolocation.getCurrentPosition(p => { ubicacionUsuario = { lat: p.coords.latitude, lng: p.coords.longitude }; soloCerca = true; b.classList.add('active'); renderizarCanchas() }, () => window.toast('Activa la ubicación.', 'warning')); return } if (f === 'top') soloTop = !soloTop; b.classList.toggle('active'); renderizarCanchas() })); cargar()
 }
 
 // ==========================================
 // MODAL DE RESERVA Y DISPONIBILIDAD
 // ==========================================
-window.abrirModal=async id=>{const c=canchasGlobales.find(x=>x.id===id);if(!c)return;document.getElementById('modal-nombre-interno').innerText=c.nombre; await pintarDisponibilidadModal(c);document.getElementById('modal-cancha').classList.add('mostrar');document.body.style.overflow='hidden'};
-async function pintarDisponibilidadModal(c, fechaElegida){
+window.abrirModal = async id => {
+    let c = canchasGlobales.find(x => String(x.id) === String(id));
+    if (!c) {
+        try {
+            const docSnap = await getDoc(doc(db, 'canchas', id));
+            if (docSnap.exists()) {
+                c = { id: docSnap.id, ...docSnap.data() };
+            }
+        } catch (e) {
+            console.warn("No se pudo cargar cancha por ID:", e);
+        }
+    }
+    if (!c) return;
+    const nombre = c.nombreCancha || c.nombre || 'Cancha';
+    const titleEl = document.getElementById('modal-nombre-interno');
+    if (titleEl) titleEl.innerText = nombre;
+    await pintarDisponibilidadModal(c);
+    const modalEl = document.getElementById('modal-cancha');
+    if (modalEl) modalEl.classList.add('mostrar');
+    document.body.style.overflow = 'hidden';
+};
+
+async function pintarDisponibilidadModal(c, fechaElegida) {
     const box = document.getElementById('modal-disponibilidad');
-    if(!box) return;
+    if (!box) return;
     const fReq = fechaElegida || fechaHoy();
     box.innerHTML = '<div style="text-align:center; padding:20px;"><i class="ph-bold ph-spinner-gap ph-spin"></i></div>';
     try {
@@ -217,26 +238,26 @@ async function pintarDisponibilidadModal(c, fechaElegida){
                 <label style="display:flex; flex-direction:column; font-size:0.8rem; color:var(--text-muted); font-weight:bold;">FECHA DE RESERVA<input type="date" id="input-fecha-modal" value="${fReq}" min="${fechaHoy()}" style="background:transparent; border:none; color:#fff; font-size:1.1rem; font-weight:bold; outline:none; margin-top:4px; font-family:inherit; color-scheme:dark; cursor:pointer;"></label>
                 <div style="text-align:right;"><span style="font-size:0.75rem; color:var(--text-muted); font-weight:bold;">DISPONIBLES</span><strong style="font-size:1.3rem; color:var(--primary-green); display:block;">${libres}</strong></div>
             </div>
-            <div class="modal-slots">${slots.length ? slots.map(s=>`<button type="button" class="modal-slot ${s.blocked?'blocked':''}" data-book-court="${c.id}" data-book-time="${s.label}" data-book-date="${fReq}" ${s.blocked?'disabled':''}>${s.label}</button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
+            <div class="modal-slots">${slots.length ? slots.map(s => `<button type="button" class="modal-slot ${s.blocked ? 'blocked' : ''}" data-book-court="${c.id}" data-book-time="${s.label}" data-book-date="${fReq}" ${s.blocked ? 'disabled' : ''}>${s.label}</button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
         `;
         document.getElementById('input-fecha-modal').addEventListener('change', (e) => pintarDisponibilidadModal(c, e.target.value));
-        box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b=>b.addEventListener('click',()=>abrirReserva(c, b.dataset.bookTime, b.dataset.bookDate)));
-    } catch (e) { box.innerHTML='<span style="color:var(--danger)">Error cargando horarios.</span>'; }
+        box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b => b.addEventListener('click', () => abrirReserva(c, b.dataset.bookTime, b.dataset.bookDate)));
+    } catch (e) { box.innerHTML = '<span style="color:var(--danger)">Error cargando horarios.</span>'; }
 }
 
 function abrirReserva(c, hora, fechaElegida) {
     const modal = document.getElementById('modal-reserva');
     if (!modal) return;
-    
-    document.getElementById('booking-cancha-nombre').textContent = c.nombre;
+
+    document.getElementById('booking-cancha-nombre').textContent = c.nombreCancha || c.nombre || 'Cancha';
     const dateObj = new Date(`${fechaElegida}T12:00:00`);
     document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
-    
+
     // 🔥 LÓGICA DEL AVISO DE ADELANTO Y MÉTODOS DE PAGO (CON MAYOR ESPACIO)
     const metodos = c.metodosPago || {};
     let avisoHTML = '';
-    
+
     // Le añadimos margin-bottom: 25px al bloque del aviso para darle más aire respecto al botón de confirmar
     if (metodos.requiereSena && metodos.montoSena > 0) {
         avisoHTML = `
@@ -256,11 +277,11 @@ function abrirReserva(c, hora, fechaElegida) {
     // Invertimos el orden en el HTML del modal para asegurar que el botón vaya ABAJO del mensaje
     const bookingStatus = document.getElementById('booking-status');
     const btnConfirmar = document.getElementById('btn-confirmar-reserva');
-    
+
     if (bookingStatus && btnConfirmar) {
         // Colocamos el aviso, y aseguramos que el botón no se vea "aplastado"
         bookingStatus.innerHTML = avisoHTML;
-        
+
         // Mueve el botón de confirmación debajo del mensaje si no lo estaba
         const modalInner = bookingStatus.parentNode;
         modalInner.appendChild(bookingStatus);
@@ -268,58 +289,58 @@ function abrirReserva(c, hora, fechaElegida) {
         btnConfirmar.style.marginTop = '15px'; // Espacio extra asegurado arriba del botón
     }
 
-    modal.dataset.courtId = c.id; 
-    modal.dataset.time = hora; 
+    modal.dataset.courtId = c.id;
+    modal.dataset.time = hora;
     modal.dataset.date = fechaElegida;
-    modal.classList.add('mostrar'); 
+    modal.classList.add('mostrar');
     modal.setAttribute('aria-hidden', 'false');
 }
 
-async function confirmarReserva(){
+async function confirmarReserva() {
     const modal = document.getElementById('modal-reserva');
     const id = modal?.dataset.courtId, hora = modal?.dataset.time, fechaReq = modal?.dataset.date;
     const nombre = document.getElementById('booking-nombre')?.value.trim(), telefono = document.getElementById('booking-telefono')?.value.trim(), btn = document.getElementById('btn-confirmar-reserva');
-    
-    if(!id || !hora || !fechaReq || !nombre || !telefono){ window.toast('Completa tu nombre y teléfono.','warning'); return; }
-    if(!usuarioActual){
-        window.toast('Inicia sesión con Google para reservar.','warning');
-        try{ const r = await signInWithPopup(auth, new GoogleAuthProvider()); usuarioActual = r.user; }catch(e){return;}
+
+    if (!id || !hora || !fechaReq || !nombre || !telefono) { window.toast('Completa tu nombre y teléfono.', 'warning'); return; }
+    if (!usuarioActual) {
+        window.toast('Inicia sesión con Google para reservar.', 'warning');
+        try { const r = await signInWithPopup(auth, new GoogleAuthProvider()); usuarioActual = r.user; } catch (e) { return; }
     }
-    
-    const c = canchasGlobales.find(x=>x.id===id);
-    btn.disabled = true; window.toast('Confirmando horario...','info');
-    const key = `${id}_${fechaReq}_${hora.replace(':','')}`;
-    
+
+    const c = canchasGlobales.find(x => x.id === id);
+    btn.disabled = true; window.toast('Confirmando horario...', 'info');
+    const key = `${id}_${fechaReq}_${hora.replace(':', '')}`;
+
     try {
         await runTransaction(db, async tx => {
-            const ref = doc(db,'reservas',key), existing = await tx.get(ref);
-            if(existing.exists() && !['cancelada','cancelado','cancelled','rejected'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
-            tx.set(ref,{ id: key, canchaId: id, canchaNombre: c?.nombre||'', usuarioUid: usuarioActual.uid, nombre: nombre, usuarioNombre: nombre, telefono: telefono, usuarioTelefono: telefono, fecha: fechaReq, horaInicio: hora, horaFin: hora, estado: 'pendiente', precio: Number(c?.precio||0), metodoPago: 'pendiente', senaPagada: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+            const ref = doc(db, 'reservas', key), existing = await tx.get(ref);
+            if (existing.exists() && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
+            tx.set(ref, { id: key, canchaId: id, canchaNombre: c?.nombre || '', usuarioUid: usuarioActual.uid, nombre: nombre, usuarioNombre: nombre, telefono: telefono, usuarioTelefono: telefono, fecha: fechaReq, horaInicio: hora, horaFin: hora, estado: 'pendiente', precio: Number(c?.precio || 0), metodoPago: 'pendiente', senaPagada: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
         });
-        
+
         document.getElementById('booking-status').innerHTML = `
             <div style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; padding:15px; border-radius:8px; color:#f1c40f; margin-top:15px; text-align:center;">
                 <i class="ph-fill ph-hourglass-high" style="font-size: 2rem;"></i><br>
                 <b style="font-size:1.1rem; display:block; margin:5px 0;">Reserva en estado PENDIENTE</b>
                 <span>Abre WhatsApp, envía la foto del pago/seña y espera que la cancha valide tu reserva.</span>
             </div>`;
-            
+
         await pintarDisponibilidadModal(c, fechaReq);
-        const telOwner = formatWsp(c?.whatsapp); 
-        
+        const telOwner = formatWsp(c?.whatsapp);
+
         if (telOwner) {
             const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en la APP:\n*Nombre:* ${nombre}\n*Fecha:* ${fechaReq}\n*Hora:* ${hora}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
             setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); }, 2500);
         }
-    } catch(e) {
-        window.toast(e.message==='SLOT_OCUPADO'?'Ese horario acaba de ser reservado.':'No pudimos registrar la reserva.','error');
+    } catch (e) {
+        window.toast(e.message === 'SLOT_OCUPADO' ? 'Ese horario acaba de ser reservado.' : 'No pudimos registrar la reserva.', 'error');
     } finally { btn.disabled = false; }
 }
 
-const btnCerrar=document.getElementById('cerrar-modal'),modalCancha=document.getElementById('modal-cancha');if(btnCerrar)btnCerrar.addEventListener('click',cerrarModal);if(modalCancha)modalCancha.addEventListener('click',e=>{if(e.target===modalCancha)cerrarModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarModal();cerrarReserva()}});function cerrarModal(){if(!modalCancha)return;modalCancha.classList.remove('mostrar');document.body.style.overflow=''}
-function cerrarReserva(){const m=document.getElementById('modal-reserva');if(m){m.classList.remove('mostrar');m.setAttribute('aria-hidden','true')}}
-const cr=document.getElementById('cerrar-reserva');cr?.addEventListener('click',cerrarReserva);document.getElementById('modal-reserva')?.addEventListener('click',e=>{if(e.target.id==='modal-reserva')cerrarReserva()});document.getElementById('btn-confirmar-reserva')?.addEventListener('click',confirmarReserva);
-onAuthStateChanged(auth,u=>{usuarioActual=u||null});
+const btnCerrar = document.getElementById('cerrar-modal'), modalCancha = document.getElementById('modal-cancha'); if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal); if (modalCancha) modalCancha.addEventListener('click', e => { if (e.target === modalCancha) cerrarModal() }); document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarModal(); cerrarReserva() } }); function cerrarModal() { if (!modalCancha) return; modalCancha.classList.remove('mostrar'); document.body.style.overflow = '' }
+function cerrarReserva() { const m = document.getElementById('modal-reserva'); if (m) { m.classList.remove('mostrar'); m.setAttribute('aria-hidden', 'true') } }
+const cr = document.getElementById('cerrar-reserva'); cr?.addEventListener('click', cerrarReserva); document.getElementById('modal-reserva')?.addEventListener('click', e => { if (e.target.id === 'modal-reserva') cerrarReserva() }); document.getElementById('btn-confirmar-reserva')?.addEventListener('click', confirmarReserva);
+onAuthStateChanged(auth, u => { usuarioActual = u || null });
 
 // ==========================================
 // FASE 26: BOLSA DE JUGADORES (MOTOR RECONSTRUIDO)
@@ -330,7 +351,7 @@ if (window.location.pathname.includes('jugadores.html')) {
     const lista = document.getElementById('lista-jugadores');
     const hint = document.getElementById('login-hint');
 
-    let docsBolsa = []; 
+    let docsBolsa = [];
 
     function renderizarBolsa() {
         if (!lista) return;
@@ -354,7 +375,7 @@ if (window.location.pathname.includes('jugadores.html')) {
 
             if (esMio) {
                 let htmlPost = listaPostulantes.map(p => {
-                    if(p.estado === 'aceptado') {
+                    if (p.estado === 'aceptado') {
                         return `<div style="background:rgba(46,204,113,0.1); border:1px solid #2ecc71; padding:10px; border-radius:8px; margin-top:8px;">
                             <span style="color:#2ecc71; font-size:0.85rem;"><i class="ph-fill ph-handshake"></i> Fichaste a <b>${p.nombre}</b></span>
                             <a href="https://wa.me/${formatWsp(p.telefono)}" target="_blank" style="display:flex; justify-content:center; align-items:center; gap:5px; margin-top:8px; color:#000; background:#25D366; padding:6px 10px; border-radius:6px; font-weight:bold; font-size:0.8rem; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.1rem;"></i> Escribir a ${p.nombre}</a>
@@ -411,14 +432,14 @@ if (window.location.pathname.includes('jugadores.html')) {
 
         lista.querySelectorAll('.btn-postular').forEach(b => {
             b.addEventListener('click', async () => {
-                if(!usuarioActual) return window.toast('Inicia sesión para postularte.', 'warning');
+                if (!usuarioActual) return window.toast('Inicia sesión para postularte.', 'warning');
 
                 let telefonoVerificado = usuarioActual.phoneNumber;
                 if (!telefonoVerificado) {
                     try {
                         const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
                         if (docSnap.exists() && docSnap.data().telefono) telefonoVerificado = docSnap.data().telefono;
-                    } catch(err) { console.error(err); }
+                    } catch (err) { console.error(err); }
                 }
 
                 if (!telefonoVerificado) {
@@ -433,18 +454,18 @@ if (window.location.pathname.includes('jugadores.html')) {
                         [`postulantes.${usuarioActual.uid}`]: {
                             uid: usuarioActual.uid,
                             nombre: usuarioActual.displayName || 'Jugador',
-                            telefono: formatWsp(telefonoVerificado), 
+                            telefono: formatWsp(telefonoVerificado),
                             estado: 'pendiente'
                         }
                     });
                     window.toast('¡Te has apuntado con éxito!', 'success');
-                } catch(e) { window.toast('Error al apuntarse.', 'error'); b.innerHTML = '<i class="ph-bold ph-hand-palm"></i> ¡Me Apunto!'; b.disabled = false; }
+                } catch (e) { window.toast('Error al apuntarse.', 'error'); b.innerHTML = '<i class="ph-bold ph-hand-palm"></i> ¡Me Apunto!'; b.disabled = false; }
             });
         });
 
         lista.querySelectorAll('.btn-aceptar-postulante').forEach(b => {
             b.addEventListener('click', async () => {
-                if(!confirm('¿Aceptar a este jugador y mostrarle tu WhatsApp?')) return;
+                if (!confirm('¿Aceptar a este jugador y mostrarle tu WhatsApp?')) return;
                 const anuncioId = b.dataset.anuncio;
                 const postUid = b.dataset.uid;
                 b.innerHTML = '...'; b.disabled = true;
@@ -453,7 +474,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                         [`postulantes.${postUid}.estado`]: 'aceptado'
                     });
                     window.toast('¡Fichaje completado!', 'success');
-                } catch(e) { window.toast('Error al aceptar.', 'error'); b.innerHTML = 'Fichar'; b.disabled = false; }
+                } catch (e) { window.toast('Error al aceptar.', 'error'); b.innerHTML = 'Fichar'; b.disabled = false; }
             });
         });
 
@@ -463,7 +484,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                     try {
                         await deleteDoc(doc(db, 'bolsa_jugadores', b.dataset.id));
                         window.toast('Anuncio eliminado.', 'success');
-                    } catch(e) { window.toast('Error al eliminar.', 'error'); }
+                    } catch (e) { window.toast('Error al eliminar.', 'error'); }
                 }
             });
         });
@@ -474,13 +495,13 @@ if (window.location.pathname.includes('jugadores.html')) {
         if (btnLogin) btnLogin.style.display = u ? 'none' : 'flex';
         if (formAnuncio) formAnuncio.style.display = u ? 'flex' : 'none';
         if (hint) hint.style.display = u ? 'none' : 'block';
-        
-        renderizarBolsa(); 
+
+        renderizarBolsa();
     });
 
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); } 
+            try { await signInWithPopup(auth, new GoogleAuthProvider()); }
             catch (e) { window.toast('No se pudo iniciar sesión.', 'error'); }
         });
     }
@@ -490,7 +511,7 @@ if (window.location.pathname.includes('jugadores.html')) {
         onSnapshot(q, s => {
             docsBolsa = [];
             s.forEach(ds => docsBolsa.push({ id: ds.id, ...ds.data() }));
-            renderizarBolsa(); 
+            renderizarBolsa();
         }, e => {
             console.error('Error cargando bolsa:', e);
             lista.innerHTML = '<p style="color:var(--danger); text-align:center;">Error de conexión. No pudimos cargar los partidos.</p>';
@@ -507,7 +528,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                 try {
                     const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
                     if (docSnap.exists() && docSnap.data().telefono) telefonoVerificado = docSnap.data().telefono;
-                } catch(err) { console.error(err); }
+                } catch (err) { console.error(err); }
             }
 
             if (!telefonoVerificado) {
@@ -517,33 +538,33 @@ if (window.location.pathname.includes('jugadores.html')) {
 
             const btn = formAnuncio.querySelector('button[type="submit"]');
             const textOriginal = btn ? btn.innerHTML : 'Publicar';
-            if(btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; }
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...'; }
 
             try {
                 const qCheck = query(collection(db, 'bolsa_jugadores'), where('uid', '==', usuarioActual.uid));
                 const snapCheck = await getDocs(qCheck);
-                
+
                 if (!snapCheck.empty) {
                     window.toast("Ya tienes un anuncio activo. Bórralo para crear uno nuevo.", "warning");
-                    if(btn) { btn.disabled = false; btn.innerHTML = textOriginal; }
-                    return; 
+                    if (btn) { btn.disabled = false; btn.innerHTML = textOriginal; }
+                    return;
                 }
 
                 await addDoc(collection(db, 'bolsa_jugadores'), {
-                    uid: usuarioActual.uid, 
+                    uid: usuarioActual.uid,
                     nombreJugador: usuarioActual.displayName || 'Jugador',
                     nombre: usuarioActual.displayName || 'Jugador',
                     tipo: document.getElementById('tipo-anuncio')?.value || 'jugador',
                     modalidad: document.getElementById('modalidad-anuncio')?.value || 'Fútbol 7',
-                    contacto: formatWsp(telefonoVerificado), 
+                    contacto: formatWsp(telefonoVerificado),
                     texto: document.getElementById('texto-anuncio')?.value || '',
-                    postulantes: {}, 
+                    postulantes: {},
                     createdAt: serverTimestamp(), updatedAt: serverTimestamp()
                 });
-                
+
                 window.toast('¡Anuncio publicado con éxito!', 'success');
                 formAnuncio.reset();
-            } catch (error) { window.toast('Error al publicar.', 'error'); } finally { if(btn) { btn.disabled = false; btn.innerHTML = textOriginal; } }
+            } catch (error) { window.toast('Error al publicar.', 'error'); } finally { if (btn) { btn.disabled = false; btn.innerHTML = textOriginal; } }
         });
     }
 }
@@ -553,7 +574,7 @@ if (window.location.pathname.includes('jugadores.html')) {
 // ==========================================
 async function cargarEventosPublicos() {
     const contenedorEventos = document.getElementById('lista-eventos-publicos');
-    if (!contenedorEventos) return; 
+    if (!contenedorEventos) return;
     contenedorEventos.innerHTML = '<div style="text-align:center; padding:20px;"><i class="ph-bold ph-spinner-gap ph-spin"></i></div>';
     try {
         const q = query(collection(db, 'eventos'), where('estado', '==', 'programado'));
@@ -566,7 +587,7 @@ async function cargarEventosPublicos() {
             return;
         }
         contenedorEventos.innerHTML = eventos.map(e => {
-            const fechaInicio = new Date(e.inicio).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit' });
+            const fechaInicio = new Date(e.inicio).toLocaleDateString('es-PE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
             return `<article class="evento-publico-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:15px; margin-bottom:15px;">
                 <div><span style="background:var(--primary-green); color:#000; font-size:0.7rem; font-weight:bold; padding:3px 8px; border-radius:4px;">TORNEO</span>
                 <h3 style="margin:5px 0;">${e.nombre}</h3><p style="margin:0; color:var(--text-muted); font-size:0.85rem;"><i class="ph-bold ph-calendar"></i> Inicia: ${fechaInicio}</p></div>
@@ -584,7 +605,7 @@ if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
     const canchaId = urlParams.get('id');
     let ratingSeleccionado = 0;
-    let etiquetasSeleccionadas = new Map(); 
+    let etiquetasSeleccionadas = new Map();
 
     const TAGS_POR_RATING = {
         5: [{ icon: "ph-leaf", text: "Césped impecable" }, { icon: "ph-lightbulb", text: "Buena iluminación" }, { icon: "ph-handshake", text: "Excelente atención" }, { icon: "ph-soccer-ball", text: "Pelotas buenas" }, { icon: "ph-shower", text: "Vestuarios limpios" }, { icon: "ph-car", text: "Estacionamiento" }],
@@ -595,12 +616,12 @@ if (window.location.pathname.includes('cancha.html')) {
     };
 
     async function cargarDetalleCancha() {
-        if (!canchaId) { 
+        if (!canchaId) {
             const titleEl = document.getElementById('bio-title');
-            if (titleEl) titleEl.textContent = 'Cancha no encontrada'; 
-            return; 
+            if (titleEl) titleEl.textContent = 'Cancha no encontrada';
+            return;
         }
-        
+
         try {
             // 1. Obtener los datos del complejo principal
             const docSnap = await getDoc(doc(db, 'canchas', canchaId));
@@ -611,21 +632,21 @@ if (window.location.pathname.includes('cancha.html')) {
             }
 
             const cPrincipal = docSnap.data();
-            cPrincipal.id = docSnap.id; 
+            cPrincipal.id = docSnap.id;
 
             // Determinar el UID del dueño
             const ownerUid = cPrincipal.usuarioUid || cPrincipal.ownerUid || cPrincipal.uid || docSnap.id;
-            
+
             // 2. Pintar cabecera e información general del complejo
             const coverEl = document.getElementById('bio-cover');
             if (coverEl) coverEl.src = cPrincipal.fotos?.length ? cPrincipal.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
-            
+
             const logoEl = document.getElementById('bio-logo');
             if (logoEl) logoEl.src = cPrincipal.logo || 'https://via.placeholder.com/100';
-            
+
             const titleEl = document.getElementById('bio-title');
             if (titleEl) titleEl.textContent = cPrincipal.nombre || 'Complejo Deportivo';
-            
+
             const locEl = document.getElementById('bio-location');
             if (locEl) locEl.innerHTML = `<i class="ph-bold ph-map-pin"></i> ${cPrincipal.ubicacionTexto || cPrincipal.distrito || 'Ubicación'}`;
 
@@ -634,11 +655,11 @@ if (window.location.pathname.includes('cancha.html')) {
 
             const btnMapa = document.getElementById('btn-mapa-bio');
             if (btnMapa) {
-                if (cPrincipal.ubicacionLink) { 
-                    btnMapa.href = cPrincipal.ubicacionLink; 
+                if (cPrincipal.ubicacionLink) {
+                    btnMapa.href = cPrincipal.ubicacionLink;
                     btnMapa.style.display = 'inline-flex';
-                } else { 
-                    btnMapa.style.display = 'none'; 
+                } else {
+                    btnMapa.style.display = 'none';
                 }
             }
 
@@ -646,68 +667,68 @@ if (window.location.pathname.includes('cancha.html')) {
             const mapCanchas = new Map();
 
             // A) Agregar la cancha principal con sus horarios
-const aperturaBase = cPrincipal.horaApertura || cPrincipal.horaInicio || '08:00';
-const cierreBase = cPrincipal.horaCierre || cPrincipal.horaFin || '23:00';
+            const aperturaBase = cPrincipal.horaApertura || cPrincipal.horaInicio || '08:00';
+            const cierreBase = cPrincipal.horaCierre || cPrincipal.horaFin || '23:00';
 
-mapCanchas.set(cPrincipal.id, {
-    id: cPrincipal.id,
-    nombreCancha: cPrincipal.nombreCancha || cPrincipal.nombre || 'Cancha Principal',
-    tipo: cPrincipal.tipo || (Array.isArray(cPrincipal.tiposCancha) ? cPrincipal.tiposCancha[0] : cPrincipal.tipoCancha) || 'Fútbol',
-    precio: Number(cPrincipal.precio || 0),
-    horaApertura: aperturaBase,
-    horaCierre: cierreBase,
-    isOpen: canchaEstaAbierta(cPrincipal),
-    ...cPrincipal
-});
-
-// B) Buscar en la colección 'espacios' asignando herencia de horarios
-if (ownerUid) {
-    try {
-        const qEspacios = query(collection(db, 'espacios'), where('ownerUid', '==', ownerUid));
-        const snapEspacios = await getDocs(qEspacios);
-        snapEspacios.forEach(d => {
-            const data = d.data();
-            mapCanchas.set(d.id, {
-                id: d.id,
-                nombreCancha: data.nombre || 'Cancha Individual',
-                tipo: data.tipo || 'Fútbol',
-                precio: Number(data.precio || cPrincipal.precio || 0),
-                // 🔥 HERENCIA AUTOMÁTICA DE HORARIOS: Si el espacio no especifica, usa los del complejo
-                horaApertura: data.horaApertura || aperturaBase,
-                horaCierre: data.horaCierre || cierreBase,
-                precioNoche: data.precioNoche,
-                tienePrecioNoche: data.tienePrecioNoche,
-                horaInicioNoche: data.horaInicioNoche,
-                isOpen: true,
-                ...data,
-                nombreComplejo: cPrincipal.nombre,
-                usuarioUid: ownerUid
+            mapCanchas.set(cPrincipal.id, {
+                id: cPrincipal.id,
+                nombreCancha: cPrincipal.nombreCancha || cPrincipal.nombre || 'Cancha Principal',
+                tipo: cPrincipal.tipo || (Array.isArray(cPrincipal.tiposCancha) ? cPrincipal.tiposCancha[0] : cPrincipal.tipoCancha) || 'Fútbol',
+                precio: Number(cPrincipal.precio || 0),
+                horaApertura: aperturaBase,
+                horaCierre: cierreBase,
+                isOpen: canchaEstaAbierta(cPrincipal),
+                ...cPrincipal
             });
-        });
-    } catch (eEspacios) {
-        console.warn("Error al consultar espacios:", eEspacios);
-    }
-}
-                // C) Buscar en la colección 'canchas' por si hay otras secundarias
+
+            // B) Buscar en la colección 'espacios' asignando herencia de horarios
+            if (ownerUid) {
                 try {
-                    const qCanchas = query(collection(db, 'canchas'), where('usuarioUid', '==', ownerUid));
-                    const snapCanchas = await getDocs(qCanchas);
-                    snapCanchas.forEach(d => {
+                    const qEspacios = query(collection(db, 'espacios'), where('ownerUid', '==', ownerUid));
+                    const snapEspacios = await getDocs(qEspacios);
+                    snapEspacios.forEach(d => {
                         const data = d.data();
-                        if (!mapCanchas.has(d.id)) {
-                            mapCanchas.set(d.id, {
-                                id: d.id,
-                                nombreCancha: data.nombreCancha || data.nombre || 'Cancha',
-                                tipo: data.tipo || 'Fútbol',
-                                precio: Number(data.precio || 0),
-                                isOpen: canchaEstaAbierta(data),
-                                ...data
-                            });
-                        }
+                        mapCanchas.set(d.id, {
+                            id: d.id,
+                            nombreCancha: data.nombre || 'Cancha Individual',
+                            tipo: data.tipo || 'Fútbol',
+                            precio: Number(data.precio || cPrincipal.precio || 0),
+                            // 🔥 HERENCIA AUTOMÁTICA DE HORARIOS: Si el espacio no especifica, usa los del complejo
+                            horaApertura: data.horaApertura || aperturaBase,
+                            horaCierre: data.horaCierre || cierreBase,
+                            precioNoche: data.precioNoche,
+                            tienePrecioNoche: data.tienePrecioNoche,
+                            horaInicioNoche: data.horaInicioNoche,
+                            isOpen: true,
+                            ...data,
+                            nombreComplejo: cPrincipal.nombre,
+                            usuarioUid: ownerUid
+                        });
                     });
-                } catch (eCanchas) {
-                    console.warn("Error al consultar canchas secundarias:", eCanchas);
+                } catch (eEspacios) {
+                    console.warn("Error al consultar espacios:", eEspacios);
                 }
+            }
+            // C) Buscar en la colección 'canchas' por si hay otras secundarias
+            try {
+                const qCanchas = query(collection(db, 'canchas'), where('usuarioUid', '==', ownerUid));
+                const snapCanchas = await getDocs(qCanchas);
+                snapCanchas.forEach(d => {
+                    const data = d.data();
+                    if (!mapCanchas.has(d.id)) {
+                        mapCanchas.set(d.id, {
+                            id: d.id,
+                            nombreCancha: data.nombreCancha || data.nombre || 'Cancha',
+                            tipo: data.tipo || 'Fútbol',
+                            precio: Number(data.precio || 0),
+                            isOpen: canchaEstaAbierta(data),
+                            ...data
+                        });
+                    }
+                });
+            } catch (eCanchas) {
+                console.warn("Error al consultar canchas secundarias:", eCanchas);
+            }
 
             // Convertir a Array global para el modal de reservas
             canchasGlobales = Array.from(mapCanchas.values());
@@ -717,7 +738,7 @@ if (ownerUid) {
             const contenedorLista = document.getElementById('lista-canchas-complejo');
             if (contenedorLista) {
                 let htmlLista = `<h3 style="color:#fff; margin-bottom:15px; font-size:1.15rem;"><i class="ph-bold ph-list-dashes" style="color:var(--primary-green);"></i> Canchas disponibles:</h3>`;
-                
+
                 canchasGlobales.forEach((c) => {
                     const nombreMostrar = c.nombreCancha || c.nombre || 'Cancha';
                     const deporteMostrar = c.tipo || 'Fútbol';
@@ -733,7 +754,7 @@ if (ownerUid) {
                     </div>
                     `;
                 });
-                
+
                 contenedorLista.innerHTML = htmlLista;
 
                 // Conectar botones de reservar con el modal de horarios
@@ -747,10 +768,10 @@ if (ownerUid) {
                 });
             }
 
-        } catch (e) { 
-            console.error("Error cargando detalle:", e); 
+        } catch (e) {
+            console.error("Error cargando detalle:", e);
         }
-        
+
         await refrescarPromedio();
         setupRatingForm();
     }
@@ -781,29 +802,29 @@ if (ownerUid) {
                 ratingSeleccionado = Number(star.dataset.val);
                 etiquetasSeleccionadas.clear();
                 stars.forEach(s => {
-                    if(Number(s.dataset.val) <= ratingSeleccionado) {
+                    if (Number(s.dataset.val) <= ratingSeleccionado) {
                         s.style.color = '#f1c40f'; s.classList.add('selected');
                     } else {
                         s.style.color = '#333'; s.classList.remove('selected');
                     }
                 });
-                
+
                 const labels = { 1: "Pésimo", 2: "Malo", 3: "Regular", 4: "Bueno", 5: "¡Excelente!" };
                 starLabel.textContent = labels[ratingSeleccionado];
                 starLabel.style.color = '#f1c40f';
-                
+
                 const tagsDisponibles = TAGS_POR_RATING[ratingSeleccionado] || [];
                 tagsContainer.innerHTML = tagsDisponibles.map(t => `<div class="tag-chip" data-icon="${t.icon}" data-text="${t.text}" style="border:1px solid #555; padding:6px 12px; border-radius:20px; font-size:0.8rem; cursor:pointer;"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`).join('');
                 tagsBox.style.display = 'block';
-                
+
                 tagsContainer.querySelectorAll('.tag-chip').forEach(chip => {
                     chip.onclick = () => {
-                        const icon = chip.dataset.icon, text = chip.dataset.text, key = `${icon}|${text}`; 
-                        if (etiquetasSeleccionadas.has(key)) { 
-                            etiquetasSeleccionadas.delete(key); 
+                        const icon = chip.dataset.icon, text = chip.dataset.text, key = `${icon}|${text}`;
+                        if (etiquetasSeleccionadas.has(key)) {
+                            etiquetasSeleccionadas.delete(key);
                             chip.style.background = 'transparent'; chip.style.color = '#fff'; chip.style.borderColor = '#555';
-                        } else { 
-                            etiquetasSeleccionadas.set(key, true); 
+                        } else {
+                            etiquetasSeleccionadas.set(key, true);
                             chip.style.background = 'rgba(241,196,15,0.1)'; chip.style.color = '#f1c40f'; chip.style.borderColor = '#f1c40f';
                         }
                     };
@@ -819,10 +840,10 @@ if (ownerUid) {
             if (!ratingSeleccionado) return;
             if (!usuarioActual) {
                 window.toast("Debes iniciar sesión con Google para calificar.", "warning");
-                try { await signInWithPopup(auth, new GoogleAuthProvider()); if(!auth.currentUser) return; } catch(e) { return; }
+                try { await signInWithPopup(auth, new GoogleAuthProvider()); if (!auth.currentUser) return; } catch (e) { return; }
             }
             btnSubmit.disabled = true; btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
-            
+
             try {
                 const reseñaUnicaId = `${canchaId}_${auth.currentUser.uid}`;
                 const refResena = doc(db, 'resenas', reseñaUnicaId);
@@ -841,7 +862,7 @@ if (ownerUid) {
                     canchaId: canchaId, usuarioUid: auth.currentUser.uid, nombre: auth.currentUser.displayName || 'Jugador',
                     rating: ratingSeleccionado, tags: Array.from(etiquetasSeleccionadas.keys()), createdAt: serverTimestamp()
                 });
-                
+
                 window.toast("¡Calificación registrada con éxito!", "success");
                 ratingSeleccionado = 0; etiquetasSeleccionadas.clear();
                 stars.forEach(s => { s.style.color = '#333'; s.classList.remove('selected'); });
@@ -849,7 +870,7 @@ if (ownerUid) {
                 btnSubmit.textContent = 'Publicar Calificación'; btnSubmit.disabled = true;
                 btnSubmit.style.background = 'rgba(255,255,255,0.05)'; btnSubmit.style.color = '#888';
                 await refrescarPromedio();
-                
+
             } catch (e) {
                 console.error(e);
                 // Si aún así Firebase rechaza por reglas de seguridad
@@ -869,21 +890,21 @@ if (ownerUid) {
 // MÓDULO INTELIGENTE: GPS, SLIDER Y FILTROS (CORREGIDO)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // 1. LLENAR EL FILTRO DE TIPOS DINÁMICAMENTE USANDO LA BD EXISTENTE (db)
     async function cargarTiposDinamicos() {
         try {
             if (typeof db !== 'undefined') {
                 const snap = await getDocs(collection(db, 'canchas'));
                 const tipos = new Set();
-                snap.forEach(d => { if(d.data().tipo) tipos.add(d.data().tipo); });
+                snap.forEach(d => { if (d.data().tipo) tipos.add(d.data().tipo); });
                 const selectTipo = document.getElementById('filtro-tipo');
-                if(selectTipo && tipos.size > 0) {
-                    selectTipo.innerHTML = '<option value="">Todos los tipos</option>' + 
+                if (selectTipo && tipos.size > 0) {
+                    selectTipo.innerHTML = '<option value="">Todos los tipos</option>' +
                         [...tipos].map(t => `<option value="${t}">${t}</option>`).join('');
                 }
             }
-        } catch(e) { console.error("Error al cargar tipos dinámicos", e); }
+        } catch (e) { console.error("Error al cargar tipos dinámicos", e); }
     }
     cargarTiposDinamicos();
 
@@ -947,7 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-detectar-gps')?.addEventListener('click', () => {
         const btn = document.getElementById('btn-detectar-gps');
         btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Ubicando...';
-        
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const lat = pos.coords.latitude;
@@ -956,9 +977,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                     const data = await res.json();
                     let dpto = data.address.state || data.address.region || '';
-                    
+
                     dpto = dpto.replace(' Department', '').replace(' Región', '').trim();
-                    
+
                     const selectDept = document.getElementById('filtro-ciudad');
                     let encontrado = false;
                     if (selectDept) {
@@ -971,12 +992,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             }
                         }
                     }
-                    
+
                     localStorage.setItem('gpsPreguntado', 'true');
                     if (modalGps) modalGps.style.display = 'none';
                     if (encontrado) alert(`¡Detectado! Mostrando canchas en ${dpto}.`);
-                    
-                } catch(e) {
+
+                } catch (e) {
                     alert("No pudimos obtener tu departamento exacto. Puedes seleccionarlo manualmente.");
                     if (modalGps) modalGps.style.display = 'none';
                 }
