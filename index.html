@@ -221,19 +221,19 @@
      ============================================== -->
 
 <!-- 1. Modal Horarios Rápidos (SIN FOTOS, DIRECTO A LA RESERVA) -->
-<div id="modal-cancha" class="modal-oculto">
-    <div class="modal-contenido" style="max-width: 450px; padding: 30px 25px;">
-        <button id="cerrar-modal" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-        <span class="mini-label" style="color: var(--primary-green);">DISPONIBILIDAD EN VIVO</span>
-        <h2 id="modal-nombre-interno" style="margin-top: 5px; margin-bottom: 20px;">...</h2>
+<div id="modal-cancha" class="modal-booking">
+    <div class="modal-content" style="max-width: 450px; padding: 30px 25px; position: relative;">
+        <button id="cerrar-modal" class="modal-close"><i class="ph-bold ph-x"></i></button>
+        <span class="mini-label" style="color: var(--primary-green); font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 5px;">DISPONIBILIDAD EN VIVO</span>
+        <h2 id="modal-nombre-interno" style="margin-top: 0; margin-bottom: 20px; font-size: 1.5rem; color: #fff;">...</h2>
         <div id="modal-disponibilidad"></div>
     </div>
 </div>
 
 <!-- 2. Modal Confirmar Reserva -->
-<div id="modal-reserva" class="modal-oculto">
-    <div class="modal-contenido" style="max-width: 450px; padding: 30px 25px;">
-        <button id="cerrar-reserva" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+<div id="modal-reserva" class="modal-booking">
+    <div class="modal-content" style="max-width: 450px; padding: 30px 25px; position: relative;">
+        <button id="cerrar-reserva" class="modal-close"><i class="ph-bold ph-x"></i></button>
         <h2 style="color: var(--primary-green); margin-top:0; font-size: 1.3rem;"><i class="ph-fill ph-calendar-plus"></i> Tu Reserva</h2>
         
         <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; border:1px solid rgba(255,255,255,0.1);">
@@ -241,17 +241,17 @@
             <p id="booking-hora" style="margin:0; color:var(--primary-green); font-size:1.2rem; font-weight:900;"></p>
         </div>
         
-        <div class="form-group" style="margin-bottom:15px;">
+        <div class="form-group" style="margin-bottom:15px; text-align: left;">
             <label style="color:#aaa; font-size:0.85rem; margin-bottom:5px; display:block;">Tu Nombre</label>
             <input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; box-sizing:border-box;">
         </div>
         
-        <div class="form-group" style="margin-bottom:20px;">
+        <div class="form-group" style="margin-bottom:20px; text-align: left;">
             <label style="color:#aaa; font-size:0.85rem; margin-bottom:5px; display:block;">WhatsApp de contacto</label>
             <input type="tel" id="booking-telefono" placeholder="Ej. 987654321" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; box-sizing:border-box;">
         </div>
         
-        <button id="btn-confirmar-reserva" class="btn btn-primary" style="width:100%; padding:12px; font-size:1.05rem; font-weight:bold;"><i class="ph-bold ph-check-circle"></i> Solicitar Reserva</button>
+        <button id="btn-confirmar-reserva" class="btn" style="width:100%; padding:12px; font-size:1.05rem; font-weight:bold; background: var(--primary-green); color: #000; border: none; border-radius: 8px;"><i class="ph-bold ph-check-circle"></i> Solicitar Reserva</button>
         
         <div id="booking-status"></div>
     </div>
@@ -259,16 +259,16 @@
 
 <!-- 3. Modal Mapa -->
 <div id="modal-mapa" class="modal-oculto">
-    <div class="modal-contenido" style="max-width: 1000px; height: 85vh; padding: 0; display: flex; flex-direction: column; overflow: hidden;">
+    <div class="modal-contenido" style="max-width: 1000px; height: 85vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; position: relative;">
         <div style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; background: rgba(15, 23, 20, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1);">
             <h3 style="margin: 0; color: #fff; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
                 <i class="ph-fill ph-map-pin" style="color: var(--primary-green);"></i> Mapa CHALACAPP
             </h3>
-            <button id="cerrar-mapa" class="btn-cerrar" style="position: static; margin: 0; background: rgba(255,255,255,0.1);"><i class="ph-bold ph-x"></i></button>
+            <button id="cerrar-mapa" class="btn-cerrar" style="position: static; margin: 0; background: rgba(255,255,255,0.1); border: none; color: #aaa; cursor: pointer; border-radius: 5px; width: 30px; height: 30px;"><i class="ph-bold ph-x"></i></button>
         </div>
         <div style="padding: 10px 20px; background: #080b0a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
             <span id="map-status" style="font-size: 0.85rem; color: #aaa;">Cargando...</span>
-            <button id="btn-mi-ubicacion" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; width: auto;"><i class="ph-bold ph-navigation"></i> Mi ubicación</button>
+            <button id="btn-mi-ubicacion" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.8rem; width: auto; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 6px;"><i class="ph-bold ph-navigation"></i> Mi ubicación</button>
         </div>
         <div id="map-canchas" style="flex: 1; width: 100%; background: #1a1a1a;"></div>
     </div>
@@ -276,14 +276,14 @@
 
 <!-- 4. Modal GPS Inicial -->
 <div id="modal-ubicacion" class="modal-oculto">
-    <div class="modal-contenido" style="text-align:center; max-width:400px; padding: 35px 25px; border: 1px solid var(--primary-green);">
+    <div class="modal-contenido" style="text-align:center; max-width:400px; padding: 35px 25px; border: 1px solid var(--primary-green); position: relative;">
         <div style="width: 80px; height: 80px; background: rgba(0,217,104,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
             <i class="ph-fill ph-map-pin" style="font-size: 3rem; color: var(--primary-green);"></i>
         </div>
         <h2 style="color: #fff; margin-bottom: 10px; font-size: 1.5rem;">¿Dónde juegas?</h2>
         <p style="color: #aaa; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;">Permítenos detectar tu departamento para mostrarte al instante las mejores canchas cerca de ti.</p>
-        <button id="btn-detectar-gps" class="btn btn-primary" style="width: 100%; margin-bottom: 12px; color: #000; font-weight:bold;"><i class="ph-bold ph-navigation-arrow"></i> Detectar mi ubicación</button>
-        <button id="btn-cerrar-gps" class="btn btn-outline" style="width: 100%; border: none;">Elegir manualmente</button>
+        <button id="btn-detectar-gps" class="btn" style="width: 100%; margin-bottom: 12px; color: #000; font-weight:bold; background: var(--primary-green); border: none; padding: 12px; border-radius: 8px;"><i class="ph-bold ph-navigation-arrow"></i> Detectar mi ubicación</button>
+        <button id="btn-cerrar-gps" class="btn btn-outline" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff;">Elegir manualmente</button>
     </div>
 </div>
 
