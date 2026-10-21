@@ -231,28 +231,39 @@ function abrirReserva(c, hora, fechaElegida) {
     document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
     
-    // 🔥 LÓGICA DEL AVISO DE ADELANTO Y MÉTODOS DE PAGO
+    // 🔥 LÓGICA DEL AVISO DE ADELANTO Y MÉTODOS DE PAGO (CON MAYOR ESPACIO)
     const metodos = c.metodosPago || {};
     let avisoHTML = '';
     
+    // Le añadimos margin-bottom: 25px al bloque del aviso para darle más aire respecto al botón de confirmar
     if (metodos.requiereSena && metodos.montoSena > 0) {
         avisoHTML = `
-            <div style="background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:12px; border-radius:8px; margin-bottom:15px; color:#f1c40f;">
-                <b style="display:block; margin-bottom:5px;"><i class="ph-bold ph-warning-circle"></i> Esta cancha exige un adelanto de S/ ${metodos.montoSena}</b>
-                <span style="font-size:0.85rem; color:#ccc;">Al confirmar, deberás transferir este monto al dueño (Yape/Plin: <b>${metodos.numero || 'No especificado'}</b> a nombre de <b>${metodos.titular || 'el dueño'}</b>) y enviarle el comprobante por WhatsApp para validar tu reserva.</span>
+            <div style="background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:15px; border-radius:10px; margin-top:25px; margin-bottom:15px; color:#f1c40f;">
+                <b style="display:block; margin-bottom:8px; font-size:1.05rem;"><i class="ph-bold ph-warning-circle"></i> Esta cancha exige un adelanto de S/ ${metodos.montoSena}</b>
+                <span style="font-size:0.9rem; color:#ccc; line-height:1.5;">Al confirmar, deberás transferir este monto al dueño a través de: <b>${metodos.textoMetodos || 'Yape/Plin'}</b> (Cuenta/Número: <b>${metodos.numero || 'No especificado'}</b> a nombre de <b>${metodos.titular || 'el dueño'}</b>) y enviarle el comprobante por WhatsApp para validar tu reserva.</span>
             </div>
         `;
     } else {
         avisoHTML = `
-            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); padding:10px; border-radius:8px; margin-bottom:15px; color:#2ecc71; font-size:0.85rem; text-align:center;">
+            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); padding:12px; border-radius:10px; margin-top:25px; margin-bottom:15px; color:#2ecc71; font-size:0.9rem; text-align:center;">
                 <i class="ph-bold ph-check-circle"></i> <b>Reserva Directa:</b> El pago total se realiza en el local.
             </div>
         `;
     }
 
+    // Invertimos el orden en el HTML del modal para asegurar que el botón vaya ABAJO del mensaje
     const bookingStatus = document.getElementById('booking-status');
-    if (bookingStatus) {
-        bookingStatus.innerHTML = avisoHTML; 
+    const btnConfirmar = document.getElementById('btn-confirmar-reserva');
+    
+    if (bookingStatus && btnConfirmar) {
+        // Colocamos el aviso, y aseguramos que el botón no se vea "aplastado"
+        bookingStatus.innerHTML = avisoHTML;
+        
+        // Mueve el botón de confirmación debajo del mensaje si no lo estaba
+        const modalInner = bookingStatus.parentNode;
+        modalInner.appendChild(bookingStatus);
+        modalInner.appendChild(btnConfirmar);
+        btnConfirmar.style.marginTop = '15px'; // Espacio extra asegurado arriba del botón
     }
 
     modal.dataset.courtId = c.id; 
