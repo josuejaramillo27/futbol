@@ -138,6 +138,23 @@ async function cargarPerfil() {
 
     const campos = { 'admin-nombre': canchaActual.nombre, 'admin-whatsapp': canchaActual.whatsapp, 'admin-descripcion': canchaActual.descripcion, 'admin-precio': canchaActual.precio, 'admin-ubicacion-texto': canchaActual.ubicacionTexto, 'admin-ubicacion-link': canchaActual.ubicacionLink, 'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60 };
     Object.entries(campos).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v ?? '' });
+    // 🔥 NUEVO: Cargar configuración de pagos y adelantos
+    if(canchaActual.metodosPago) {
+        const elMetodos = document.getElementById('admin-pago-metodos');
+        if(elMetodos) elMetodos.value = canchaActual.metodosPago.textoMetodos || '';
+        
+        const elNumero = document.getElementById('admin-pago-numero');
+        if(elNumero) elNumero.value = canchaActual.metodosPago.numero || '';
+        
+        const elTitular = document.getElementById('admin-pago-titular');
+        if(elTitular) elTitular.value = canchaActual.metodosPago.titular || '';
+        
+        const elReqSena = document.getElementById('admin-req-sena');
+        if(elReqSena) elReqSena.checked = !!canchaActual.metodosPago.requiereSena;
+        
+        const elMontoSena = document.getElementById('admin-monto-sena');
+        if(elMontoSena) elMontoSena.value = canchaActual.metodosPago.montoSena || '';
+    }
 
     // Sincronizar Departamento y Distrito con los selectores
     const dpto = canchaActual.departamento || '';
@@ -624,6 +641,15 @@ if (formPerfil) {
             const valDpto = (document.getElementById('admin-cancha-departamento')?.value || document.getElementById('admin-departamento')?.value || '').trim();
             const valDist = (document.getElementById('admin-cancha-distrito')?.value || document.getElementById('admin-distrito')?.value || '').trim();
 
+            // 🔥 NUEVO: Capturar datos de pagos y seña
+            const metodosPagoConfig = {
+                textoMetodos: document.getElementById('admin-pago-metodos')?.value?.trim() || '',
+                numero: document.getElementById('admin-pago-numero')?.value?.trim() || '',
+                titular: document.getElementById('admin-pago-titular')?.value?.trim() || '',
+                requiereSena: document.getElementById('admin-req-sena')?.checked || false,
+                montoSena: Number(document.getElementById('admin-monto-sena')?.value || 0)
+            };
+
             const dataToSave = {
                 ownerUid: uid || '',
                 nombre: (document.getElementById('admin-nombre')?.value || '').trim(),
@@ -631,6 +657,7 @@ if (formPerfil) {
                 distrito: valDist,
                 whatsapp: (document.getElementById('admin-whatsapp')?.value || '').trim(),
                 precio: Number(document.getElementById('admin-precio')?.value || 0),
+                metodosPago: metodosPagoConfig, // 🔥 SE GUARDA LA CONFIGURACIÓN AQUÍ
                 tiposCancha: tipos || ['Fútbol 7 - Sintética'],
                 formatoJugadores: formato || 7,
                 superficie: superficie || 'Sintética',
@@ -647,7 +674,6 @@ if (formPerfil) {
                 estadoPublicacion: canchaActual?.estadoPublicacion || 'draft',
                 updatedAt: serverTimestamp()
             };
-
             if (logo) dataToSave.logo = logo;
             const fotosFiltradas = [...fotos.map((x, i) => x || canchaActual?.fotos?.[i]).filter(Boolean)];
             if (fotosFiltradas.length > 0) dataToSave.fotos = fotosFiltradas;
