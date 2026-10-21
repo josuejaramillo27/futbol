@@ -330,16 +330,14 @@
 
                 <!-- Pagos -->
                 <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-                    <h3 style="margin: 0 0 10px 0; font-size: 1.1rem; color: #fff;">Cobros y Adelantos</h3>
-                    <div style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
-                        <label style="color:#aaa; font-size:0.85rem;"><input type="checkbox" id="pago-yape" style="margin-right:5px;"> Yape</label>
-                        <label style="color:#aaa; font-size:0.85rem;"><input type="checkbox" id="pago-plin" style="margin-right:5px;"> Plin</label>
-                        <label style="color:#aaa; font-size:0.85rem;"><input type="checkbox" id="pago-efectivo" style="margin-right:5px;" checked> Efectivo en local</label>
-                    </div>
+                    <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; color: #fff;">Cobros y Adelantos</h3>
                     
-                    <div class="form-two" style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
-                        <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Número Yape/Plin
-                            <input type="tel" id="admin-pago-numero" placeholder="987654321" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                    <div style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
+                        <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Métodos de Pago Aceptados
+                            <input type="text" id="admin-pago-metodos" placeholder="Ej. Yape / Plin / BCP" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                        </label>
+                        <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Número de Cuenta o Teléfono
+                            <input type="text" id="admin-pago-numero" placeholder="Ej. 987654321 o Cta. 191-..." style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
                         </label>
                         <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Titular
                             <input type="text" id="admin-pago-titular" placeholder="Ej. Juan Pérez" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
@@ -347,9 +345,11 @@
                     </div>
                     
                     <div class="form-two" style="display:flex; gap:15px; align-items: flex-end; flex-wrap:wrap;">
-                        <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;"><input type="checkbox" id="admin-req-sena" style="margin-right:5px;"> Exigir Adelanto de Reserva</label>
+                        <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+                            <input type="checkbox" id="admin-req-sena"> Exigir Adelanto para Reservar
+                        </label>
                         <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Monto del Adelanto (S/)
-                            <input type="number" id="admin-monto-sena" placeholder="20" min="0" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                            <input type="number" id="admin-monto-sena" placeholder="Ej. 35" min="0" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
                         </label>
                     </div>
                 </div>
