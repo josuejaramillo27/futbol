@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#080B0A">
-    <title>Perfil de Cancha | CHALACAPP</title>
+    <title>Perfil de Complejo | CHALACAPP</title>
     
     <link rel="icon" type="image/png" href="logo-chalacapp-nav.png">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -15,17 +15,19 @@
     <style>
         body { background: #080B0A; min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: inherit; color: #fff; }
         
-        /* BARRA SUPERIOR */
+        /* BARRA SUPERIOR INDEPENDIENTE */
         .topbar-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 20px;
+            padding: 14px 24px;
             background: rgba(8, 11, 10, 0.95);
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .back-link-top {
@@ -39,93 +41,117 @@
             transition: color 0.2s ease;
         }
         .back-link-top:hover { color: var(--primary-green); }
-        .back-link-top i { font-size: 1.1rem; color: var(--primary-green); }
+        .back-link-top i { font-size: 1.15rem; color: var(--primary-green); }
 
-        /* CONTENEDOR BASE (MÓVIL) */
+        /* CONTENEDOR BASE */
         .bio-container {
-            max-width: 520px;
+            max-width: 540px;
             width: 100%;
             margin: 0 auto;
-            padding: 0;
+            padding: 0 15px 40px;
             box-sizing: border-box;
             background: #080B0A;
             transition: max-width 0.3s ease;
         }
 
         /* PORTADA Y LOGO */
-        .bio-header { position: relative; height: 160px; width: 100%; overflow: visible; }
-        .bio-cover-box { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 0 0 16px 16px; }
-        .bio-cover { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65); }
-        .bio-cover-gradient { position: absolute; bottom: 0; left: 0; width: 100%; height: 80px; background: linear-gradient(to top, #080B0A, transparent); }
+        .bio-header { position: relative; height: 180px; width: 100%; overflow: visible; margin-top: 15px; }
+        .bio-cover-box { position: relative; width: 100%; height: 100%; overflow: hidden; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); }
+        .bio-cover { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); }
+        .bio-cover-gradient { position: absolute; bottom: 0; left: 0; width: 100%; height: 90px; background: linear-gradient(to top, rgba(8,11,10,0.95), transparent); }
         
-        .bio-logo-wrapper { position: absolute; bottom: -35px; left: 50%; transform: translateX(-50%); width: 85px; height: 85px; border-radius: 50%; border: 3px solid #080B0A; overflow: hidden; background: #111; z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
-        .bio-logo { width: 100%; height: 100%; object-fit: cover; }
+        .bio-logo-wrapper { 
+            position: absolute; 
+            bottom: -35px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 85px; 
+            height: 85px; 
+            border-radius: 50%; 
+            border: 3px solid #080B0A; 
+            overflow: hidden; 
+            background: #111; 
+            z-index: 10; 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.8); 
+        }
+        .bio-logo { 
+            width: 100%; 
+            height: 100%; 
+            aspect-ratio: 1/1; 
+            object-fit: cover; 
+        }
 
-        .bio-body { padding: 45px 20px 40px; text-align: center; box-sizing: border-box; }
-        .bio-title { font-size: 1.5rem; color: #fff; margin: 0 0 4px 0; font-weight: 900; letter-spacing: -0.3px; }
-        .bio-location { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 15px; }
+        .bio-body { padding: 45px 0 30px; box-sizing: border-box; }
+        .bio-title { font-size: 1.6rem; color: #fff; margin: 0 0 6px 0; font-weight: 900; letter-spacing: -0.3px; }
+        .bio-location { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 
-        /* BOTONES ESTANDARIZADOS */
-        .bio-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 13px 20px; background: var(--primary-green, #2ecc71); color: #080b0a; font-weight: 800; font-size: 0.95rem; border: 1px solid var(--primary-green, #2ecc71); border-radius: 12px; cursor: pointer; text-decoration: none; margin-bottom: 10px; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; }
+        /* BOTONES */
+        .bio-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; background: var(--primary-green, #2ecc71); color: #080b0a; font-weight: 800; font-size: 0.92rem; border: 1px solid var(--primary-green, #2ecc71); border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; }
         .bio-btn:hover { background: var(--primary-hover, #27ae60); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3); }
-        .bio-btn:active { transform: translateY(0); }
-        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.2); color: #fff; box-shadow: none; }
+        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.18); color: #fff; box-shadow: none; }
         .bio-btn-outline:hover { border-color: var(--primary-green, #2ecc71); color: var(--primary-green, #2ecc71); background: rgba(46,204,113,0.06); }
 
-        /* DESCRIPCIÓN */
-        .bio-desc-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 15px; text-align: left; margin-top: 20px; }
-        .bio-desc-title { font-size: 0.95rem; color: #fff; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px; }
-        .bio-desc { color: #ccc; font-size: 0.88rem; margin: 0; line-height: 1.5; font-style: italic; }
+        /* DESCRIPCIÓN Y TARJETAS */
+        .bio-desc-container { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 18px; text-align: left; margin-bottom: 20px; }
+        .bio-desc-title { font-size: 0.92rem; color: #fff; margin: 0 0 8px 0; display: flex; align-items: center; gap: 6px; font-weight: 700; }
+        .bio-desc { color: #ccc; font-size: 0.88rem; margin: 0; line-height: 1.6; }
 
-        /* ESTRUCTURA SPLIT-SCREEN SOLO PARA PC */
-        .pc-split-grid { display: block; }
+        /* RESEÑAS CONTAINER */
+        .reviews-box { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 20px; text-align: center; }
 
-        @media (min-width: 850px) {
-            .bio-container { max-width: 1050px; padding: 30px 20px; }
-            .bio-header { height: 240px; }
-            .bio-cover-box { border-radius: 16px; }
-            .bio-logo-wrapper { width: 105px; height: 105px; bottom: -40px; left: 60px; transform: none; }
-            .bio-body { padding: 0; }
+        /* SPLIT-SCREEN LAYOUT PARA PC */
+        .pc-split-grid { display: flex; flex-direction: column; gap: 25px; }
+
+        @media (min-width: 880px) {
+            .bio-container { max-width: 1140px; padding: 15px 25px 60px; }
+            .bio-header { height: 260px; }
+            .bio-cover-box { border-radius: 20px; }
+            .bio-logo-wrapper { width: 115px; height: 115px; bottom: -45px; left: 55px; transform: none; }
+            
+            .bio-title { font-size: 2.2rem; text-align: left; }
+            .bio-location { text-align: left; justify-content: flex-start; font-size: 0.98rem; }
             
             .pc-split-grid {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 35px;
+                grid-template-columns: 1.05fr 1.25fr;
+                gap: 40px;
                 align-items: start;
                 margin-top: 55px;
                 text-align: left;
             }
 
-            .left-column { display: flex; flex-direction: column; gap: 20px; }
+            .left-column { display: flex; flex-direction: column; gap: 22px; }
             .right-column {
-                background: rgba(255,255,255,0.02);
-                border: 1px solid rgba(255,255,255,0.08);
-                border-radius: 16px;
-                padding: 25px;
+                background: rgba(20,25,22,0.65);
+                border: 1px solid rgba(255,255,255,0.09);
+                border-radius: 20px;
+                padding: 26px;
                 position: sticky;
-                top: 80px;
+                top: 85px;
+                backdrop-filter: blur(12px);
+                box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             }
-
-            .bio-title { font-size: 2.2rem; text-align: left; }
-            .bio-location { font-size: 1rem; text-align: left; }
-            .bio-desc-container { margin-top: 0; }
-            .left-column .bio-btn-outline { width: auto; align-self: flex-start; min-width: 190px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- BARRA SUPERIOR INDEPENDIENTE -->
     <header class="topbar-header">
         <a href="index.html" class="back-link-top">
-            <i class="ph-bold ph-arrow-left"></i> Explorar más
+            <i class="ph-bold ph-arrow-left"></i> Volver a Explorar
         </a>
-        <span style="font-size: 0.9rem; font-weight: 900; letter-spacing: 1px; color: #fff;">CHALACAPP</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <img src="logo-chalacapp-nav.png" alt="Logo" style="height:22px;">
+            <span style="font-size: 0.9rem; font-weight: 900; letter-spacing: 1px; color: #fff;">CHALACAPP</span>
+        </div>
     </header>
 
     <main class="bio-container">
+        <!-- PORTADA Y LOGO DEL COMPLEJO -->
         <div class="bio-header">
             <div class="bio-cover-box">
-                <img id="bio-cover" class="bio-cover" src="" alt="Portada">
+                <img id="bio-cover" class="bio-cover" src="" alt="Portada del Complejo">
                 <div class="bio-cover-gradient"></div>
             </div>
             <div class="bio-logo-wrapper">
@@ -134,75 +160,104 @@
         </div>
 
         <div class="bio-body">
+            <!-- LAYOUT SPLIT-SCREEN (PC: 2 COLUMNAS / MÓVIL: APILADO) -->
             <div class="pc-split-grid">
                 
+                <!-- COLUMNA IZQUIERDA: INFORMACIÓN Y RESEÑAS DEL COMPLEJO -->
                 <div class="left-column">
                     <div>
-                        <h1 id="bio-title" class="bio-title">Cargando...</h1>
-                        <p id="bio-location" class="bio-location"><i class="ph-bold ph-map-pin"></i> ...</p>
+                        <span class="mini-label" style="color:var(--primary-green); font-weight:800; font-size:0.75rem; letter-spacing:1px; margin-bottom:6px; display:block;">COMPLEJO DEPORTIVO</span>
+                        <h1 id="bio-title" class="bio-title">Cargando complejo...</h1>
+                        <p id="bio-location" class="bio-location"><i class="ph-bold ph-map-pin" style="color:var(--primary-green);"></i> ...</p>
+                        <div id="court-rating" style="margin-top: 10px; margin-bottom: 12px; display: inline-flex;"></div>
                     </div>
+
+                    <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline" style="width: auto; align-self: flex-start;">
+                        <i class="ph-bold ph-navigation-arrow" style="color:var(--primary-green);"></i> Cómo llegar con GPS
+                    </a>
 
                     <div class="bio-desc-container">
-                        <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre el complejo</h3>
-                        <p id="bio-desc" class="bio-desc"></p>
+                        <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre las instalaciones</h3>
+                        <p id="bio-desc" class="bio-desc">Cargando información del complejo...</p>
                     </div>
 
-                    <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline"><i class="ph-bold ph-navigation-arrow"></i> Cómo llegar (GPS)</a>
+                    <!-- CAJA DE RESEÑAS -->
+                    <div class="reviews-box">
+                        <h3 style="color: #fff; margin-bottom: 6px; font-size: 1.15rem;">¿Ya jugaste en este complejo?</h3>
+                        <p id="star-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Ayuda a la comunidad calificando la experiencia</p>
+                        
+                        <div id="star-picker" style="font-size: 2.2rem; color: #333; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; gap: 8px;">
+                            <i class="ph-fill ph-star" data-val="1"></i>
+                            <i class="ph-fill ph-star" data-val="2"></i>
+                            <i class="ph-fill ph-star" data-val="3"></i>
+                            <i class="ph-fill ph-star" data-val="4"></i>
+                            <i class="ph-fill ph-star" data-val="5"></i>
+                        </div>
+                        
+                        <div id="quick-tags-box" style="display: none; margin-bottom: 20px;">
+                            <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 10px;">¿Qué destacarías?</p>
+                            <div id="quick-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
+                        </div>
+
+                        <button id="btn-submit-review" class="btn" style="background: rgba(255,255,255,0.06); color: #888; border: 1px solid rgba(255,255,255,0.12); width: 100%; font-size: 0.88rem; padding: 12px; border-radius:10px;" disabled>
+                            Publicar Calificación
+                        </button>
+                    </div>
                 </div>
 
+                <!-- COLUMNA DERECHA: RESERVAS Y LISTA DE CANCHAS DEL COMPLEJO -->
                 <div class="right-column">
-                    <div id="court-rating" style="margin-bottom: 20px; display: flex; flex-direction: column; align-items: center;"></div>
-                    
-                    <div id="lista-canchas-complejo" style="margin-bottom: 25px;">
-                        <div style="text-align:center; color:#888;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando canchas...</div>
+                    <div id="lista-canchas-complejo">
+                        <div style="text-align:center; color:#888; padding:35px 20px;">
+                            <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2rem; color:var(--primary-green); display:block; margin-bottom:10px;"></i>
+                            Buscando canchas disponibles en este complejo...
+                        </div>
                     </div>
-
-                    <hr style="border: none; border-top: 1px dashed rgba(255,255,255,0.1); margin: 25px 0;">
-
-                    <h3 style="color: #fff; margin-bottom: 8px; font-size: 1.15rem; text-align: center;">¿Ya jugaste aquí?</h3>
-                    <p id="star-label" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; text-align: center;">Ayuda a otros tocando las estrellas</p>
-                    <div id="star-picker" style="font-size: 2.4rem; color: #333; margin-bottom: 15px; cursor: pointer; display: flex; justify-content: center; gap: 6px;">
-                        <i class="ph-fill ph-star" data-val="1"></i>
-                        <i class="ph-fill ph-star" data-val="2"></i>
-                        <i class="ph-fill ph-star" data-val="3"></i>
-                        <i class="ph-fill ph-star" data-val="4"></i>
-                        <i class="ph-fill ph-star" data-val="5"></i>
-                    </div>
-                    
-                    <div id="quick-tags-box" style="display: none; margin-bottom: 22px;">
-                        <p style="color: #ccc; font-size: 0.85rem; margin-bottom: 12px; text-align: center;">¿Qué destacarías?</p>
-                        <div id="quick-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
-                    </div>
-
-                    <button id="btn-submit-review" class="btn" style="background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); width: 100%; font-size: 0.9rem; padding: 12px;" disabled>Publicar Calificación</button>
                 </div>
 
             </div>
         </div>
     </main>
 
+    <!-- MODAL 1: DISPONIBILIDAD EN VIVO -->
     <div id="modal-cancha" class="modal-oculto">
-        <div class="modal-contenido bottom-sheet" style="padding: 20px 16px; text-align: left; max-height: 85vh; overflow-y: auto;">
-            <button id="cerrar-modal" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-            <span class="mini-label" style="color: var(--primary-green);">DISPONIBILIDAD EN VIVO</span>
-            <h2 id="modal-nombre-interno" style="margin-bottom: 15px; color: #fff; font-size: 1.3rem;">Elige un horario</h2>
+        <div class="modal-contenido" style="max-width: 480px; padding: 28px 24px; position: relative;">
+            <button id="cerrar-modal" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label" style="color: var(--primary-green); font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px;">DISPONIBILIDAD EN VIVO</span>
+            <h2 id="modal-nombre-interno" style="margin-top: 0; margin-bottom: 18px; font-size: 1.45rem; color: #fff; font-weight: 800; text-transform: uppercase;">...</h2>
             <div id="modal-disponibilidad"></div>
         </div>
     </div>
 
-    <div id="modal-reserva" class="modal-oculto">
-        <div class="modal-contenido center-modal" style="background:#111; border:1px solid var(--primary-green); padding: 20px;">
-            <button id="cerrar-reserva" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
-            <h2 style="color: var(--primary-green); margin-top:0; font-size: 1.3rem;"><i class="ph-fill ph-calendar-plus"></i> Tu Reserva</h2>
-            <div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:10px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.1);">
-                <p id="booking-cancha-nombre" style="margin:0 0 4px 0; color:#fff; font-weight:bold; font-size:1rem;"></p>
-                <p id="booking-hora" style="margin:0; color:var(--primary-green); font-size:1.1rem; font-weight:900;"></p>
+    <!-- MODAL 2: CONFIRMAR RESERVA -->
+    <div id="modal-reserva" class="modal-oculto" style="z-index: 1050;">
+        <div class="modal-contenido" style="max-width: 450px; padding: 28px 24px; position: relative;">
+            <button id="cerrar-reserva" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label" style="color: var(--primary-green); font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; display: block; margin-bottom: 6px;">PASO FINAL</span>
+            <h2 style="color: #fff; margin-top: 0; margin-bottom: 18px; font-size: 1.35rem; display: flex; align-items: center; gap: 8px;">
+                <i class="ph-fill ph-calendar-plus" style="color: var(--primary-green);"></i> Tu Reserva
+            </h2>
+
+            <div style="background: rgba(255,255,255,0.04); padding: 14px 16px; border-radius: 12px; margin-bottom: 18px; border: 1px solid rgba(255,255,255,0.08);">
+                <p id="booking-cancha-nombre" style="margin: 0 0 5px 0; color: #fff; font-weight: bold; font-size: 1.1rem;"></p>
+                <p id="booking-hora" style="margin: 0; color: var(--primary-green); font-size: 1.15rem; font-weight: 800;"></p>
             </div>
-            <div class="filter-field" style="margin-bottom:12px;"><span>Tu Nombre</span><input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff;"></div>
-            <div class="filter-field" style="margin-bottom:15px;"><span>WhatsApp de contacto</span><input type="tel" id="booking-telefono" placeholder="Ej. 987654321" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff;"></div>
-            
-            <button id="btn-confirmar-reserva" class="btn hero-primary" style="width:100%; padding: 12px; font-size: 0.95rem;"><i class="ph-bold ph-whatsapp-logo"></i> Confirmar por WhatsApp</button>
+
+            <div class="form-group" style="margin-bottom: 14px; text-align: left;">
+                <label style="color: #aaa; font-size: 0.85rem; margin-bottom: 6px; display: block; font-weight: 600;">Tu Nombre</label>
+                <input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez" style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 18px; text-align: left;">
+                <label style="color: #aaa; font-size: 0.85rem; margin-bottom: 6px; display: block; font-weight: 600;">WhatsApp de contacto</label>
+                <input type="tel" id="booking-telefono" placeholder="Ej. 987654321" style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
+            </div>
+
             <div id="booking-status"></div>
+
+            <button id="btn-confirmar-reserva" class="btn" style="width: 100%; padding: 13px; font-size: 1rem; font-weight: bold; background: var(--primary-green); color: #000; border: none; border-radius: 10px; margin-top: 15px; cursor: pointer;">
+                <i class="ph-bold ph-check-circle"></i> Solicitar Reserva
+            </button>
         </div>
     </div>
 

@@ -144,12 +144,14 @@ if (esInicio()) {
         resultados.forEach(c => {
             const estado = c.isOpen ? '<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>' : '<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>', logo = c.logo || 'https://via.placeholder.com/100', portada = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85', d = distanciaCerca(c), dist = Number.isFinite(d) && d < 999999 ? ` · ${d.toFixed(1)} km` : '';
 
-            // 🔥 TEXTO QUE AVISA SI HAY MÁS CANCHAS
-            const multiBadge = c.multiCancha ? `<p style="margin: 6px 0 0 0; font-size: 0.8rem; color: #f1c40f; font-weight: bold;"><i class="ph-bold ph-copy"></i> ${c.cantidadCanchas} Canchas (${c.tiposMulti})</p>` : '';
+            // 🔥 SUBTÍTULO DINÁMICO DE AGRUPACIÓN POR COMPLEJO
+            const subtituloCanchas = c.cantidadCanchas > 1
+                ? `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem; color: var(--primary-green); font-weight: 700;"><i class="ph-bold ph-soccer-ball"></i> ⚽ ${c.cantidadCanchas} Canchas disponibles ${c.tiposMulti ? `· <span style="color:#aaa; font-weight:normal;">${c.tiposMulti}</span>` : ''}</p>`
+                : `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem; color: var(--primary-green); font-weight: 700;"><i class="ph-bold ph-soccer-ball"></i> ⚽ 1 Cancha disponible</p>`;
 
-            contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo"><div class="court-content"><div class="court-title-line"><a href="cancha.html?id=${c.id}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : ''}${dist}</p>
-         ${multiBadge}
-         <div class="court-meta" style="${c.multiCancha ? 'margin-top:8px;' : ''}"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol')}</span><strong>S/ ${c.precio ?? 'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`
+            contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="cancha.html?id=${c.id}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : ''}${dist}</p>
+         ${subtituloCanchas}
+         <div class="court-meta" style="margin-top:8px;"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol')}</span><strong>S/ ${c.precio ?? 'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`
         });
         contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
             if (window.abrirModal) window.abrirModal(b.dataset.courtId);
@@ -167,20 +169,23 @@ if (esInicio()) {
             s.forEach(ds => {
                 const d = ds.data();
                 if (d.estadoPublicacion === 'published' || (d.configurado === true && !d.estadoPublicacion)) {
-                    const uid = d.usuarioUid || ds.id; // Agrupa por el dueño
+                    // Agrupa por usuarioUid (o id del documento si no tiene)
+                    const uid = d.usuarioUid || d.ownerUid || ds.id;
                     if (!agrupados[uid]) agrupados[uid] = [];
                     agrupados[uid].push({ id: ds.id, ...d, isOpen: canchaEstaAbierta(d), rating: Number(d.ratingPromedio || d.rating || 0) });
                 }
             });
 
             canchasGlobales = Object.values(agrupados).map(grupo => {
-                const main = grupo[0];
-                if (grupo.length > 1) {
-                    const tiposUnicos = [...new Set(grupo.map(c => c.tipo))].filter(Boolean).join(', ');
-                    main.multiCancha = true;
-                    main.cantidadCanchas = grupo.length;
-                    main.tiposMulti = tiposUnicos;
-                }
+                const main = { ...grupo[0] };
+                main.canchasDelComplejo = grupo;
+                main.cantidadCanchas = grupo.length;
+                const tiposUnicos = [...new Set(grupo.map(c => c.tipo || c.tipoCancha).filter(Boolean))];
+                main.tiposMulti = tiposUnicos.join(', ');
+                main.multiCancha = grupo.length > 1;
+                main.subtituloDinamico = grupo.length > 1
+                    ? `⚽ ${grupo.length} Canchas disponibles`
+                    : `⚽ 1 Cancha disponible`;
                 return main;
             });
 
@@ -734,23 +739,52 @@ if (window.location.pathname.includes('cancha.html')) {
             canchasGlobales = Array.from(mapCanchas.values());
             window.canchasGlobales = canchasGlobales;
 
-            // 4. DIBUJAR LA LISTA COMPLETA DE CANCHAS DISPONIBLES
+            // 4. DIBUJAR LA LISTA COMPLETA DE CANCHAS DISPONIBLES EN #lista-canchas-complejo
             const contenedorLista = document.getElementById('lista-canchas-complejo');
             if (contenedorLista) {
-                let htmlLista = `<h3 style="color:#fff; margin-bottom:15px; font-size:1.15rem;"><i class="ph-bold ph-list-dashes" style="color:var(--primary-green);"></i> Canchas disponibles:</h3>`;
+                let htmlLista = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                        <div>
+                            <span class="mini-label" style="color:var(--primary-green); font-size:0.75rem; font-weight:800; letter-spacing:1px;">ESPACIOS DEL COMPLEJO</span>
+                            <h3 style="color:#fff; margin:4px 0 0 0; font-size:1.3rem; font-weight:800;">Canchas Disponibles</h3>
+                        </div>
+                        <span style="background:rgba(46,204,113,0.1); color:var(--primary-green); border:1px solid rgba(46,204,113,0.3); border-radius:20px; padding:4px 12px; font-size:0.78rem; font-weight:800;">
+                            ${canchasGlobales.length} ${canchasGlobales.length === 1 ? 'Cancha' : 'Canchas'}
+                        </span>
+                    </div>
+                `;
 
                 canchasGlobales.forEach((c) => {
                     const nombreMostrar = c.nombreCancha || c.nombre || 'Cancha';
                     const deporteMostrar = c.tipo || 'Fútbol';
                     const precioMostrar = c.precio ? `S/ ${c.precio}` : 'Consultar';
+                    const deporteIcono = deporteMostrar.toLowerCase().includes('voley') || deporteMostrar.toLowerCase().includes('vóley')
+                        ? 'ph-volleyball'
+                        : deporteMostrar.toLowerCase().includes('basket') || deporteMostrar.toLowerCase().includes('básquet')
+                        ? 'ph-basketball'
+                        : 'ph-soccer-ball';
 
                     htmlLista += `
-                    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                        <div>
-                            <h4 style="margin:0 0 5px 0; color:#fff; font-size:1.05rem;">${nombreMostrar}</h4>
-                            <p style="margin:0; color:#aaa; font-size:0.85rem;"><i class="ph-bold ph-soccer-ball" style="color:var(--primary-green);"></i> ${deporteMostrar} <span style="margin:0 5px;">|</span> <span style="color:var(--primary-green); font-weight:bold; font-size:0.95rem;">${precioMostrar}</span> <small>/ hr</small></p>
+                    <div class="card subcancha-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:14px; padding:18px 20px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; transition:border-color 0.2s, background 0.2s;">
+                        <div style="flex:1; min-width:180px;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                                <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:rgba(46,204,113,0.12); color:var(--primary-green); font-size:1.2rem;">
+                                    <i class="ph-bold ${deporteIcono}"></i>
+                                </span>
+                                <h4 style="margin:0; color:#fff; font-size:1.1rem; font-weight:700;">${nombreMostrar}</h4>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; font-size:0.88rem; color:#aaa;">
+                                <span>${deporteMostrar}</span>
+                                <span>·</span>
+                                <span style="color:var(--primary-green); font-weight:800; font-size:0.95rem;">${precioMostrar}</span>
+                                <small style="color:#777;">/ hr</small>
+                            </div>
                         </div>
-                        <button class="btn btn-reservar-dinamico" data-id="${c.id}" style="background:linear-gradient(45deg, var(--primary-green), #27ae60); color:#000; font-weight:900; border:none; padding:10px 16px; border-radius:10px; cursor:pointer; font-size:0.9rem; box-shadow:0 4px 10px rgba(0,217,104,0.2);"><i class="ph-bold ph-calendar-plus"></i> Reservar</button>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <button class="btn btn-reservar-dinamico" data-id="${c.id}" style="padding:10px 18px; font-weight:800; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                                <i class="ph-bold ph-calendar-plus"></i> Reservar
+                            </button>
+                        </div>
                     </div>
                     `;
                 });
@@ -772,8 +806,13 @@ if (window.location.pathname.includes('cancha.html')) {
             console.error("Error cargando detalle:", e);
         }
 
-        await refrescarPromedio();
-        setupRatingForm();
+        // Carga defensiva de reseñas
+        try {
+            await refrescarPromedio();
+            setupRatingForm();
+        } catch (eResenas) {
+            console.warn("Carga defensiva: no se pudieron cargar reseñas pero el complejo sigue cargando:", eResenas);
+        }
     }
     async function refrescarPromedio() {
         try {
