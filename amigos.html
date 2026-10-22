@@ -729,9 +729,13 @@
     // CARGAR MIEMBROS DEL GRUPO ACTIVO
     async function cargarMiembrosDelGrupo() {
         const lista = document.getElementById('lista-amigos-grupo');
-        const uids = grupoActivo.miembros_uids || [];
+        const ownerUid = grupoActivo.ownerUid;
+        const uidsRaw = Array.isArray(grupoActivo.miembros_uids) ? grupoActivo.miembros_uids : [];
+        
+        // Asegurar que el owner esté incluido en la lista si no lo está
+        const todosUids = ownerUid && !uidsRaw.includes(ownerUid) ? [ownerUid, ...uidsRaw] : [...uidsRaw];
 
-        if (uids.length === 0) {
+        if (todosUids.length === 0) {
             lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1; padding:30px;">Vestuario vacío. Ve a "Añadir Jugadores" para sumar integrantes.</p>';
             miembrosDataGrupoActivo = [];
             return;
@@ -740,37 +744,67 @@
         lista.innerHTML = '<div style="text-align:center; grid-column:1/-1; padding:25px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green);"></i> Cargando alineación...</div>';
         try {
             miembrosDataGrupoActivo = [];
-            const chunks = [];
-            for (let i = 0; i < uids.length; i += 10) {
-                chunks.push(uids.slice(i, i + 10));
-            }
+            
+            // Cargar perfiles de forma segura
+            const perfilesSnaps = await Promise.all(
+                todosUids.map(uid => getDoc(doc(db, 'jugadores_perfiles', uid)).catch(() => null))
+            );
 
-            for (const chunk of chunks) {
-                const q = query(collection(db, 'jugadores_perfiles'), where('__name__', 'in', chunk));
-                const snap = await getDocs(q);
-                snap.forEach(d => miembrosDataGrupoActivo.push({ uid: d.id, ...d.data() }));
-            }
+            perfilesSnaps.forEach((snap, idx) => {
+                const uid = todosUids[idx];
+                if (snap && snap.exists()) {
+                    miembrosDataGrupoActivo.push({ uid, ...snap.data() });
+                } else {
+                    miembrosDataGrupoActivo.push({ uid, nombre: 'Jugador', posicion: 'JUG' });
+                }
+            });
+
+            // Ordenar: El líder/creador va estrictamente primero
+            miembrosDataGrupoActivo.sort((a, b) => {
+                if (a.uid === ownerUid) return -1;
+                if (b.uid === ownerUid) return 1;
+                return (a.nombre || '').localeCompare(b.nombre || '', 'es');
+            });
+
+            const soyLider = currentUser && currentUser.uid === ownerUid;
 
             lista.innerHTML = miembrosDataGrupoActivo.map(j => {
-                const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre || 'Jugador')}&background=2ecc71&color=fff`;
-                const pos = j.posicion || 'JUG';
+                const esEsteLider = j.uid === ownerUid;
+                const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre || 'Jugador')}&background=${esEsteLider ? 'f1c40f' : '2ecc71'}&color=${esEsteLider ? '000' : 'fff'}`;
+                const pos = j.posicion || (esEsteLider ? 'Líder' : 'JUG');
                 const telClean = String(j.telefono || '').replace(/\D/g, '');
-                const waBtn = telClean ? `<a href="https://wa.me/${telClean}?text=${encodeURIComponent('¡Habla! ¿Listo para el partido?')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
+                const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent('¡Habla! ¿Listo para el partido?')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
+
+                // Botón de quitar: Solo visible para el líder y NUNCA contra sí mismo
+                const btnQuitar = (soyLider && !esEsteLider)
+                    ? `<button class="btn" style="width: 34px; height: 34px; background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer;" onclick="window.quitarDelGrupo('${j.uid}')" title="Quitar del grupo">
+                        <i class="ph-bold ph-trash"></i>
+                    </button>`
+                    : '';
+
+                const badgeLider = esEsteLider 
+                    ? `<span style="background: rgba(241,196,15,0.2); color: #f1c40f; border: 1px solid rgba(241,196,15,0.4); padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;"><i class="ph-fill ph-crown"></i> Líder</span>`
+                    : '';
+
+                const estiloCard = esEsteLider
+                    ? `border-color: rgba(241,196,15,0.45); background: linear-gradient(135deg, rgba(241,196,15,0.08), rgba(0,0,0,0.45));`
+                    : '';
 
                 return `
-                    <div class="friend-card">
+                    <div class="friend-card" style="${estiloCard}">
                         <div class="friend-info">
-                            <img src="${foto}" class="friend-avatar" alt="${j.nombre || 'Jugador'}">
+                            <img src="${foto}" class="friend-avatar" style="${esEsteLider ? 'border: 2px solid #f1c40f;' : ''}" alt="${j.nombre || 'Jugador'}">
                             <div style="min-width:0;">
-                                <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
+                                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                    <h4 class="friend-name" style="margin:0;">${j.nombre || 'Jugador'}</h4>
+                                    ${badgeLider}
+                                </div>
                                 <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); font-weight:700;">${pos}</span>
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
                             ${waBtn}
-                            <button class="btn" style="width: 34px; height: 34px; background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer;" onclick="window.quitarDelGrupo('${j.uid}')" title="Quitar del grupo">
-                                <i class="ph-bold ph-trash"></i>
-                            </button>
+                            ${btnQuitar}
                         </div>
                     </div>
                 `;

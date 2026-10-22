@@ -13,6 +13,7 @@ const firebaseConfig = {
     appId: "1:223446110165:web:219afce6a9dac03203f75c"
 };
 const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
+window.auth = auth;
 let canchasGlobales = [], ubicacionUsuario = null, usuarioActual = null;
 
 // ==========================================
@@ -231,12 +232,23 @@ if (esInicio()) {
                     // Agrupa por usuarioUid (o id del documento si no tiene)
                     const uid = d.usuarioUid || d.ownerUid || ds.id;
                     if (!agrupados[uid]) agrupados[uid] = [];
-                    const slots = slotsDeCancha(d, reservasHoy, fechaHoy());
-                    const turnosLibres = slots.filter(sl => !sl.blocked).length;
+                    let turnosLibres = 0;
+                    let estaAbierta = false;
+                    try {
+                        const slots = slotsDeCancha(d, reservasHoy, fechaHoy());
+                        turnosLibres = slots.filter(sl => !sl.blocked).length;
+                    } catch (errSlots) {
+                        turnosLibres = 0;
+                    }
+                    try {
+                        estaAbierta = canchaEstaAbierta(d);
+                    } catch (errOpen) {
+                        estaAbierta = false;
+                    }
                     agrupados[uid].push({ 
                         id: ds.id, 
                         ...d, 
-                        isOpen: canchaEstaAbierta(d), 
+                        isOpen: estaAbierta, 
                         turnosLibres,
                         rating: Number(d.ratingPromedio || d.rating || 0) 
                     });
@@ -379,7 +391,12 @@ async function confirmarReserva() {
     if (!id || !hora || !fechaReq || !nombre || !telefono) { window.toast('Completa tu nombre y teléfono.', 'warning'); return; }
     if (!usuarioActual) {
         window.toast('Inicia sesión con Google para reservar.', 'warning');
-        try { const r = await signInWithPopup(auth, new GoogleAuthProvider()); usuarioActual = r.user; } catch (e) { return; }
+        try { 
+            const prov = new GoogleAuthProvider();
+            prov.setCustomParameters({ prompt: 'select_account' });
+            const r = await signInWithPopup(auth, prov); 
+            usuarioActual = r.user; 
+        } catch (e) { return; }
     }
 
     const c = canchasGlobales.find(x => x.id === id);
@@ -416,6 +433,18 @@ const btnCerrar = document.getElementById('cerrar-modal'), modalCancha = documen
 function cerrarReserva() { const m = document.getElementById('modal-reserva'); if (m) { m.classList.remove('mostrar'); m.setAttribute('aria-hidden', 'true') } }
 const cr = document.getElementById('cerrar-reserva'); cr?.addEventListener('click', cerrarReserva); document.getElementById('modal-reserva')?.addEventListener('click', e => { if (e.target.id === 'modal-reserva') cerrarReserva() }); document.getElementById('btn-confirmar-reserva')?.addEventListener('click', confirmarReserva);
 onAuthStateChanged(auth, u => { usuarioActual = u || null });
+
+window.cerrarSesionChalacapp = async function () {
+    if (!confirm('¿Seguro que deseas cerrar sesión en CHALACAPP?')) return;
+    try {
+        await auth.signOut();
+        usuarioActual = null;
+        if (window.toast) window.toast('Sesión cerrada correctamente', 'info');
+        setTimeout(() => window.location.reload(), 300);
+    } catch (e) {
+        console.error('Error al cerrar sesión:', e);
+    }
+};
 
 // ==========================================
 // FASE 26: BOLSA DE JUGADORES (MOTOR RECONSTRUIDO)
@@ -596,7 +625,11 @@ if (window.location.pathname.includes('jugadores.html')) {
 
     if (btnLogin) {
         btnLogin.addEventListener('click', async () => {
-            try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+            try { 
+                const prov = new GoogleAuthProvider();
+                prov.setCustomParameters({ prompt: 'select_account' });
+                await signInWithPopup(auth, prov); 
+            }
             catch (e) { window.toast('No se pudo iniciar sesión.', 'error'); }
         });
     }
@@ -972,9 +1005,9 @@ if (window.location.pathname.includes('cancha.html')) {
         try {
             const q = query(collection(db, 'resenas'), where('canchaId', '==', canchaId));
             const resenasSnap = await getDocs(q);
-            const reseñas = resenasSnap.docs.map(d => d.data());
-            const total = reseñas.length;
-            const sum = reseñas.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
+            const resenasLista = resenasSnap.docs.map(d => d.data());
+            const total = resenasLista.length;
+            const sum = resenasLista.reduce((acc, r) => acc + (Number(r.rating) || 0), 0);
             const prom = total > 0 ? (sum / total).toFixed(1) : "0.0";
             const ratingEl = document.getElementById('court-rating');
             if (ratingEl) {
@@ -1038,8 +1071,8 @@ if (window.location.pathname.includes('cancha.html')) {
             btnSubmit.disabled = true; btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
 
             try {
-                const reseñaUnicaId = `${canchaId}_${auth.currentUser.uid}`;
-                const refResena = doc(db, 'resenas', reseñaUnicaId);
+                const resenaUnicaId = `${canchaId}_${auth.currentUser.uid}`;
+                const refResena = doc(db, 'resenas', resenaUnicaId);
 
                 // 🔥 MAGIA AQUÍ: Verificamos si ya existe antes de que Firebase nos bloquee
                 const snapResena = await getDoc(refResena);

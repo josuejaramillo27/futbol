@@ -356,10 +356,12 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, getDoc, query, where, addDoc, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk", authDomain: "app-futbol-acd0f.firebaseapp.com", projectId: "app-futbol-acd0f", storageBucket: "app-futbol-acd0f.firebasestorage.app", messagingSenderId: "223446110165", appId: "1:223446110165:web:219afce6a9dac03203f75c" };
     const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
+    const googleProvider = new GoogleAuthProvider();
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
 
     let currentUser = null;
     let cacheComunidades = {};
@@ -530,7 +532,14 @@
 
         const btnSolicitar = document.getElementById('btn-solicitar-ingreso-comunidad');
         btnSolicitar.onclick = async () => {
-            if (!currentUser) return alert('Debes iniciar sesión con Google para unirte a una comunidad.');
+            if (!currentUser) {
+                try {
+                    const res = await signInWithPopup(auth, googleProvider);
+                    currentUser = res.user;
+                } catch(e) {
+                    return alert('Debes iniciar sesión con Google para unirte a una comunidad.');
+                }
+            }
             btnSolicitar.disabled = true;
             btnSolicitar.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Uniendo...';
             try {
@@ -776,25 +785,25 @@
                     console.warn('No se pudo leer perfil del líder:', err);
                 }
             }
+            if (!liderData.telefono && c.whatsappLider) {
+                liderData.telefono = c.whatsappLider;
+            }
+            if ((!liderData.nombre || liderData.nombre === 'Líder de la Comunidad') && currentUser && currentUser.uid === liderUid) {
+                liderData.nombre = currentUser.displayName || 'Líder de la Comunidad';
+                if (currentUser.photoURL) liderData.foto = currentUser.photoURL;
+            }
 
-            // 2. Obtener perfiles de los demás miembros en batches de 10
+            // 2. Cargar perfiles de los demás miembros de forma segura
             const miembrosMap = {};
-            const chunks = [];
-            for (let i = 0; i < otrosUids.length; i += 10) {
-                chunks.push(otrosUids.slice(i, i + 10));
-            }
-
-            for (const chunk of chunks) {
-                try {
-                    const q = query(collection(db, 'jugadores_perfiles'), where('__name__', 'in', chunk));
-                    const snap = await getDocs(q);
-                    snap.forEach(d => {
-                        miembrosMap[d.id] = { uid: d.id, ...d.data() };
-                    });
-                } catch(err) {
-                    console.warn('Error al cargar batch de perfiles:', err);
+            const perfilesSnaps = await Promise.all(
+                otrosUids.map(uid => getDoc(doc(db, 'jugadores_perfiles', uid)).catch(() => null))
+            );
+            perfilesSnaps.forEach((snap, idx) => {
+                const uid = otrosUids[idx];
+                if (snap && snap.exists()) {
+                    miembrosMap[uid] = { uid, ...snap.data() };
                 }
-            }
+            });
 
             // Renderizar Líder OBLIGATORIAMENTE PRIMERO
             const fotoLider = liderData.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(liderData.nombre || 'Lider')}&background=f1c40f&color=000`;

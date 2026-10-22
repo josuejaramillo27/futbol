@@ -110,6 +110,7 @@
             <i class="ph-bold ph-trophy" style="font-size: 1.2rem;"></i>
             <span style="font-size: 0.6rem; margin-top: 3px; font-weight: bold;">LIGAS</span>
         </a>
+        <div id="topbar-auth" style="display: flex; align-items: center; margin-left: 4px;"></div>
     </nav>
 </header>
 
@@ -314,11 +315,13 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
 
     const btnAbrirPerfil = document.getElementById('btn-abrir-perfil');
     const modalPerfil = document.getElementById('modal-perfil-jugador');
     const btnGuardarPerfil = document.getElementById('btn-guardar-perfil');
     const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
+    const topbarAuth = document.getElementById('topbar-auth');
     let currentUser = null;
 
     // MAPA DE POSICIONES POR DEPORTE
@@ -362,8 +365,56 @@
         actualizarPosiciones(e.target.value);
     });
 
+    async function ejecutarCerrarSesion() {
+        if (!confirm("¿Seguro que deseas cerrar sesión en CHALACAPP?")) return;
+        try {
+            await signOut(auth);
+            currentUser = null;
+            modalPerfil.classList.remove('mostrar');
+            if (window.toast) window.toast("Sesión cerrada correctamente", "info");
+            actualizarEstadoDesconectado();
+        } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+            alert("No se pudo cerrar sesión.");
+        }
+    }
+
+    function actualizarEstadoDesconectado() {
+        currentUser = null;
+        if (topbarAuth) topbarAuth.innerHTML = '';
+        
+        const formAnuncio = document.getElementById('form-anuncio');
+        const loginHint = document.getElementById('login-hint');
+        const btnLoginGoogle = document.getElementById('btn-login-google');
+        
+        if (formAnuncio) formAnuncio.style.display = 'none';
+        if (loginHint) loginHint.style.display = 'block';
+        if (btnLoginGoogle) btnLoginGoogle.style.display = 'flex';
+
+        // Limpiar campos del perfil
+        document.getElementById('perfil-nombre').value = '';
+        document.getElementById('perfil-telefono').value = '';
+        document.getElementById('perfil-ciudad').value = '';
+        btnGuardarPerfil.disabled = true;
+    }
+
     onAuthStateChanged(auth, async (user) => { 
         currentUser = user; 
+        if (user) {
+            if (topbarAuth) {
+                const fotoUser = user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=2ecc71&color=fff`;
+                topbarAuth.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <img src="${fotoUser}" style="width:28px; height:28px; border-radius:50%; object-fit:cover; border:1.5px solid var(--primary-green);" title="${user.displayName || 'Usuario'}">
+                        <button id="btn-topbar-logout" title="Cerrar Sesión" style="background:rgba(231,76,60,0.12); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:4px 9px; border-radius:7px; font-size:0.75rem; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                            <i class="ph-bold ph-sign-out"></i> Salir
+                        </button>
+                    </div>`;
+                document.getElementById('btn-topbar-logout')?.addEventListener('click', ejecutarCerrarSesion);
+            }
+        } else {
+            actualizarEstadoDesconectado();
+        }
     });
 
     if (btnAbrirPerfil) {
@@ -411,12 +462,7 @@
     }
 
     if (btnCerrarSesion) {
-        btnCerrarSesion.addEventListener('click', async () => {
-            if (confirm("¿Seguro que deseas cerrar sesión?")) {
-                await signOut(auth);
-                window.location.reload();
-            }
-        });
+        btnCerrarSesion.addEventListener('click', ejecutarCerrarSesion);
     }
 
     document.getElementById('cerrar-perfil')?.addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
