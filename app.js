@@ -187,10 +187,21 @@ if (esInicio()) {
         resultados.forEach(c => {
             const estado = c.isOpen ? '<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>' : '<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>', logo = c.logo || 'https://via.placeholder.com/100', portada = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85', d = distanciaCerca(c), dist = Number.isFinite(d) && d < 999999 ? ` · ${d.toFixed(1)} km` : '';
 
-            // 🔥 SUBTÍTULO DINÁMICO DE AGRUPACIÓN POR COMPLEJO
-            const subtituloCanchas = c.cantidadCanchas > 1
-                ? `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem; color: var(--primary-green); font-weight: 700;"><i class="ph-bold ph-soccer-ball"></i> ⚽ ${c.cantidadCanchas} Canchas disponibles ${c.tiposMulti ? `· <span style="color:#aaa; font-weight:normal;">${c.tiposMulti}</span>` : ''}</p>`
-                : `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem; color: var(--primary-green); font-weight: 700;"><i class="ph-bold ph-soccer-ball"></i> ⚽ 1 Cancha disponible</p>`;
+            // 🔥 SUBTÍTULO DINÁMICO CON TURNOS LIBRES HOY
+            let textoTurnos = '';
+            if (typeof c.totalTurnosLibres === 'number' && Number.isFinite(c.totalTurnosLibres)) {
+                if (c.totalTurnosLibres > 0) {
+                    textoTurnos = `<span style="color:var(--primary-green); font-weight:800;"><i class="ph-bold ph-clock"></i> 🟢 ${c.totalTurnosLibres} ${c.totalTurnosLibres === 1 ? 'turno libre hoy' : 'turnos libres hoy'}</span>`;
+                } else {
+                    textoTurnos = `<span style="color:#e74c3c; font-weight:700;"><i class="ph-bold ph-x-circle"></i> 🔴 Sin turnos libres hoy</span>`;
+                }
+            } else {
+                textoTurnos = c.isOpen
+                    ? `<span style="color:var(--primary-green); font-weight:800;">🟢 Abierto hoy</span>`
+                    : `<span style="color:#e74c3c; font-weight:700;">🔴 Cerrado</span>`;
+            }
+            const infoCanchas = c.cantidadCanchas > 1 ? ` · <span style="color:#aaa; font-weight:normal;">${c.cantidadCanchas} canchas${c.tiposMulti ? ` (${c.tiposMulti})` : ''}</span>` : (c.tiposMulti ? ` · <span style="color:#aaa; font-weight:normal;">${c.tiposMulti}</span>` : '');
+            const subtituloCanchas = `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem;">${textoTurnos}${infoCanchas}</p>`;
 
             contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="cancha.html?id=${c.id}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : ''}${dist}</p>
          ${subtituloCanchas}
@@ -207,7 +218,12 @@ if (esInicio()) {
         if (!contenedor) return;
         contenedor.innerHTML = '<div class="card loading-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted)"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando canchas...</div>';
         try {
-            const s = await Promise.race([getDocs(collection(db, 'canchas')), new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 12000))]);
+            const [s, sRes] = await Promise.all([
+                Promise.race([getDocs(collection(db, 'canchas')), new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 12000))]),
+                getDocs(query(collection(db, 'reservas'), where('fecha', '==', fechaHoy()))).catch(() => ({ docs: [] }))
+            ]);
+            const reservasHoy = sRes && sRes.docs ? sRes.docs.map(d => d.data()) : [];
+
             const agrupados = {};
             s.forEach(ds => {
                 const d = ds.data();
@@ -215,7 +231,15 @@ if (esInicio()) {
                     // Agrupa por usuarioUid (o id del documento si no tiene)
                     const uid = d.usuarioUid || d.ownerUid || ds.id;
                     if (!agrupados[uid]) agrupados[uid] = [];
-                    agrupados[uid].push({ id: ds.id, ...d, isOpen: canchaEstaAbierta(d), rating: Number(d.ratingPromedio || d.rating || 0) });
+                    const slots = slotsDeCancha(d, reservasHoy, fechaHoy());
+                    const turnosLibres = slots.filter(sl => !sl.blocked).length;
+                    agrupados[uid].push({ 
+                        id: ds.id, 
+                        ...d, 
+                        isOpen: canchaEstaAbierta(d), 
+                        turnosLibres,
+                        rating: Number(d.ratingPromedio || d.rating || 0) 
+                    });
                 }
             });
 
@@ -226,9 +250,12 @@ if (esInicio()) {
                 const tiposUnicos = [...new Set(grupo.map(c => c.tipo || c.tipoCancha).filter(Boolean))];
                 main.tiposMulti = tiposUnicos.join(', ');
                 main.multiCancha = grupo.length > 1;
-                main.subtituloDinamico = grupo.length > 1
-                    ? `⚽ ${grupo.length} Canchas disponibles`
-                    : `⚽ 1 Cancha disponible`;
+                main.isOpen = grupo.some(g => g.isOpen);
+                const totalTurnos = grupo.reduce((acc, subC) => acc + (subC.turnosLibres || 0), 0);
+                main.totalTurnosLibres = totalTurnos;
+                main.subtituloDinamico = totalTurnos > 0 
+                    ? `🟢 ${totalTurnos} ${totalTurnos === 1 ? 'turno libre hoy' : 'turnos libres hoy'}`
+                    : (main.isOpen ? '🟢 Abierto hoy' : '🔴 Cerrado');
                 return main;
             });
 

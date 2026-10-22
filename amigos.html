@@ -313,9 +313,14 @@
                     <span id="vestuario-deporte" style="color: var(--primary-green); font-size: 0.8rem; font-weight: 800; background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); padding: 2px 10px; border-radius: 6px; display:inline-block; margin-top:4px;">...</span>
                 </div>
             </div>
-            <button id="btn-eliminar-grupo-actual" class="btn btn-danger" style="padding: 8px 12px; font-size: 0.82rem; border-radius: 8px; background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;" title="Eliminar este grupo">
-                <i class="ph-bold ph-trash"></i> Eliminar Grupo
-            </button>
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button id="btn-eliminar-grupo-actual" class="btn btn-danger" style="display: none; padding: 8px 12px; font-size: 0.82rem; border-radius: 8px; background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); align-items: center; gap: 6px; cursor: pointer;" title="Eliminar este grupo">
+                    <i class="ph-bold ph-trash"></i> Eliminar Grupo
+                </button>
+                <button id="btn-salir-grupo-actual" class="btn btn-danger" style="display: none; padding: 8px 12px; font-size: 0.82rem; border-radius: 8px; background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); align-items: center; gap: 6px; cursor: pointer;" title="Salir de este grupo">
+                    <i class="ph-bold ph-sign-out"></i> Salir del Grupo
+                </button>
+            </div>
         </div>
 
         <div class="tabs-container">
@@ -441,7 +446,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, deleteDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, deleteDoc, addDoc, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -549,13 +554,23 @@
         lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i> Cargando tus grupos...</p>';
         
         try {
-            const q = query(collection(db, 'grupos_amigos'), where('ownerUid', '==', currentUser.uid));
-            const snap = await getDocs(q);
-            misGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            const qOwned = query(collection(db, 'grupos_amigos'), where('ownerUid', '==', currentUser.uid));
+            const qMember = query(collection(db, 'grupos_amigos'), where('miembros_uids', 'array-contains', currentUser.uid));
+            const [snapOwned, snapMember] = await Promise.all([getDocs(qOwned), getDocs(qMember)]);
 
-            // REGLA 3: Si tiene menos de 3 grupos, mostrar el botón "Crear Grupo"
+            const mapGrupos = new Map();
+            snapOwned.forEach(d => mapGrupos.set(d.id, { id: d.id, ...d.data(), esLider: true }));
+            snapMember.forEach(d => {
+                if (!mapGrupos.has(d.id)) {
+                    mapGrupos.set(d.id, { id: d.id, ...d.data(), esLider: false });
+                }
+            });
+            misGrupos = Array.from(mapGrupos.values());
+
+            // REGLA 3: Si tiene menos de 3 grupos propios, mostrar el botón "Crear Grupo"
+            const creadosPorMi = misGrupos.filter(g => g.ownerUid === currentUser.uid);
             const btnCrear = document.getElementById('btn-crear-grupo');
-            btnCrear.style.display = misGrupos.length < 3 ? 'inline-flex' : 'none';
+            btnCrear.style.display = creadosPorMi.length < 3 ? 'inline-flex' : 'none';
 
             if (misGrupos.length === 0) {
                 lista.innerHTML = `
@@ -576,9 +591,16 @@
             lista.innerHTML = misGrupos.map(g => {
                 const sportIcon = g.deporte === 'Vóley' ? 'ph-volleyball' : (g.deporte === 'Básquet' ? 'ph-basketball' : 'ph-soccer-ball');
                 const numJugadores = Array.isArray(g.miembros_uids) ? g.miembros_uids.length : 0;
+                const rolBadge = g.esLider 
+                    ? `<span style="color:#f1c40f; font-size:0.75rem; font-weight:800; margin-left:auto;"><i class="ph-fill ph-crown"></i> Líder</span>`
+                    : `<span style="color:#aaa; font-size:0.75rem; font-weight:bold; margin-left:auto;">Miembro</span>`;
+
                 return `
                     <div class="grupo-card" onclick="window.abrirVestuario('${g.id}')">
-                        <span class="grupo-card-sport"><i class="ph-bold ${sportIcon}"></i> ${g.deporte || 'Fútbol'}</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <span class="grupo-card-sport" style="margin-bottom:0;"><i class="ph-bold ${sportIcon}"></i> ${g.deporte || 'Fútbol'}</span>
+                            ${rolBadge}
+                        </div>
                         <h3 class="grupo-card-title">${g.nombre}</h3>
                         <p style="color:#888; font-size:0.85rem; margin:0;"><i class="ph-fill ph-users"></i> ${numJugadores} Jugador${numJugadores === 1 ? '' : 'es'}</p>
                     </div>
@@ -607,7 +629,8 @@
 
     document.getElementById('form-crear-grupo').onsubmit = async (e) => {
         e.preventDefault();
-        if (misGrupos.length >= 3) {
+        const creadosPorMi = misGrupos.filter(g => g.ownerUid === currentUser.uid);
+        if (creadosPorMi.length >= 3) {
             alert("Has alcanzado el límite máximo de 3 grupos.");
             return;
         }
@@ -656,11 +679,22 @@
         document.getElementById('vestuario-nombre').textContent = grupoActivo.nombre;
         document.getElementById('vestuario-deporte').textContent = grupoActivo.deporte || 'Fútbol';
 
+        // Mostrar u ocultar Eliminar vs Salir del Grupo según rol
+        const btnEliminar = document.getElementById('btn-eliminar-grupo-actual');
+        const btnSalir = document.getElementById('btn-salir-grupo-actual');
+        if (grupoActivo.ownerUid === currentUser.uid) {
+            btnEliminar.style.display = 'inline-flex';
+            btnSalir.style.display = 'none';
+        } else {
+            btnEliminar.style.display = 'none';
+            btnSalir.style.display = 'inline-flex';
+        }
+
         switchTab('mbr');
         await cargarMiembrosDelGrupo();
     };
 
-    // ELIMINAR GRUPO ACTIVO
+    // ELIMINAR GRUPO ACTIVO (SOLO LÍDER/CREADOR)
     document.getElementById('btn-eliminar-grupo-actual').onclick = async () => {
         if (!grupoActivo) return;
         if (!confirm(`¿Estás seguro de eliminar el grupo "${grupoActivo.nombre}"?`)) return;
@@ -672,6 +706,23 @@
         } catch (e) {
             console.error("Error al eliminar grupo:", e);
             alert("Error al eliminar el grupo.");
+        }
+    };
+
+    // SALIR DEL GRUPO (SOLO MIEMBROS)
+    document.getElementById('btn-salir-grupo-actual').onclick = async () => {
+        if (!grupoActivo) return;
+        if (!confirm(`¿Estás seguro de salir del grupo "${grupoActivo.nombre}"?`)) return;
+
+        try {
+            await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id), {
+                miembros_uids: arrayRemove(currentUser.uid)
+            });
+            alert("Has salido del grupo.");
+            document.getElementById('btn-volver-lobby').click();
+        } catch (e) {
+            console.error("Error al salir del grupo:", e);
+            alert("Error al salir del grupo.");
         }
     };
 

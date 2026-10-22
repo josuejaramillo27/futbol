@@ -45,6 +45,17 @@
         .sport-tags { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
         .sport-tag { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; color: #ddd; font-weight: 600; }
 
+        /* LISTAS DE MIEMBROS Y PARTIDOS */
+        .friend-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .friend-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+        .friend-card:hover { border-color: rgba(46,204,113,0.3); }
+        .friend-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+        .friend-avatar { width: 48px; height: 48px; aspect-ratio: 1/1; object-fit: cover; border-radius: 50%; border: 2px solid var(--primary-green); background: #111; flex-shrink: 0; }
+        .friend-name { font-weight: 800; font-size: 0.98rem; color: #fff; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .badge-lider { background: rgba(241,196,15,0.2); color: #f1c40f; border: 1px solid rgba(241,196,15,0.4); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; }
+        .partido-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 14px; transition: all 0.22s ease; position: relative; }
+        .partido-card:hover { border-color: rgba(46,204,113,0.35); transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
+
         @media (max-width: 650px) {
             .section-banner-top { flex-direction: column; align-items: stretch; text-align: center; }
             .section-banner-top .btn-anunciar-top { width: 100% !important; justify-content: center; }
@@ -115,33 +126,163 @@
     </div>
 
     <div id="seccion-comunidades" style="display: none;">
-        <div class="section-banner-top">
-            <div>
-                <h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-fill ph-shield-checkered" style="color:var(--primary-green);"></i> Comunidades & Pichangas</h3>
-                <p style="margin:3px 0 0; color:#aaa; font-size:0.8rem;">Únete a grupos fijos para pichanguear o desafía a otros equipos.</p>
+        <!-- VISTA LISTA DE COMUNIDADES -->
+        <div id="vista-lista-comunidades">
+            <div class="section-banner-top">
+                <div>
+                    <h3 style="margin:0; color:#fff; font-size:1.1rem;"><i class="ph-fill ph-shield-checkered" style="color:var(--primary-green);"></i> Comunidades & Pichangas</h3>
+                    <p style="margin:3px 0 0; color:#aaa; font-size:0.8rem;">Únete a grupos fijos para pichanguear o desafía a otros equipos.</p>
+                </div>
+                <button id="btn-solicitar-creacion-comunidad" class="btn" style="width:auto !important; background:rgba(46, 204, 113, 0.15); color:var(--primary-green); border:1px dashed var(--primary-green); font-weight:bold; font-size:0.85rem; padding:8px 14px; border-radius:8px;"><i class="ph-bold ph-plus-circle"></i> Registrar Comunidad</button>
             </div>
-            <button id="btn-solicitar-creacion-comunidad" class="btn" style="width:auto !important; background:rgba(46, 204, 113, 0.15); color:var(--primary-green); border:1px dashed var(--primary-green); font-weight:bold; font-size:0.85rem; padding:8px 14px; border-radius:8px;"><i class="ph-bold ph-plus-circle"></i> Registrar Comunidad</button>
+
+            <div class="subtabs-container">
+                <button class="subtab-btn active" id="subtab-mis-comunidades">
+                    <i class="ph-bold ph-user-check"></i> Mis Comunidades
+                </button>
+                <button class="subtab-btn" id="subtab-explorar-comunidades">
+                    <i class="ph-bold ph-compass"></i> Explorar Comunidades
+                </button>
+                <button class="subtab-btn subtab-btn-reto" id="subtab-retos-comunidades">
+                    <i class="ph-bold ph-swords"></i> Zona de Retos
+                </button>
+            </div>
+
+            <div id="subseccion-mis-comunidades" class="grid-cards">
+                <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p>
+            </div>
+
+            <div id="subseccion-explorar-comunidades" class="grid-cards" style="display: none;"></div>
+
+            <div id="subseccion-retos-comunidades" class="grid-cards" style="display: none;"></div>
         </div>
 
-        <div class="subtabs-container">
-    <button class="subtab-btn active" id="subtab-mis-comunidades">
-        <i class="ph-bold ph-user-check"></i> Mis Comunidades
-    </button>
-    <button class="subtab-btn" id="subtab-explorar-comunidades">
-        <i class="ph-bold ph-compass"></i> Explorar Comunidades
-    </button>
-    <button class="subtab-btn subtab-btn-reto" id="subtab-retos-comunidades">
-        <i class="ph-bold ph-swords"></i> Zona de Retos
-    </button>
-</div>
-        <div id="subseccion-mis-comunidades" class="grid-cards">
-            <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus comunidades...</p>
+        <!-- VISTA INTERIOR DE LA COMUNIDAD -->
+        <div id="vista-interior-comunidad" style="display: none;">
+            <div style="margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 16px 20px; border-radius: 16px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <button id="btn-volver-lista-comunidades" class="btn btn-ghost" title="Volver a Comunidades" style="padding: 8px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                        <i class="ph-bold ph-arrow-left" style="font-size:1.1rem;"></i> Volver
+                    </button>
+                    <div id="vic-logo" style="width: 48px; height: 48px; border-radius: 12px; background: #111; border: 1.5px solid var(--primary-green); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;"></div>
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <h2 id="vic-nombre" style="margin: 0; font-size: 1.45rem; color: #fff; font-weight: 800; line-height: 1.2;">...</h2>
+                            <span id="vic-rol"></span>
+                        </div>
+                        <div style="display:flex; gap:8px; margin-top:4px; font-size:0.8rem; color:#aaa;">
+                            <span id="vic-deporte" style="color:var(--primary-green); font-weight:bold;">...</span>
+                            <span>·</span>
+                            <span id="vic-ciudad"><i class="ph-bold ph-map-pin"></i> ...</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- BOTÓN SALIR DE LA COMUNIDAD (VISIBLE SOLO PARA MIEMBROS) -->
+                <button id="btn-salir-comunidad" class="btn btn-danger" style="display: none; padding: 10px 16px; font-size: 0.85rem; font-weight: 800; border-radius: 10px; background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); align-items: center; gap: 6px; cursor: pointer;">
+                    <i class="ph-bold ph-sign-out"></i> Salir de la Comunidad
+                </button>
+            </div>
+
+            <!-- TABS INTERIORES: MIEMBROS Y PARTIDOS -->
+            <div class="tabs-container" style="display: flex; gap: 10px; margin-bottom: 22px; background: rgba(255,255,255,0.03); padding: 6px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.08);">
+                <button class="tab-btn active" id="tab-int-miembros" style="flex:1; padding:12px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <i class="ph-bold ph-users-three"></i> Miembros (<span id="vic-total-miembros">0</span>)
+                </button>
+                <button class="tab-btn" id="tab-int-partidos" style="flex:1; padding:12px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <i class="ph-bold ph-soccer-ball"></i> Partidos
+                </button>
+            </div>
+
+            <!-- PANEL MIEMBROS (LÍDER PRIMERO OBLIGATORIAMENTE) -->
+            <div id="panel-int-miembros">
+                <div id="grid-miembros-comunidad" class="friend-list">
+                    <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando miembros...</p>
+                </div>
+            </div>
+
+            <!-- PANEL PARTIDOS -->
+            <div id="panel-int-partidos" style="display: none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+                    <div>
+                        <h3 style="margin:0; font-size:1.25rem; color:#fff; font-weight:800;">Partidos de la Comunidad</h3>
+                        <p style="margin:2px 0 0; color:#aaa; font-size:0.82rem;">Coordina y anótate a las pichangas oficiales organizadas por tu líder.</p>
+                    </div>
+                    <button id="btn-abrir-organizar-partido" class="btn btn-primary" style="display:none; padding:10px 18px; font-weight:800; border-radius:10px; align-items:center; gap:8px; cursor:pointer;">
+                        <i class="ph-bold ph-plus-circle"></i> Organizar Partido
+                    </button>
+                </div>
+
+                <div id="grid-partidos-comunidad" class="grid-cards">
+                    <p style="color:#aaa; grid-column:1/-1; text-align:center; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando partidos...</p>
+                </div>
+            </div>
         </div>
-
-        <div id="subseccion-explorar-comunidades" class="grid-cards" style="display: none;"></div>
-
-        <div id="subseccion-retos-comunidades" class="grid-cards" style="display: none;"></div>
     </div>
+</main>
+
+<!-- MODAL: ORGANIZAR PARTIDO EN COMUNIDAD (SOLO LÍDER) -->
+<div id="modal-organizar-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:26px 24px; border-radius:18px; width:100%; max-width:440px; position:relative; border:1px solid rgba(46,204,113,0.3); box-shadow:0 15px 40px rgba(0,0,0,0.85);">
+        <button id="cerrar-modal-organizar-partido" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
+        
+        <div style="margin-bottom:18px;">
+            <span style="color:var(--primary-green); font-size:0.75rem; font-weight:800; letter-spacing:0.5px;">ORGANIZACIÓN DE PARTIDO</span>
+            <h2 style="margin:4px 0 0; font-size:1.35rem; color:#fff; font-weight:800; display:flex; align-items:center; gap:8px;">
+                <i class="ph-bold ph-calendar-plus" style="color:var(--primary-green);"></i> Nuevo Partido
+            </h2>
+        </div>
+
+        <form id="form-organizar-partido">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                <div>
+                    <label style="color:#aaa; font-size:0.8rem; margin-bottom:4px; display:block; font-weight:600;">Fecha:</label>
+                    <input type="date" id="op-fecha" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.18); border-radius:8px; color:#fff; box-sizing:border-box; color-scheme:dark;">
+                </div>
+                <div>
+                    <label style="color:#aaa; font-size:0.8rem; margin-bottom:4px; display:block; font-weight:600;">Hora:</label>
+                    <input type="time" id="op-hora" required value="20:00" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.18); border-radius:8px; color:#fff; box-sizing:border-box; color-scheme:dark;">
+                </div>
+            </div>
+
+            <div style="margin-bottom:12px;">
+                <label style="color:#aaa; font-size:0.8rem; margin-bottom:4px; display:block; font-weight:600;">Lugar / Cancha:</label>
+                <input type="text" id="op-lugar" required placeholder="Ej. Cancha 2 - Complejo Fundo Excalibur" style="width:100%; padding:11px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.18); border-radius:8px; color:#fff; box-sizing:border-box;">
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+                <div>
+                    <label style="color:#aaa; font-size:0.8rem; margin-bottom:4px; display:block; font-weight:600;">Cupos Totales:</label>
+                    <input type="number" id="op-cupos" required min="2" max="40" value="12" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.18); border-radius:8px; color:#fff; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="color:#aaa; font-size:0.8rem; margin-bottom:4px; display:block; font-weight:600;">Precio / Yape:</label>
+                    <input type="text" id="op-precio-yape" required placeholder="Ej. S/ 10 - Yape: 961341323" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.18); border-radius:8px; color:#fff; box-sizing:border-box;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; padding:13px; font-weight:800; font-size:0.95rem; justify-content:center;">
+                <i class="ph-bold ph-check"></i> Publicar Partido
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: GESTIÓN DE INSCRITOS EN PARTIDO -->
+<div id="modal-gestion-inscritos" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:26px 24px; border-radius:18px; width:100%; max-width:480px; position:relative; border:1px solid rgba(255,255,255,0.12); box-shadow:0 15px 40px rgba(0,0,0,0.85); max-height:85vh; display:flex; flex-direction:column;">
+        <button id="cerrar-modal-gestion-inscritos" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
+        
+        <div style="margin-bottom:14px; flex-shrink:0;">
+            <span style="color:#f1c40f; font-size:0.75rem; font-weight:800;">JUGADORES ANOTADOS</span>
+            <h2 id="mgi-titulo" style="margin:4px 0 2px; font-size:1.25rem; color:#fff; font-weight:800;">Inscritos en el Partido</h2>
+            <p id="mgi-subtitulo" style="margin:0; font-size:0.8rem; color:#aaa;">...</p>
+        </div>
+
+        <div id="mgi-lista-inscritos" style="overflow-y:auto; flex:1; padding-right:4px; display:flex; flex-direction:column; gap:10px;">
+            <p style="text-align:center; color:#aaa; padding:20px;">Cargando jugadores inscritos...</p>
+        </div>
+    </div>
+</div>
 </main>
 
 <div id="modal-anunciar" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
@@ -214,7 +355,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where, addDoc, doc, updateDoc, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, getDoc, query, where, addDoc, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk", authDomain: "app-futbol-acd0f.firebaseapp.com", projectId: "app-futbol-acd0f", storageBucket: "app-futbol-acd0f.firebasestorage.app", messagingSenderId: "223446110165", appId: "1:223446110165:web:219afce6a9dac03203f75c" };
@@ -222,6 +363,8 @@
 
     let currentUser = null;
     let cacheComunidades = {};
+    let comunidadActualId = null;
+    let comunidadActualData = null;
 
     // PESTAÑAS PRINCIPALES
     const btnTorneos = document.getElementById('tab-torneos');
@@ -235,6 +378,10 @@
     function resetMainTabs() {
         [btnTorneos, btnAcademias, btnComunidades].forEach(b => b.classList.remove('active'));
         [secTorneos, secAcademias, secComunidades].forEach(s => s.style.display = 'none');
+        const vistaLista = document.getElementById('vista-lista-comunidades');
+        const vistaInterior = document.getElementById('vista-interior-comunidad');
+        if (vistaLista) vistaLista.style.display = 'block';
+        if (vistaInterior) vistaInterior.style.display = 'none';
     }
 
     btnTorneos.onclick = () => { resetMainTabs(); btnTorneos.classList.add('active'); secTorneos.style.display = 'block'; cargarTorneos(); };
@@ -437,7 +584,17 @@
                     const tagsHTML = deportesArray.map(dp => `<span class="sport-tag">${dp}</span>`).join('');
                     const logoImg = c.logo ? `<img src="${c.logo}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>`;
 
-                    const onClickAttr = subTipo === 'explorar' ? `onclick="window.abrirDetalleComunidad('${c.id}')" style="cursor: pointer; transition: transform 0.2s, border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'"` : '';
+                    const onClickAttr = subTipo === 'explorar' 
+                        ? `onclick="window.abrirDetalleComunidad('${c.id}')" style="cursor: pointer; transition: transform 0.2s, border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'"` 
+                        : `onclick="window.abrirInteriorComunidad('${c.id}')" style="cursor: pointer; transition: transform 0.2s, border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary-green)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)'"`;
+
+                    const numMiembros = (c.miembros_uids && Array.isArray(c.miembros_uids)) ? c.miembros_uids.length : 1;
+                    const accionTexto = subTipo === 'mis'
+                        ? `<div style="margin-top:12px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+                             <span style="font-size:0.75rem; color:#aaa;"><i class="ph-bold ph-users"></i> ${numMiembros} integrante${numMiembros === 1 ? '' : 's'}</span>
+                             <span style="font-size:0.8rem; color:var(--primary-green); font-weight:800; display:flex; align-items:center; gap:4px;">Entrar <i class="ph-bold ph-arrow-right"></i></span>
+                           </div>`
+                        : '';
 
                     html += `
                     <div class="community-card" ${onClickAttr}>
@@ -446,11 +603,12 @@
                                 ${logoImg}
                             </div>
                             <div>
-                                <h3 style="margin:0; font-size:1.15rem; color:#fff;">${c.nombre} ${soyLider ? '<i class="ph-fill ph-crown" style="color:#f1c40f;"></i>' : ''}</h3>
+                                <h3 style="margin:0; font-size:1.15rem; color:#fff;">${c.nombre} ${soyLider ? '<i class="ph-fill ph-crown" style="color:#f1c40f;" title="Líder"></i>' : ''}</h3>
                                 <p style="margin:3px 0 0 0; font-size:0.8rem; color:var(--text-muted);"><i class="ph-bold ph-map-pin"></i> ${c.ciudad || 'Lima'}</p>
                             </div>
                         </div>
                         <div class="sport-tags">${tagsHTML}</div>
+                        ${accionTexto}
                     </div>`;
                 }
             });
@@ -464,6 +622,617 @@
             container.innerHTML = html;
         } catch(e) { container.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar comunidades.</p>'; }
     }
+
+    // ==========================================
+    // VISTA INTERIOR DE LA COMUNIDAD (MIEMBROS & PARTIDOS)
+    // ==========================================
+    const vistaListaComunidades = document.getElementById('vista-lista-comunidades');
+    const vistaInteriorComunidad = document.getElementById('vista-interior-comunidad');
+    const btnVolverLista = document.getElementById('btn-volver-lista-comunidades');
+    const btnSalirComunidad = document.getElementById('btn-salir-comunidad');
+    const tabIntMiembros = document.getElementById('tab-int-miembros');
+    const tabIntPartidos = document.getElementById('tab-int-partidos');
+    const panelIntMiembros = document.getElementById('panel-int-miembros');
+    const panelIntPartidos = document.getElementById('panel-int-partidos');
+    const btnAbrirOrgPartido = document.getElementById('btn-abrir-organizar-partido');
+
+    function activarTabInterior(tab) {
+        if (tab === 'miembros') {
+            tabIntMiembros.classList.add('active');
+            tabIntPartidos.classList.remove('active');
+            panelIntMiembros.style.display = 'block';
+            panelIntPartidos.style.display = 'none';
+        } else {
+            tabIntPartidos.classList.add('active');
+            tabIntMiembros.classList.remove('active');
+            panelIntPartidos.style.display = 'block';
+            panelIntMiembros.style.display = 'none';
+            cargarPartidosComunidad();
+        }
+    }
+
+    if (tabIntMiembros) tabIntMiembros.onclick = () => activarTabInterior('miembros');
+    if (tabIntPartidos) tabIntPartidos.onclick = () => activarTabInterior('partidos');
+
+    if (btnVolverLista) {
+        btnVolverLista.onclick = () => {
+            vistaInteriorComunidad.style.display = 'none';
+            vistaListaComunidades.style.display = 'block';
+            cargarComunidades('mis');
+        };
+    }
+
+    window.abrirInteriorComunidad = async function(id) {
+        if (!currentUser) return alert('Inicia sesión para entrar a tu comunidad.');
+        comunidadActualId = id;
+
+        try {
+            const cDoc = await getDoc(doc(db, 'comunidades', id));
+            if (!cDoc.exists()) return alert('La comunidad no existe.');
+            comunidadActualData = { id: cDoc.id, ...cDoc.data() };
+            cacheComunidades[id] = comunidadActualData;
+        } catch(e) {
+            if (cacheComunidades[id]) {
+                comunidadActualData = cacheComunidades[id];
+            } else {
+                return alert('Error al cargar la información de la comunidad.');
+            }
+        }
+
+        const c = comunidadActualData;
+        const soyLider = currentUser.uid === c.liderUid;
+
+        // Cabecera interior
+        document.getElementById('vic-nombre').textContent = c.nombre || 'Comunidad';
+
+        const vicLogo = document.getElementById('vic-logo');
+        if (c.logo) {
+            vicLogo.innerHTML = `<img src="${c.logo}" style="width:100%; height:100%; object-fit:cover;">`;
+        } else {
+            vicLogo.innerHTML = `<i class="ph-fill ph-shield-checkered" style="font-size:1.8rem; color:var(--primary-green);"></i>`;
+        }
+
+        const vicRol = document.getElementById('vic-rol');
+        if (soyLider) {
+            vicRol.innerHTML = `<span class="badge-lider"><i class="ph-fill ph-crown"></i> Líder</span>`;
+        } else {
+            vicRol.innerHTML = `<span style="background:rgba(46,204,113,0.15); color:var(--primary-green); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Miembro</span>`;
+        }
+
+        document.getElementById('vic-deporte').textContent = c.deporte || 'Fútbol';
+        document.getElementById('vic-ciudad').innerHTML = `<i class="ph-bold ph-map-pin"></i> ${c.ciudad || 'Lima'}`;
+
+        // Botón Salir de la comunidad: Solo visible para miembros, NO para el líder
+        if (btnSalirComunidad) {
+            btnSalirComunidad.style.display = soyLider ? 'none' : 'inline-flex';
+        }
+
+        // Botón Organizar Partido: Solo visible para el líder
+        if (btnAbrirOrgPartido) {
+            btnAbrirOrgPartido.style.display = soyLider ? 'inline-flex' : 'none';
+        }
+
+        // Mostrar vista interior
+        vistaListaComunidades.style.display = 'none';
+        vistaInteriorComunidad.style.display = 'block';
+
+        // Por defecto activar la pestaña de Miembros
+        activarTabInterior('miembros');
+        cargarMiembrosComunidad();
+    };
+
+    // SALIR DE LA COMUNIDAD (ELIMINA EL UID DEL ARRAY miembros_uids)
+    if (btnSalirComunidad) {
+        btnSalirComunidad.onclick = async () => {
+            if (!currentUser || !comunidadActualId) return;
+            if (!confirm(`¿Estás seguro de que deseas salir de "${comunidadActualData?.nombre || 'la comunidad'}"?`)) return;
+
+            btnSalirComunidad.disabled = true;
+            btnSalirComunidad.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Saliendo...';
+            try {
+                await updateDoc(doc(db, 'comunidades', comunidadActualId), {
+                    miembros_uids: arrayRemove(currentUser.uid)
+                });
+                alert('Has salido de la comunidad exitosamente.');
+                vistaInteriorComunidad.style.display = 'none';
+                vistaListaComunidades.style.display = 'block';
+                cargarComunidades('mis');
+            } catch(err) {
+                console.error('Error al salir de la comunidad:', err);
+                alert('Hubo un error al salir de la comunidad.');
+            } finally {
+                btnSalirComunidad.disabled = false;
+                btnSalirComunidad.innerHTML = '<i class="ph-bold ph-sign-out"></i> Salir de la Comunidad';
+            }
+        };
+    }
+
+    // CARGAR MIEMBROS DE LA COMUNIDAD (LÍDER PRIMERO OBLIGATORIAMENTE)
+    async function cargarMiembrosComunidad() {
+        const container = document.getElementById('grid-miembros-comunidad');
+        container.innerHTML = '<div style="text-align:center; grid-column:1/-1; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green);"></i> Cargando alineación de la comunidad...</div>';
+
+        if (!comunidadActualData) return;
+        const c = comunidadActualData;
+        const liderUid = c.liderUid;
+        const miembrosUids = Array.isArray(c.miembros_uids) ? c.miembros_uids : [];
+
+        // Excluir al líder de la lista de miembros restantes para no duplicar
+        const otrosUids = miembrosUids.filter(uid => uid !== liderUid);
+        const totalConteo = (liderUid ? 1 : 0) + otrosUids.length;
+        const elemTotal = document.getElementById('vic-total-miembros');
+        if (elemTotal) elemTotal.textContent = totalConteo;
+
+        try {
+            // 1. Obtener datos del Líder
+            let liderData = { uid: liderUid, nombre: 'Líder de la Comunidad', posicion: 'Líder / Creador' };
+            if (liderUid) {
+                try {
+                    const snapLider = await getDoc(doc(db, 'jugadores_perfiles', liderUid));
+                    if (snapLider.exists()) {
+                        liderData = { uid: snapLider.id, ...snapLider.data() };
+                    }
+                } catch(err) {
+                    console.warn('No se pudo leer perfil del líder:', err);
+                }
+            }
+
+            // 2. Obtener perfiles de los demás miembros en batches de 10
+            const miembrosMap = {};
+            const chunks = [];
+            for (let i = 0; i < otrosUids.length; i += 10) {
+                chunks.push(otrosUids.slice(i, i + 10));
+            }
+
+            for (const chunk of chunks) {
+                try {
+                    const q = query(collection(db, 'jugadores_perfiles'), where('__name__', 'in', chunk));
+                    const snap = await getDocs(q);
+                    snap.forEach(d => {
+                        miembrosMap[d.id] = { uid: d.id, ...d.data() };
+                    });
+                } catch(err) {
+                    console.warn('Error al cargar batch de perfiles:', err);
+                }
+            }
+
+            // Renderizar Líder OBLIGATORIAMENTE PRIMERO
+            const fotoLider = liderData.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(liderData.nombre || 'Lider')}&background=f1c40f&color=000`;
+            const posLider = liderData.posicion || 'Líder';
+            const telLiderClean = String(liderData.telefono || '').replace(/\D/g, '');
+            const waLiderBtn = telLiderClean ? `<a href="https://wa.me/51${telLiderClean}?text=${encodeURIComponent('¡Hola Líder! Te escribo desde CHALACAPP.')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp Líder"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
+
+            let html = `
+            <div class="friend-card" style="border-color: rgba(241,196,15,0.45); background: linear-gradient(135deg, rgba(241,196,15,0.08), rgba(0,0,0,0.5));">
+                <div class="friend-info">
+                    <img src="${fotoLider}" class="friend-avatar" style="border: 2px solid #f1c40f;" alt="${liderData.nombre || 'Líder'}">
+                    <div style="min-width:0;">
+                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                            <h4 class="friend-name" style="margin:0;">${liderData.nombre || 'Líder de la Comunidad'}</h4>
+                            <span class="badge-lider"><i class="ph-fill ph-crown"></i> Líder</span>
+                        </div>
+                        <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241,196,15,0.12); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(241,196,15,0.3); font-weight:700;">${posLider}</span>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    ${waLiderBtn}
+                </div>
+            </div>`;
+
+            // Renderizar el resto de miembros
+            otrosUids.forEach(uid => {
+                const m = miembrosMap[uid] || { uid, nombre: 'Miembro', posicion: 'JUG' };
+                const foto = m.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.nombre || 'Jugador')}&background=2ecc71&color=fff`;
+                const pos = m.posicion || 'JUG';
+                const telClean = String(m.telefono || '').replace(/\D/g, '');
+                const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent('¡Habla! Te escribo desde la comunidad en CHALACAPP.')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
+
+                html += `
+                <div class="friend-card">
+                    <div class="friend-info">
+                        <img src="${foto}" class="friend-avatar" alt="${m.nombre || 'Jugador'}">
+                        <div style="min-width:0;">
+                            <h4 class="friend-name">${m.nombre || 'Jugador'}</h4>
+                            <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); font-weight:700;">${pos}</span>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        ${waBtn}
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        } catch(err) {
+            console.error('Error al cargar miembros de la comunidad:', err);
+            container.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar lista de miembros.</p>';
+        }
+    }
+
+    // ==========================================
+    // CREACIÓN Y GESTIÓN DE PARTIDOS EN COMUNIDADES
+    // ==========================================
+    let cachePartidosComunidad = {};
+    const modalOrganizarPartido = document.getElementById('modal-organizar-partido');
+    const cerrarModalOrgPartido = document.getElementById('cerrar-modal-organizar-partido');
+    const formOrganizarPartido = document.getElementById('form-organizar-partido');
+    const modalGestionInscritos = document.getElementById('modal-gestion-inscritos');
+    const cerrarModalGesInscritos = document.getElementById('cerrar-modal-gestion-inscritos');
+
+    if (btnAbrirOrgPartido) {
+        btnAbrirOrgPartido.onclick = () => {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('op-fecha').value = hoy;
+            modalOrganizarPartido.style.display = 'flex';
+        };
+    }
+    if (cerrarModalOrgPartido) cerrarModalOrgPartido.onclick = () => { modalOrganizarPartido.style.display = 'none'; };
+    if (modalOrganizarPartido) {
+        modalOrganizarPartido.onclick = (e) => { if (e.target === modalOrganizarPartido) modalOrganizarPartido.style.display = 'none'; };
+    }
+
+    if (cerrarModalGesInscritos) cerrarModalGesInscritos.onclick = () => { modalGestionInscritos.style.display = 'none'; };
+    if (modalGestionInscritos) {
+        modalGestionInscritos.onclick = (e) => { if (e.target === modalGestionInscritos) modalGestionInscritos.style.display = 'none'; };
+    }
+
+    // FORMULARIO ORGANIZAR PARTIDO (LÍDER)
+    if (formOrganizarPartido) {
+        formOrganizarPartido.onsubmit = async (e) => {
+            e.preventDefault();
+            if (!currentUser || !comunidadActualId) return;
+
+            const btnSubmit = formOrganizarPartido.querySelector('button[type="submit"]');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
+
+            const fecha = document.getElementById('op-fecha').value;
+            const hora = document.getElementById('op-hora').value;
+            const lugar = document.getElementById('op-lugar').value.trim();
+            const cupos = parseInt(document.getElementById('op-cupos').value) || 12;
+            const precioYape = document.getElementById('op-precio-yape').value.trim();
+
+            try {
+                await addDoc(collection(db, 'comunidades', comunidadActualId, 'partidos_comunidad'), {
+                    fecha,
+                    hora,
+                    lugar,
+                    cupos,
+                    precio_yape: precioYape,
+                    creadorUid: currentUser.uid,
+                    estado: 'activo',
+                    inscritos: [],
+                    createdAt: serverTimestamp()
+                });
+                modalOrganizarPartido.style.display = 'none';
+                formOrganizarPartido.reset();
+                alert('¡Partido publicado exitosamente en la comunidad!');
+                cargarPartidosComunidad();
+            } catch(err) {
+                console.error('Error al crear partido:', err);
+                alert('Error al publicar el partido.');
+            } finally {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Publicar Partido';
+            }
+        };
+    }
+
+    // CARGAR PARTIDOS DE LA COMUNIDAD
+    async function cargarPartidosComunidad() {
+        const container = document.getElementById('grid-partidos-comunidad');
+        container.innerHTML = '<div style="text-align:center; grid-column:1/-1; padding:30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green);"></i> Cargando partidos...</div>';
+
+        if (!comunidadActualId) return;
+        const soyLider = currentUser && comunidadActualData && currentUser.uid === comunidadActualData.liderUid;
+
+        try {
+            const colPartidos = collection(db, 'comunidades', comunidadActualId, 'partidos_comunidad');
+            const snap = await getDocs(colPartidos);
+
+            if (snap.empty) {
+                container.innerHTML = `
+                    <div style="grid-column:1/-1; text-align:center; padding:40px 20px; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.12); border-radius:16px;">
+                        <i class="ph-bold ph-calendar-blank" style="font-size:3rem; color:#666; margin-bottom:10px;"></i>
+                        <h3 style="margin:0 0 8px; color:#fff;">No hay partidos programados</h3>
+                        <p style="color:#aaa; font-size:0.85rem;">${soyLider ? 'Como líder, presiona "Organizar Partido" para crear una convocatoria.' : 'Tu líder de comunidad aún no ha organizado partidos.'}</p>
+                    </div>`;
+                return;
+            }
+
+            let partidos = [];
+            snap.forEach(d => {
+                partidos.push({ id: d.id, ...d.data() });
+            });
+
+            partidos.sort((a, b) => {
+                const dateA = (a.fecha || '') + ' ' + (a.hora || '');
+                const dateB = (b.fecha || '') + ' ' + (b.hora || '');
+                return dateB.localeCompare(dateA);
+            });
+
+            cachePartidosComunidad = {};
+            let html = '';
+
+            partidos.forEach(p => {
+                cachePartidosComunidad[p.id] = p;
+                const inscritos = Array.isArray(p.inscritos) ? p.inscritos : [];
+                const cuposTotales = parseInt(p.cupos) || 12;
+                const totalInscritos = inscritos.length;
+                const cuposLibres = Math.max(0, cuposTotales - totalInscritos);
+
+                const miInscripcion = currentUser ? inscritos.find(i => i.uid === currentUser.uid) : null;
+                const estoyInscrito = !!miInscripcion;
+
+                let estadoCuposHTML = '';
+                if (cuposLibres === 0) {
+                    estadoCuposHTML = `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cupos Llenos</span>`;
+                } else {
+                    estadoCuposHTML = `<span style="background:rgba(46,204,113,0.15); color:var(--primary-green); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">${cuposLibres} cupo${cuposLibres === 1 ? '' : 's'} disponible${cuposLibres === 1 ? '' : 's'}</span>`;
+                }
+
+                let botoneraHTML = '';
+                if (estoyInscrito) {
+                    botoneraHTML = `
+                    <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:10px; padding:10px; margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                        <div>
+                            <span style="color:var(--primary-green); font-size:0.8rem; font-weight:800; display:flex; align-items:center; gap:4px;">
+                                <i class="ph-bold ph-check-circle"></i> ¡Estás anotado!
+                            </span>
+                            <span style="font-size:0.75rem; color:${miInscripcion.pagado ? '#2ecc71' : '#f1c40f'}; font-weight:700;">
+                                ${miInscripcion.pagado ? 'Pago Confirmado ✅' : 'Pago Pendiente ⏳'}
+                            </span>
+                        </div>
+                        <button onclick="window.cancelarAsistenciaPartido('${p.id}')" style="background:rgba(231,76,60,0.15); border:1px solid rgba(231,76,60,0.3); color:#e74c3c; padding:6px 10px; border-radius:6px; font-size:0.75rem; font-weight:700; cursor:pointer;">
+                            Cancelar
+                        </button>
+                    </div>`;
+                } else if (cuposLibres > 0) {
+                    botoneraHTML = `
+                    <button onclick="window.asistirAPartido('${p.id}')" class="btn btn-primary" style="margin-top:12px; width:100%; padding:10px; font-weight:800; border-radius:10px; justify-content:center; gap:6px;">
+                        <i class="ph-bold ph-hand-palm"></i> Asistiré (Separar Cupo)
+                    </button>`;
+                } else {
+                    botoneraHTML = `
+                    <button disabled class="btn" style="margin-top:12px; width:100%; padding:10px; font-weight:800; border-radius:10px; justify-content:center; background:rgba(255,255,255,0.05); color:#666; border:1px solid rgba(255,255,255,0.08); cursor:not-allowed;">
+                        <i class="ph-bold ph-prohibit"></i> Cupos Agotados
+                    </button>`;
+                }
+
+                let botonVerInscritos = '';
+                if (soyLider) {
+                    botonVerInscritos = `
+                    <button onclick="window.abrirGestionInscritos('${p.id}')" class="btn" style="margin-top:8px; width:100%; padding:9px; background:rgba(241,196,15,0.15); color:#f1c40f; border:1px solid rgba(241,196,15,0.35); border-radius:10px; font-weight:800; font-size:0.82rem; justify-content:center; gap:6px; cursor:pointer;">
+                        <i class="ph-bold ph-users-three"></i> Gestionar Inscritos (${totalInscritos}/${cuposTotales})
+                    </button>`;
+                } else {
+                    botonVerInscritos = `
+                    <button onclick="window.abrirGestionInscritos('${p.id}')" class="btn" style="margin-top:8px; width:100%; padding:8px; background:rgba(255,255,255,0.04); color:#aaa; border:1px solid rgba(255,255,255,0.08); border-radius:10px; font-size:0.8rem; justify-content:center; gap:6px; cursor:pointer;">
+                        <i class="ph-bold ph-users"></i> Ver Inscritos (${totalInscritos}/${cuposTotales})
+                    </button>`;
+                }
+
+                html += `
+                <div class="partido-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:0.85rem; font-weight:800; color:#fff; display:flex; align-items:center; gap:6px;">
+                            <i class="ph-bold ph-calendar-check" style="color:var(--primary-green);"></i> ${p.fecha || 'Fecha por definir'} · ${p.hora || ''}
+                        </span>
+                        ${estadoCuposHTML}
+                    </div>
+
+                    <div class="detail-row"><span class="detail-label">Lugar / Cancha:</span><span class="detail-val">${p.lugar || 'Por definir'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Precio / Yape:</span><span class="detail-val" style="color:#f1c40f;">${p.precio_yape || 'A coordinar'}</span></div>
+                    <div class="detail-row"><span class="detail-label">Inscritos:</span><span class="detail-val">${totalInscritos} / ${cuposTotales} jugadores</span></div>
+
+                    ${botoneraHTML}
+                    ${botonVerInscritos}
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        } catch(err) {
+            console.error('Error al cargar partidos de comunidad:', err);
+            container.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar partidos.</p>';
+        }
+    }
+
+    // ASISTIR A PARTIDO (SEPARAR CUPO)
+    window.asistirAPartido = async function(partidoId) {
+        if (!currentUser) return alert('Debes iniciar sesión con Google.');
+        if (!comunidadActualId) return;
+
+        try {
+            const pRef = doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', partidoId);
+            const pSnap = await getDoc(pRef);
+            if (!pSnap.exists()) return alert('El partido ya no existe.');
+            const pData = pSnap.data();
+
+            const inscritos = Array.isArray(pData.inscritos) ? [...pData.inscritos] : [];
+            if (inscritos.some(i => i.uid === currentUser.uid)) {
+                return alert('Ya estás anotado en este partido.');
+            }
+
+            const cuposTotales = parseInt(pData.cupos) || 12;
+            if (inscritos.length >= cuposTotales) {
+                return alert('Lo sentimos, los cupos para este partido se acaban de completar.');
+            }
+
+            let nombre = currentUser.displayName || 'Jugador';
+            let foto = currentUser.photoURL || '';
+            let telefono = '';
+
+            try {
+                const perfilSnap = await getDoc(doc(db, 'jugadores_perfiles', currentUser.uid));
+                if (perfilSnap.exists()) {
+                    const pd = perfilSnap.data();
+                    if (pd.nombre) nombre = pd.nombre;
+                    if (pd.foto) foto = pd.foto;
+                    if (pd.telefono) telefono = pd.telefono;
+                }
+            } catch(e) {}
+
+            const nuevoInscrito = {
+                uid: currentUser.uid,
+                nombre,
+                foto,
+                telefono,
+                pagado: false,
+                anotadoEn: new Date().toISOString()
+            };
+
+            inscritos.push(nuevoInscrito);
+            await updateDoc(pRef, { inscritos });
+            alert('¡Excelente! Has separado tu cupo.');
+            cargarPartidosComunidad();
+        } catch(err) {
+            console.error('Error al asistir al partido:', err);
+            alert('Error al separar cupo.');
+        }
+    };
+
+    // CANCELAR ASISTENCIA A PARTIDO
+    window.cancelarAsistenciaPartido = async function(partidoId) {
+        if (!currentUser || !comunidadActualId) return;
+        if (!confirm('¿Deseas cancelar tu asistencia a este partido?')) return;
+
+        try {
+            const pRef = doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', partidoId);
+            const pSnap = await getDoc(pRef);
+            if (!pSnap.exists()) return;
+            const pData = pSnap.data();
+
+            const inscritos = (pData.inscritos || []).filter(i => i.uid !== currentUser.uid);
+            await updateDoc(pRef, { inscritos });
+            alert('Asistencia cancelada.');
+            cargarPartidosComunidad();
+        } catch(err) {
+            console.error('Error al cancelar asistencia:', err);
+            alert('Error al cancelar asistencia.');
+        }
+    };
+
+    // MODAL DE GESTIÓN DE INSCRITOS (LÍDER PUEDE MARCAR PAGADO / LIBERAR CUPO)
+    window.abrirGestionInscritos = async function(partidoId) {
+        const modal = document.getElementById('modal-gestion-inscritos');
+        const titulo = document.getElementById('mgi-titulo');
+        const subtitulo = document.getElementById('mgi-subtitulo');
+        const lista = document.getElementById('mgi-lista-inscritos');
+
+        modal.style.display = 'flex';
+        lista.innerHTML = '<p style="text-align:center; color:#aaa; padding:20px;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando inscritos...</p>';
+
+        try {
+            const pRef = doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', partidoId);
+            const pSnap = await getDoc(pRef);
+            if (!pSnap.exists()) {
+                modal.style.display = 'none';
+                return alert('El partido no existe.');
+            }
+            const p = pSnap.data();
+            const soyLider = currentUser && comunidadActualData && currentUser.uid === comunidadActualData.liderUid;
+
+            titulo.textContent = `${p.fecha || ''} · ${p.hora || ''} (${p.lugar || 'Cancha'})`;
+            const inscritos = Array.isArray(p.inscritos) ? p.inscritos : [];
+            const cuposTotales = parseInt(p.cupos) || 12;
+            subtitulo.textContent = `${inscritos.length} de ${cuposTotales} cupos ocupados · Precio: ${p.precio_yape || 'S/ 0'}`;
+
+            if (inscritos.length === 0) {
+                lista.innerHTML = '<p style="text-align:center; color:#aaa; padding:30px;">Aún no hay jugadores inscritos en este partido.</p>';
+                return;
+            }
+
+            let html = '';
+            inscritos.forEach(i => {
+                const foto = i.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(i.nombre || 'Jugador')}&background=2ecc71&color=fff`;
+                const telClean = String(i.telefono || '').replace(/\D/g, '');
+                const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent(`Hola ${i.nombre}, te escribo por el partido de la comunidad ${comunidadActualData?.nombre || ''}`)}" target="_blank" class="btn" style="width:32px; height:32px; padding:0; border-radius:6px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
+
+                let pagoControl = '';
+                if (soyLider) {
+                    if (i.pagado) {
+                        pagoControl = `<button onclick="window.togglePagoInscrito('${partidoId}', '${i.uid}', false)" style="background:rgba(46,204,113,0.2); color:var(--primary-green); border:1px solid rgba(46,204,113,0.5); padding:5px 9px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;" title="Clic para marcar como Pendiente"><i class="ph-bold ph-check"></i> Pagado ✅</button>`;
+                    } else {
+                        pagoControl = `<button onclick="window.togglePagoInscrito('${partidoId}', '${i.uid}', true)" style="background:rgba(241,196,15,0.18); color:#f1c40f; border:1px solid rgba(241,196,15,0.4); padding:5px 9px; border-radius:6px; font-weight:800; font-size:0.75rem; cursor:pointer;" title="Clic para marcar como Pagado"><i class="ph-bold ph-clock"></i> Pendiente ⏳</button>`;
+                    }
+                } else {
+                    pagoControl = i.pagado 
+                        ? `<span style="background:rgba(46,204,113,0.15); color:var(--primary-green); padding:4px 8px; border-radius:6px; font-weight:bold; font-size:0.75rem;">Pagado ✅</span>`
+                        : `<span style="background:rgba(255,255,255,0.06); color:#aaa; padding:4px 8px; border-radius:6px; font-weight:bold; font-size:0.75rem;">Pendiente ⏳</span>`;
+                }
+
+                let btnLiberar = '';
+                if (soyLider) {
+                    btnLiberar = `<button onclick="window.liberarCupoInscrito('${partidoId}', '${i.uid}', '${encodeURIComponent(i.nombre || 'Jugador')}')" style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:5px 8px; border-radius:6px; font-weight:700; font-size:0.75rem; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Liberar Cupo"><i class="ph-bold ph-trash"></i> Liberar Cupo</button>`;
+                }
+
+                html += `
+                <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+                        <img src="${foto}" style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:1px solid rgba(255,255,255,0.15);" alt="${i.nombre}">
+                        <div style="min-width:0;">
+                            <h4 style="margin:0; font-size:0.9rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${i.nombre || 'Jugador'}</h4>
+                            <span style="font-size:0.72rem; color:#888;">${telClean ? telClean : 'Sin teléfono'}</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        ${waBtn}
+                        ${pagoControl}
+                        ${btnLiberar}
+                    </div>
+                </div>`;
+            });
+
+            lista.innerHTML = html;
+        } catch(err) {
+            console.error('Error al abrir gestión de inscritos:', err);
+            lista.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Error al cargar lista.</p>';
+        }
+    };
+
+    window.togglePagoInscrito = async function(partidoId, jugadorUid, nuevoEstado) {
+        try {
+            const pRef = doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', partidoId);
+            const pSnap = await getDoc(pRef);
+            if (!pSnap.exists()) return;
+            const pData = pSnap.data();
+
+            const inscritos = (pData.inscritos || []).map(i => {
+                if (i.uid === jugadorUid) {
+                    return { ...i, pagado: nuevoEstado };
+                }
+                return i;
+            });
+
+            await updateDoc(pRef, { inscritos });
+            window.abrirGestionInscritos(partidoId);
+            cargarPartidosComunidad();
+        } catch(err) {
+            console.error('Error al actualizar estado de pago:', err);
+            alert('Error al actualizar pago.');
+        }
+    };
+
+    window.liberarCupoInscrito = async function(partidoId, jugadorUid, nombreEncoded) {
+        const nombre = decodeURIComponent(nombreEncoded);
+        if (!confirm(`¿Estás seguro de liberar el cupo de "${nombre}" y retirarlo del partido?`)) return;
+
+        try {
+            const pRef = doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', partidoId);
+            const pSnap = await getDoc(pRef);
+            if (!pSnap.exists()) return;
+            const pData = pSnap.data();
+
+            const inscritos = (pData.inscritos || []).filter(i => i.uid !== jugadorUid);
+            await updateDoc(pRef, { inscritos });
+            window.abrirGestionInscritos(partidoId);
+            cargarPartidosComunidad();
+        } catch(err) {
+            console.error('Error al liberar cupo:', err);
+            alert('Error al liberar cupo.');
+        }
+    };
 
     async function cargarRetos() {
         subSecRet.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando Zona de Retos...</p>';
