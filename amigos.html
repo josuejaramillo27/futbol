@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="styles.css">
     
     <style>
-        body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: var(--font-family); color: #fff; }
+        body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: var(--font-family); color: #fff; background: var(--bg-dark); }
         
         .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
         .topbar-nav { display: flex; gap: 15px; align-items: center; }
@@ -20,107 +20,19 @@
         .topbar-nav i { font-size: 1.25rem; }
 
         .container { max-width: 980px; margin: 0 auto; padding: 25px 20px 90px; width: 100%; box-sizing: border-box; }
-        
-        /* BANNER MODO FÚTBOL (TOGGLE SWITCH) */
-        .modo-futbol-banner {
-            background: linear-gradient(135deg, rgba(20,28,24,0.92) 0%, rgba(10,15,12,0.95) 100%);
-            border: 1px solid rgba(46, 204, 113, 0.35);
-            border-radius: 18px;
-            padding: 22px 25px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 18px;
-            box-shadow: 0 12px 35px rgba(0,0,0,0.45), 0 0 20px rgba(46,204,113,0.08);
-            position: relative;
-            overflow: hidden;
-        }
 
-        .modo-futbol-banner::before {
-            content: '';
-            position: absolute;
-            top: -50px;
-            right: -50px;
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle, rgba(46,204,113,0.18), transparent 70%);
-            pointer-events: none;
-        }
+        /* TARJETAS DE GRUPOS (LOBBY) */
+        .grupos-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }
+        .grupo-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 22px; cursor: pointer; transition: all 0.22s ease; position: relative; backdrop-filter: blur(10px); }
+        .grupo-card:hover { border-color: rgba(46,204,113,0.4); background: rgba(255,255,255,0.04); transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .grupo-card-title { font-size: 1.4rem; margin: 0 0 5px; color: #fff; font-weight: 800; }
+        .grupo-card-sport { display: inline-flex; align-items: center; gap: 6px; background: rgba(46,204,113,0.12); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; font-weight: 800; color: var(--primary-green); margin-bottom: 12px; border: 1px solid rgba(46,204,113,0.3); }
 
-        .modo-futbol-info { flex: 1; min-width: 240px; }
-        .modo-futbol-eyebrow { color: var(--primary-green); font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-        .modo-futbol-eyebrow span { width: 7px; height: 7px; border-radius: 50%; background: var(--primary-green); box-shadow: 0 0 10px var(--primary-green); }
-        .modo-futbol-title { font-size: 1.4rem; color: #fff; margin: 0 0 5px; font-weight: 800; }
-        .modo-futbol-desc { color: #aaa; font-size: 0.88rem; margin: 0; line-height: 1.4; }
-
-        .modo-futbol-action { display: flex; align-items: center; gap: 14px; }
-
-        /* TOGGLE SWITCH NATIVO ESTILO IOS */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 58px;
-            height: 32px;
-            flex-shrink: 0;
-        }
-
-        .switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            inset: 0;
-            background-color: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 24px;
-            width: 24px;
-            left: 3px;
-            bottom: 3px;
-            background-color: #ffffff;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 50%;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-        }
-
-        input:checked + .slider {
-            background-color: var(--primary-green, #2ecc71);
-            border-color: var(--primary-green, #2ecc71);
-            box-shadow: 0 0 18px rgba(46, 204, 113, 0.45);
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-            background-color: #080B0A;
-        }
-
-        .status-badge-futbol {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 800;
-            letter-spacing: 0.5px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-        .status-activo { background: rgba(46,204,113,0.15); color: var(--primary-green); border: 1px solid rgba(46,204,113,0.4); }
-        .status-inactivo { background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); }
-
-        /* SISTEMA DE PESTAÑAS (TABS) */
+        /* TABS DEL VESTUARIO */
         .tabs-container {
             display: flex;
             gap: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 22px;
             background: rgba(255,255,255,0.03);
             padding: 6px;
             border-radius: 14px;
@@ -130,7 +42,7 @@
 
         .tab-btn {
             flex: 1;
-            min-width: 140px;
+            min-width: 130px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -146,61 +58,23 @@
             transition: all 0.22s ease;
             white-space: nowrap;
         }
-
         .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
-
         .tab-btn.active {
             background: var(--primary-green);
             color: #080B0A;
             box-shadow: 0 4px 15px rgba(46,204,113,0.25);
         }
 
-        .tab-badge {
-            background: rgba(0,0,0,0.25);
-            color: inherit;
-            font-size: 0.75rem;
-            padding: 2px 7px;
-            border-radius: 10px;
-            font-weight: 800;
-        }
-        .tab-btn.active .tab-badge { background: #080B0A; color: var(--primary-green); }
-
-        /* LISTAS DE AMIGOS Y TARJETAS */
-        .friend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
-        
-        .friend-card {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.08);
-            padding: 16px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            transition: all 0.22s ease;
-            backdrop-filter: blur(10px);
-        }
-        .friend-card:hover { border-color: rgba(46,204,113,0.4); transform: translateY(-2px); background: rgba(255,255,255,0.05); }
-
+        /* LISTAS DE TARJETAS Y JUGADORES */
+        .friend-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .friend-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+        .friend-card:hover { border-color: rgba(46,204,113,0.3); }
         .friend-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
-        .friend-avatar {
-            width: 54px;
-            height: 54px;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            border-radius: 50%;
-            border: 2px solid var(--primary-green);
-            background: #111;
-            flex-shrink: 0;
-        }
-        .friend-texts { min-width: 0; flex: 1; }
-        .friend-name { font-weight: 800; font-size: 1rem; color: #fff; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .friend-meta { font-size: 0.78rem; color: #888; display: flex; align-items: center; gap: 6px; }
-
-        .friend-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+        .friend-avatar { width: 50px; height: 50px; aspect-ratio: 1/1; object-fit: cover; border-radius: 50%; border: 2px solid var(--primary-green); background: #111; flex-shrink: 0; }
+        .friend-name { font-weight: 800; font-size: 0.98rem; color: #fff; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* BUSCADOR */
-        .search-box-wrapper { display: flex; gap: 10px; margin-bottom: 22px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
         .search-input {
             flex: 1;
             padding: 13px 18px;
@@ -235,35 +109,8 @@
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .fab-convocar:hover { transform: scale(1.08) translateY(-3px); box-shadow: 0 12px 30px rgba(241, 196, 15, 0.55); }
-        .fab-convocar:active { transform: scale(0.96); }
 
-        /* CANCHAS DINÁMICAS (RANKING NIVEL 1: CORE SPORTS) */
-        .sport-selector-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .sport-chip {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.12);
-            color: #ccc;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .sport-chip:hover { border-color: var(--primary-green); color: #fff; }
-        .sport-chip.active { background: var(--primary-green); color: #080B0A; border-color: var(--primary-green); font-weight: 800; }
-
-        /* CANCHA DE FÚTBOL (CSS PURO) */
+        /* CANCHAS TÁCTICAS DINÁMICAS (CSS PURO) */
         .soccer-pitch {
             position: relative;
             background: repeating-linear-gradient(0deg, #1b4924, #1b4924 35px, #153c1d 35px, #153c1d 70px);
@@ -278,12 +125,9 @@
             box-shadow: inset 0 0 50px rgba(0,0,0,0.65), 0 10px 30px rgba(0,0,0,0.5);
         }
         .pitch-line { position: absolute; border: 2px solid rgba(255,255,255,0.35); pointer-events: none; }
-        .pitch-center-line { top: 50%; left: 0; width: 100%; height: 0; }
-        .pitch-center-circle { top: 50%; left: 50%; width: 110px; height: 110px; border-radius: 50%; transform: translate(-50%, -50%); }
-        .pitch-goal-area-top { top: 0; left: 50%; width: 140px; height: 50px; border-top: none; transform: translateX(-50%); }
-        .pitch-goal-area-bottom { bottom: 0; left: 50%; width: 140px; height: 50px; border-bottom: none; transform: translateX(-50%); }
+        .pitch-center { top: 50%; left: 0; width: 100%; height: 0; }
+        .pitch-circle { top: 50%; left: 50%; width: 110px; height: 110px; border-radius: 50%; transform: translate(-50%, -50%); }
 
-        /* CANCHA DE VÓLEY (CSS PURO) */
         .voley-pitch {
             position: relative;
             background: #2574a9;
@@ -309,7 +153,6 @@
             z-index: 5;
         }
 
-        /* CANCHA DE BÁSQUET (CSS PURO) */
         .basket-pitch {
             position: relative;
             background: #c0392b;
@@ -323,10 +166,9 @@
             overflow: hidden;
             box-shadow: inset 0 0 45px rgba(0,0,0,0.6), 0 10px 30px rgba(0,0,0,0.5);
         }
-        .basket-center-line { top: 50%; left: 0; width: 100%; height: 0; }
-        .basket-center-circle { top: 50%; left: 50%; width: 90px; height: 90px; border-radius: 50%; transform: translate(-50%, -50%); }
+        .basket-center { top: 50%; left: 0; width: 100%; height: 0; }
+        .basket-circle { top: 50%; left: 50%; width: 90px; height: 90px; border-radius: 50%; transform: translate(-50%, -50%); }
 
-        /* CARTAS DE JUGADORES EN CANCHA */
         .formation-row { display: flex; justify-content: center; gap: 20px; z-index: 10; position: relative; min-height: 80px; flex-wrap: wrap; align-items: center; }
         
         .player-pitch-card {
@@ -338,7 +180,6 @@
             cursor: pointer;
         }
         .player-pitch-card:hover { transform: scale(1.12); z-index: 20; }
-
         .player-pitch-photo-container {
             position: relative;
             width: 58px;
@@ -347,7 +188,6 @@
             justify-content: center;
             align-items: center;
         }
-
         .player-pitch-card img {
             width: 100%;
             height: 100%;
@@ -358,7 +198,6 @@
             background: #111;
             box-shadow: 0 6px 15px rgba(0,0,0,0.85);
         }
-
         .player-pitch-score {
             position: absolute;
             top: -5px;
@@ -376,7 +215,6 @@
             border: 2px solid #111;
             box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-
         .player-pitch-name {
             background: rgba(8, 11, 10, 0.9);
             color: #fff;
@@ -391,9 +229,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.6);
         }
-
         .player-pitch-pos {
             background: rgba(241, 196, 15, 0.15);
             color: #f1c40f;
@@ -405,45 +241,6 @@
             margin-top: 2px;
         }
 
-        /* RANKING NIVEL 2: CUSTOM / TOP 10 MVPS */
-        .top10-container {
-            background: rgba(20,25,22,0.6);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .top10-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: rgba(255,255,255,0.025);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-        .top10-item:hover { border-color: rgba(46,204,113,0.3); background: rgba(255,255,255,0.045); }
-
-        .top10-rank {
-            width: 32px;
-            font-weight: 900;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .top10-player { display: flex; align-items: center; gap: 12px; flex: 1; margin: 0 12px; }
-        .top10-photo { width: 44px; height: 44px; aspect-ratio: 1/1; object-fit: cover; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); }
-        .top10-name { font-weight: 800; font-size: 0.95rem; color: #fff; }
-        .top10-meta { font-size: 0.75rem; color: #888; }
-        .top10-score { color: #f1c40f; font-weight: 900; font-size: 1.05rem; display: flex; align-items: center; gap: 4px; }
-
-        /* CHECKBOXES CONVOCATORIA */
         .convocar-friend-item {
             display: flex;
             align-items: center;
@@ -458,6 +255,11 @@
         }
         .convocar-friend-item:hover { background: rgba(255,255,255,0.06); }
         .convocar-friend-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary-green); cursor: pointer; }
+
+        @media (max-width: 650px) {
+            #vista-lobby-grupos > div:first-child { flex-direction: column; align-items: stretch !important; gap: 14px; text-align: center; }
+            #btn-crear-grupo { width: 100% !important; justify-content: center; }
+        }
     </style>
 </head>
 <body>
@@ -478,153 +280,168 @@
 
 <main class="container">
 
-    <!-- BANNER DE GAMIFICACIÓN: MODO FÚTBOL (TOGGLE SWITCH) -->
-    <section class="modo-futbol-banner">
-        <div class="modo-futbol-info">
-            <div class="modo-futbol-eyebrow">
-                <span></span> MODO FÚTBOL · TIEMPO REAL
-            </div>
-            <h2 class="modo-futbol-title">¿Listo para jugar hoy?</h2>
-            <p class="modo-futbol-desc">Activa tu disponibilidad para que tus amigos y capitanes te convoquen al instante a sus partidos.</p>
-        </div>
-        <div class="modo-futbol-action">
-            <span id="estado-modo-futbol" class="status-badge-futbol status-inactivo">
-                <i class="ph-bold ph-moon"></i> No disponible
-            </span>
-            <label class="switch" title="Activar/Desactivar Modo Fútbol">
-                <input type="checkbox" id="toggle-modo-futbol">
-                <span class="slider"></span>
-            </label>
-        </div>
-    </section>
-
-    <!-- SISTEMA DE PESTAÑAS (TABS) -->
-    <div class="tabs-container">
-        <button class="tab-btn active" id="tab-mis-amigos">
-            <i class="ph-bold ph-users"></i> Mis Amigos <span id="badge-total-amigos" class="tab-badge">0</span>
-        </button>
-        <button class="tab-btn" id="tab-buscar">
-            <i class="ph-bold ph-magnifying-glass"></i> Buscar Jugadores
-        </button>
-        <button class="tab-btn" id="tab-equipo-ideal">
-            <i class="ph-fill ph-star" style="color: #f1c40f;"></i> Mi Equipo Ideal
-        </button>
-    </div>
-
-    <!-- SECCIÓN 1: MIS AMIGOS -->
-    <div id="seccion-mis-amigos">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;">
+    <!-- VISTA 1: LOBBY DE GRUPOS REALES DESDE FIRESTORE -->
+    <div id="vista-lobby-grupos">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
-                <h2 style="margin:0; font-size:1.35rem; color:#fff; font-weight:800;">Tu Vestuario</h2>
-                <p style="margin:3px 0 0; color:var(--text-muted); font-size:0.84rem;">Lista de amigos agregados para convocar rápidamente a tus pichangas.</p>
+                <h1 style="margin: 0; font-size: 1.8rem; color: #fff; font-weight: 800;">Mis Grupos</h1>
+                <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.9rem;">Organiza a tus patas por deporte (Máx. 3 grupos).</p>
             </div>
-            <div id="resumen-disponibles" style="font-size:0.85rem; color:#aaa;"></div>
-        </div>
-
-        <div id="lista-amigos" class="friend-grid">
-            <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; color: #888;">
-                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 2rem; color: var(--primary-green); display: block; margin-bottom: 10px;"></i>
-                Cargando tu vestuario...
-            </div>
-        </div>
-    </div>
-
-    <!-- SECCIÓN 2: BUSCAR JUGADORES -->
-    <div id="seccion-buscar" style="display: none;">
-        <div style="margin-bottom:18px;">
-            <h2 style="margin:0 0 4px; font-size:1.35rem; color:#fff; font-weight:800;">Descubre Jugadores</h2>
-            <p style="margin:0; color:var(--text-muted); font-size:0.84rem;">Busca por nombre, apodo, posición o ciudad para sumarlos a tu red.</p>
-        </div>
-
-        <div class="search-box-wrapper">
-            <input type="text" id="input-buscar-jugador" class="search-input" placeholder="Buscar jugador por nombre, posición o ciudad...">
-            <button id="btn-buscar-jugador" class="btn" style="padding: 0 22px; font-size: 0.9rem; flex-shrink: 0;">
-                <i class="ph-bold ph-magnifying-glass"></i> Buscar
+            <button id="btn-crear-grupo" class="btn btn-primary" style="display: none; align-items: center; gap: 8px;">
+                <i class="ph-bold ph-plus"></i> Crear Grupo
             </button>
         </div>
 
-        <div id="lista-busqueda-jugadores" class="friend-grid">
-            <div style="grid-column: 1/-1; text-align: center; padding: 30px; color: #aaa; background: rgba(255,255,255,0.02); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
-                <i class="ph-bold ph-users-three" style="font-size: 2.2rem; color: #666; margin-bottom: 8px; display: block;"></i>
-                Ingresa un nombre arriba para buscar jugadores de la comunidad CHALACAPP.
-            </div>
+        <div id="lista-mis-grupos" class="grupos-grid">
+            <p style="color:#aaa; text-align:center; grid-column:1/-1;">
+                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 1.8rem; color: var(--primary-green); display: block; margin-bottom: 8px;"></i>
+                Cargando tus grupos...
+            </p>
         </div>
     </div>
 
-    <!-- SECCIÓN 3: MI EQUIPO IDEAL (RANKING DE 2 NIVELES) -->
-    <div id="seccion-equipo-ideal" style="display: none;">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <span class="mini-label" style="justify-content: center; margin-bottom: 4px;">GAMIFICACIÓN & TÁCTICA</span>
-            <h2 style="margin: 0 0 6px; font-size: 1.5rem; color: #fff; font-weight: 800;">Alineación de Élite</h2>
-            <p style="margin: 0; color: var(--text-muted); font-size: 0.88rem;">Tus mejores amigos posicionados tácticamente según su rendimiento.</p>
+    <!-- VISTA 2: VESTUARIO DEL GRUPO SELECCIONADO -->
+    <div id="vista-vestuario-grupo" style="display: none;">
+        
+        <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+                <button id="btn-volver-lobby" class="btn btn-ghost" title="Volver a Mis Grupos" style="padding: 8px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <i class="ph-bold ph-arrow-left" style="font-size:1.1rem;"></i> Volver
+                </button>
+                <div style="text-align: left;">
+                    <h1 id="vestuario-nombre" style="margin: 0; font-size: 1.6rem; color: #fff; line-height: 1.2; font-weight: 800;">...</h1>
+                    <span id="vestuario-deporte" style="color: var(--primary-green); font-size: 0.8rem; font-weight: 800; background: rgba(46,204,113,0.12); border: 1px solid rgba(46,204,113,0.3); padding: 2px 10px; border-radius: 6px; display:inline-block; margin-top:4px;">...</span>
+                </div>
+            </div>
+            <button id="btn-eliminar-grupo-actual" class="btn btn-danger" style="padding: 8px 12px; font-size: 0.82rem; border-radius: 8px; background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); display: inline-flex; align-items: center; gap: 6px; cursor: pointer;" title="Eliminar este grupo">
+                <i class="ph-bold ph-trash"></i> Eliminar Grupo
+            </button>
         </div>
 
-        <!-- SELECTOR DE DEPORTE (NIVEL 1 CORE VS NIVEL 2 CUSTOM) -->
-        <div class="sport-selector-row">
-            <button class="sport-chip active" data-sport="Fútbol"><i class="ph-bold ph-soccer-ball"></i> Fútbol (Nivel 1)</button>
-            <button class="sport-chip" data-sport="Vóley"><i class="ph-bold ph-volleyball"></i> Vóley (Nivel 1)</button>
-            <button class="sport-chip" data-sport="Básquet"><i class="ph-bold ph-basketball"></i> Básquet (Nivel 1)</button>
-            <button class="sport-chip" data-sport="Otros"><i class="ph-fill ph-trophy"></i> Top 10 MVPs (Nivel 2)</button>
+        <div class="tabs-container">
+            <button class="tab-btn active" id="tab-miembros">
+                <i class="ph-bold ph-users-three"></i> Alineación
+            </button>
+            <button class="tab-btn" id="tab-explorar">
+                <i class="ph-bold ph-user-plus"></i> Añadir Jugadores
+            </button>
+            <button class="tab-btn" id="tab-ranking">
+                <i class="ph-fill ph-star" style="color:#f1c40f;"></i> Equipo Ideal
+            </button>
         </div>
 
-        <div id="contenedor-ranking-render"></div>
+        <!-- SUBSECCIÓN: MIEMBROS -->
+        <div id="seccion-miembros">
+            <div id="lista-amigos-grupo" class="friend-list"></div>
+            <!-- FAB PARA CONVOCAR -->
+            <button class="fab-convocar" id="btn-abrir-convocatoria" title="Armar Partido por WhatsApp">
+                <i class="ph-bold ph-megaphone"></i>
+            </button>
+        </div>
+
+        <!-- SUBSECCIÓN: AÑADIR JUGADORES -->
+        <div id="seccion-explorar" style="display: none;">
+            <div class="search-box">
+                <input type="text" id="input-buscar-jugador" class="search-input" placeholder="Buscar jugador por nombre o apodo...">
+                <button id="btn-buscar-jugador" class="btn" style="width: auto !important; background:var(--primary-green); color:#000; padding: 0 20px; border-radius: 10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink: 0; font-weight:800; border:none; height:46px; cursor:pointer;">
+                    <i class="ph-bold ph-magnifying-glass" style="font-size: 1.2rem;"></i>
+                </button>
+            </div>
+            
+            <div id="lista-busqueda" class="friend-list">
+                <p style="color:#aaa; text-align:center; grid-column:1/-1; padding: 25px;">Escribe un nombre arriba para buscar jugadores registrados y sumarlos a este vestuario.</p>
+            </div>
+        </div>
+
+        <!-- SUBSECCIÓN: RANKING / CANCHA TÁCTICA -->
+        <div id="seccion-ranking" style="display: none;">
+            <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:20px;">
+                Distribución táctica según el deporte del grupo y rendimiento de los miembros.
+            </p>
+            <div id="contenedor-cancha-ranking"></div>
+        </div>
     </div>
 
 </main>
 
-<!-- BOTÓN FLOTANTE (FAB) PARA CONVOCAR A PICHANGA -->
-<button class="fab-convocar" id="btn-abrir-convocatoria" title="Armar Convocatoria para Pichanga">
-    <i class="ph-bold ph-megaphone"></i>
-</button>
-
-<!-- MODAL: ARMAR CONVOCATORIA POR WHATSAPP -->
-<div id="modal-convocar" class="modal-oculto">
-    <div class="modal-contenido" style="max-width: 480px; padding: 26px 24px; position: relative;">
-        <button id="cerrar-convocar" class="btn-cerrar" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>
+<!-- MODAL CREAR GRUPO (REQUISITO 3: ÚNICO DEPORTE FÚTBOL, VÓLEY O BÁSQUET) -->
+<div id="modal-crear-grupo" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; padding:30px 25px; border-radius:18px; width:100%; max-width:420px; position:relative; border:1px solid rgba(46,204,113,0.3); box-shadow:0 15px 40px rgba(0,0,0,0.85);">
         
-        <span class="mini-label" style="color: #f1c40f; margin-bottom: 6px;">CONVOCATORIA RÁPIDA</span>
-        <h2 style="margin-top: 0; margin-bottom: 14px; font-size: 1.4rem; color: #fff; font-weight: 800;">
-            <i class="ph-bold ph-megaphone" style="color: #f1c40f;"></i> Convocar a tus Patas
-        </h2>
+        <button id="cerrar-crear-grupo" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
         
-        <p style="color: #aaa; font-size: 0.85rem; margin-top: 0; margin-bottom: 18px;">
-            Elige los detalles del partido y selecciona a los amigos que deseas convocar por WhatsApp.
-        </p>
-
-        <div class="form-group" style="margin-bottom: 12px; text-align: left;">
-            <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Cancha / Lugar</label>
-            <input type="text" id="convocar-lugar" placeholder="Ej. Complejo Fundo Excalibur" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(46,204,113,0.15); color: var(--primary-green); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 10px;">
+                <i class="ph-bold ph-users-three"></i>
+            </div>
+            <h2 style="margin: 0; color: #fff; font-size: 1.4rem; font-weight: 800;">Nuevo Grupo</h2>
+            <p style="color: #aaa; font-size: 0.85rem; margin: 4px 0 0;">Crea tu vestuario para organizar a tus amigos (máx. 3).</p>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;">
+        <form id="form-crear-grupo">
+            <label style="color:#aaa; font-size:0.82rem; margin-bottom:6px; display:block; font-weight:600;">Nombre del Grupo:</label>
+            <input type="text" id="cg-nombre" required placeholder="Ej. Los Amigos del Viernes" maxlength="35" style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#fff; margin-bottom:18px; box-sizing:border-box; font-size:0.95rem;">
+            
+            <label style="color:#aaa; font-size:0.82rem; margin-bottom:6px; display:block; font-weight:600;">Deporte del Grupo (selección única):</label>
+            <select id="cg-deporte" required style="width:100%; padding:12px; background:rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.2); border-radius:10px; color:#fff; margin-bottom:25px; box-sizing:border-box; font-size:0.95rem; cursor:pointer;">
+                <option value="Fútbol">Fútbol</option>
+                <option value="Vóley">Vóley</option>
+                <option value="Básquet">Básquet</option>
+            </select>
+
+            <button type="submit" class="btn" style="width:100%; padding:13px; background:var(--primary-green); color:#080B0A; font-weight:800; border:none; border-radius:10px; font-size:0.95rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <i class="ph-bold ph-check"></i> Crear Vestuario
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL CONVOCATORIA POR WHATSAPP -->
+<div id="modal-convocar" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; max-width:480px; width:100%; padding:26px 24px; position:relative; border-radius:18px; border:1px solid rgba(241,196,15,0.3); box-shadow:0 15px 40px rgba(0,0,0,0.85);">
+        <button id="cerrar-convocar" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
+        
+        <div style="margin-bottom: 16px;">
+            <span style="color: #f1c40f; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px;">CONVOCATORIA RÁPIDA</span>
+            <h2 style="margin: 4px 0 0; font-size: 1.35rem; color: #fff; font-weight: 800; display:flex; align-items:center; gap:8px;">
+                <i class="ph-bold ph-megaphone" style="color: #f1c40f;"></i> Convocar a tu Vestuario
+            </h2>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px; text-align: left;">
+            <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Cancha / Lugar:</label>
+            <input type="text" id="convocar-lugar" placeholder="Ej. Cancha Los Gallos - Cancha 1" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem;">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
             <div class="form-group" style="text-align: left;">
-                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Fecha</label>
+                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Fecha:</label>
                 <input type="date" id="convocar-fecha" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem; color-scheme: dark;">
             </div>
             <div class="form-group" style="text-align: left;">
-                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Hora</label>
+                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Hora:</label>
                 <input type="time" id="convocar-hora" value="20:00" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem; color-scheme: dark;">
             </div>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 0.85rem; color: #fff; font-weight: 700;">Seleccionar Amigos:</span>
+            <span style="font-size: 0.85rem; color: #fff; font-weight: 700;">Seleccionar Jugadores:</span>
             <button type="button" id="btn-toggle-select-all" style="background: none; border: none; color: var(--primary-green); font-size: 0.8rem; cursor: pointer; font-weight: bold; padding: 0;">Seleccionar todos</button>
         </div>
 
-        <div id="convocar-lista-checks" style="max-height: 200px; overflow-y: auto; margin-bottom: 18px; padding-right: 4px;">
+        <div id="convocar-lista-checks" style="max-height: 180px; overflow-y: auto; margin-bottom: 18px; padding-right: 4px;">
             <p style="color: #888; font-size: 0.85rem; text-align: center;">Cargando amigos...</p>
         </div>
 
-        <button id="btn-enviar-convocatoria-wa" class="btn" style="width: 100%; padding: 13px; font-size: 0.95rem; font-weight: bold; background: #25D366; color: #080B0A; border: none; border-radius: 10px;">
-            <i class="ph-bold ph-whatsapp-logo" style="font-size: 1.2rem;"></i> Compartir Convocatoria en WhatsApp
+        <button id="btn-enviar-convocatoria-wa" class="btn" style="width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 800; background: #25D366; color: #080B0A; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="ph-bold ph-whatsapp-logo" style="font-size: 1.25rem;"></i> Compartir en WhatsApp
         </button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, deleteDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -641,82 +458,74 @@
     const auth = getAuth(app);
 
     let currentUser = null;
-    let miPerfilJugador = null;
-    let amigosUids = [];
-    let amigosData = [];
-    let deporteRankingActivo = 'Fútbol';
+    let misGrupos = [];
+    let grupoActivo = null;
+    let miembrosDataGrupoActivo = [];
 
     // TOAST NOTIFICATIONS
     window.toast = function(msg, tipo = 'info') {
-        let container = document.getElementById('toast-container-global');
-        if (!container) {
-            container = document.createElement('div');
-            container.id = 'toast-container-global';
-            document.body.appendChild(container);
-        }
-        const t = document.createElement('div');
-        t.className = `custom-toast ${tipo === 'success' ? 'toast-success' : tipo === 'error' ? 'toast-error' : 'toast-warning'}`;
-        t.innerHTML = `<i class="ph-bold ${tipo === 'success' ? 'ph-check-circle' : tipo === 'error' ? 'ph-warning-octagon' : 'ph-info'}"></i><span>${msg}</span>`;
-        container.appendChild(t);
-        setTimeout(() => {
-            t.classList.add('toast-out');
-            setTimeout(() => t.remove(), 400);
-        }, 3000);
+        alert(msg);
     };
 
-    // ==========================================
-    // SISTEMA DE PESTAÑAS (TABS)
-    // ==========================================
-    const tabBtns = {
-        amigos: document.getElementById('tab-mis-amigos'),
-        buscar: document.getElementById('tab-buscar'),
-        equipo: document.getElementById('tab-equipo-ideal')
+    // TABS DEL VESTUARIO
+    const tabs = {
+        mbr: document.getElementById('tab-miembros'),
+        exp: document.getElementById('tab-explorar'),
+        rnk: document.getElementById('tab-ranking')
     };
-    const secPanels = {
-        amigos: document.getElementById('seccion-mis-amigos'),
-        buscar: document.getElementById('seccion-buscar'),
-        equipo: document.getElementById('seccion-equipo-ideal')
+    const secs = {
+        mbr: document.getElementById('seccion-miembros'),
+        exp: document.getElementById('seccion-explorar'),
+        rnk: document.getElementById('seccion-ranking')
     };
 
-    function activarTab(key) {
-        Object.keys(tabBtns).forEach(k => {
-            if (k === key) {
-                tabBtns[k].classList.add('active');
-                secPanels[k].style.display = 'block';
+    function switchTab(tabKey) {
+        Object.keys(tabs).forEach(k => {
+            if (k === tabKey) {
+                tabs[k].classList.add('active');
+                secs[k].style.display = 'block';
             } else {
-                tabBtns[k].classList.remove('active');
-                secPanels[k].style.display = 'none';
+                tabs[k].classList.remove('active');
+                secs[k].style.display = 'none';
             }
         });
-        if (key === 'equipo') {
-            renderizarRanking(deporteRankingActivo);
+        if (tabKey === 'rnk') {
+            dibujarEquipoIdeal(grupoActivo ? grupoActivo.deporte : 'Fútbol');
         }
     }
 
-    tabBtns.amigos.addEventListener('click', () => activarTab('amigos'));
-    tabBtns.buscar.addEventListener('click', () => activarTab('buscar'));
-    tabBtns.equipo.addEventListener('click', () => activarTab('equipo'));
+    tabs.mbr.addEventListener('click', () => switchTab('mbr'));
+    tabs.exp.addEventListener('click', () => switchTab('exp'));
+    tabs.rnk.addEventListener('click', () => switchTab('rnk'));
 
-    // ==========================================
-    // INICIALIZACIÓN DE SESIÓN Y PERFIL
-    // ==========================================
+    // BOTÓN VOLVER AL LOBBY
+    document.getElementById('btn-volver-lobby').onclick = () => {
+        document.getElementById('vista-vestuario-grupo').style.display = 'none';
+        document.getElementById('vista-lobby-grupos').style.display = 'block';
+        grupoActivo = null;
+        cargarMisGrupos();
+    };
+
+    // AUTH OBSERVER
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
+            currentUser = null;
             mostrarEstadoInvitado();
             return;
         }
         currentUser = user;
-        await cargarPerfilYAmigos();
+        await cargarMisGrupos();
     });
 
     function mostrarEstadoInvitado() {
-        const lista = document.getElementById('lista-amigos');
+        const lista = document.getElementById('lista-mis-grupos');
+        document.getElementById('btn-crear-grupo').style.display = 'none';
         lista.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 45px 20px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); border-radius: 16px;">
                 <i class="ph-bold ph-lock-key" style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 12px; display: block;"></i>
-                <h3 style="color:#fff; margin: 0 0 8px;">Inicia sesión para gestionar tus amigos</h3>
-                <p style="color:#aaa; font-size: 0.9rem; margin-bottom: 20px;">Conecta tu cuenta para activar el Modo Fútbol, guardar tu equipo ideal y armar convocatorias.</p>
-                <button id="btn-login-amigos" class="btn" style="padding: 12px 24px; font-weight: 800;">
+                <h3 style="color:#fff; margin: 0 0 8px;">Inicia sesión con Google para ver tus grupos</h3>
+                <p style="color:#aaa; font-size: 0.9rem; margin-bottom: 20px;">Crea hasta 3 grupos, organiza a tus amigos y arma convocatorias directas.</p>
+                <button id="btn-login-amigos" class="btn" style="padding: 12px 24px; font-weight: 800; background: var(--primary-green); color: #080B0A; border: none; border-radius: 10px; cursor: pointer;">
                     <i class="ph-bold ph-google-logo"></i> Entrar con Google
                 </button>
             </div>
@@ -726,377 +535,321 @@
                 const provider = new GoogleAuthProvider();
                 await signInWithPopup(auth, provider);
             } catch (e) {
-                window.toast("Error al conectar con Google.", "error");
+                alert("Error al conectar con Google.");
             }
         });
     }
 
-    async function cargarPerfilYAmigos() {
+    // ==========================================
+    // CARGAR MIS GRUPOS DESDE FIRESTORE (SIN MOCK DATA)
+    // ==========================================
+    async function cargarMisGrupos() {
+        if (!currentUser) return;
+        const lista = document.getElementById('lista-mis-grupos');
+        lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i> Cargando tus grupos...</p>';
+        
         try {
-            // Cargar perfil del usuario actual desde jugadores_perfiles
-            const docRef = doc(db, 'jugadores_perfiles', currentUser.uid);
-            const docSnap = await getDoc(docRef);
+            const q = query(collection(db, 'grupos_amigos'), where('ownerUid', '==', currentUser.uid));
+            const snap = await getDocs(q);
+            misGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-            if (docSnap.exists()) {
-                miPerfilJugador = docSnap.data();
-            } else {
-                // Perfil inicial automático si no existe
-                miPerfilJugador = {
-                    uid: currentUser.uid,
-                    nombre: currentUser.displayName || 'Jugador',
-                    foto: currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || 'Jugador')}&background=2ecc71&color=fff`,
-                    disponibleHoy: false,
-                    amigos: []
-                };
-                await setDoc(docRef, miPerfilJugador, { merge: true });
-            }
+            // REGLA 3: Si tiene menos de 3 grupos, mostrar el botón "Crear Grupo"
+            const btnCrear = document.getElementById('btn-crear-grupo');
+            btnCrear.style.display = misGrupos.length < 3 ? 'inline-flex' : 'none';
 
-            // Sincronizar Toggle Modo Fútbol
-            configurarToggleModoFutbol(Boolean(miPerfilJugador.disponibleHoy));
-
-            // Sincronizar lista de UIDs de amigos
-            amigosUids = Array.isArray(miPerfilJugador.amigos) ? [...miPerfilJugador.amigos] : [];
-
-            // Si tenía grupos antiguos en grupos_amigos, fusionamos los miembros para no perder contactos
-            try {
-                const qGrupos = query(collection(db, 'grupos_amigos'), where('ownerUid', '==', currentUser.uid));
-                const snapGrupos = await getDocs(qGrupos);
-                snapGrupos.forEach(gDoc => {
-                    const gData = gDoc.data();
-                    if (Array.isArray(gData.miembros_uids)) {
-                        gData.miembros_uids.forEach(uid => {
-                            if (!amigosUids.includes(uid) && uid !== currentUser.uid) {
-                                amigosUids.push(uid);
-                            }
-                        });
-                    }
+            if (misGrupos.length === 0) {
+                lista.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); border-radius: 16px;">
+                        <i class="ph-bold ph-users-three" style="font-size: 3rem; color: #666; margin-bottom: 10px; display: block;"></i>
+                        <h3 style="margin: 0 0 8px; color: #fff;">Aún no tienes grupos creados</h3>
+                        <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 20px;">Crea tu primer vestuario para organizar a tus amigos según el deporte que juegan.</p>
+                        <button id="btn-crear-primer-grupo" class="btn" style="width: auto !important; background: var(--primary-green); color: #080B0A; border: none; padding: 10px 20px; font-weight: 800; border-radius: 10px; cursor: pointer;">
+                            <i class="ph-bold ph-plus"></i> Crear mi primer Grupo
+                        </button>
+                    </div>`;
+                document.getElementById('btn-crear-primer-grupo')?.addEventListener('click', () => {
+                    document.getElementById('modal-crear-grupo').style.display = 'flex';
                 });
-            } catch (eG) {
-                console.warn("Carga defensiva grupos antiguos:", eG);
+                return;
             }
 
-            await renderizarMisAmigos();
+            lista.innerHTML = misGrupos.map(g => {
+                const sportIcon = g.deporte === 'Vóley' ? 'ph-volleyball' : (g.deporte === 'Básquet' ? 'ph-basketball' : 'ph-soccer-ball');
+                const numJugadores = Array.isArray(g.miembros_uids) ? g.miembros_uids.length : 0;
+                return `
+                    <div class="grupo-card" onclick="window.abrirVestuario('${g.id}')">
+                        <span class="grupo-card-sport"><i class="ph-bold ${sportIcon}"></i> ${g.deporte || 'Fútbol'}</span>
+                        <h3 class="grupo-card-title">${g.nombre}</h3>
+                        <p style="color:#888; font-size:0.85rem; margin:0;"><i class="ph-fill ph-users"></i> ${numJugadores} Jugador${numJugadores === 1 ? '' : 'es'}</p>
+                    </div>
+                `;
+            }).join('');
 
         } catch (e) {
-            console.error("Error al cargar perfil:", e);
-            window.toast("Error al sincronizar tu perfil.", "error");
+            console.error("Error al cargar grupos:", e);
+            lista.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1;">Error al cargar tus grupos desde la base de datos.</p>';
         }
     }
 
     // ==========================================
-    // MODO FÚTBOL (TOGGLE SWITCH)
+    // CREAR GRUPO (REQUISITO 3: MÁXIMO 3, ÚNICO DEPORTE)
     // ==========================================
-    function configurarToggleModoFutbol(activo) {
-        const toggle = document.getElementById('toggle-modo-futbol');
-        const badge = document.getElementById('estado-modo-futbol');
-        
-        toggle.checked = activo;
-        actualizarBadgeModoFutbol(activo);
+    const modalCrearGrupo = document.getElementById('modal-crear-grupo');
+    document.getElementById('btn-crear-grupo').onclick = () => {
+        modalCrearGrupo.style.display = 'flex';
+    };
+    document.getElementById('cerrar-crear-grupo').onclick = () => {
+        modalCrearGrupo.style.display = 'none';
+    };
+    modalCrearGrupo.onclick = (e) => {
+        if (e.target === modalCrearGrupo) modalCrearGrupo.style.display = 'none';
+    };
 
-        toggle.onchange = async () => {
-            const nuevoEstado = toggle.checked;
-            actualizarBadgeModoFutbol(nuevoEstado);
-            try {
-                await setDoc(doc(db, 'jugadores_perfiles', currentUser.uid), {
-                    disponibleHoy: nuevoEstado,
-                    actualizadoEn: serverTimestamp()
-                }, { merge: true });
-
-                if (miPerfilJugador) miPerfilJugador.disponibleHoy = nuevoEstado;
-
-                if (nuevoEstado) {
-                    window.toast("¡Modo Fútbol activado! Tus amigos verán que estás listo para jugar hoy.", "success");
-                } else {
-                    window.toast("Modo Fútbol desactivado.", "info");
-                }
-            } catch (err) {
-                console.error("Error guardando Modo Fútbol:", err);
-                toggle.checked = !nuevoEstado;
-                actualizarBadgeModoFutbol(!nuevoEstado);
-                window.toast("Error al actualizar disponibilidad.", "error");
-            }
-        };
-    }
-
-    function actualizarBadgeModoFutbol(activo) {
-        const badge = document.getElementById('estado-modo-futbol');
-        if (activo) {
-            badge.className = 'status-badge-futbol status-activo';
-            badge.innerHTML = '<i class="ph-fill ph-circle"></i> Disponible para Pichanga';
-        } else {
-            badge.className = 'status-badge-futbol status-inactivo';
-            badge.innerHTML = '<i class="ph-bold ph-moon"></i> No disponible';
-        }
-    }
-
-    // ==========================================
-    // RENDERIZAR LISTA DE MIS AMIGOS
-    // ==========================================
-    async function renderizarMisAmigos() {
-        const lista = document.getElementById('lista-amigos');
-        const badgeCount = document.getElementById('badge-total-amigos');
-        const resumenDisponibles = document.getElementById('resumen-disponibles');
-
-        badgeCount.textContent = amigosUids.length;
-
-        if (amigosUids.length === 0) {
-            lista.innerHTML = `
-                <div style="grid-column: 1/-1; text-align: center; padding: 45px 20px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.12); border-radius: 16px;">
-                    <i class="ph-bold ph-users-three" style="font-size: 2.8rem; color: #555; margin-bottom: 12px; display: block;"></i>
-                    <h3 style="margin: 0 0 6px; color: #fff;">Aún no tienes amigos en tu vestuario</h3>
-                    <p style="color: #aaa; font-size: 0.88rem; margin-bottom: 20px;">Busca a tus patas y agrégalos para ver quién tiene el Modo Fútbol activado y armar pichangas rápido.</p>
-                    <button class="btn" onclick="document.getElementById('tab-buscar').click();" style="padding: 10px 20px;">
-                        <i class="ph-bold ph-user-plus"></i> Buscar Jugadores
-                    </button>
-                </div>
-            `;
-            if (resumenDisponibles) resumenDisponibles.textContent = '';
-            amigosData = [];
+    document.getElementById('form-crear-grupo').onsubmit = async (e) => {
+        e.preventDefault();
+        if (misGrupos.length >= 3) {
+            alert("Has alcanzado el límite máximo de 3 grupos.");
             return;
         }
 
-        lista.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 2rem; color: var(--primary-green);"></i></div>`;
+        const nombre = document.getElementById('cg-nombre').value.trim();
+        const deporte = document.getElementById('cg-deporte').value;
+
+        if (!nombre) return alert("Por favor ingresa un nombre para el grupo.");
+
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Creando...';
 
         try {
-            amigosData = [];
-            // Carga defensiva por lotes de 10
+            await addDoc(collection(db, 'grupos_amigos'), {
+                ownerUid: currentUser.uid,
+                nombre: nombre,
+                deporte: deporte, // Único deporte: Fútbol, Vóley o Básquet
+                miembros_uids: [],
+                createdAt: serverTimestamp()
+            });
+
+            modalCrearGrupo.style.display = 'none';
+            e.target.reset();
+            alert("¡Grupo creado exitosamente!");
+            await cargarMisGrupos();
+        } catch (err) {
+            console.error("Error al crear grupo:", err);
+            alert("No se pudo crear el grupo.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-check"></i> Crear Vestuario';
+        }
+    };
+
+    // ==========================================
+    // ABRIR VESTUARIO DE UN GRUPO
+    // ==========================================
+    window.abrirVestuario = async function(grupoId) {
+        grupoActivo = misGrupos.find(g => g.id === grupoId);
+        if (!grupoActivo) return;
+
+        document.getElementById('vista-lobby-grupos').style.display = 'none';
+        document.getElementById('vista-vestuario-grupo').style.display = 'block';
+
+        document.getElementById('vestuario-nombre').textContent = grupoActivo.nombre;
+        document.getElementById('vestuario-deporte').textContent = grupoActivo.deporte || 'Fútbol';
+
+        switchTab('mbr');
+        await cargarMiembrosDelGrupo();
+    };
+
+    // ELIMINAR GRUPO ACTIVO
+    document.getElementById('btn-eliminar-grupo-actual').onclick = async () => {
+        if (!grupoActivo) return;
+        if (!confirm(`¿Estás seguro de eliminar el grupo "${grupoActivo.nombre}"?`)) return;
+
+        try {
+            await deleteDoc(doc(db, 'grupos_amigos', grupoActivo.id));
+            alert("Grupo eliminado.");
+            document.getElementById('btn-volver-lobby').click();
+        } catch (e) {
+            console.error("Error al eliminar grupo:", e);
+            alert("Error al eliminar el grupo.");
+        }
+    };
+
+    // CARGAR MIEMBROS DEL GRUPO ACTIVO
+    async function cargarMiembrosDelGrupo() {
+        const lista = document.getElementById('lista-amigos-grupo');
+        const uids = grupoActivo.miembros_uids || [];
+
+        if (uids.length === 0) {
+            lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1; padding:30px;">Vestuario vacío. Ve a "Añadir Jugadores" para sumar integrantes.</p>';
+            miembrosDataGrupoActivo = [];
+            return;
+        }
+
+        lista.innerHTML = '<div style="text-align:center; grid-column:1/-1; padding:25px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green);"></i> Cargando alineación...</div>';
+        try {
+            miembrosDataGrupoActivo = [];
             const chunks = [];
-            for (let i = 0; i < amigosUids.length; i += 10) {
-                chunks.push(amigosUids.slice(i, i + 10));
+            for (let i = 0; i < uids.length; i += 10) {
+                chunks.push(uids.slice(i, i + 10));
             }
 
             for (const chunk of chunks) {
                 const q = query(collection(db, 'jugadores_perfiles'), where('__name__', 'in', chunk));
                 const snap = await getDocs(q);
-                snap.forEach(d => amigosData.push({ uid: d.id, ...d.data() }));
+                snap.forEach(d => miembrosDataGrupoActivo.push({ uid: d.id, ...d.data() }));
             }
 
-            // Ordenar: primero los que tienen disponibleHoy activo, luego alfabéticamente
-            amigosData.sort((a, b) => {
-                if (Boolean(b.disponibleHoy) !== Boolean(a.disponibleHoy)) {
-                    return b.disponibleHoy ? 1 : -1;
-                }
-                return (a.nombre || '').localeCompare(b.nombre || '');
-            });
-
-            const disponiblesCount = amigosData.filter(a => a.disponibleHoy).length;
-            if (resumenDisponibles) {
-                resumenDisponibles.innerHTML = disponiblesCount > 0
-                    ? `<span style="color:var(--primary-green); font-weight:800;"><i class="ph-fill ph-circle"></i> ${disponiblesCount} ${disponiblesCount === 1 ? 'disponible hoy' : 'disponibles hoy'}</span>`
-                    : `<span style="color:#888;">Ninguno disponible hoy</span>`;
-            }
-
-            lista.innerHTML = amigosData.map(j => {
+            lista.innerHTML = miembrosDataGrupoActivo.map(j => {
                 const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre || 'Jugador')}&background=2ecc71&color=fff`;
                 const pos = j.posicion || 'JUG';
-                const dep = j.deporte || 'Fútbol';
-                const estadoBadge = j.disponibleHoy
-                    ? `<span style="display:inline-flex; align-items:center; gap:4px; color:var(--primary-green); font-size:0.75rem; font-weight:800;"><i class="ph-fill ph-circle"></i> Disponible hoy</span>`
-                    : `<span style="color:#777; font-size:0.75rem;"><i class="ph-bold ph-moon"></i> No disponible</span>`;
-                
                 const telClean = String(j.telefono || '').replace(/\D/g, '');
-                const waBtn = telClean
-                    ? `<a href="https://wa.me/${telClean}?text=${encodeURIComponent('¡Habla causa! ¿Sale pichanga hoy? Te vi en CHALACAPP.')}" target="_blank" class="btn" style="width:36px; height:36px; padding:0; border-radius:10px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center;" title="Chatear por WhatsApp"><i class="ph-bold ph-whatsapp-logo" style="font-size:1.15rem;"></i></a>`
-                    : '';
+                const waBtn = telClean ? `<a href="https://wa.me/${telClean}?text=${encodeURIComponent('¡Habla! ¿Listo para el partido?')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
 
                 return `
-                <div class="friend-card">
-                    <div class="friend-info">
-                        <img src="${foto}" class="friend-avatar" alt="${j.nombre || 'Jugador'}" style="aspect-ratio:1/1;object-fit:cover;">
-                        <div class="friend-texts">
-                            <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
-                            <div class="friend-meta">
-                                <span style="background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px; border:1px solid rgba(255,255,255,0.1); font-weight:700;">${pos}</span>
-                                <span>${dep}</span>
+                    <div class="friend-card">
+                        <div class="friend-info">
+                            <img src="${foto}" class="friend-avatar" alt="${j.nombre || 'Jugador'}">
+                            <div style="min-width:0;">
+                                <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
+                                <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); font-weight:700;">${pos}</span>
                             </div>
-                            <div style="margin-top:4px;">${estadoBadge}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            ${waBtn}
+                            <button class="btn" style="width: 34px; height: 34px; background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer;" onclick="window.quitarDelGrupo('${j.uid}')" title="Quitar del grupo">
+                                <i class="ph-bold ph-trash"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="friend-actions">
-                        ${waBtn}
-                        <button class="btn btn-danger" style="width:36px; height:36px; padding:0; border-radius:10px; display:inline-flex; align-items:center; justify-content:center;" onclick="window.eliminarAmigo('${j.uid}')" title="Quitar de amigos">
-                            <i class="ph-bold ph-trash" style="font-size:1.1rem;"></i>
-                        </button>
-                    </div>
-                </div>
                 `;
             }).join('');
 
         } catch (e) {
-            console.error("Error al renderizar amigos:", e);
-            lista.innerHTML = `<p style="color:red; text-align:center; grid-column:1/-1;">Error al cargar amigos.</p>`;
+            console.error("Error al cargar miembros del grupo:", e);
+            lista.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1;">Error al cargar miembros.</p>';
         }
     }
 
-    // ==========================================
-    // AGREGAR Y ELIMINAR AMIGOS
-    // ==========================================
-    window.agregarAmigo = async function(uidAmigo) {
-        if (!currentUser) return;
-        try {
-            if (!amigosUids.includes(uidAmigo)) {
-                amigosUids.push(uidAmigo);
-                await setDoc(doc(db, 'jugadores_perfiles', currentUser.uid), {
-                    amigos: amigosUids
-                }, { merge: true });
-
-                window.toast("¡Jugador agregado a tus amigos!", "success");
-                await renderizarMisAmigos();
-                // Actualizar botón en la vista de búsqueda si está abierta
-                document.getElementById('btn-buscar-jugador')?.click();
-            }
-        } catch (e) {
-            console.error("Error al agregar amigo:", e);
-            window.toast("No se pudo agregar al amigo.", "error");
-        }
-    };
-
-    window.eliminarAmigo = async function(uidAmigo) {
-        if (!confirm("¿Deseas quitar a este jugador de tus amigos?")) return;
-        try {
-            amigosUids = amigosUids.filter(id => id !== uidAmigo);
-            await setDoc(doc(db, 'jugadores_perfiles', currentUser.uid), {
-                amigos: amigosUids
-            }, { merge: true });
-
-            window.toast("Amigo eliminado de tu vestuario.", "info");
-            await renderizarMisAmigos();
-        } catch (e) {
-            console.error("Error al eliminar amigo:", e);
-            window.toast("No se pudo eliminar.", "error");
-        }
-    };
-
-    // ==========================================
-    // BÚSQUEDA DE JUGADORES
-    // ==========================================
+    // BUSCAR Y AGREGAR DIRECTO AL GRUPO
     const inputBuscar = document.getElementById('input-buscar-jugador');
     const btnBuscar = document.getElementById('btn-buscar-jugador');
-    const listaBusqueda = document.getElementById('lista-busqueda-jugadores');
+    const listaBusqueda = document.getElementById('lista-busqueda');
 
-    async function ejecutarBusqueda() {
+    btnBuscar.onclick = async () => {
         const qTexto = (inputBuscar.value || '').trim().toLowerCase();
         if (!qTexto) {
-            listaBusqueda.innerHTML = `<p style="color:#aaa; text-align:center; grid-column:1/-1; padding:20px;">Ingresa un nombre para buscar.</p>`;
+            listaBusqueda.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1; padding:20px;">Ingresa un nombre para buscar.</p>';
             return;
         }
 
-        listaBusqueda.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 2rem; color: var(--primary-green);"></i></div>`;
-
+        listaBusqueda.innerHTML = '<p style="text-align:center; grid-column:1/-1; padding:25px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green);"></i> Buscando jugadores...</p>';
         try {
             const snap = await getDocs(collection(db, 'jugadores_perfiles'));
-            const matches = [];
+            let html = '';
+            let count = 0;
 
             snap.forEach(d => {
-                if (currentUser && d.id === currentUser.uid) return;
-                const data = d.data();
-                const nombre = (data.nombre || '').toLowerCase();
-                const apodo = (data.apodo || '').toLowerCase();
-                const ciudad = (data.ciudad || '').toLowerCase();
-                const pos = (data.posicion || '').toLowerCase();
+                if (d.id === currentUser.uid) return;
+                const j = d.data();
+                const match = (j.nombre || '').toLowerCase().includes(qTexto) || (j.apodo || '').toLowerCase().includes(qTexto);
+                if (match) {
+                    count++;
+                    const yaEsta = grupoActivo.miembros_uids && grupoActivo.miembros_uids.includes(d.id);
+                    const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre || 'Jugador')}&background=2ecc71&color=fff`;
+                    const btnHtml = yaEsta
+                        ? `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#888; border-radius:8px;" disabled><i class="ph-bold ph-check"></i> En grupo</button>`
+                        : `<button class="btn" style="width: auto !important; padding:6px 14px; font-size:0.78rem; background:var(--primary-green); color:#080B0A; border:none; font-weight:800; border-radius:8px; cursor:pointer;" onclick="window.agregarAlGrupo('${d.id}')"><i class="ph-bold ph-plus"></i> Añadir</button>`;
 
-                if (nombre.includes(qTexto) || apodo.includes(qTexto) || ciudad.includes(qTexto) || pos.includes(qTexto)) {
-                    matches.push({ uid: d.id, ...data });
+                    html += `
+                        <div class="friend-card">
+                            <div class="friend-info">
+                                <img src="${foto}" class="friend-avatar" alt="${j.nombre || 'Jugador'}">
+                                <div style="min-width:0;">
+                                    <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
+                                    <span style="font-size:0.75rem; color:#aaa;">${j.posicion || 'JUG'} · ${j.ciudad || 'Lima'}</span>
+                                </div>
+                            </div>
+                            <div>${btnHtml}</div>
+                        </div>
+                    `;
                 }
             });
 
-            if (matches.length === 0) {
-                listaBusqueda.innerHTML = `<p style="color:#aaa; text-align:center; grid-column:1/-1; padding:30px;">No encontramos jugadores con ese criterio.</p>`;
-                return;
-            }
-
-            listaBusqueda.innerHTML = matches.map(j => {
-                const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre || 'Jugador')}&background=2ecc71&color=fff`;
-                const yaEsAmigo = amigosUids.includes(j.uid);
-
-                const btnHtml = yaEsAmigo
-                    ? `<button class="btn btn-outline" style="padding:7px 14px; font-size:0.78rem; opacity:0.65; cursor:default;" disabled><i class="ph-bold ph-check"></i> En tu vestuario</button>`
-                    : `<button class="btn" style="padding:7px 14px; font-size:0.78rem; font-weight:800;" onclick="window.agregarAmigo('${j.uid}')"><i class="ph-bold ph-user-plus"></i> Agregar</button>`;
-
-                const dispTag = j.disponibleHoy
-                    ? `<span style="color:var(--primary-green); font-size:0.72rem; font-weight:800; display:inline-flex; align-items:center; gap:4px; margin-top:3px;"><i class="ph-fill ph-circle"></i> Disponible hoy</span>`
-                    : '';
-
-                return `
-                <div class="friend-card">
-                    <div class="friend-info">
-                        <img src="${foto}" class="friend-avatar" alt="${j.nombre || 'Jugador'}" style="aspect-ratio:1/1;object-fit:cover;">
-                        <div class="friend-texts">
-                            <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
-                            <div class="friend-meta">
-                                <span>${j.posicion || 'JUG'}</span>
-                                <span>·</span>
-                                <span>${j.deporte || 'Fútbol'}</span>
-                                ${j.ciudad ? `<span>· ${j.ciudad}</span>` : ''}
-                            </div>
-                            ${dispTag}
-                        </div>
-                    </div>
-                    <div>${btnHtml}</div>
-                </div>
-                `;
-            }).join('');
-
+            listaBusqueda.innerHTML = count > 0 ? html : '<p style="text-align:center; grid-column:1/-1; color:#aaa; padding:25px;">No se encontraron jugadores.</p>';
         } catch (e) {
             console.error("Error en búsqueda:", e);
-            listaBusqueda.innerHTML = `<p style="color:red; text-align:center; grid-column:1/-1;">Error al buscar jugadores.</p>`;
+            listaBusqueda.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1;">Error en búsqueda.</p>';
         }
-    }
+    };
 
-    btnBuscar.addEventListener('click', ejecutarBusqueda);
-    inputBuscar.addEventListener('keyup', (e) => { if (e.key === 'Enter') ejecutarBusqueda(); });
-
-    // ==========================================
-    // GAMIFICACIÓN: SISTEMA DE RANKINGS DE 2 NIVELES
-    // ==========================================
-    document.querySelectorAll('.sport-chip').forEach(chip => {
-        chip.addEventListener('click', () => {
-            document.querySelectorAll('.sport-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            deporteRankingActivo = chip.dataset.sport;
-            renderizarRanking(deporteRankingActivo);
-        });
+    inputBuscar.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') btnBuscar.click();
     });
 
-    function renderizarRanking(deporte) {
-        const contenedor = document.getElementById('contenedor-ranking-render');
+    window.agregarAlGrupo = async function(uidJugador) {
+        if (!grupoActivo) return;
+        try {
+            let actualizados = grupoActivo.miembros_uids ? [...grupoActivo.miembros_uids] : [];
+            if (!actualizados.includes(uidJugador)) {
+                actualizados.push(uidJugador);
+                await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id), { miembros_uids: actualizados });
+                grupoActivo.miembros_uids = actualizados;
+                btnBuscar.click();
+                await cargarMiembrosDelGrupo();
+            }
+        } catch (e) {
+            console.error("Error al añadir al grupo:", e);
+            alert("Error al añadir jugador al grupo.");
+        }
+    };
+
+    window.quitarDelGrupo = async function(uidJugador) {
+        if (!confirm("¿Deseas quitar a este jugador del grupo?")) return;
+        try {
+            let actualizados = (grupoActivo.miembros_uids || []).filter(id => id !== uidJugador);
+            await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id), { miembros_uids: actualizados });
+            grupoActivo.miembros_uids = actualizados;
+            await cargarMiembrosDelGrupo();
+        } catch (e) {
+            console.error("Error al quitar jugador del grupo:", e);
+            alert("Error al quitar jugador.");
+        }
+    };
+
+    // ==========================================
+    // EQUIPO IDEAL (RANKING DINÁMICO SEGÚN DEPORTE)
+    // ==========================================
+    function dibujarEquipoIdeal(deporte) {
+        const contenedor = document.getElementById('contenedor-cancha-ranking');
         if (!contenedor) return;
 
-        // Construir base de jugadores (amigos + el propio usuario)
-        const poolJugadores = [...amigosData];
-        if (currentUser) {
-            poolJugadores.push({
-                uid: currentUser.uid,
-                nombre: currentUser.displayName || 'Tú (Capitán)',
-                foto: currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || 'Capitán')}&background=f1c40f&color=000`,
-                posicion: miPerfilJugador?.posicion || 'CAPI',
-                deporte: miPerfilJugador?.deporte || 'Fútbol',
-                rating: 5.0,
-                score: 99
-            });
-        }
-
-        if (poolJugadores.length === 0) {
-            contenedor.innerHTML = `<p style="text-align:center; color:#aaa; padding:40px;">Agrega amigos a tu vestuario para generar el Equipo Ideal.</p>`;
+        if (miembrosDataGrupoActivo.length === 0) {
+            contenedor.innerHTML = '<p style="text-align:center; color:#aaa; margin-top:30px;">Añade jugadores a este vestuario para armar la alineación ideal.</p>';
             return;
         }
 
-        // Asignar y ordenar por score calculado
-        const ranking = poolJugadores.map(j => {
-            const baseScore = j.score || (j.rating ? Math.round(Number(j.rating) * 20) : Math.floor(75 + ((j.nombre.charCodeAt(0) * 3) % 23)));
-            return {
-                ...j,
-                score: Math.min(99, Math.max(60, baseScore))
-            };
-        });
+        let ranking = miembrosDataGrupoActivo.map(j => ({
+            ...j,
+            score: j.rating ? Math.round(Number(j.rating) * 20) : Math.floor(75 + ((j.nombre.charCodeAt(0) * 3) % 23))
+        }));
+
+        const yo = {
+            uid: currentUser.uid,
+            nombre: currentUser.displayName || 'Tú (Capitán)',
+            foto: currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || 'Capitán')}&background=f1c40f&color=000`,
+            score: 99,
+            posicion: 'CAPI'
+        };
+        ranking.push(yo);
         ranking.sort((a, b) => b.score - a.score);
 
-        const cartaHTML = (j, posForzada) => {
+        const generarCarta = (j, posForzada) => {
             if (!j) {
                 return `
-                <div class="player-pitch-card" style="opacity: 0.35;">
+                <div class="player-pitch-card" style="opacity:0.35;">
                     <div class="player-pitch-photo-container">
-                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #222; border: 2px dashed #777;"></div>
+                        <div style="width:50px; height:50px; border-radius:50%; background:#222; border:2px dashed #777;"></div>
                     </div>
                     <div class="player-pitch-name">Libre</div>
                     <div class="player-pitch-pos">${posForzada || 'VAC'}</div>
@@ -1107,7 +860,7 @@
             return `
             <div class="player-pitch-card" title="${j.nombre} - Score: ${j.score}">
                 <div class="player-pitch-photo-container">
-                    <img src="${foto}" alt="${j.nombre}" style="aspect-ratio:1/1;object-fit:cover;">
+                    <img src="${foto}" alt="${j.nombre}">
                     <div class="player-pitch-score">${j.score}</div>
                 </div>
                 <div class="player-pitch-name">${primerNombre}</div>
@@ -1115,104 +868,65 @@
             </div>`;
         };
 
-        function armarAlineacion(rank, requeridos) {
-            const asignados = [];
-            const disponibles = [...rank];
-            requeridos.forEach(req => {
-                const idx = disponibles.findIndex(j => (j.posicion || '').includes(req));
+        function armarEquipo(rank, reqs) {
+            let seleccionados = [];
+            let disponibles = [...rank];
+            reqs.forEach(req => {
+                let idx = disponibles.findIndex(jug => jug.posicion && jug.posicion.includes(req));
                 if (idx !== -1) {
-                    asignados.push({ jug: disponibles[idx], pos: req });
+                    seleccionados.push({ jug: disponibles[idx], pos: req });
                     disponibles.splice(idx, 1);
                 } else if (disponibles.length > 0) {
-                    asignados.push({ jug: disponibles[0], pos: req });
+                    seleccionados.push({ jug: disponibles[0], pos: req });
                     disponibles.splice(0, 1);
                 } else {
-                    asignados.push({ jug: null, pos: req });
+                    seleccionados.push({ jug: null, pos: req });
                 }
             });
-            return asignados;
+            return seleccionados;
         }
 
-        // ==========================================
-        // NIVEL 1: DEPORTES CORE (CSS PURO)
-        // ==========================================
-        if (deporte === 'Fútbol') {
-            const team = armarAlineacion(ranking, ['ARQ', 'DEF', 'DEF', 'MED', 'MED', 'DEL', 'DEL']);
-            contenedor.innerHTML = `
-            <div class="soccer-pitch">
-                <div class="pitch-line pitch-center-line"></div>
-                <div class="pitch-line pitch-center-circle"></div>
-                <div class="pitch-line pitch-goal-area-top"></div>
-                <div class="pitch-line pitch-goal-area-bottom"></div>
-                
-                <!-- Delanteros -->
-                <div class="formation-row">${team.slice(5, 7).map(t => cartaHTML(t.jug, t.pos)).join('')}</div>
-                <!-- Mediocampo -->
-                <div class="formation-row">${team.slice(3, 5).map(t => cartaHTML(t.jug, t.pos)).join('')}</div>
-                <!-- Defensas -->
-                <div class="formation-row">${team.slice(1, 3).map(t => cartaHTML(t.jug, t.pos)).join('')}</div>
-                <!-- Arquero -->
-                <div class="formation-row">${cartaHTML(team[0].jug, team[0].pos)}</div>
-            </div>`;
-
-        } else if (deporte === 'Vóley') {
-            const team = armarAlineacion(ranking, ['ARM', 'OPU', 'ATQ', 'ATQ', 'CEN', 'LIB']);
-            contenedor.innerHTML = `
+        let html = '';
+        if (deporte === 'Vóley') {
+            const team = armarEquipo(ranking, ['ARM', 'OPU', 'ATQ', 'ATQ', 'CEN', 'LIB']);
+            html = `
             <div class="voley-pitch">
                 <div class="voley-net"></div>
-                <!-- Zona Ataque -->
-                <div class="formation-row">${team.slice(2, 5).map(t => cartaHTML(t.jug, t.pos)).join('')}</div>
-                <!-- Zona Defensiva / Colocador -->
-                <div class="formation-row" style="margin-top: 25px;">
-                    ${team.slice(0, 2).map(t => cartaHTML(t.jug, t.pos)).join('')}
-                    ${cartaHTML(team[5].jug, team[5].pos)}
+                <div class="formation-row">${team.slice(2, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                <div class="formation-row" style="margin-top:20px;">
+                    ${team.slice(0, 2).map(t => generarCarta(t.jug, t.pos)).join('')}
+                    ${generarCarta(team[5].jug, team[5].pos)}
                 </div>
             </div>`;
-
         } else if (deporte === 'Básquet') {
-            const team = armarAlineacion(ranking, ['BAS', 'ESC', 'ALE', 'API', 'PIV']);
-            contenedor.innerHTML = `
+            const team = armarEquipo(ranking, ['BAS', 'ESC', 'ALE', 'API', 'PIV']);
+            html = `
             <div class="basket-pitch">
-                <div class="pitch-line basket-center-line"></div>
-                <div class="pitch-line basket-center-circle"></div>
-                <!-- Aleros y Pívot -->
-                <div class="formation-row" style="margin-top: 15px;">${team.slice(3, 5).map(t => cartaHTML(t.jug, t.pos)).join('')}</div>
-                <div class="formation-row">${team.slice(1, 3).map(t => cartaHTML(t.jug, t.pos)).join('')}</div>
-                <!-- Base -->
-                <div class="formation-row">${cartaHTML(team[0].jug, team[0].pos)}</div>
+                <div class="pitch-line basket-center"></div>
+                <div class="pitch-line basket-circle"></div>
+                <div class="formation-row" style="margin-top:20px;">${team.slice(3, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                <div class="formation-row">${team.slice(1, 3).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                <div class="formation-row">${generarCarta(team[0].jug, team[0].pos)}</div>
             </div>`;
-
-        // ==========================================
-        // NIVEL 2: CUSTOM / TOP 10 MVPS (DEPORTES NO CONVENCIONALES)
-        // ==========================================
         } else {
-            const top10 = ranking.slice(0, 10);
-            contenedor.innerHTML = `
-            <div class="top10-container">
-                ${top10.map((j, i) => {
-                    const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre)}&background=2ecc71&color=fff`;
-                    const medalla = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
-                    return `
-                    <div class="top10-item">
-                        <div class="top10-rank">${medalla}</div>
-                        <div class="top10-player">
-                            <img src="${foto}" class="top10-photo" alt="${j.nombre}" style="aspect-ratio:1/1;object-fit:cover;">
-                            <div>
-                                <div class="top10-name">${j.nombre}</div>
-                                <div class="top10-meta">${j.posicion || 'MVP'} · ${j.deporte || 'Deporte'}</div>
-                            </div>
-                        </div>
-                        <div class="top10-score">
-                            <i class="ph-fill ph-star"></i> ${j.score} <small style="font-size:0.7rem; color:#aaa;">pts</small>
-                        </div>
-                    </div>`;
-                }).join('')}
+            // Fútbol
+            const team = armarEquipo(ranking, ['ARQ', 'DEF', 'DEF', 'MED', 'MED', 'DEL', 'DEL']);
+            html = `
+            <div class="soccer-pitch">
+                <div class="pitch-line pitch-center"></div>
+                <div class="pitch-line pitch-circle"></div>
+                <div class="formation-row">${team.slice(5, 7).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                <div class="formation-row">${team.slice(3, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                <div class="formation-row">${team.slice(1, 3).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                <div class="formation-row">${generarCarta(team[0].jug, team[0].pos)}</div>
             </div>`;
         }
+
+        contenedor.innerHTML = html;
     }
 
     // ==========================================
-    // MODAL DE CONVOCATORIA (BOTÓN FLOTANTE FAB)
+    // MODAL CONVOCATORIA (FAB WHATSAPP)
     // ==========================================
     const modalConvocar = document.getElementById('modal-convocar');
     const btnAbrirConvocar = document.getElementById('btn-abrir-convocatoria');
@@ -1222,76 +936,66 @@
     const btnToggleAll = document.getElementById('btn-toggle-select-all');
     const btnEnviarWa = document.getElementById('btn-enviar-convocatoria-wa');
 
-    // Inicializar fecha de hoy
     const dHoy = new Date();
     const hoyStr = `${dHoy.getFullYear()}-${String(dHoy.getMonth() + 1).padStart(2, '0')}-${String(dHoy.getDate()).padStart(2, '0')}`;
     inputFecha.value = hoyStr;
     inputFecha.min = hoyStr;
 
-    btnAbrirConvocar.addEventListener('click', () => {
-        if (!currentUser) {
-            window.toast("Inicia sesión para convocar a tus amigos.", "warning");
-            return;
-        }
-        if (amigosData.length === 0) {
-            window.toast("Agrega amigos primero para poder convocarlos.", "warning");
+    btnAbrirConvocar.onclick = () => {
+        if (!grupoActivo) return;
+        if (miembrosDataGrupoActivo.length === 0) {
+            alert("Añade jugadores primero para poder convocarlos.");
             return;
         }
 
-        // Renderizar checkboxes de amigos
-        checksContainer.innerHTML = amigosData.map(j => {
+        checksContainer.innerHTML = miembrosDataGrupoActivo.map(j => {
             const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre)}&background=2ecc71&color=fff`;
-            const badgeDisp = j.disponibleHoy
-                ? `<span style="color:var(--primary-green); font-size:0.75rem; font-weight:800; margin-left:6px;"><i class="ph-fill ph-circle"></i> Listo</span>`
-                : '';
-
             return `
             <label class="convocar-friend-item">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <img src="${foto}" style="width:34px; height:34px; aspect-ratio:1/1; object-fit:cover; border-radius:50%;" alt="${j.nombre}">
-                    <span style="font-size:0.88rem; font-weight:700; color:#fff;">${j.nombre}${badgeDisp}</span>
+                    <span style="font-size:0.88rem; font-weight:700; color:#fff;">${j.nombre}</span>
                 </div>
-                <input type="checkbox" class="check-convocar-amigo" value="${j.nombre}" data-uid="${j.uid}" ${j.disponibleHoy ? 'checked' : ''}>
-            </label>
-            `;
+                <input type="checkbox" class="check-convocar-amigo" value="${j.nombre}" data-uid="${j.uid}" checked>
+            </label>`;
         }).join('');
 
-        modalConvocar.classList.add('mostrar');
-        document.body.style.overflow = 'hidden';
-    });
+        modalConvocar.style.display = 'flex';
+    };
 
-    btnCerrarConvocar.addEventListener('click', () => {
-        modalConvocar.classList.remove('mostrar');
-        document.body.style.overflow = '';
-    });
+    btnCerrarConvocar.onclick = () => { modalConvocar.style.display = 'none'; };
+    modalConvocar.onclick = (e) => {
+        if (e.target === modalConvocar) modalConvocar.style.display = 'none';
+    };
 
-    let allSelected = false;
-    btnToggleAll.addEventListener('click', () => {
+    let allSelected = true;
+    btnToggleAll.onclick = () => {
         const checks = document.querySelectorAll('.check-convocar-amigo');
         allSelected = !allSelected;
         checks.forEach(c => c.checked = allSelected);
         btnToggleAll.textContent = allSelected ? 'Deseleccionar todos' : 'Seleccionar todos';
-    });
+    };
 
-    btnEnviarWa.addEventListener('click', () => {
+    btnEnviarWa.onclick = () => {
         const lugar = (document.getElementById('convocar-lugar').value || '').trim() || 'Cancha por definir';
         const fecha = document.getElementById('convocar-fecha').value || hoyStr;
         const hora = document.getElementById('convocar-hora').value || '20:00';
+        const deporte = grupoActivo ? grupoActivo.deporte : 'Partido';
 
         const checks = document.querySelectorAll('.check-convocar-amigo:checked');
         const seleccionados = Array.from(checks).map(c => c.value);
 
         if (seleccionados.length === 0) {
-            window.toast("Selecciona al menos un amigo para convocar.", "warning");
+            alert("Selecciona al menos un amigo para convocar.");
             return;
         }
 
         const listaNombres = seleccionados.map((n, i) => `${i + 1}. ${n}`).join('\n');
 
         const mensaje = 
-`⚽ *¡CONVOCATORIA DE PICHANGA - CHALACAPP!* ⚽
+`🏆 *¡CONVOCATORIA ${deporte.toUpperCase()} - ${grupoActivo ? grupoActivo.nombre.toUpperCase() : 'CHALACAPP'}!* 🏆
 
-¡Habla gente! Se armó el partido y estás convocado:
+¡Habla equipo! Se armó el partido y estás convocado:
 📍 *Lugar:* ${lugar}
 📅 *Fecha:* ${fecha}
 ⏰ *Hora:* ${hora}
@@ -1303,10 +1007,8 @@ ${listaNombres}
 
         const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
         window.open(waUrl, '_blank');
-        modalConvocar.classList.remove('mostrar');
-        document.body.style.overflow = '';
-        window.toast("¡Convocatoria generada para WhatsApp!", "success");
-    });
+        modalConvocar.style.display = 'none';
+    };
 </script>
 </body>
 </html>

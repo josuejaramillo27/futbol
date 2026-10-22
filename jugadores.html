@@ -50,6 +50,39 @@
         @media (max-width: 600px) {
             .btn-edit-profile { width: 100% !important; }
         }
+
+        /* BOTÓN FLOTANTE SOS (FALTA 1 YA) */
+        .btn-sos-floating {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: linear-gradient(135deg, #e74c3c 0%, #e67e22 100%);
+            color: #fff;
+            border: none;
+            padding: 13px 22px;
+            border-radius: 50px;
+            font-size: 0.92rem;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.55), 0 0 15px rgba(230, 126, 34, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulseSos 2s infinite;
+        }
+        .btn-sos-floating:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 12px 30px rgba(231, 76, 60, 0.75);
+        }
+        @keyframes pulseSos {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+            70% { box-shadow: 0 0 0 14px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
     </style>
 </head>
 <body>
@@ -153,40 +186,25 @@
         </div>
     </section>
 
+    <!-- MODAL PERFIL JUGADOR (SIN SMS) -->
     <div id="modal-perfil-jugador" class="modal-oculto">
         <div class="modal-contenido" style="max-width: 450px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px;">
             <button id="cerrar-perfil" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
             <span class="mini-label">TU FUT CARD</span>
             <h2>Edita tu Perfil</h2>
-            
-            <div id="sms-section" style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #f1c40f;">
-                <h4 style="margin:0 0 10px 0; color:#f1c40f;"><i class="ph-bold ph-device-mobile"></i> Verificación de Seguridad</h4>
-                
-                <div id="phone-verified-msg" style="display:none; color:#2ecc71; font-weight:bold; font-size:0.9rem;">
-                    <i class="ph-bold ph-check-circle"></i> Celular verificado y seguro.
-                </div>
-                
-                <div id="phone-unverified-box">
-                    <p style="font-size:0.8rem; color:#ccc; margin-top:0;">Verifica tu celular para activar tu Tarjeta FUT y ser visible.</p>
-                    <div id="step-1-phone">
-                        <input type="tel" id="sms-phone" placeholder="987654321" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:10px; text-align:center; font-size:1.2rem; letter-spacing:2px;">
-                        <div id="recaptcha-container"></div>
-                        <button type="button" id="btn-send-sms" class="btn" style="width:100%; background:#f1c40f; color:#000; font-weight:bold;">Enviar SMS de Código</button>
-                    </div>
-                    
-                    <div id="step-2-code" style="display:none;">
-                        <p style="font-size:0.8rem; color:#ccc; text-align:center;">Ingresa los 6 dígitos que te llegaron por SMS:</p>
-                        <input type="text" id="sms-code" placeholder="------" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.2); background:rgba(0,0,0,0.5); color:#fff; margin-bottom:10px; text-align:center; font-size:1.5rem; letter-spacing:5px;">
-                        <button type="button" id="btn-verify-sms" class="btn" style="width:100%; background:#2ecc71; color:#000; font-weight:bold;">Verificar Código</button>
-                    </div>
-                </div>
-            </div>
 
             <form id="form-editar-perfil">
                 <div style="margin-bottom: 15px;">
                     <label class="filter-field">
                         <span>Nombre / Apodo en la App</span>
                         <input type="text" id="perfil-nombre" placeholder="Ej: Josué Jaramillo" required style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; margin-top: 5px;">
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label class="filter-field">
+                        <span>WhatsApp / Teléfono de Contacto</span>
+                        <input type="tel" id="perfil-telefono" placeholder="Ej: 987654321" maxlength="9" oninput="this.value=this.value.replace(/[^0-9]/g,'');" style="width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; box-sizing: border-box; margin-top: 5px;">
                     </label>
                 </div>
 
@@ -202,7 +220,7 @@
                     <label class="filter-field">
                         <span>Posición</span>
                         <select id="perfil-posicion">
-                            </select>
+                        </select>
                     </label>
                 </div>
                 <div class="filter-row" style="grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
@@ -210,7 +228,7 @@
                     <label class="filter-field"><span>Pie / Mano Hábil</span><select id="perfil-habilidad"><option>Diestro</option><option>Zurdo</option><option>Ambidiestro</option></select></label>
                 </div>
                 
-                <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;" disabled>
+                <button type="button" id="btn-guardar-perfil" class="btn hero-primary" style="width: 100%; margin-top: 25px;">
                     <i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta
                 </button>
                 
@@ -220,6 +238,50 @@
             </form>
         </div>
     </div>
+
+    <!-- MODAL SOS: FALTA 1 YA (URGENTE) -->
+    <div id="modal-sos-anuncio" class="modal-oculto">
+        <div class="modal-contenido" style="max-width: 480px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px; border: 1.5px solid #e74c3c; box-shadow: 0 0 30px rgba(231,76,60,0.35); text-align: left;">
+            <button id="cerrar-modal-sos" class="btn-cerrar"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label" style="color: #e74c3c; font-weight: 900;"><i class="ph-fill ph-siren"></i> ALERTA DE EMERGENCIA</span>
+            <h2 style="margin: 0 0 6px; color: #fff; font-size: 1.45rem;">SOS (Falta 1 Ya)</h2>
+            <p style="color: #aaa; font-size: 0.85rem; margin: 0 0 20px; line-height: 1.4;">
+                Publica un aviso urgente que aparecerá primero en el feed con una etiqueta destacada para encontrar jugador de inmediato.
+            </p>
+
+            <form id="form-sos-anuncio">
+                <div style="margin-bottom: 14px;">
+                    <label class="filter-field">
+                        <span>Modalidad del Partido</span>
+                        <select id="sos-modalidad" style="width:100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; box-sizing: border-box; margin-top: 4px;">
+                            <option>Fútbol 5</option>
+                            <option>Fútbol 6</option>
+                            <option selected>Fútbol 7</option>
+                            <option>Fútbol 8</option>
+                            <option>Fútbol 11</option>
+                            <option>Vóley</option>
+                            <option>Básquet</option>
+                        </select>
+                    </label>
+                </div>
+                <div style="margin-bottom: 18px;">
+                    <label class="filter-field">
+                        <span>Detalle Urgente (Lugar / Hora)</span>
+                        <textarea id="sos-texto" rows="3" maxlength="200" required placeholder="Ej: ¡Falta 1 para jugar AHORA a las 8:30 PM en Fundo Excalibur! Llegar ya..." style="width:100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; box-sizing: border-box; font-family: inherit; resize: none; margin-top: 4px;"></textarea>
+                    </label>
+                </div>
+                <button type="submit" class="btn" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #e74c3c, #e67e22); color: #fff; font-weight: 900; font-size: 1rem; border: none; border-radius: 10px; box-shadow: 0 4px 18px rgba(231,76,60,0.4); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer;">
+                    <i class="ph-fill ph-siren"></i> Publicar Alerta SOS
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BOTÓN FLOTANTE SOS (FALTA 1 YA) -->
+    <button id="btn-sos-jales" class="btn-sos-floating" title="Lanzar Alerta Urgente">
+        <i class="ph-fill ph-siren" style="font-size: 1.3rem;"></i>
+        <span>SOS (Falta 1 Ya)</span>
+    </button>
 
     <div id="modal-ver-perfil" class="modal-oculto">
         <div class="modal-contenido" style="max-width: 400px; padding: 30px 25px; box-sizing: border-box; border-radius: 16px; border: 1px solid #f1c40f;">
@@ -236,7 +298,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, RecaptchaVerifier, linkWithPhoneNumber, signOut, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -258,7 +320,6 @@
     const btnGuardarPerfil = document.getElementById('btn-guardar-perfil');
     const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
     let currentUser = null;
-    let verifiedPhoneFromDB = null;
 
     // MAPA DE POSICIONES POR DEPORTE
     const posicionesPorDeporte = {
@@ -303,14 +364,6 @@
 
     onAuthStateChanged(auth, async (user) => { 
         currentUser = user; 
-        if(user) {
-            try {
-                const docSnap = await getDoc(doc(db, "jugadores_perfiles", user.uid));
-                if (docSnap.exists() && docSnap.data().telefono) {
-                    verifiedPhoneFromDB = docSnap.data().telefono;
-                }
-            } catch(e) { console.error("Error leyendo DB:", e); }
-        }
     });
 
     if (btnAbrirPerfil) {
@@ -328,44 +381,31 @@
             let nombreCargado = "";
             let deporteCargado = "Fútbol";
             let posicionCargada = "DEL";
+            let telefonoCargado = "";
 
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 nombreCargado = data.nombre;
                 deporteCargado = data.deporte || "Fútbol";
                 posicionCargada = data.posicion || "DEL";
+                telefonoCargado = data.telefono || "";
                 document.getElementById('perfil-ciudad').value = data.ciudad || '';
                 document.getElementById('perfil-habilidad').value = data.habilidad || 'Diestro';
-                verifiedPhoneFromDB = data.telefono;
             }
 
-            // SI EL NOMBRE EN FIRESTORE ES "Jugador" O "null", JALAMOS EL DE GOOGLE
             if (!nombreCargado || nombreCargado === "Jugador" || nombreCargado === "null") {
                 nombreCargado = currentUser.displayName || "";
             }
+            if (!telefonoCargado && currentUser.phoneNumber) {
+                telefonoCargado = currentUser.phoneNumber.replace(/\D/g, '');
+            }
 
             document.getElementById('perfil-nombre').value = nombreCargado;
+            document.getElementById('perfil-telefono').value = telefonoCargado;
             document.getElementById('perfil-deporte').value = deporteCargado;
             
-            // Cargar opciones dinámicas de posición
             actualizarPosiciones(deporteCargado, posicionCargada);
-
-            if (currentUser.phoneNumber || verifiedPhoneFromDB) {
-                document.getElementById('phone-unverified-box').style.display = 'none';
-                const msg = document.getElementById('phone-verified-msg');
-                msg.style.display = 'block';
-                msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Verificado: ${currentUser.phoneNumber || verifiedPhoneFromDB}`;
-                btnGuardarPerfil.disabled = false;
-            } else {
-                document.getElementById('phone-unverified-box').style.display = 'block';
-                document.getElementById('phone-verified-msg').style.display = 'none';
-                btnGuardarPerfil.disabled = true; 
-                
-                if(!window.recaptchaVerifier) {
-                    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
-                }
-            }
-            
+            btnGuardarPerfil.disabled = false;
             modalPerfil.classList.add('mostrar');
         });
     }
@@ -379,55 +419,33 @@
         });
     }
 
-    document.getElementById('btn-send-sms').addEventListener('click', () => {
-        const num = document.getElementById('sms-phone').value;
-        if(num.length !== 9) return alert("Ingresa un número celular de 9 dígitos válido.");
-        const phoneNumber = "+51" + num; 
-        
-        window.tempPhoneNumberToVerify = phoneNumber;
-        const btn = document.getElementById('btn-send-sms');
-        btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Enviando...';
+    document.getElementById('cerrar-perfil')?.addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
+    document.getElementById('cerrar-ver-perfil')?.addEventListener('click', () => document.getElementById('modal-ver-perfil').classList.remove('mostrar'));
 
-        signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier)
-            .then((confirmationResult) => {
-                window.confirmationResult = confirmationResult;
-                document.getElementById('step-1-phone').style.display = 'none';
-                document.getElementById('step-2-code').style.display = 'block';
-            }).catch((error) => {
-                console.error("SMS Error:", error);
-                alert("Error al enviar el SMS. Intenta con un número de prueba configurado en Firebase.");
-                btn.disabled = false; btn.innerHTML = "Reintentar";
-                if(window.recaptchaVerifier) window.recaptchaVerifier.clear();
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {'size': 'invisible'});
-            });
-    });
+    // CONTROLADORES BOTÓN Y MODAL SOS
+    const btnSos = document.getElementById('btn-sos-jales');
+    const modalSos = document.getElementById('modal-sos-anuncio');
+    const btnCerrarSos = document.getElementById('cerrar-modal-sos');
 
-    document.getElementById('btn-verify-sms').addEventListener('click', () => {
-        const code = document.getElementById('sms-code').value;
-        if(code.length !== 6) return alert("El código tiene 6 dígitos.");
-        
-        const btn = document.getElementById('btn-verify-sms');
-        btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Validando...';
-
-        window.confirmationResult.confirm(code).then((result) => {
-            document.getElementById('phone-unverified-box').style.display = 'none';
-            const msg = document.getElementById('phone-verified-msg');
-            msg.style.display = 'block';
-            
-            verifiedPhoneFromDB = window.tempPhoneNumberToVerify;
-            msg.innerHTML = `<i class="ph-bold ph-check-circle"></i> Celular verificado: ${verifiedPhoneFromDB}`;
-            btnGuardarPerfil.disabled = false;
-        }).catch((error) => {
-            console.error("Code Error:", error);
-            alert("Código incorrecto. Verifica el mensaje en tu celular.");
-            btn.disabled = false; btn.innerHTML = "Verificar Código";
+    if (btnSos && modalSos) {
+        btnSos.addEventListener('click', async () => {
+            if (!currentUser) {
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    currentUser = result.user;
+                } catch(err) { return; }
+            }
+            modalSos.classList.add('mostrar');
         });
-    });
+    }
 
-    document.getElementById('cerrar-perfil').addEventListener('click', () => modalPerfil.classList.remove('mostrar'));
-    document.getElementById('cerrar-ver-perfil').addEventListener('click', () => document.getElementById('modal-ver-perfil').classList.remove('mostrar'));
+    if (btnCerrarSos && modalSos) {
+        btnCerrarSos.addEventListener('click', () => {
+            modalSos.classList.remove('mostrar');
+        });
+    }
 
-    // GUARDAR TARJETA FUT
+    // GUARDAR TARJETA FUT (DIRECTO SIN SMS)
     if (btnGuardarPerfil) {
         btnGuardarPerfil.addEventListener('click', async () => {
             if (!currentUser) return;
@@ -438,12 +456,13 @@
             if (!nombreIngresado || nombreIngresado === "null" || nombreIngresado === "Jugador") {
                 nombreIngresado = currentUser.displayName || "Jugador";
             }
+            const telefonoIngresado = document.getElementById('perfil-telefono')?.value.trim() || currentUser.phoneNumber || '';
 
             const perfilData = {
                 uid: currentUser.uid, 
                 nombre: nombreIngresado, 
                 foto: currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreIngresado)}&background=2ecc71&color=fff`,
-                telefono: currentUser.phoneNumber || verifiedPhoneFromDB,
+                telefono: telefonoIngresado,
                 deporte: document.getElementById('perfil-deporte').value,
                 posicion: document.getElementById('perfil-posicion').value,
                 ciudad: document.getElementById('perfil-ciudad').value,

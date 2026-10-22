@@ -23,12 +23,8 @@ if (mapEl && window.L) {
     const map = L.map(mapEl, { zoomControl: false, scrollWheelZoom: true, fadeAnimation: true }).setView([-5.1945, -80.6328], 13);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     
-    const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { subdomains: 'abcd', maxZoom: 20, attribution: '&copy; OpenStreetMap contributors &copy; CARTO' });
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' });
-    
-    let fallback = false;
-    carto.on('tileerror', () => { if (!fallback) { fallback = true; map.removeLayer(carto); osm.addTo(map); } });
-    carto.addTo(map);
+    osm.addTo(map);
     
     const markers = L.layerGroup().addTo(map);
     const userLayer = L.layerGroup().addTo(map);
@@ -50,13 +46,30 @@ if (mapEl && window.L) {
         if (!m) m = u.match(/[?&](?:q|ll)=(-?\d+(?:\.\d+)?)[,%20]+(-?\d+(?:\.\d+)?)/);
         return m ? [Number(m[1]), Number(m[2])] : null;
     }
+
+    function getCourtSchedule(c, dateStr) {
+        if (!c) return { activo: false, open: null, close: null, step: 60 };
+        const [y, m, d] = (dateStr || todayKey()).split('-').map(Number);
+        const dt = (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) ? new Date(y, m - 1, d, 12, 0, 0) : new Date();
+        const diasCon = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const diasSin = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+        const idx = dt.getDay();
+        const h = c.horariosSemana?.[diasCon[idx]] || c.horariosSemana?.[diasSin[idx]];
+        if (h && h.activo === false) return { activo: false, open: null, close: null, step: 60 };
+        const open = h?.apertura || h?.inicio || c.horaApertura || c.horaInicio || '08:00';
+        const close = h?.cierre || h?.fin || c.horaCierre || c.horaFin || '23:00';
+        const step = Number(c.intervaloMinutos || c.duracionReserva || 60) || 60;
+        return { activo: true, open, close, step };
+    }
     
     function isOpen(c) {
-        if (!c.horaApertura || !c.horaCierre) return false;
-        const n = new Date(), now = n.getHours() * 60 + n.getMinutes();
-        const [ha, ma] = c.horaApertura.split(':').map(Number), [hc, mc] = c.horaCierre.split(':').map(Number);
-        const a = ha * 60 + ma, b = hc * 60 + mc;
-        return b > a ? now >= a && now <= b : now >= a || now <= b;
+        if (!c) return false;
+        const h = getCourtSchedule(c, todayKey());
+        if (!h.activo || !h.open || !h.close) return false;
+        const now = new Date(), current = now.getHours() * 60 + now.getMinutes();
+        const a = toMinutes(h.open), b = toMinutes(h.close);
+        if (a === null || b === null) return false;
+        return b > a ? current >= a && current <= b : current >= a || current <= b;
     }
     
     function toMinutes(v) {
@@ -70,7 +83,9 @@ if (mapEl && window.L) {
     function reservationTime(r) { return toMinutes(r.horaInicio ?? r.hora ?? r.horaReserva ?? r.time); }
     
     function buildSlots(c, reservas) {
-        const start = toMinutes(c.horaApertura), end = toMinutes(c.horaCierre), step = Number(c.intervaloMinutos || c.duracionReserva || 60);
+        const h = getCourtSchedule(c, todayKey());
+        if (!h.activo || !h.open || !h.close) return { html: '<span class="availability-empty">Cerrado hoy</span>', count: 0 };
+        const start = toMinutes(h.open), end = toMinutes(h.close), step = h.step;
         if (start === null || end === null || !Number.isFinite(step) || step <= 0) return { html: '<span class="availability-empty">Horario no configurado</span>', count: 0 };
         
         let final = end; if (final <= start) final += 1440;

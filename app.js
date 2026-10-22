@@ -95,7 +95,48 @@ function formatWsp(num) {
 function normalizar(v) { return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() }
 function obtenerCiudad(c) { return c.ciudad || c.provincia || c.departamento || '' } function obtenerTipo(c) { return c.tipoCancha || c.tipo || c.modalidad || '' }
 function precioNumero(c) { const p = Number(String(c.precio ?? '').replace(',', '.').replace(/[^0-9.]/g, '')); return Number.isFinite(p) ? p : 0 }
-function canchaEstaAbierta(c) { if (!c.horaApertura || !c.horaCierre) return false; const n = new Date(), actual = n.getHours() * 60 + n.getMinutes(), [ha, ma] = c.horaApertura.split(':').map(Number), [hc, mc] = c.horaCierre.split(':').map(Number); if (![ha, ma, hc, mc].every(Number.isFinite)) return false; const a = ha * 60 + ma, b = hc * 60 + mc; return b > a ? actual >= a && actual <= b : actual >= a || actual <= b }
+function normalizarDiaKey(str) { return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+
+function obtenerHorarioCancha(c, fechaReq) {
+    if (!c) return { activo: false, apertura: null, cierre: null, step: 60 };
+    const fStr = fechaReq || fechaHoy();
+    const [y, m, d] = String(fStr).split('-').map(Number);
+    const dt = (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) ? new Date(y, m - 1, d, 12, 0, 0) : new Date();
+    const diasCon = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const diasSin = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const idx = dt.getDay();
+    const diaCon = diasCon[idx], diaSin = diasSin[idx];
+    
+    let horarioDia = null;
+    if (c.horariosSemana && typeof c.horariosSemana === 'object') {
+        horarioDia = c.horariosSemana[diaCon] || c.horariosSemana[diaSin];
+        if (!horarioDia) {
+            for (const [k, v] of Object.entries(c.horariosSemana)) {
+                if (normalizarDiaKey(k) === diaSin) { horarioDia = v; break; }
+            }
+        }
+    }
+    
+    if (horarioDia && horarioDia.activo === false) {
+        return { activo: false, apertura: null, cierre: null, step: Number(c.intervaloMinutos || c.duracionReserva || 60) || 60 };
+    }
+    
+    const apertura = horarioDia?.apertura || horarioDia?.inicio || c.horaApertura || c.horaInicio || '08:00';
+    const cierre = horarioDia?.cierre || horarioDia?.fin || c.horaCierre || c.horaFin || '23:00';
+    const step = Number(c.intervaloMinutos || c.duracionReserva || 60) || 60;
+    return { activo: true, apertura, cierre, step };
+}
+
+function canchaEstaAbierta(c) {
+    if (!c) return false;
+    const now = new Date();
+    const h = obtenerHorarioCancha(c, fechaHoy());
+    if (!h || !h.activo || !h.apertura || !h.cierre) return false;
+    const actual = now.getHours() * 60 + now.getMinutes();
+    const a = minutos(h.apertura), b = minutos(h.cierre);
+    if (a === null || b === null) return false;
+    return b > a ? (actual >= a && actual <= b) : (actual >= a || actual <= b);
+}
 function distanciaKm(lat1, lon1, lat2, lon2) { const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180, a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2; return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) }
 function distanciaCerca(c) { if (ubicacionUsuario && Number.isFinite(Number(c.lat)) && Number.isFinite(Number(c.lng))) return distanciaKm(ubicacionUsuario.lat, ubicacionUsuario.lng, Number(c.lat), Number(c.lng)); return Number(c.distanciaKm ?? c.distancia ?? 999999) }
 const esInicio = () => { const p = window.location.pathname.replace(/\/$/, ''); return p === '' || p.endsWith('/index.html') || p.endsWith('/futbol') || p.endsWith('/futbol/index.html') };
@@ -103,11 +144,13 @@ const fechaHoy = () => { const d = new Date(); return `${d.getFullYear()}-${Stri
 const minutos = t => { const m = String(t || '').match(/^(\d{1,2}):(\d{2})$/); return m ? Number(m[1]) * 60 + Number(m[2]) : null };
 
 const slotsDeCancha = (c, reservas, fechaReq) => {
-    const a = minutos(c.horaApertura), b0 = minutos(c.horaCierre), step = Number(c.intervaloMinutos || c.duracionReserva || 60);
+    const fReq = fechaReq || fechaHoy();
+    const h = obtenerHorarioCancha(c, fReq);
+    if (!h || !h.activo || !h.apertura || !h.cierre) return [];
+    const a = minutos(h.apertura), b0 = minutos(h.cierre), step = h.step;
     if (a === null || b0 === null || !Number.isFinite(step) || step <= 0) return [];
     let b = b0 <= a ? b0 + 1440 : b0;
-    const fReq = fechaReq || fechaHoy();
-    const ocupadas = new Set(reservas.filter(r => String(r.canchaId) === String(c.id) && String(r.fecha) === fReq && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(r.estado))).map(r => minutos(r.horaInicio)).filter(Number.isFinite));
+    const ocupadas = new Set((reservas || []).filter(r => String(r.canchaId) === String(c.id) && String(r.fecha) === fReq && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(r.estado))).map(r => minutos(r.horaInicio || r.hora)).filter(Number.isFinite));
     const isToday = fReq === fechaHoy();
     const now = new Date(), actual = now.getHours() * 60 + now.getMinutes();
     const out = [];
@@ -365,12 +408,30 @@ if (window.location.pathname.includes('jugadores.html')) {
             return;
         }
 
+        // 🔥 REQUERIMIENTO 4: Los anuncios urgentes (SOS) se muestran primero en el feed
+        docsBolsa.sort((a, b) => {
+            const aUrg = a.urgente ? 1 : 0;
+            const bUrg = b.urgente ? 1 : 0;
+            if (aUrg !== bUrg) return bUrg - aUrg;
+            const aTime = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0;
+            const bTime = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0;
+            return bTime - aTime;
+        });
+
         let bufferHTML = '';
 
         docsBolsa.forEach(d => {
             const esMio = usuarioActual && d.uid === usuarioActual.uid;
             const borrar = esMio ? `<button class="btn btn-borrar-anuncio" data-id="${d.id}" style="width:100%; padding:8px 12px; font-size:0.8rem; border-radius:8px; margin-top:10px; background:rgba(231,76,60,0.1); color:#e74c3c; border:1px dashed rgba(231,76,60,0.3);"><i class="ph-bold ph-trash"></i> Borrar Anuncio</button>` : '';
             const fechaTexto = d.createdAt?.toDate ? new Date(d.createdAt.toDate()).toLocaleDateString('es-PE') : 'Reciente';
+
+            const esUrgente = Boolean(d.urgente);
+            const badgeUrgente = esUrgente 
+                ? `<div style="background:linear-gradient(135deg, #e74c3c, #e67e22); color:#fff; font-size:0.75rem; font-weight:900; padding:4px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:5px; margin-bottom:10px; box-shadow:0 2px 10px rgba(231,76,60,0.45);"><i class="ph-fill ph-siren"></i> ¡URGENTE · FALTA 1 YA!</div>`
+                : '';
+            const estiloCard = esUrgente
+                ? 'background:rgba(231,76,60,0.06); border:1.5px solid #e74c3c; box-shadow:0 0 20px rgba(231,76,60,0.25); border-radius:12px; padding:20px;'
+                : 'background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; box-shadow:0 4px 15px rgba(0,0,0,0.2);';
 
             let interaccionHTML = '';
             const postulantes = d.postulantes || {};
@@ -399,7 +460,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                 </div>`;
             } else {
                 if (!usuarioActual) {
-                    interaccionHTML = `<button class="btn" style="width:100%; margin-top:15px; background:rgba(255,255,255,0.1); color:#aaa; border:1px dashed #555;" onclick="window.toast('Inicia sesión para postularte','warning')">Inicia sesión para apuntarte</button>`;
+                    interaccionHTML = `<button class="btn" style="width:100%; margin-top:15px; background:rgba(255,255,255,0.1); color:#aaa; border:1px dashed #555;" onclick="window.toast('Inicia sesión con Google para postularte','warning')">Inicia sesión para apuntarte</button>`;
                 } else if (yaPostulo) {
                     if (miPostulacion.estado === 'aceptado') {
                         interaccionHTML = `<div style="margin-top:15px; padding:15px; background:rgba(46,204,113,0.1); border:1px solid #2ecc71; border-radius:8px; text-align:center;">
@@ -417,7 +478,8 @@ if (window.location.pathname.includes('jugadores.html')) {
             }
 
             bufferHTML += `
-            <article style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:20px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <article style="${estiloCard}">
+                ${badgeUrgente}
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
                     <strong onclick="abrirPerfilJugador('${d.uid}')" style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem; cursor:pointer; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#fff'" title="Ver Tarjeta FUT">
                         <i class="ph-fill ph-user-circle" style="font-size:1.8rem; color:var(--primary-green);"></i> 
@@ -437,29 +499,30 @@ if (window.location.pathname.includes('jugadores.html')) {
 
         lista.querySelectorAll('.btn-postular').forEach(b => {
             b.addEventListener('click', async () => {
-                if (!usuarioActual) return window.toast('Inicia sesión para postularte.', 'warning');
+                if (!usuarioActual) return window.toast('Inicia sesión con Google para postularte.', 'warning');
 
-                let telefonoVerificado = usuarioActual.phoneNumber;
-                if (!telefonoVerificado) {
-                    try {
-                        const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
-                        if (docSnap.exists() && docSnap.data().telefono) telefonoVerificado = docSnap.data().telefono;
-                    } catch (err) { console.error(err); }
-                }
+                // 🔥 REQUERIMIENTO 1: Sin verificación SMS, solo datos en jugadores_perfiles
+                let perfil = null;
+                try {
+                    const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
+                    if (docSnap.exists()) perfil = docSnap.data();
+                } catch (err) { console.error(err); }
 
-                if (!telefonoVerificado) {
-                    window.toast('Debes configurar y verificar tu número en la Tarjeta FUT antes de apuntarte.', 'warning');
+                if (!perfil) {
+                    window.toast('Completa tu Tarjeta de Jugador antes de postularte.', 'warning');
+                    document.getElementById('modal-perfil-jugador')?.classList.add('mostrar');
                     return;
                 }
 
                 const anuncioId = b.dataset.anuncio;
                 b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
                 try {
+                    const telContacto = perfil.telefono || usuarioActual.phoneNumber || '';
                     await updateDoc(doc(db, 'bolsa_jugadores', anuncioId), {
                         [`postulantes.${usuarioActual.uid}`]: {
                             uid: usuarioActual.uid,
-                            nombre: usuarioActual.displayName || 'Jugador',
-                            telefono: formatWsp(telefonoVerificado),
+                            nombre: perfil.nombre || usuarioActual.displayName || 'Jugador',
+                            telefono: telContacto ? formatWsp(telContacto) : '',
                             estado: 'pendiente'
                         }
                     });
@@ -523,21 +586,22 @@ if (window.location.pathname.includes('jugadores.html')) {
         });
     }
 
+    // FORMULARIO DE PUBLICACIÓN ESTÁNDAR
     if (formAnuncio) {
         formAnuncio.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!usuarioActual) { window.toast('Inicia sesión con Google para publicar.', 'warning'); return; }
 
-            let telefonoVerificado = usuarioActual.phoneNumber;
-            if (!telefonoVerificado) {
-                try {
-                    const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
-                    if (docSnap.exists() && docSnap.data().telefono) telefonoVerificado = docSnap.data().telefono;
-                } catch (err) { console.error(err); }
-            }
+            // 🔥 REQUERIMIENTO 1: Sin verificación SMS, solo datos en jugadores_perfiles
+            let perfil = null;
+            try {
+                const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
+                if (docSnap.exists()) perfil = docSnap.data();
+            } catch (err) { console.error(err); }
 
-            if (!telefonoVerificado) {
-                window.toast('Debes verificar tu celular en "Configurar mi Tarjeta de Jugador" antes de publicar.', 'warning');
+            if (!perfil) {
+                window.toast('Configura tu Tarjeta de Jugador antes de publicar.', 'warning');
+                document.getElementById('modal-perfil-jugador')?.classList.add('mostrar');
                 return;
             }
 
@@ -555,14 +619,16 @@ if (window.location.pathname.includes('jugadores.html')) {
                     return;
                 }
 
+                const telContacto = perfil.telefono || usuarioActual.phoneNumber || '';
                 await addDoc(collection(db, 'bolsa_jugadores'), {
                     uid: usuarioActual.uid,
-                    nombreJugador: usuarioActual.displayName || 'Jugador',
-                    nombre: usuarioActual.displayName || 'Jugador',
+                    nombreJugador: perfil.nombre || usuarioActual.displayName || 'Jugador',
+                    nombre: perfil.nombre || usuarioActual.displayName || 'Jugador',
                     tipo: document.getElementById('tipo-anuncio')?.value || 'jugador',
                     modalidad: document.getElementById('modalidad-anuncio')?.value || 'Fútbol 7',
-                    contacto: formatWsp(telefonoVerificado),
+                    contacto: telContacto ? formatWsp(telContacto) : '',
                     texto: document.getElementById('texto-anuncio')?.value || '',
+                    urgente: false,
                     postulantes: {},
                     createdAt: serverTimestamp(), updatedAt: serverTimestamp()
                 });
@@ -570,6 +636,67 @@ if (window.location.pathname.includes('jugadores.html')) {
                 window.toast('¡Anuncio publicado con éxito!', 'success');
                 formAnuncio.reset();
             } catch (error) { window.toast('Error al publicar.', 'error'); } finally { if (btn) { btn.disabled = false; btn.innerHTML = textOriginal; } }
+        });
+    }
+
+    // 🔥 REQUERIMIENTO 4: FORMULARIO DE PUBLICACIÓN SOS (FALTA 1 YA)
+    const formSos = document.getElementById('form-sos-anuncio');
+    if (formSos) {
+        formSos.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!usuarioActual) {
+                window.toast('Inicia sesión con Google para lanzar una alerta SOS.', 'warning');
+                try {
+                    const res = await signInWithPopup(auth, new GoogleAuthProvider());
+                    usuarioActual = res.user;
+                } catch(err) { return; }
+            }
+
+            let perfil = null;
+            try {
+                const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
+                if (docSnap.exists()) perfil = docSnap.data();
+            } catch (err) { console.error(err); }
+
+            if (!perfil) {
+                window.toast('Configura tu Tarjeta de Jugador antes de publicar un SOS.', 'warning');
+                document.getElementById('modal-sos-anuncio')?.classList.remove('mostrar');
+                document.getElementById('modal-perfil-jugador')?.classList.add('mostrar');
+                return;
+            }
+
+            const btn = formSos.querySelector('button[type="submit"]');
+            const textOriginal = btn ? btn.innerHTML : 'Publicar SOS';
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Lanzando SOS...'; }
+
+            try {
+                const telContacto = perfil.telefono || usuarioActual.phoneNumber || '';
+                const modalidad = document.getElementById('sos-modalidad')?.value || 'Fútbol 7';
+                const detalle = document.getElementById('sos-texto')?.value.trim() || '¡Nos falta 1 jugador urgente para completar el partido!';
+
+                await addDoc(collection(db, 'bolsa_jugadores'), {
+                    uid: usuarioActual.uid,
+                    nombreJugador: perfil.nombre || usuarioActual.displayName || 'Jugador',
+                    nombre: perfil.nombre || usuarioActual.displayName || 'Jugador',
+                    tipo: 'jugador',
+                    modalidad: modalidad,
+                    contacto: telContacto ? formatWsp(telContacto) : '',
+                    texto: `🚨 SOS (Falta 1 Ya): ${detalle}`,
+                    urgente: true,
+                    postulantes: {},
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp()
+                });
+
+                window.toast('¡Alerta SOS publicada con éxito! Aparecerá al inicio de la bolsa.', 'success');
+                formSos.reset();
+                document.getElementById('modal-sos-anuncio')?.classList.remove('mostrar');
+            } catch (err) {
+                console.error('Error al publicar SOS:', err);
+                window.toast('No se pudo publicar la alerta SOS.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = textOriginal; }
+            }
         });
     }
 }
