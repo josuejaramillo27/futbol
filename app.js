@@ -351,12 +351,24 @@ async function pintarDisponibilidadModal(c, fechaElegida) {
         ]);
         const slots = slotsDeCancha(c, snapRes.docs.map(d => d.data()), snapBloq.docs.map(d => d.data()), fReq);
         const libres = slots.filter(s => !s.blocked).length;
+        const targetId = c.id;
+
+        // Botón secundario para visitar el perfil completo de la cancha (Link en Bio / cancha.html)
+        const botonPerfilCompleto = !window.location.pathname.includes('cancha.html') ? `
+            <div style="margin-top: 20px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px;">
+                <a href="cancha.html?id=${targetId}" class="btn btn-outline" style="width: 100%; font-size: 0.85rem; padding: 11px 16px; border-color: rgba(46, 204, 113, 0.35); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; border-radius: 10px; transition: all 0.2s ease;">
+                    Ver perfil completo, reseñas y mapa <i class="ph-bold ph-arrow-right"></i>
+                </a>
+            </div>
+        ` : '';
+
         box.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:10px; border:1px solid var(--border-color);">
                 <label style="display:flex; flex-direction:column; font-size:0.8rem; color:var(--text-muted); font-weight:bold;">FECHA DE RESERVA<input type="date" id="input-fecha-modal" value="${fReq}" min="${fechaHoy()}" style="background:transparent; border:none; color:#fff; font-size:1.1rem; font-weight:bold; outline:none; margin-top:4px; font-family:inherit; color-scheme:dark; cursor:pointer;"></label>
                 <div style="text-align:right;"><span style="font-size:0.75rem; color:var(--text-muted); font-weight:bold;">DISPONIBLES</span><strong style="font-size:1.3rem; color:var(--primary-green); display:block;">${libres}</strong></div>
             </div>
             <div class="modal-slots">${slots.length ? slots.map(s => `<button type="button" class="modal-slot ${s.blocked ? 'blocked' : ''}" data-book-court="${c.id}" data-book-time="${s.label}" data-book-date="${fReq}" ${s.blocked ? 'disabled' : ''}>${s.label}</button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
+            ${botonPerfilCompleto}
         `;
         document.getElementById('input-fecha-modal')?.addEventListener('change', (e) => pintarDisponibilidadModal(c, e.target.value));
         box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b => b.addEventListener('click', () => abrirReserva(c, b.dataset.bookTime, b.dataset.bookDate)));
