@@ -1,167 +1,137 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
-    authDomain: "app-futbol-acd0f.firebaseapp.com",
-    projectId: "app-futbol-acd0f",
-    storageBucket: "app-futbol-acd0f.firebasestorage.app",
-    messagingSenderId: "223446110165",
-    appId: "1:223446110165:web:219afce6a9dac03203f75c"
-};
-
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const db = getFirestore(app);
 const mapEl = document.getElementById('map-canchas');
 
-// Controles del Modal
+// Controles del Modal de Mapa
 const modalMapa = document.getElementById('modal-mapa');
 const btnAbrirMapa = document.getElementById('btn-abrir-mapa');
 const btnCerrarMapa = document.getElementById('cerrar-mapa');
 
 if (mapEl && window.L) {
-    const map = L.map(mapEl, { zoomControl: false, scrollWheelZoom: true, fadeAnimation: true }).setView([-5.1945, -80.6328], 13);
+    const map = L.map(mapEl, { zoomControl: false, scrollWheelZoom: true, fadeAnimation: true }).setView([-9.1899, -75.0152], 6);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap contributors' });
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+        maxZoom: 19, 
+        attribution: '&copy; OpenStreetMap contributors' 
+    });
     osm.addTo(map);
     
     const markers = L.layerGroup().addTo(map);
     const userLayer = L.layerGroup().addTo(map);
     const status = document.getElementById('map-status');
-    const btn = document.getElementById('btn-mi-ubicacion');
+    const btnUbicacion = document.getElementById('btn-mi-ubicacion');
     
-    const icon = L.divIcon({ className: 'premium-map-marker', html: '<div><i class="ph-fill ph-soccer-ball"></i></div>', iconSize: [40, 40], iconAnchor: [20, 38], popupAnchor: [0, -38] });
-    const userIcon = L.divIcon({ className: 'user-map-marker', html: '<div><span></span></div>', iconSize: [24, 24], iconAnchor: [12, 12] });
+    const icon = L.divIcon({ 
+        className: 'premium-map-marker', 
+        html: '<div><i class="ph-fill ph-soccer-ball"></i></div>', 
+        iconSize: [40, 40], 
+        iconAnchor: [20, 38], 
+        popupAnchor: [0, -38] 
+    });
+
+    const userIcon = L.divIcon({ 
+        className: 'user-map-marker', 
+        html: '<div><span></span></div>', 
+        iconSize: [24, 24], 
+        iconAnchor: [12, 12] 
+    });
     
     const escapeHtml = v => String(v ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
-    const pad = n => String(n).padStart(2, '0');
-    const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` };
     
+    // Función defensiva para extraer coordenadas en cualquier formato
     function coords(c) {
-        let lat = Number(c.lat), lng = Number(c.lng);
-        if (Number.isFinite(lat) && Number.isFinite(lng)) return [lat, lng];
-        const u = String(c.ubicacionLink || '');
+        if (!c) return null;
+        let lat = Number(c.lat ?? c.latitud ?? c.latitude);
+        let lng = Number(c.lng ?? c.longitud ?? c.longitude);
+        if (Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)) {
+            return [lat, lng];
+        }
+        const u = String(c.ubicacionLink || c.mapa || '');
         let m = u.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
         if (!m) m = u.match(/[?&](?:q|ll)=(-?\d+(?:\.\d+)?)[,%20]+(-?\d+(?:\.\d+)?)/);
-        return m ? [Number(m[1]), Number(m[2])] : null;
-    }
-
-    function getCourtSchedule(c, dateStr) {
-        if (!c) return { activo: false, open: null, close: null, step: 60 };
-        const [y, m, d] = (dateStr || todayKey()).split('-').map(Number);
-        const dt = (Number.isFinite(y) && Number.isFinite(m) && Number.isFinite(d)) ? new Date(y, m - 1, d, 12, 0, 0) : new Date();
-        const diasCon = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-        const diasSin = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-        const idx = dt.getDay();
-        const h = c.horariosSemana?.[diasCon[idx]] || c.horariosSemana?.[diasSin[idx]];
-        if (h && h.activo === false) return { activo: false, open: null, close: null, step: 60 };
-        const open = h?.apertura || h?.inicio || c.horaApertura || c.horaInicio || '08:00';
-        const close = h?.cierre || h?.fin || c.horaCierre || c.horaFin || '23:00';
-        const step = Number(c.intervaloMinutos || c.duracionReserva || 60) || 60;
-        return { activo: true, open, close, step };
-    }
-    
-    function isOpen(c) {
-        if (!c) return false;
-        const h = getCourtSchedule(c, todayKey());
-        if (!h.activo || !h.open || !h.close) return false;
-        const now = new Date(), current = now.getHours() * 60 + now.getMinutes();
-        const a = toMinutes(h.open), b = toMinutes(h.close);
-        if (a === null || b === null) return false;
-        return b > a ? current >= a && current <= b : current >= a || current <= b;
-    }
-    
-    function toMinutes(v) {
-        if (typeof v === 'number') return v;
-        const m = String(v || '').match(/(\d{1,2}):?(\d{2})?/);
-        return m ? Number(m[1]) * 60 + Number(m[2] || 0) : null;
-    }
-    
-    function reservationMatches(r, c) { return String(r.canchaId ?? r.canchaID ?? r.courtId ?? r.cancha ?? '') === String(c.id); }
-    function reservationDate(r) { return r.fecha?.toDate ? r.fecha.toDate().toISOString().slice(0, 10) : String(r.fecha ?? r.fechaReserva ?? r.date ?? '').slice(0, 10); }
-    function reservationTime(r) { return toMinutes(r.horaInicio ?? r.hora ?? r.horaReserva ?? r.time); }
-    
-    function buildSlots(c, reservas) {
-        const h = getCourtSchedule(c, todayKey());
-        if (!h.activo || !h.open || !h.close) return { html: '<span class="availability-empty">Cerrado hoy</span>', count: 0 };
-        const start = toMinutes(h.open), end = toMinutes(h.close), step = h.step;
-        if (start === null || end === null || !Number.isFinite(step) || step <= 0) return { html: '<span class="availability-empty">Horario no configurado</span>', count: 0 };
-        
-        let final = end; if (final <= start) final += 1440;
-        const occupied = new Set();
-        reservas.filter(r => reservationMatches(r, c) && reservationDate(r) === todayKey() && !['cancelada', 'cancelado', 'cancelled'].includes(String(r.estado || r.status || '').toLowerCase())).forEach(r => { const t = reservationTime(r); if (t !== null) occupied.add(t % 1440); });
-        
-        const now = new Date(), current = now.getHours() * 60 + now.getMinutes();
-        let html = '', available = 0;
-        
-        for (let t = start; t < final; t += step) {
-            const real = t % 1440, label = `${pad(Math.floor(real / 60))}:${pad(real % 60)}`, past = real < current, blocked = occupied.has(real) || past, cls = blocked ? 'busy' : 'free';
-            if (!blocked) available++;
-            html += `<button type="button" class="availability-slot ${cls}" data-time="${label}" data-id="${escapeHtml(c.id)}" ${blocked ? 'disabled' : ''}>${label}</button>`;
+        if (m) {
+            const mLat = Number(m[1]), mLng = Number(m[2]);
+            if (Number.isFinite(mLat) && Number.isFinite(mLng)) return [mLat, mLng];
         }
-        return { html, count: available };
-    }
-    
-    function popup(c, reservas) {
-        const open = isOpen(c), rating = Number(c.ratingPromedio || c.rating || 0), foto = c.fotos?.[0] || 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=500&q=80', slots = buildSlots(c, reservas);
-        return `<div class="map-popup premium-popup"><div class="map-popup-cover" style="background-image:url('${escapeHtml(foto)}')"><span class="map-popup-status ${open ? 'open' : 'closed'}"><i class="ph-fill ph-circle"></i> ${open ? 'Abierto ahora' : 'Cerrado'}</span></div><div class="map-popup-body"><strong>${escapeHtml(c.nombre || 'Cancha')}</strong><span class="map-popup-rating"><i class="ph-fill ph-star"></i> ${rating ? rating.toFixed(1) : 'Nuevo'} · ${escapeHtml(c.tipoCancha || c.tipo || 'Fútbol')}</span><span><i class="ph-bold ph-map-pin"></i> ${escapeHtml(c.ubicacionTexto || c.ciudad || 'Ubicación disponible')}</span><div class="map-popup-price">${c.precio != null ? `S/ ${escapeHtml(c.precio)} <small>/ hora</small>` : 'Consultar precio'}</div><div class="availability-head"><span>Horarios de hoy</span><b>${slots.count} disponibles</b></div><div class="availability-grid">${slots.html}</div><small class="availability-note"><i class="ph-bold ph-info"></i> Verde = disponible · Gris = ocupado o ya pasó</small><div class="map-popup-actions"><button type="button" class="map-open-card" data-id="${escapeHtml(c.id)}">Ver cancha</button>${c.ubicacionLink ? `<a href="${escapeHtml(c.ubicacionLink)}" target="_blank" rel="noopener">Ruta <i class="ph-bold ph-arrow-up-right"></i></a>` : ''}</div></div></div>`;
-    }
-    
-    function bindSlots(c) {
-        document.querySelectorAll(`.availability-slot.free[data-id="${CSS.escape(c.id)}"]`).forEach(el => el.addEventListener('click', () => {
-            const time = el.dataset.time, tel = String(c.whatsapp || '').replace(/\D/g, '');
-            if (!tel) { 
-                modalMapa.classList.remove('mostrar'); // Cerrar mapa
-                window.abrirModal?.(c.id); // Abrir info cancha
-                return; 
-            }
-            const msg = `Hola ${c.nombre}, vengo de CHALACAPP. Quiero reservar la cancha hoy a las ${time}. ¿Está disponible?`;
-            window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
-        }));
+        return null;
     }
 
-    async function cargar() {
-        try { 
-            const [snap, resSnap] = await Promise.all([getDocs(collection(db, 'canchas')), getDocs(collection(db, 'reservas')).catch(() => null)]);
-            const reservas = resSnap ? resSnap.docs.map(d => ({ id: d.id, ...d.data() })) : [];
-            const bounds = [];
-            
-            snap.forEach(ds => {
-                const c = { id: ds.id, ...ds.data() };
-                if (c.estadoPublicacion !== 'published' && c.configurado !== true) return;
-                const pos = coords(c);
-                if (!pos) return;
-                
-                const marker = L.marker(pos, { icon }).bindPopup(popup(c, reservas), { maxWidth: 290, minWidth: 240 });
-                marker.on('popupopen', () => {
-                    bindSlots(c);
-                    const el = document.querySelector(`.map-open-card[data-id="${CSS.escape(c.id)}"]`);
-                    el?.addEventListener('click', () => {
-                        modalMapa.classList.remove('mostrar');
-                        window.abrirModal?.(c.id);
-                    });
-                });
-                marker.addTo(markers);
-                bounds.push(pos);
-            });
-            
-            if(bounds.length > 0) {
-                map.fitBounds(bounds, { padding: [35, 35], maxZoom: 14 });
-                if(status) status.textContent = `${bounds.length} cancha${bounds.length === 1 ? '' : 's'} en el mapa.`;
-            } else {
-                if(status) status.textContent = 'Aún no hay canchas en el mapa.';
-            }
-        } catch (error) { 
-            console.error("Error cargando el mapa:", error);
-            if(status) status.textContent = 'No pudimos cargar el mapa.';
+    function popup(c) {
+        const nombre = escapeHtml(c.nombreCancha || c.nombre || 'Cancha');
+        const precio = c.precio != null && c.precio !== '' ? `S/ ${escapeHtml(c.precio)} <small>/ hora</small>` : 'Consultar precio';
+        const rating = Number(c.ratingPromedio || c.rating || 0);
+        const tipo = escapeHtml(c.tipoCancha || c.tipo || 'Fútbol');
+        const ubicacion = escapeHtml(c.departamento || c.ciudad || c.ubicacionTexto || 'Ubicación disponible');
+        const foto = c.fotos?.[0] || 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=500&q=80';
+        const targetId = encodeURIComponent(c.id || '');
+        const estaAbierta = c.isOpen === true;
+
+        return `
+            <div class="map-popup premium-popup">
+                <div class="map-popup-cover" style="background-image:url('${escapeHtml(foto)}')">
+                    <span class="map-popup-status ${estaAbierta ? 'open' : 'closed'}">
+                        <i class="ph-fill ph-circle"></i> ${estaAbierta ? 'Abierto ahora' : 'Cerrado'}
+                    </span>
+                </div>
+                <div class="map-popup-body">
+                    <strong>${nombre}</strong>
+                    <span class="map-popup-rating">
+                        <i class="ph-fill ph-star"></i> ${rating > 0 ? rating.toFixed(1) : 'Nuevo'} · ${tipo}
+                    </span>
+                    <span><i class="ph-bold ph-map-pin"></i> ${ubicacion}</span>
+                    <div class="map-popup-price">${precio}</div>
+                    <div class="map-popup-actions" style="margin-top: 10px; display: flex; gap: 8px;">
+                        <a href="cancha.html?id=${targetId}" style="display:flex; align-items:center; justify-content:center; gap:6px; background:var(--primary-green, #00D968); color:#03150B; font-weight:800; font-size:11px; padding:9px 12px; border-radius:8px; text-decoration:none; flex:1; text-align:center;">
+                            Ver perfil completo <i class="ph-bold ph-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Renderizado reactivo de marcadores en el mapa Leaflet
+    function renderizarMarcadores(lista) {
+        if (!markers) return;
+        markers.clearLayers();
+
+        const canchas = Array.isArray(lista) ? lista : (window.canchasFiltradasActuales || window.canchasGlobales || []);
+        const bounds = [];
+
+        canchas.forEach(c => {
+            if (!c) return;
+            const pos = coords(c);
+            if (!pos) return;
+
+            const marker = L.marker(pos, { icon }).bindPopup(popup(c), { maxWidth: 290, minWidth: 230 });
+            marker.addTo(markers);
+            bounds.push(pos);
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [35, 35], maxZoom: 15 });
+            if (status) status.textContent = `${bounds.length} cancha${bounds.length === 1 ? '' : 's'} en el mapa.`;
+        } else {
+            if (status) status.textContent = 'Aún no hay canchas con ubicación registrada.';
         }
     }
 
+    // Exponer globalmente para sincronización con app.js y filtros
+    window.renderizarMarcadoresMapa = renderizarMarcadores;
+    window.actualizarMapaCanchas = renderizarMarcadores;
+
+    // Escuchar evento personalizado emitido por app.js cuando cambien filtros o carguen canchas
+    window.addEventListener('canchasActualizadas', (e) => {
+        if (e.detail) renderizarMarcadores(e.detail);
+    });
+
+    // Ubicar al usuario
     function ubicarUsuario() {
-        if (!navigator.geolocation) { if(status) status.textContent = 'Tu navegador no admite geolocalización.'; return; }
-        if(btn) btn.setAttribute('disabled', 'disabled');
-        if(status) status.textContent = 'Obteniendo tu ubicación…';
+        if (!navigator.geolocation) { 
+            if (status) status.textContent = 'Tu navegador no admite geolocalización.'; 
+            return; 
+        }
+        if (btnUbicacion) btnUbicacion.setAttribute('disabled', 'disabled');
+        if (status) status.textContent = 'Obteniendo tu ubicación…';
         
         navigator.geolocation.getCurrentPosition(pos => {
             const lat = pos.coords.latitude, lng = pos.coords.longitude;
@@ -169,25 +139,26 @@ if (mapEl && window.L) {
             L.marker([lat, lng], { icon: userIcon }).addTo(userLayer).bindPopup('<strong>Estás aquí</strong>').openPopup();
             L.circle([lat, lng], { radius: 1000, color: '#00D968', fillColor: '#00D968', fillOpacity: .08, weight: 1 }).addTo(userLayer);
             map.setView([lat, lng], 14);
-            if(status) status.textContent = 'Ubicación activada. Explora las canchas cercanas.';
-            if(btn) btn.removeAttribute('disabled');
+            if (status) status.textContent = 'Ubicación activada. Explora las canchas cercanas.';
+            if (btnUbicacion) btnUbicacion.removeAttribute('disabled');
         }, () => {
-            if(status) status.textContent = 'No pudimos acceder a tu ubicación. Revisa permisos.';
-            if(btn) btn.removeAttribute('disabled');
+            if (status) status.textContent = 'No pudimos acceder a tu ubicación. Revisa permisos.';
+            if (btnUbicacion) btnUbicacion.removeAttribute('disabled');
         }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
     }
 
-    if(btn) btn.addEventListener('click', ubicarUsuario);
+    if (btnUbicacion) btnUbicacion.addEventListener('click', ubicarUsuario);
     
-    // =====================================
-    // EVENTOS PARA ABRIR Y CERRAR EL MAPA
-    // =====================================
+    // Controles de Apertura y Cierre del Mapa
     if (btnAbrirMapa && modalMapa) {
         btnAbrirMapa.addEventListener('click', () => {
             modalMapa.classList.add('mostrar');
-            // TRUCO VITAL: Avisarle a Leaflet que el contenedor ya es visible
             setTimeout(() => {
                 map.invalidateSize(true);
+                const actuales = window.canchasFiltradasActuales || window.canchasGlobales;
+                if (actuales && actuales.length > 0) {
+                    renderizarMarcadores(actuales);
+                }
             }, 250); 
         });
     }
@@ -198,10 +169,13 @@ if (mapEl && window.L) {
         });
     }
 
-    // Cerrar al hacer clic fuera
     modalMapa?.addEventListener('click', (e) => {
         if (e.target === modalMapa) modalMapa.classList.remove('mostrar');
     });
 
-    cargar();
+    // Render inicial si las canchas ya fueron descargadas
+    if (window.canchasGlobales && window.canchasGlobales.length > 0) {
+        renderizarMarcadores(window.canchasGlobales);
+    }
 }
+

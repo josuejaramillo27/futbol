@@ -193,54 +193,186 @@ const slotsDeCancha = (c, reservas = [], bloqueos = [], fechaReq = null) => {
 // PÁGINA PRINCIPAL (INDEX)
 // ==========================================
 if (esInicio()) {
-    const contenedor = document.getElementById('lista-canchas'), inputBusqueda = document.getElementById('filtro-busqueda'), filtroCiudad = document.getElementById('filtro-ciudad'), filtroTipo = document.getElementById('filtro-tipo'), filtroPrecio = document.getElementById('filtro-precio'), filtroOrden = document.getElementById('filtro-orden'), contador = document.getElementById('contador-canchas'), filtroActivo = document.getElementById('filtro-activo'); let soloAbiertas = false, soloCerca = false, soloTop = false;
-    function llenarSelect(select, valores, placeholder) { if (!select) return; const actual = select.value; select.innerHTML = `<option value="">${placeholder}</option>`;[...new Set(valores.map(v => String(v).trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'es')).forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; select.appendChild(o) }); if ([...select.options].some(o => o.value === actual)) select.value = actual }
+    const contenedor = document.getElementById('lista-canchas');
+    const inputBusqueda = document.getElementById('filtro-busqueda');
+    const filtroCiudad = document.getElementById('filtro-ciudad');
+    const filtroTipo = document.getElementById('filtro-tipo');
+    const filtroPrecio = document.getElementById('filtro-precio');
+    const filtroOrden = document.getElementById('filtro-orden');
+    const contador = document.getElementById('contador-canchas');
+    const filtroActivo = document.getElementById('filtro-activo');
+    let soloAbiertas = false, soloCerca = false, soloTop = false;
+
+    // Restaurar departamento memorizado desde localStorage si existe
+    const deptoGuardado = localStorage.getItem('departamentoSeleccionado');
+    if (deptoGuardado && filtroCiudad) {
+        filtroCiudad.value = deptoGuardado;
+    }
+
+    // Función para poblar el filtro de tipos deduplicando sin distinguir mayúsculas/minúsculas
+    function llenarSelectTipos(canchas) {
+        if (!filtroTipo) return;
+        const actual = (filtroTipo.value || '').toLowerCase().trim();
+        const tiposMap = new Map();
+
+        (canchas || []).forEach(c => {
+            const candidatos = [];
+            if (c?.tipo) candidatos.push(c.tipo);
+            if (c?.tipoCancha) candidatos.push(c.tipoCancha);
+            if (c?.modalidad) candidatos.push(c.modalidad);
+            if (Array.isArray(c?.canchasDelComplejo)) {
+                c.canchasDelComplejo.forEach(sub => {
+                    if (sub?.tipo) candidatos.push(sub.tipo);
+                    if (sub?.tipoCancha) candidatos.push(sub.tipoCancha);
+                });
+            }
+            candidatos.forEach(raw => {
+                if (!raw) return;
+                String(raw).split(',').forEach(item => {
+                    const limpio = item.trim();
+                    if (!limpio) return;
+                    const clave = limpio.toLowerCase();
+                    if (!tiposMap.has(clave)) {
+                        tiposMap.set(clave, limpio);
+                    }
+                });
+            });
+        });
+
+        const tiposOrdenados = Array.from(tiposMap.values()).sort((a, b) => a.localeCompare(b, 'es'));
+        filtroTipo.innerHTML = '<option value="">Todos los tipos</option>';
+        tiposOrdenados.forEach(tipoNombre => {
+            const opt = document.createElement('option');
+            opt.value = tipoNombre;
+            opt.textContent = tipoNombre;
+            if (actual && tipoNombre.toLowerCase().trim() === actual) {
+                opt.selected = true;
+            }
+            filtroTipo.appendChild(opt);
+        });
+    }
 
     function renderizarCanchas() {
         if (!contenedor) return;
-        const texto = normalizar(inputBusqueda?.value), ciudad = normalizar(filtroCiudad?.value), tipo = normalizar(filtroTipo?.value), rango = filtroPrecio?.value || '', orden = filtroOrden?.value || 'recomendadas';
+        const texto = normalizar(inputBusqueda?.value);
+        const deptoFiltro = normalizar(filtroCiudad?.value);
+        const tipoFiltro = normalizar(filtroTipo?.value);
+        const rango = filtroPrecio?.value || '';
+        const orden = filtroOrden?.value || 'recomendadas';
+
         let resultados = canchasGlobales.filter(c => {
-            const buscable = normalizar(`${c.nombre} ${c.ubicacionTexto || ''} ${obtenerCiudad(c)} ${obtenerTipo(c)} ${c.tiposMulti || ''}`), precio = precioNumero(c);
-            let rp = true; if (rango) { const [min, max] = rango.split('-').map(Number); rp = precio >= min && precio <= max }
-            return (!texto || buscable.includes(texto)) && (!ciudad || normalizar(obtenerCiudad(c)) === ciudad) && (!tipo || (normalizar(obtenerTipo(c)) === tipo || normalizar(c.tiposMulti || '').includes(tipo))) && rp && (!soloAbiertas || c.isOpen) && (!soloTop || c.rating >= 4.5) && (!soloCerca || distanciaCerca(c) <= 10);
+            const buscable = normalizar(`${c.nombre || ''} ${c.ubicacionTexto || ''} ${c.distrito || ''} ${c.ciudad || ''} ${c.departamento || ''} ${c.tipo || ''} ${c.tipoCancha || ''} ${c.tiposMulti || ''}`);
+            const precio = precioNumero(c);
+            let rp = true;
+            if (rango) {
+                const [min, max] = rango.split('-').map(Number);
+                rp = precio >= min && precio <= max;
+            }
+
+            // Filtro Departamento: coincidencia defensiva con departamento, ciudad o provincia
+            const matchDepto = !deptoFiltro || 
+                normalizar(c.departamento) === deptoFiltro || 
+                normalizar(c.ciudad) === deptoFiltro || 
+                normalizar(c.provincia) === deptoFiltro;
+
+            // Filtro Tipo: insensible a mayúsculas/minúsculas
+            const matchTipo = !tipoFiltro || 
+                normalizar(c.tipo) === tipoFiltro || 
+                normalizar(c.tipoCancha) === tipoFiltro || 
+                normalizar(c.modalidad) === tipoFiltro || 
+                normalizar(c.tiposMulti || '').includes(tipoFiltro);
+
+            return (!texto || buscable.includes(texto)) && 
+                   matchDepto && 
+                   matchTipo && 
+                   rp && 
+                   (!soloAbiertas || c.isOpen) && 
+                   (!soloTop || c.rating >= 4.5) && 
+                   (!soloCerca || distanciaCerca(c) <= 10);
         });
+
         resultados.sort((a, b) => orden === 'rating' ? b.rating - a.rating : orden === 'precio-asc' ? precioNumero(a) - precioNumero(b) : orden === 'precio-desc' ? precioNumero(b) - precioNumero(a) : orden === 'cerca' ? distanciaCerca(a) - distanciaCerca(b) : a.isOpen !== b.isOpen ? (a.isOpen ? -1 : 1) : b.rating - a.rating);
         if (contador) contador.textContent = `${resultados.length} ${resultados.length === 1 ? 'complejo encontrado' : 'complejos encontrados'}`;
-        if (filtroActivo) { const a = []; if (ciudad) a.push(filtroCiudad.value); if (tipo) a.push(filtroTipo.value); if (rango) a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text); if (soloAbiertas) a.push('Abiertas ahora'); if (soloTop) a.push('4.5+ estrellas'); if (soloCerca) a.push(ubicacionUsuario ? 'Cerca de mí' : 'Cerca de mí*'); filtroActivo.textContent = a.length ? a.join(' · ') : '' }
+        if (filtroActivo) {
+            const a = [];
+            if (deptoFiltro && filtroCiudad) a.push(filtroCiudad.value);
+            if (tipoFiltro && filtroTipo) a.push(filtroTipo.value);
+            if (rango) a.push(filtroPrecio.options[filtroPrecio.selectedIndex].text);
+            if (soloAbiertas) a.push('Abiertas ahora');
+            if (soloTop) a.push('4.5+ estrellas');
+            if (soloCerca) a.push(ubicacionUsuario ? 'Cerca de mí' : 'Cerca de mí*');
+            filtroActivo.textContent = a.length ? a.join(' · ') : '';
+        }
+
         contenedor.innerHTML = '';
         if (!resultados.length) {
             contenedor.innerHTML = '<div class="card empty-results" style="grid-column:1/-1;text-align:center"><i class="ph ph-magnifying-glass" style="font-size:34px;color:var(--primary-green)"></i><h3>No encontramos canchas</h3><p>Prueba quitando algún filtro o buscando otra zona.</p><button type="button" class="btn btn-outline" style="width:auto;margin:15px auto 0" id="btn-reset-empty">Limpiar filtros</button></div>';
-            document.getElementById('btn-reset-empty')?.addEventListener('click', limpiarFiltros); return;
-        }
-        resultados.forEach(c => {
-            const estado = c.isOpen ? '<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>' : '<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>', logo = c.logo || 'https://via.placeholder.com/100', portada = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85', d = distanciaCerca(c), dist = Number.isFinite(d) && d < 999999 ? ` · ${d.toFixed(1)} km` : '';
+            document.getElementById('btn-reset-empty')?.addEventListener('click', limpiarFiltros);
+        } else {
+            resultados.forEach(c => {
+                const estado = c.isOpen ? '<span class="badge-estado badge-abierto"><i class="ph-fill ph-circle"></i> Abierto ahora</span>' : '<span class="badge-estado badge-cerrado"><i class="ph-fill ph-circle"></i> Cerrado</span>';
+                const logo = c.logo || 'https://via.placeholder.com/100';
+                const portada = c.fotos?.length ? c.fotos[0] : 'https://images.unsplash.com/photo-1518605368461-1e1e38ce81ba?auto=format&fit=crop&w=1000&q=85';
+                const d = distanciaCerca(c);
+                const dist = Number.isFinite(d) && d < 999999 ? ` · ${d.toFixed(1)} km` : '';
 
-            // 🔥 SUBTÍTULO DINÁMICO CON TURNOS LIBRES HOY
-            let textoTurnos = '';
-            if (typeof c.totalTurnosLibres === 'number' && Number.isFinite(c.totalTurnosLibres)) {
-                if (c.totalTurnosLibres > 0) {
-                    textoTurnos = `<span style="color:var(--primary-green); font-weight:800;"><i class="ph-bold ph-clock"></i> 🟢 ${c.totalTurnosLibres} ${c.totalTurnosLibres === 1 ? 'turno libre hoy' : 'turnos libres hoy'}</span>`;
+                // Subtítulo dinámico con turnos libres hoy
+                let textoTurnos = '';
+                if (typeof c.totalTurnosLibres === 'number' && Number.isFinite(c.totalTurnosLibres)) {
+                    if (c.totalTurnosLibres > 0) {
+                        textoTurnos = `<span style="color:var(--primary-green); font-weight:800;"><i class="ph-bold ph-clock"></i> 🟢 ${c.totalTurnosLibres} ${c.totalTurnosLibres === 1 ? 'turno libre hoy' : 'turnos libres hoy'}</span>`;
+                    } else {
+                        textoTurnos = `<span style="color:#e74c3c; font-weight:700;"><i class="ph-bold ph-x-circle"></i> 🔴 Sin turnos libres hoy</span>`;
+                    }
                 } else {
-                    textoTurnos = `<span style="color:#e74c3c; font-weight:700;"><i class="ph-bold ph-x-circle"></i> 🔴 Sin turnos libres hoy</span>`;
+                    textoTurnos = c.isOpen
+                        ? `<span style="color:var(--primary-green); font-weight:800;">🟢 Abierto hoy</span>`
+                        : `<span style="color:#e74c3c; font-weight:700;">🔴 Cerrado</span>`;
                 }
-            } else {
-                textoTurnos = c.isOpen
-                    ? `<span style="color:var(--primary-green); font-weight:800;">🟢 Abierto hoy</span>`
-                    : `<span style="color:#e74c3c; font-weight:700;">🔴 Cerrado</span>`;
-            }
-            const infoCanchas = c.cantidadCanchas > 1 ? ` · <span style="color:#aaa; font-weight:normal;">${c.cantidadCanchas} canchas${c.tiposMulti ? ` (${c.tiposMulti})` : ''}</span>` : (c.tiposMulti ? ` · <span style="color:#aaa; font-weight:normal;">${c.tiposMulti}</span>` : '');
-            const subtituloCanchas = `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem;">${textoTurnos}${infoCanchas}</p>`;
+                const infoCanchas = c.cantidadCanchas > 1 ? ` · <span style="color:#aaa; font-weight:normal;">${c.cantidadCanchas} canchas${c.tiposMulti ? ` (${c.tiposMulti})` : ''}</span>` : (c.tiposMulti ? ` · <span style="color:#aaa; font-weight:normal;">${c.tiposMulti}</span>` : '');
+                const subtituloCanchas = `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem;">${textoTurnos}${infoCanchas}</p>`;
 
-            contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="cancha.html?id=${c.id}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : ''}${dist}</p>
-         ${subtituloCanchas}
-         <div class="court-meta" style="margin-top:8px;"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol')}</span><strong>S/ ${c.precio ?? 'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`
-        });
-        contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
-            if (window.abrirModal) window.abrirModal(b.dataset.courtId);
-        }));
+                contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="cancha.html?id=${c.id}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${c.departamento ? ` · ${c.departamento}` : (obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : '')}${dist}</p>
+             ${subtituloCanchas}
+             <div class="court-meta" style="margin-top:8px;"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol')}</span><strong>S/ ${c.precio ?? 'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`;
+            });
+
+            contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
+                if (window.abrirModal) window.abrirModal(b.dataset.courtId);
+            }));
+        }
+
+        // Sincronizar reactivamente con el mapa Leaflet
+        window.canchasFiltradasActuales = resultados;
+        if (typeof window.actualizarMapaCanchas === 'function') {
+            window.actualizarMapaCanchas(resultados);
+        }
+        window.dispatchEvent(new CustomEvent('canchasActualizadas', { detail: resultados }));
     }
 
-    function limpiarFiltros() { if (inputBusqueda) inputBusqueda.value = ''; if (filtroCiudad) filtroCiudad.value = ''; if (filtroTipo) filtroTipo.value = ''; if (filtroPrecio) filtroPrecio.value = ''; if (filtroOrden) filtroOrden.value = 'recomendadas'; soloAbiertas = soloCerca = soloTop = false; document.querySelectorAll('.quick-filter').forEach(b => b.classList.remove('active')); renderizarCanchas() }
+    function limpiarFiltros() {
+        if (inputBusqueda) inputBusqueda.value = '';
+        if (filtroCiudad) filtroCiudad.value = '';
+        if (filtroTipo) filtroTipo.value = '';
+        if (filtroPrecio) filtroPrecio.value = '';
+        if (filtroOrden) filtroOrden.value = 'recomendadas';
+        soloAbiertas = soloCerca = soloTop = false;
+        localStorage.removeItem('departamentoSeleccionado');
+        document.querySelectorAll('.quick-filter').forEach(b => b.classList.remove('active'));
+        renderizarCanchas();
+    }
+
+    // Escuchar cambios de departamento para guardar en memoria localStorage
+    filtroCiudad?.addEventListener('change', () => {
+        const sel = filtroCiudad.value;
+        if (sel) {
+            localStorage.setItem('departamentoSeleccionado', sel);
+        } else {
+            localStorage.removeItem('departamentoSeleccionado');
+        }
+        localStorage.setItem('gpsPreguntado', 'true');
+        renderizarCanchas();
+    });
 
     async function cargar() {
         if (!contenedor) return;
@@ -258,7 +390,6 @@ if (esInicio()) {
             s.forEach(ds => {
                 const d = ds.data();
                 if (d.estadoPublicacion === 'published' || (d.configurado === true && !d.estadoPublicacion)) {
-                    // Agrupa por usuarioUid (o id del documento si no tiene)
                     const uid = d.usuarioUid || d.ownerUid || ds.id;
                     if (!agrupados[uid]) agrupados[uid] = [];
                     let turnosLibres = 0;
@@ -300,18 +431,44 @@ if (esInicio()) {
                 return main;
             });
 
-            llenarSelect(filtroCiudad, canchasGlobales.map(obtenerCiudad), 'Todas las ciudades');
+            window.canchasGlobales = canchasGlobales;
 
-            const todosLosTipos = [];
-            Object.values(agrupados).forEach(g => g.forEach(c => { if (c.tipo) todosLosTipos.push(c.tipo); }));
-            llenarSelect(filtroTipo, todosLosTipos, 'Todos los tipos');
+            // Llenar dinámicamente los tipos deduplicados a partir de las canchas descargadas
+            llenarSelectTipos(canchasGlobales);
+
+            // Sincronizar valor guardado si coincide
+            if (deptoGuardado && filtroCiudad) {
+                filtroCiudad.value = deptoGuardado;
+            }
 
             renderizarCanchas();
         } catch (e) {
+            console.error("Error al cargar canchas:", e);
             contenedor.innerHTML = `<div class="card" style="grid-column:1/-1;text-align:center;color:var(--danger);padding:28px">Error cargando las canchas.</div>`;
         }
     }
-    [inputBusqueda, filtroCiudad, filtroTipo, filtroPrecio, filtroOrden].forEach(e => e?.addEventListener('input', renderizarCanchas)); document.querySelectorAll('.quick-filter').forEach(b => b.addEventListener('click', () => { const f = b.dataset.filter; if (f === 'limpiar') return limpiarFiltros(); if (f === 'abiertas') soloAbiertas = !soloAbiertas; if (f === 'cerca') { if (!navigator.geolocation) return window.toast('Tu navegador no permite geolocalización.', 'error'); navigator.geolocation.getCurrentPosition(p => { ubicacionUsuario = { lat: p.coords.latitude, lng: p.coords.longitude }; soloCerca = true; b.classList.add('active'); renderizarCanchas() }, () => window.toast('Activa la ubicación.', 'warning')); return } if (f === 'top') soloTop = !soloTop; b.classList.toggle('active'); renderizarCanchas() })); cargar()
+
+    [inputBusqueda, filtroTipo, filtroPrecio, filtroOrden].forEach(e => e?.addEventListener('input', renderizarCanchas));
+    document.querySelectorAll('.quick-filter').forEach(b => b.addEventListener('click', () => { 
+        const f = b.dataset.filter; 
+        if (f === 'limpiar') return limpiarFiltros(); 
+        if (f === 'abiertas') soloAbiertas = !soloAbiertas; 
+        if (f === 'cerca') { 
+            if (!navigator.geolocation) return window.toast('Tu navegador no permite geolocalización.', 'error'); 
+            navigator.geolocation.getCurrentPosition(p => { 
+                ubicacionUsuario = { lat: p.coords.latitude, lng: p.coords.longitude }; 
+                soloCerca = true; 
+                b.classList.add('active'); 
+                renderizarCanchas();
+            }, () => window.toast('Activa la ubicación.', 'warning')); 
+            return;
+        } 
+        if (f === 'top') soloTop = !soloTop; 
+        b.classList.toggle('active'); 
+        renderizarCanchas();
+    }));
+
+    cargar();
 }
 
 // ==========================================
@@ -1215,28 +1372,11 @@ if (window.location.pathname.includes('cancha.html')) {
 }
 
 // ==========================================
-// MÓDULO INTELIGENTE: GPS, SLIDER Y FILTROS (CORREGIDO)
+// MÓDULO INTELIGENTE: GPS, SLIDER Y MEMORIA
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 1. LLENAR EL FILTRO DE TIPOS DINÁMICAMENTE USANDO LA BD EXISTENTE (db)
-    async function cargarTiposDinamicos() {
-        try {
-            if (typeof db !== 'undefined') {
-                const snap = await getDocs(collection(db, 'canchas'));
-                const tipos = new Set();
-                snap.forEach(d => { if (d.data().tipo) tipos.add(d.data().tipo); });
-                const selectTipo = document.getElementById('filtro-tipo');
-                if (selectTipo && tipos.size > 0) {
-                    selectTipo.innerHTML = '<option value="">Todos los tipos</option>' +
-                        [...tipos].map(t => `<option value="${t}">${t}</option>`).join('');
-                }
-            }
-        } catch (e) { console.error("Error al cargar tipos dinámicos", e); }
-    }
-    cargarTiposDinamicos();
-
-    // 2. EFECTO DESENFOQUE (BLUR) PARA EL CARRUSEL
+    // 1. EFECTO DESENFOQUE (BLUR) PARA EL CARRUSEL
     const sliderLista = document.getElementById('lista-canchas');
     if (sliderLista) {
         const blurObserver = new IntersectionObserver((entries) => {
@@ -1282,58 +1422,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. MODAL GPS (GEOLOCALIZACIÓN DEL DEPARTAMENTO)
+    // 2. MODAL GPS (GEOLOCALIZACIÓN DEL DEPARTAMENTO CON MEMORIA LOCALSTORAGE)
     const modalGps = document.getElementById('modal-ubicacion');
-    if (modalGps && !localStorage.getItem('gpsPreguntado')) {
-        setTimeout(() => { modalGps.style.display = 'flex'; }, 1500);
+    const yaTieneDepto = localStorage.getItem('departamentoSeleccionado');
+    const yaPreguntado = localStorage.getItem('gpsPreguntado');
+
+    // No mostrar el modal si ya existe un departamento memorizado o ya se preguntó
+    if (modalGps && !yaTieneDepto && !yaPreguntado) {
+        setTimeout(() => { 
+            modalGps.style.display = 'flex'; 
+        }, 1200);
     }
 
-    document.getElementById('btn-cerrar-gps')?.addEventListener('click', () => {
+    const cerrarModalGps = () => {
         localStorage.setItem('gpsPreguntado', 'true');
         if (modalGps) modalGps.style.display = 'none';
-    });
+    };
+
+    document.getElementById('btn-cerrar-gps')?.addEventListener('click', cerrarModalGps);
 
     document.getElementById('btn-detectar-gps')?.addEventListener('click', () => {
         const btn = document.getElementById('btn-detectar-gps');
-        btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Ubicando...';
+        const textoOriginal = btn ? btn.innerHTML : '';
+        if (btn) btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Ubicando...';
 
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async (pos) => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                try {
-                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-                    const data = await res.json();
-                    let dpto = data.address.state || data.address.region || '';
+        if (!navigator.geolocation) {
+            cerrarModalGps();
+            return;
+        }
 
-                    dpto = dpto.replace(' Department', '').replace(' Región', '').trim();
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+            const lat = pos?.coords?.latitude;
+            const lon = pos?.coords?.longitude;
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+                const data = await res.json();
+                let dpto = data?.address?.state || data?.address?.region || '';
+                dpto = dpto.replace(' Department', '').replace(' Región', '').replace(' Region', '').trim();
 
-                    const selectDept = document.getElementById('filtro-ciudad');
-                    let encontrado = false;
-                    if (selectDept) {
-                        for (let i = 0; i < selectDept.options.length; i++) {
-                            if (selectDept.options[i].value.toLowerCase() === dpto.toLowerCase()) {
-                                selectDept.selectedIndex = i;
-                                encontrado = true;
-                                selectDept.dispatchEvent(new Event('change'));
-                                break;
-                            }
+                const selectDept = document.getElementById('filtro-ciudad');
+                let deptoEncontrado = null;
+                if (selectDept && dpto) {
+                    const dptoNorm = normalizar(dpto);
+                    for (let i = 0; i < selectDept.options.length; i++) {
+                        if (normalizar(selectDept.options[i].value) === dptoNorm) {
+                            selectDept.selectedIndex = i;
+                            deptoEncontrado = selectDept.options[i].value;
+                            selectDept.dispatchEvent(new Event('change'));
+                            break;
                         }
                     }
-
-                    localStorage.setItem('gpsPreguntado', 'true');
-                    if (modalGps) modalGps.style.display = 'none';
-                    if (encontrado) alert(`¡Detectado! Mostrando canchas en ${dpto}.`);
-
-                } catch (e) {
-                    alert("No pudimos obtener tu departamento exacto. Puedes seleccionarlo manualmente.");
-                    if (modalGps) modalGps.style.display = 'none';
                 }
-            }, () => {
-                alert("Permiso de ubicación denegado.");
-                localStorage.setItem('gpsPreguntado', 'true');
-                if (modalGps) modalGps.style.display = 'none';
-            });
-        }
+
+                if (deptoEncontrado) {
+                    localStorage.setItem('departamentoSeleccionado', deptoEncontrado);
+                    window.toast?.(`Ubicación detectada: ${deptoEncontrado}`, 'success');
+                }
+            } catch (e) {
+                console.warn("Geolocalización inversa no disponible:", e);
+            } finally {
+                cerrarModalGps();
+                if (btn) btn.innerHTML = textoOriginal;
+            }
+        }, (err) => {
+            // Usuario rechaza permisos o falla la API: NO BLOQUEAR LA APP
+            console.warn("Ubicación rechazada o no disponible:", err);
+            cerrarModalGps();
+            if (btn) btn.innerHTML = textoOriginal;
+        }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 });
     });
 });
