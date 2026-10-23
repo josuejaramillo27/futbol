@@ -594,6 +594,36 @@
 }
 
 /* ===================================================
+   AJUSTES RESPONSIVOS TABLET/MÓVILES (@media max-width: 768px)
+   =================================================== */
+@media (max-width: 768px) {
+    .btn-topbar-logout, #btn-topbar-logout {
+        padding: 6px 10px !important;
+        min-width: auto !important;
+    }
+    /* Esta es la regla crítica a corregir: */
+    .btn-topbar-logout span, #btn-topbar-logout span {
+        display: none !important;
+    }
+    .btn-salir span, #btn-salir span {
+        display: none !important;
+    }
+    .btn-topbar-logout, #btn-topbar-logout, .btn-salir, #btn-salir {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        padding: 0 !important;
+        border-radius: 7px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        box-sizing: border-box !important;
+    }
+}
+
+/* ===================================================
    AJUSTES RESPONSIVOS EN MÓVILES (@media max-width: 600px)
    =================================================== */
 @media (max-width: 600px) {
@@ -676,17 +706,26 @@
     }
 
     /* 5. Botón SALIR compacto en cuadrado perfecto con solo el ícono */
-    .btn-topbar-logout span,
-    #btn-topbar-logout span {
+    .btn-topbar-logout, #btn-topbar-logout {
+        padding: 6px 10px !important;
+        min-width: auto !important;
+    }
+    /* Esta es la regla crítica a corregir: */
+    .btn-topbar-logout span, #btn-topbar-logout span {
+        display: none !important;
+    }
+    .btn-salir span, #btn-salir span {
         display: none !important;
     }
 
     .btn-topbar-logout,
-    #btn-topbar-logout {
-        width: 28px !important;
-        height: 28px !important;
-        min-width: 28px !important;
-        max-width: 28px !important;
+    #btn-topbar-logout,
+    .btn-salir,
+    #btn-salir {
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
         padding: 0 !important;
         border-radius: 7px !important;
         display: inline-flex !important;
@@ -697,8 +736,10 @@
     }
 
     .btn-topbar-logout i,
-    #btn-topbar-logout i {
-        font-size: 1.05rem !important;
+    #btn-topbar-logout i,
+    .btn-salir i,
+    #btn-salir i {
+        font-size: 1.1rem !important;
         margin: 0 !important;
     }
 }
