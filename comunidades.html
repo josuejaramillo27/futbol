@@ -15,10 +15,26 @@
         
         /* BARRA SUPERIOR RESPONSIVA */
         .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; width: 100%; box-sizing: border-box; }
-        .topbar-nav { display: flex; gap: 16px; align-items: center; flex-wrap: nowrap; }
-        .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; transition: color 0.25s ease; font-size: 0.6rem; font-weight: 700; gap: 3px; letter-spacing: 0.5px; white-space: nowrap; }
+        .topbar-nav { display: flex; gap: 16px; align-items: center; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
+        .topbar-nav::-webkit-scrollbar { display: none; width: 0; height: 0; }
+        .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; transition: color 0.25s ease; font-size: 0.6rem; font-weight: 700; gap: 3px; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; }
         .topbar-nav a:hover, .topbar-nav a.active { color: var(--primary-green, #2ecc71); }
         .topbar-nav i { font-size: 1.25rem; }
+
+        @media (max-width: 600px) {
+            .topbar { padding: 8px 10px !important; gap: 8px !important; min-height: 52px !important; }
+            .brand span { display: none !important; }
+            .brand { gap: 0 !important; flex-shrink: 0 !important; }
+            .brand img { height: 26px !important; }
+            .topbar-nav { gap: 8px !important; overflow-x: auto !important; overflow-y: hidden !important; white-space: nowrap !important; scrollbar-width: none !important; -webkit-overflow-scrolling: touch !important; padding: 2px 0 !important; }
+            .topbar-nav::-webkit-scrollbar { display: none !important; }
+            .topbar-nav a { font-size: 0.55rem !important; gap: 2px !important; padding: 2px 2px !important; }
+            .topbar-nav i { font-size: 1.15rem !important; }
+            .topbar-nav span { font-size: 0.55rem !important; margin-top: 2px !important; }
+            .btn-topbar-logout span { display: none !important; }
+            .btn-topbar-logout { width: 28px !important; height: 28px !important; min-width: 28px !important; max-width: 28px !important; padding: 0 !important; border-radius: 7px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; }
+            .btn-topbar-logout i { font-size: 1.05rem !important; margin: 0 !important; }
+        }
 
         .container { max-width: 980px; margin: 0 auto; padding: 25px 20px 80px; width: 100%; box-sizing: border-box; }
 

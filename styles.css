@@ -456,3 +456,251 @@
     }
 }
 
+/* ===================================================
+   TOPBAR & RESPONSIVE NAVIGATION (MOBILE-FIRST UI/UX)
+   =================================================== */
+.topbar, header.topbar {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: rgba(8, 11, 10, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.brand img {
+    height: 28px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.brand span {
+    font-size: 1.15rem;
+    letter-spacing: 1px;
+    color: #fff;
+    font-weight: 900;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+}
+
+.topbar-nav {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.topbar-nav::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+.topbar-nav a,
+.topbar-nav-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #aaa;
+    font-size: 0.6rem;
+    font-weight: 700;
+    gap: 3px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: color 0.25s ease;
+}
+
+.topbar-nav a:hover,
+.topbar-nav a.active,
+.topbar-nav-link:hover,
+.topbar-nav-link.active {
+    color: var(--primary-green, #2ecc71);
+}
+
+.topbar-nav i,
+.topbar-nav-link i {
+    font-size: 1.25rem;
+}
+
+.topbar-user-auth,
+#topbar-auth {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.topbar-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid var(--primary-green, #2ecc71);
+    flex-shrink: 0;
+}
+
+.btn-topbar-logout,
+#btn-topbar-logout {
+    background: rgba(231, 76, 60, 0.12);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: none;
+    line-height: 1;
+}
+
+.btn-topbar-logout:hover,
+#btn-topbar-logout:hover {
+    background: rgba(231, 76, 60, 0.25);
+    color: #ff6b6b;
+    border-color: rgba(231, 76, 60, 0.5);
+    transform: none;
+}
+
+/* ===================================================
+   AJUSTES RESPONSIVOS EN MÓVILES (@media max-width: 600px)
+   =================================================== */
+@media (max-width: 600px) {
+    /* 1. Barra superior: padding y gap reducidos para que respire */
+    .topbar,
+    header.topbar {
+        padding: 8px 10px !important;
+        height: auto !important;
+        min-height: 52px !important;
+        gap: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 2. Optimizar marca: ocultar texto "CHALACAPP" dejando solo logo */
+    .brand span,
+    .brand-sub {
+        display: none !important;
+    }
+
+    .brand {
+        gap: 0 !important;
+        flex-shrink: 0 !important;
+    }
+
+    .brand img {
+        height: 26px !important;
+    }
+
+    /* 3. Navegación compacta y scroll horizontal de respaldo */
+    .topbar-nav {
+        gap: 8px !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        white-space: nowrap !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
+        flex-shrink: 1 !important;
+        padding: 2px 0 !important;
+    }
+
+    .topbar-nav::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    .topbar-nav a,
+    .topbar-nav-link {
+        font-size: 0.55rem !important;
+        gap: 2px !important;
+        padding: 2px 2px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .topbar-nav i,
+    .topbar-nav-link i {
+        font-size: 1.15rem !important;
+    }
+
+    .topbar-nav span,
+    .topbar-nav-link span {
+        font-size: 0.55rem !important;
+        margin-top: 2px !important;
+    }
+
+    /* 4. Avatar y contenedor de usuario */
+    .topbar-user-auth,
+    #topbar-auth,
+    #topbar-auth > div {
+        gap: 6px !important;
+        margin-left: 2px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .topbar-avatar,
+    #topbar-auth img {
+        width: 26px !important;
+        height: 26px !important;
+        min-width: 26px !important;
+    }
+
+    /* 5. Botón SALIR compacto en cuadrado perfecto con solo el ícono */
+    .btn-topbar-logout span,
+    #btn-topbar-logout span {
+        display: none !important;
+    }
+
+    .btn-topbar-logout,
+    #btn-topbar-logout {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        max-width: 28px !important;
+        padding: 0 !important;
+        border-radius: 7px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    .btn-topbar-logout i,
+    #btn-topbar-logout i {
+        font-size: 1.05rem !important;
+        margin: 0 !important;
+    }
+}
+
+
