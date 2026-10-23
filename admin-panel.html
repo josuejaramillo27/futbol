@@ -1212,6 +1212,41 @@
                 </div>
             </div>
 
+            <!-- SECCIÓN: SOLICITUDES DE TORNEOS Y LIGAS -->
+            <div style="margin-top: 35px;">
+                <div class="eyebrow"
+                    style="font-size: 0.68rem; font-weight: 800; color: var(--warning); letter-spacing: 1.2px; display: flex; align-items: center; gap: 7px; margin-bottom: 6px;">
+                    <span
+                        style="width: 6px; height: 6px; border-radius: 50%; background: var(--warning); box-shadow: 0 0 10px var(--warning);"></span>
+                    MODERACIÓN DE TORNEOS Y ACADEMIAS
+                </div>
+                <h2 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 14px;">Solicitudes de Torneos & Ligas</h2>
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Torneo / Anuncio</th>
+                                    <th>Tipo / Deporte</th>
+                                    <th>Sede / Premios</th>
+                                    <th>Contacto / Enlace</th>
+                                    <th>Estado</th>
+                                    <th style="text-align: right;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-lista-torneos">
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding: 35px; color: var(--text-muted);">
+                                        <i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 1.8rem; color: var(--warning);"></i>
+                                        <p style="margin-top: 8px;">Cargando solicitudes de torneos...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </section>
 
     </main>
@@ -1317,7 +1352,7 @@
          LÓGICA JAVASCRIPT MASTER ADMIN
          ========================================== -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, getDoc, updateDoc, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -1331,9 +1366,38 @@
             appId: "1:223446110165:web:219afce6a9dac03203f75c"
         };
 
-        const app = initializeApp(firebaseConfig);
+        const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // Sistema de Notificaciones Elegantes (Toast)
+        window.toast = function(msg, type = 'info') {
+            let container = document.getElementById('toast-container-global');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container-global';
+                container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none;';
+                document.body.appendChild(container);
+            }
+            const t = document.createElement('div');
+            const isError = type === 'error' || type === true;
+            const isSuccess = type === 'success';
+            const bg = isError ? 'rgba(231,76,60,0.95)' : isSuccess ? 'rgba(46,204,113,0.95)' : 'rgba(22,28,25,0.95)';
+            const color = isError ? '#fff' : isSuccess ? '#000' : '#fff';
+            const icon = isError ? 'ph-x-circle' : isSuccess ? 'ph-check-circle' : 'ph-info';
+            t.style.cssText = `background:${bg};color:${color};padding:12px 18px;border-radius:10px;font-weight:600;font-size:0.88rem;box-shadow:0 8px 24px rgba(0,0,0,0.5);display:flex;align-items:center;gap:8px;pointer-events:auto;transition:all 0.3s ease;transform:translateY(20px);opacity:0;`;
+            t.innerHTML = `<i class="ph-bold ${icon}" style="font-size:1.1rem;"></i><span>${msg}</span>`;
+            container.appendChild(t);
+            requestAnimationFrame(() => {
+                t.style.transform = 'translateY(0)';
+                t.style.opacity = '1';
+            });
+            setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translateY(10px)';
+                setTimeout(() => t.remove(), 300);
+            }, 3500);
+        };
 
         let adminUser = null;
         let allOwners = [];
@@ -1356,17 +1420,18 @@
 
                     // Cargar Dashboard de Estadísticas Inicial
                     cargarDashboardEstadisticas();
-                    // Cargar Datos de Dueños y Comunidades
+                    // Cargar Datos de Dueños, Comunidades y Torneos
                     loadOwnersAndCourts();
                     cargarComunidadesAdmin();
+                    cargarTorneosAdmin();
                 } else {
-                    alert("Acceso Denegado. Esta sección es exclusiva para el Administrador Maestro.");
-                    signOut(auth).then(() => window.location.href = "login.html");
+                    window.toast("Acceso Denegado. Esta sección es exclusiva para el Administrador Maestro.", 'error');
+                    signOut(auth).then(() => { setTimeout(() => window.location.href = "login.html", 1500); });
                 }
             } catch (err) {
                 console.error("Error autenticando admin:", err);
-                alert("Error de autenticación con el servidor.");
-                signOut(auth).then(() => window.location.href = "login.html");
+                window.toast("Error de autenticación con el servidor.", 'error');
+                signOut(auth).then(() => { setTimeout(() => window.location.href = "login.html", 1500); });
             }
         });
 
@@ -1534,7 +1599,7 @@
                     reservas: {
                         confirmadas: reservasConfirmadas,
                         pendientes: reservasPendientes,
-                        seña: reservasSena,
+                        sena: reservasSena,
                         canceladas: reservasCanceladas
                     },
                     canchas: {
@@ -1578,7 +1643,7 @@
                             data: [
                                 data.reservas.confirmadas,
                                 data.reservas.pendientes,
-                                data.reservas.seña,
+                                data.reservas.sena,
                                 data.reservas.canceladas
                             ],
                             backgroundColor: [
@@ -1831,7 +1896,7 @@
                 const btnApprove = document.createElement('button');
                 btnApprove.className = "btn btn-primary";
                 btnApprove.innerHTML = `<i class="ph-bold ph-check-circle"></i> Aprobar Acceso al Sistema`;
-                btnApprove.onclick = () => changeAccountStatus(uid, "approved");
+                btnApprove.onclick = () => changeAccountStatus(uid, "approved", btnApprove);
                 actionsContainer.appendChild(btnApprove);
             }
 
@@ -1839,7 +1904,7 @@
                 const btnReject = document.createElement('button');
                 btnReject.className = "btn btn-danger";
                 btnReject.innerHTML = `<i class="ph-bold ph-x-circle"></i> Rechazar / Suspender Cuenta`;
-                btnReject.onclick = () => changeAccountStatus(uid, "rejected");
+                btnReject.onclick = () => changeAccountStatus(uid, "rejected", btnReject);
                 actionsContainer.appendChild(btnReject);
             }
 
@@ -1856,7 +1921,7 @@
                     btnPublish.style.color = "#080B0A";
                     btnPublish.style.borderColor = "#ffffff";
                     btnPublish.innerHTML = `<i class="ph-bold ph-globe"></i> Aprobar y PUBLICAR Cancha en la Web`;
-                    btnPublish.onclick = () => changePublicationStatus(uid, "published");
+                    btnPublish.onclick = () => changePublicationStatus(uid, "published", btnPublish);
                     actionsContainer.appendChild(btnPublish);
                 } else if (owner.estadoPublicacion === "published") {
                     const btnUnpublish = document.createElement('button');
@@ -1864,46 +1929,66 @@
                     btnUnpublish.style.color = "var(--warning)";
                     btnUnpublish.style.borderColor = "rgba(255, 200, 87, 0.4)";
                     btnUnpublish.innerHTML = `<i class="ph-bold ph-eye-slash"></i> Pausar / Ocultar de la Web`;
-                    btnUnpublish.onclick = () => changePublicationStatus(uid, "draft");
+                    btnUnpublish.onclick = () => changePublicationStatus(uid, "draft", btnUnpublish);
                     actionsContainer.appendChild(btnUnpublish);
                 }
             }
             modalDetails.classList.add('mostrar');
         }
 
-        async function changeAccountStatus(uid, newStatus) {
+        async function changeAccountStatus(uid, newStatus, btnEl = null) {
             if (!confirm(`¿Confirmas cambiar el estado de la CUENTA a: ${newStatus.toUpperCase()}?`)) return;
+            let oldHtml = '';
+            if (btnEl) {
+                btnEl.disabled = true;
+                oldHtml = btnEl.innerHTML;
+                btnEl.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Actualizando...';
+            }
             try {
                 await updateDoc(doc(db, "usuarios", uid), {
                     estado: newStatus,
                     approvedBy: adminUser,
                     approvedAt: serverTimestamp()
                 });
-                alert(`Cuenta actualizada a: ${newStatus.toUpperCase()}`);
+                window.toast(`Cuenta actualizada a: ${newStatus.toUpperCase()}`, 'success');
                 modalDetails.classList.remove('mostrar');
                 loadOwnersAndCourts();
                 cargarDashboardEstadisticas();
             } catch (error) {
                 console.error("Error al actualizar la cuenta:", error);
-                alert("Error al actualizar la cuenta.");
+                window.toast("Error al actualizar la cuenta.", 'error');
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = oldHtml;
+                }
             }
         }
 
-        async function changePublicationStatus(uid, newStatus) {
+        async function changePublicationStatus(uid, newStatus, btnEl = null) {
             if (!confirm(`¿Confirmas cambiar la PUBLICACIÓN de la cancha a: ${newStatus.toUpperCase()}?`)) return;
+            let oldHtml = '';
+            if (btnEl) {
+                btnEl.disabled = true;
+                oldHtml = btnEl.innerHTML;
+                btnEl.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Actualizando...';
+            }
             try {
                 await updateDoc(doc(db, "canchas", uid), {
                     estadoPublicacion: newStatus,
                     publicadoPor: adminUser,
                     publicadoEn: serverTimestamp()
                 });
-                alert(newStatus === 'published' ? '¡Cancha PUBLICADA y visible para todos los jugadores!' : 'Cancha ocultada de la web (en borrador).');
+                window.toast(newStatus === 'published' ? '¡Cancha PUBLICADA y visible para todos los jugadores!' : 'Cancha ocultada de la web (en borrador).', 'success');
                 modalDetails.classList.remove('mostrar');
                 loadOwnersAndCourts();
                 cargarDashboardEstadisticas();
             } catch (error) {
                 console.error("Error cambiando publicación:", error);
-                alert("Error cambiando publicación.");
+                window.toast("Error cambiando publicación.", 'error');
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = oldHtml;
+                }
             }
         }
 
@@ -1939,7 +2024,7 @@
                             </td>
                             <td>${c.deporte || "Fútbol"} • <span style="color: var(--text-muted);">${c.categoria || "Libre"}</span></td>
                             <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${c.ciudad || "No especificada"}</td>
-                            <td><a href="https://wa.me/${String(c.whatsappLider || '').replace(/\\D/g, '')}" target="_blank" style="color: var(--primary-green); font-weight: 600; text-decoration: none;"><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider || "Sin teléfono"}</a></td>
+                            <td><a href="https://wa.me/${String(c.whatsappLider || '').replace(/\D/g, '')}" target="_blank" style="color: var(--primary-green); font-weight: 600; text-decoration: none;"><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider || "Sin teléfono"}</a></td>
                             <td style="text-align: right;">
                                 <button class="btn btn-danger btn-borrar-comunidad" data-id="${docSnap.id}" style="padding: 6px 12px; font-size: 0.78rem;">
                                     <i class="ph-bold ph-trash"></i> Eliminar
@@ -1957,11 +2042,12 @@
                             btnReal.disabled = true;
                             try {
                                 await deleteDoc(doc(db, 'comunidades', docId));
+                                window.toast('Comunidad eliminada.', 'info');
                                 cargarComunidadesAdmin();
                                 cargarDashboardEstadisticas();
                             } catch (err) {
                                 console.error("Error al eliminar comunidad:", err);
-                                alert("No se pudo eliminar la comunidad.");
+                                window.toast("No se pudo eliminar la comunidad.", 'error');
                                 btnReal.innerHTML = '<i class="ph-bold ph-trash"></i> Eliminar';
                                 btnReal.disabled = false;
                             }
@@ -1992,19 +2078,139 @@
                     creadoPor: adminUser,
                     creadoEn: serverTimestamp()
                 });
-                alert('¡Comunidad publicada exitosamente en CHALACAPP!');
+                window.toast('¡Comunidad publicada exitosamente en CHALACAPP!', 'success');
                 modalComunidad.classList.remove('mostrar');
                 formComunidad.reset();
                 cargarComunidadesAdmin();
                 cargarDashboardEstadisticas();
             } catch (error) {
                 console.error("Error al publicar comunidad:", error);
-                alert('Error al publicar comunidad.');
+                window.toast('Error al publicar comunidad.', 'error');
             } finally {
                 btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Publicar Comunidad';
                 btnSubmit.disabled = false;
             }
         });
+
+        // ==========================================
+        // 9. MÓDULO: MODERACIÓN DE TORNEOS Y LIGAS
+        // ==========================================
+        async function cargarTorneosAdmin() {
+            const tbody = document.getElementById('admin-lista-torneos');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 30px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 1.5rem; color: var(--warning);"></i><p style="margin-top:6px; color:var(--text-muted);">Cargando torneos y academias...</p></td></tr>';
+            try {
+                const snap = await getDocs(query(collection(db, 'anuncios_ligas')));
+                tbody.innerHTML = '';
+                if (snap.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 30px; color: var(--text-muted);"><i class="ph-bold ph-trophy" style="font-size: 1.8rem; margin-bottom: 6px; color: var(--warning);"></i><br>No se encontraron solicitudes de torneos o academias.</td></tr>';
+                    return;
+                }
+                snap.forEach(docSnap => {
+                    const t = docSnap.data();
+                    const estado = (t.estado || 'pendiente_aprobacion').toLowerCase();
+                    let badgeEstado = '<span class="badge badge-pending"><i class="ph-bold ph-clock"></i> Pendiente</span>';
+                    if (estado === 'aprobado') {
+                        badgeEstado = '<span class="badge badge-approved"><i class="ph-bold ph-check-circle"></i> Aprobado</span>';
+                    } else if (estado === 'rechazado') {
+                        badgeEstado = '<span class="badge badge-rejected"><i class="ph-bold ph-x-circle"></i> Rechazado</span>';
+                    }
+
+                    const wspClean = String(t.whatsapp || '').replace(/\D/g, '');
+                    const wspLink = wspClean ? `<a href="https://wa.me/${wspClean}" target="_blank" style="color:var(--primary-green); font-weight:600; text-decoration:none;"><i class="ph-bold ph-whatsapp-logo"></i> ${t.whatsapp}</a>` : '<span style="color:var(--text-muted);">Sin WhatsApp</span>';
+                    const linkVerif = t.linkVerificacion ? `<a href="${t.linkVerificacion}" target="_blank" style="color:var(--blue); font-size:0.78rem; display:block; margin-top:3px;"><i class="ph-bold ph-arrow-square-out"></i> Ver Bases/Flyer</a>` : '';
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="font-weight: 700; color: #fff;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <i class="ph-fill ph-trophy" style="color: var(--warning); font-size: 1.15rem;"></i>
+                                    <span>${t.nombre || "Torneo sin título"}</span>
+                                </div>
+                            </td>
+                            <td>${t.tipo ? t.tipo.toUpperCase() : 'TORNEO'} • <span style="color: var(--text-muted);">${t.deporte || 'Fútbol'} (${t.categorias || 'Libre'})</span></td>
+                            <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${t.sede || "No especificada"}<br><small style="color:var(--text-dim);">${t.premiosHorario || 'Premios a confirmar'}</small></td>
+                            <td>${wspLink}${linkVerif}</td>
+                            <td>${badgeEstado}</td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                ${estado !== 'aprobado' ? `<button class="btn btn-primary btn-aprobar-torneo" data-id="${docSnap.id}" style="padding: 6px 10px; font-size: 0.78rem; margin-right: 4px;" title="Aprobar Torneo"><i class="ph-bold ph-check"></i> Aprobar</button>` : ''}
+                                ${estado !== 'rechazado' ? `<button class="btn btn-outline btn-rechazar-torneo" data-id="${docSnap.id}" style="padding: 6px 10px; font-size: 0.78rem; color: var(--warning); border-color: rgba(255,200,87,0.3); margin-right: 4px;" title="Rechazar"><i class="ph-bold ph-x"></i> Rechazar</button>` : ''}
+                                <button class="btn btn-danger btn-borrar-torneo" data-id="${docSnap.id}" style="padding: 6px 10px; font-size: 0.78rem;" title="Eliminar"><i class="ph-bold ph-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.querySelectorAll('.btn-aprobar-torneo').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const id = btn.dataset.id;
+                        if (!confirm('¿Aprobar y publicar este torneo para todos los jugadores?')) return;
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>';
+                        try {
+                            await updateDoc(doc(db, 'anuncios_ligas', id), {
+                                estado: 'aprobado',
+                                moderadoPor: adminUser,
+                                moderadoEn: serverTimestamp()
+                            });
+                            window.toast('Torneo aprobado y publicado exitosamente.', 'success');
+                            cargarTorneosAdmin();
+                        } catch (err) {
+                            console.error('Error aprobando torneo:', err);
+                            window.toast('Error al aprobar el torneo.', 'error');
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="ph-bold ph-check"></i> Aprobar';
+                        }
+                    });
+                });
+
+                tbody.querySelectorAll('.btn-rechazar-torneo').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const id = btn.dataset.id;
+                        if (!confirm('¿Rechazar esta solicitud de torneo?')) return;
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>';
+                        try {
+                            await updateDoc(doc(db, 'anuncios_ligas', id), {
+                                estado: 'rechazado',
+                                moderadoPor: adminUser,
+                                moderadoEn: serverTimestamp()
+                            });
+                            window.toast('Torneo marcado como rechazado.', 'info');
+                            cargarTorneosAdmin();
+                        } catch (err) {
+                            console.error('Error rechazando torneo:', err);
+                            window.toast('Error al rechazar el torneo.', 'error');
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="ph-bold ph-x"></i> Rechazar';
+                        }
+                    });
+                });
+
+                tbody.querySelectorAll('.btn-borrar-torneo').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const id = btn.dataset.id;
+                        if (!confirm('¿Eliminar permanentemente este registro de torneo?')) return;
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>';
+                        try {
+                            await deleteDoc(doc(db, 'anuncios_ligas', id));
+                            window.toast('Torneo eliminado.', 'info');
+                            cargarTorneosAdmin();
+                        } catch (err) {
+                            console.error('Error eliminando torneo:', err);
+                            window.toast('Error al eliminar el torneo.', 'error');
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="ph-bold ph-trash"></i>';
+                        }
+                    });
+                });
+
+            } catch (err) {
+                console.error("Error al cargar torneos:", err);
+                tbody.innerHTML = '<tr><td colspan="6" style="color: var(--danger); text-align: center; padding: 25px;">Error conectando con la base de datos de torneos.</td></tr>';
+            }
+        }
     </script>
 </body>
 

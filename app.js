@@ -1,5 +1,4 @@
-// 1. IMPORTS DE FIREBASE (SIEMPRE DEBEN IR EN LA LÍNEA 1)
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, deleteDoc, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
@@ -12,7 +11,7 @@ const firebaseConfig = {
     messagingSenderId: "223446110165",
     appId: "1:223446110165:web:219afce6a9dac03203f75c"
 };
-const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
 window.auth = auth;
 let canchasGlobales = [], ubicacionUsuario = null, usuarioActual = null;
 
@@ -144,20 +143,48 @@ const esInicio = () => { const p = window.location.pathname.replace(/\/$/, ''); 
 const fechaHoy = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` };
 const minutos = t => { const m = String(t || '').match(/^(\d{1,2}):(\d{2})$/); return m ? Number(m[1]) * 60 + Number(m[2]) : null };
 
-const slotsDeCancha = (c, reservas, fechaReq) => {
-    const fReq = fechaReq || fechaHoy();
+const slotsDeCancha = (c, reservas = [], bloqueos = [], fechaReq = null) => {
+    let fReq = fechaReq;
+    let res = reservas;
+    let blk = bloqueos;
+    if (typeof bloqueos === 'string') {
+        fReq = bloqueos;
+        blk = [];
+    }
+    fReq = fReq || fechaHoy();
     const h = obtenerHorarioCancha(c, fReq);
     if (!h || !h.activo || !h.apertura || !h.cierre) return [];
     const a = minutos(h.apertura), b0 = minutos(h.cierre), step = h.step;
     if (a === null || b0 === null || !Number.isFinite(step) || step <= 0) return [];
     let b = b0 <= a ? b0 + 1440 : b0;
-    const ocupadas = new Set((reservas || []).filter(r => String(r.canchaId) === String(c.id) && String(r.fecha) === fReq && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(r.estado))).map(r => minutos(r.horaInicio || r.hora)).filter(Number.isFinite));
-    const isToday = fReq === fechaHoy();
-    const now = new Date(), actual = now.getHours() * 60 + now.getMinutes();
+
+    const cid = String(c?.id || '');
+    const ocupadas = new Set(
+        (Array.isArray(res) ? res : [])
+            .filter(r => String(r?.canchaId) === cid && String(r?.fecha) === fReq && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(r?.estado)))
+            .map(r => minutos(r?.horaInicio || r?.hora))
+            .filter(Number.isFinite)
+    );
+
+    const bloqueadas = new Set(
+        (Array.isArray(blk) ? blk : [])
+            .filter(bk => String(bk?.canchaId) === cid && String(bk?.fecha) === fReq)
+            .map(bk => minutos(bk?.horaInicio || bk?.hora))
+            .filter(Number.isFinite)
+    );
+
+    const hoy = fechaHoy();
+    const isPastDay = fReq < hoy;
+    const isToday = fReq === hoy;
+    const now = new Date();
+    const actual = now.getHours() * 60 + now.getMinutes();
+
     const out = [];
     for (let t = a; t < b; t += step) {
-        const real = t % 1440, label = `${String(Math.floor(real / 60)).padStart(2, '0')}:${String(real % 60).padStart(2, '0')}`;
-        out.push({ label, blocked: ocupadas.has(real) || (isToday && real < actual) });
+        const real = t % 1440;
+        const label = `${String(Math.floor(real / 60)).padStart(2, '0')}:${String(real % 60).padStart(2, '0')}`;
+        const isBlocked = isPastDay || ocupadas.has(real) || bloqueadas.has(real) || (isToday && real <= actual);
+        out.push({ label, blocked: isBlocked });
     }
     return out;
 };
@@ -219,11 +246,13 @@ if (esInicio()) {
         if (!contenedor) return;
         contenedor.innerHTML = '<div class="card loading-card" style="grid-column:1/-1;text-align:center;color:var(--text-muted)"><i class="ph-bold ph-spinner-gap ph-spin"></i> Buscando canchas...</div>';
         try {
-            const [s, sRes] = await Promise.all([
+            const [s, sRes, sBloq] = await Promise.all([
                 Promise.race([getDocs(collection(db, 'canchas')), new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 12000))]),
-                getDocs(query(collection(db, 'reservas'), where('fecha', '==', fechaHoy()))).catch(() => ({ docs: [] }))
+                getDocs(query(collection(db, 'reservas'), where('fecha', '==', fechaHoy()))).catch(() => ({ docs: [] })),
+                getDocs(query(collection(db, 'bloqueos'), where('fecha', '==', fechaHoy()))).catch(() => ({ docs: [] }))
             ]);
             const reservasHoy = sRes && sRes.docs ? sRes.docs.map(d => d.data()) : [];
+            const bloqueosHoy = sBloq && sBloq.docs ? sBloq.docs.map(d => d.data()) : [];
 
             const agrupados = {};
             s.forEach(ds => {
@@ -235,7 +264,7 @@ if (esInicio()) {
                     let turnosLibres = 0;
                     let estaAbierta = false;
                     try {
-                        const slots = slotsDeCancha(d, reservasHoy, fechaHoy());
+                        const slots = slotsDeCancha(d, reservasHoy, bloqueosHoy, fechaHoy());
                         turnosLibres = slots.filter(sl => !sl.blocked).length;
                     } catch (errSlots) {
                         turnosLibres = 0;
@@ -316,9 +345,11 @@ async function pintarDisponibilidadModal(c, fechaElegida) {
     const fReq = fechaElegida || fechaHoy();
     box.innerHTML = '<div style="text-align:center; padding:20px;"><i class="ph-bold ph-spinner-gap ph-spin"></i></div>';
     try {
-        const q = query(collection(db, 'reservas'), where('canchaId', '==', c.id), where('fecha', '==', fReq));
-        const snap = await getDocs(q);
-        const slots = slotsDeCancha(c, snap.docs.map(d => d.data()), fReq);
+        const [snapRes, snapBloq] = await Promise.all([
+            getDocs(query(collection(db, 'reservas'), where('canchaId', '==', c.id), where('fecha', '==', fReq))),
+            getDocs(query(collection(db, 'bloqueos'), where('canchaId', '==', c.id), where('fecha', '==', fReq)))
+        ]);
+        const slots = slotsDeCancha(c, snapRes.docs.map(d => d.data()), snapBloq.docs.map(d => d.data()), fReq);
         const libres = slots.filter(s => !s.blocked).length;
         box.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:10px; border:1px solid var(--border-color);">
@@ -327,9 +358,12 @@ async function pintarDisponibilidadModal(c, fechaElegida) {
             </div>
             <div class="modal-slots">${slots.length ? slots.map(s => `<button type="button" class="modal-slot ${s.blocked ? 'blocked' : ''}" data-book-court="${c.id}" data-book-time="${s.label}" data-book-date="${fReq}" ${s.blocked ? 'disabled' : ''}>${s.label}</button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
         `;
-        document.getElementById('input-fecha-modal').addEventListener('change', (e) => pintarDisponibilidadModal(c, e.target.value));
+        document.getElementById('input-fecha-modal')?.addEventListener('change', (e) => pintarDisponibilidadModal(c, e.target.value));
         box.querySelectorAll('.modal-slot:not(.blocked)').forEach(b => b.addEventListener('click', () => abrirReserva(c, b.dataset.bookTime, b.dataset.bookDate)));
-    } catch (e) { box.innerHTML = '<span style="color:var(--danger)">Error cargando horarios.</span>'; }
+    } catch (e) {
+        console.error("Error cargando horarios:", e);
+        box.innerHTML = '<span style="color:var(--danger)">Error cargando horarios.</span>';
+    }
 }
 
 function abrirReserva(c, hora, fechaElegida) {
@@ -366,14 +400,11 @@ function abrirReserva(c, hora, fechaElegida) {
     const btnConfirmar = document.getElementById('btn-confirmar-reserva');
 
     if (bookingStatus && btnConfirmar) {
-        // Colocamos el aviso, y aseguramos que el botón no se vea "aplastado"
         bookingStatus.innerHTML = avisoHTML;
-
-        // Mueve el botón de confirmación debajo del mensaje si no lo estaba
         const modalInner = bookingStatus.parentNode;
         modalInner.appendChild(bookingStatus);
         modalInner.appendChild(btnConfirmar);
-        btnConfirmar.style.marginTop = '15px'; // Espacio extra asegurado arriba del botón
+        btnConfirmar.style.marginTop = '15px';
     }
 
     modal.dataset.courtId = c.id;
@@ -388,7 +419,25 @@ async function confirmarReserva() {
     const id = modal?.dataset.courtId, hora = modal?.dataset.time, fechaReq = modal?.dataset.date;
     const nombre = document.getElementById('booking-nombre')?.value.trim(), telefono = document.getElementById('booking-telefono')?.value.trim(), btn = document.getElementById('btn-confirmar-reserva');
 
-    if (!id || !hora || !fechaReq || !nombre || !telefono) { window.toast('Completa tu nombre y teléfono.', 'warning'); return; }
+    if (!id || !hora || !fechaReq || !nombre || !telefono) {
+        window.toast('Completa tu nombre y teléfono para continuar.', 'warning');
+        return;
+    }
+
+    // Validación contra fechas y horarios pasados
+    const hoy = fechaHoy();
+    if (fechaReq < hoy) {
+        window.toast('No puedes reservar en fechas pasadas.', 'warning');
+        return;
+    }
+    const now = new Date();
+    const actualMins = now.getHours() * 60 + now.getMinutes();
+    const slotMins = minutos(hora);
+    if (fechaReq === hoy && slotMins !== null && slotMins <= actualMins) {
+        window.toast('Este horario ya ha pasado. Selecciona un horario futuro.', 'warning');
+        return;
+    }
+
     if (!usuarioActual) {
         window.toast('Inicia sesión con Google para reservar.', 'warning');
         try { 
@@ -400,14 +449,43 @@ async function confirmarReserva() {
     }
 
     const c = canchasGlobales.find(x => x.id === id);
-    btn.disabled = true; window.toast('Confirmando horario...', 'info');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Confirmando horario...';
+    }
+    window.toast('Confirmando horario...', 'info');
     const key = `${id}_${fechaReq}_${hora.replace(':', '')}`;
 
     try {
+        // Verificar si existe bloqueo manual de administración
+        const snapBloq = await getDocs(query(collection(db, 'bloqueos'), where('canchaId', '==', id), where('fecha', '==', fechaReq)));
+        const estaBloqueado = snapBloq.docs.some(d => d.data().horaInicio === hora);
+        if (estaBloqueado) {
+            throw new Error('SLOT_BLOQUEADO');
+        }
+
         await runTransaction(db, async tx => {
             const ref = doc(db, 'reservas', key), existing = await tx.get(ref);
             if (existing.exists() && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
-            tx.set(ref, { id: key, canchaId: id, canchaNombre: c?.nombre || '', usuarioUid: usuarioActual.uid, nombre: nombre, usuarioNombre: nombre, telefono: telefono, usuarioTelefono: telefono, fecha: fechaReq, horaInicio: hora, horaFin: hora, estado: 'pendiente', precio: Number(c?.precio || 0), metodoPago: 'pendiente', senaPagada: false, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+            tx.set(ref, {
+                id: key,
+                canchaId: id,
+                canchaNombre: c?.nombre || c?.nombreCancha || '',
+                usuarioUid: usuarioActual.uid,
+                nombre: nombre,
+                usuarioNombre: nombre,
+                telefono: telefono,
+                usuarioTelefono: telefono,
+                fecha: fechaReq,
+                horaInicio: hora,
+                horaFin: hora,
+                estado: 'pendiente',
+                precio: Number(c?.precio || 0),
+                metodoPago: 'pendiente',
+                senaPagada: false,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp()
+            });
         });
 
         document.getElementById('booking-status').innerHTML = `
@@ -425,8 +503,20 @@ async function confirmarReserva() {
             setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); }, 2500);
         }
     } catch (e) {
-        window.toast(e.message === 'SLOT_OCUPADO' ? 'Ese horario acaba de ser reservado.' : 'No pudimos registrar la reserva.', 'error');
-    } finally { btn.disabled = false; }
+        if (e.message === 'SLOT_BLOQUEADO') {
+            window.toast('El horario fue bloqueado por mantenimiento o administración.', 'error');
+        } else if (e.message === 'SLOT_OCUPADO') {
+            window.toast('Ese horario acaba de ser reservado.', 'error');
+        } else {
+            console.error("Error al registrar reserva:", e);
+            window.toast('No pudimos registrar la reserva. Intenta de nuevo.', 'error');
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-check-circle"></i> Solicitar Reserva';
+        }
+    }
 }
 
 const btnCerrar = document.getElementById('cerrar-modal'), modalCancha = document.getElementById('modal-cancha'); if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal); if (modalCancha) modalCancha.addEventListener('click', e => { if (e.target === modalCancha) cerrarModal() }); document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarModal(); cerrarReserva() } }); function cerrarModal() { if (!modalCancha) return; modalCancha.classList.remove('mostrar'); document.body.style.overflow = '' }
@@ -592,13 +682,13 @@ if (window.location.pathname.includes('jugadores.html')) {
                 if (!confirm('¿Aceptar a este jugador y mostrarle tu WhatsApp?')) return;
                 const anuncioId = b.dataset.anuncio;
                 const postUid = b.dataset.uid;
-                b.innerHTML = '...'; b.disabled = true;
+                b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
                 try {
                     await updateDoc(doc(db, 'bolsa_jugadores', anuncioId), {
                         [`postulantes.${postUid}.estado`]: 'aceptado'
                     });
                     window.toast('¡Fichaje completado!', 'success');
-                } catch (e) { window.toast('Error al aceptar.', 'error'); b.innerHTML = 'Fichar'; b.disabled = false; }
+                } catch (e) { window.toast('Error al aceptar.', 'error'); b.innerHTML = '<i class="ph-bold ph-check"></i> Fichar'; b.disabled = false; }
             });
         });
 

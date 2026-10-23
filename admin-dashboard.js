@@ -1,6 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, addDoc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 import { calcularDisponibilidad, fechaISO } from './availability.js';
 let bloqueosDia = [];
@@ -31,7 +31,7 @@ window.customConfirm = function (mensaje) {
 };
 
 const firebaseConfig = { apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk", authDomain: "app-futbol-acd0f.firebaseapp.com", projectId: "app-futbol-acd0f", storageBucket: "app-futbol-acd0f.firebasestorage.app", messagingSenderId: "223446110165", appId: "1:223446110165:web:219afce6a9dac03203f75c" };
-const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app), storage = getStorage(app);
 let usuarioActual = null, canchaActual = null, reservasDia = [], espacios = [], espacioSeleccionado = null;
 let fechaSeleccionada = new Date(); const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']; const fechaHoy = () => fechaISO(new Date()); const normalizar = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); const money = n => `S/ ${Number(n || 0).toFixed(2)}`; const toast = (msg, error = false) => { const el = document.getElementById('toast-admin'); if (!el) return; el.textContent = msg; el.className = `admin-toast show ${error ? 'error' : ''}`; clearTimeout(window.__toast); window.__toast = setTimeout(() => el.className = 'admin-toast', 2800) }; const horaActual = () => { const d = new Date(); return d.getHours() * 60 + d.getMinutes() }; const fechaTexto = d => new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'long' }).format(d); const horarioDefault = () => Object.fromEntries(dias.map((dia, i) => [dia, { activo: i > 0 && i < 6, apertura: '16:00', cierre: '23:00' }]));
 
@@ -308,17 +308,42 @@ async function gestionarSlot(hora, reservaId, bloqueoId) {
         return;
     }
     if (bloqueoId) {
-        if (!confirm(`¿Liberar el horario de las ${hora} para volver a recibir reservas?`)) return;
-        try { await deleteDoc(doc(db, 'bloqueos', bloqueoId)); toast('Horario liberado.'); await refrescar(); } catch (e) { toast('No se pudo liberar.', true); }
+        const confirmarLiberacion = window.customConfirm 
+            ? await window.customConfirm(`¿Liberar el horario de las ${hora} para volver a recibir reservas?`)
+            : confirm(`¿Liberar el horario de las ${hora} para volver a recibir reservas?`);
+        if (!confirmarLiberacion) return;
+        try { 
+            await deleteDoc(doc(db, 'bloqueos', bloqueoId)); 
+            toast('Horario liberado.'); 
+            await refrescar(); 
+        } catch (e) { 
+            console.error(e);
+            toast('No se pudo liberar.', true); 
+        }
         return;
     }
-    if (!confirm(`¿Bloquear manualmente las ${hora}?\nNadie podrá reservar este horario.`)) return;
+    const confirmarBloqueo = window.customConfirm 
+        ? await window.customConfirm(`¿Bloquear manualmente las ${hora}?\nNadie podrá reservar este horario.`)
+        : confirm(`¿Bloquear manualmente las ${hora}?\nNadie podrá reservar este horario.`);
+    if (!confirmarBloqueo) return;
     try {
         // 🔥 Aplica el bloqueo a la cancha específica que estés viendo
-        const idCancha = espacioSeleccionado?.id || canchaActual.id;
-        await addDoc(collection(db, 'bloqueos'), { ownerUid: usuarioActual.uid, canchaId: idCancha, fecha: fechaISO(fechaSeleccionada), horaInicio: hora, horaFin: hora, motivo: 'Bloqueo manual', createdAt: serverTimestamp() });
-        toast('Horario bloqueado.'); await refrescar();
-    } catch (e) { console.error(e); toast('No se pudo bloquear el horario.', true); }
+        const idCancha = espacioSeleccionado?.id || canchaActual?.id || usuarioActual?.uid;
+        await addDoc(collection(db, 'bloqueos'), { 
+            ownerUid: usuarioActual.uid, 
+            canchaId: idCancha, 
+            fecha: fechaISO(fechaSeleccionada), 
+            horaInicio: hora, 
+            horaFin: hora, 
+            motivo: 'Bloqueo manual', 
+            createdAt: serverTimestamp() 
+        });
+        toast('Horario bloqueado.'); 
+        await refrescar();
+    } catch (e) { 
+        console.error(e); 
+        toast('No se pudo bloquear el horario.', true); 
+    }
 }
 
 // SEMÁFORO DE RESERVAS Y CALIFICACIÓN DE JUGADOR
@@ -336,6 +361,7 @@ function abrirGestionReserva(r) {
         document.body.appendChild(m);
         m.querySelector('[data-close]').onclick = () => m.classList.remove('mostrar');
     }
+    m.dataset.reservaId = r?.id ?? '';
     const st = estadoReserva(r);
 
     // SEMÁFORO DE COLORES
@@ -361,7 +387,7 @@ function abrirGestionReserva(r) {
         <div><span>WhatsApp:</span> <b>${clienteTelefono}</b></div>
         <div><span>Importe Total:</span> <b>${money(r.precio ?? canchaActual?.precio)}</b></div>
         <div><span>Adelanto (Seña):</span> <b>${senaBadge}</b></div>
-        <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;"><span>Estado Reserva:</span> <b>${statusLabels[st]}</b></div>
+        <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;"><span>Estado Reserva:</span> <b>${statusLabels[st] ?? st}</b></div>
     `;
 
     const btnContainer = m.querySelector('#manage-buttons');
@@ -373,15 +399,15 @@ function abrirGestionReserva(r) {
     }
 
     if (st === 'pending') {
-        // 🔥 AQUÍ ESTÁ EL BLINDAJE: PASAMOS EL ID DE LA RESERVA DIRECTAMENTE
+        // 🔥 AQUÍ ESTÁ EL BLINDAJE: PASAMOS EL ID DE LA RESERVA DIRECTAMENTE Y EL BOTÓN
         btnContainer.innerHTML += `
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'confirmed')" class="btn hero-primary" style="background:#2ecc71; color:#000; border:none;"><i class="ph-bold ph-check-circle"></i> Validar Yape y Aprobar</button>
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'rejected')" class="btn" style="background:rgba(231,76,60,0.1); color:var(--danger); border:1px solid var(--danger);"><i class="ph-bold ph-x-circle"></i> Rechazar (Pago Falso / Sin Pago)</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'confirmed', this)" class="btn hero-primary" style="background:#2ecc71; color:#000; border:none;"><i class="ph-bold ph-check-circle"></i> Validar Yape y Aprobar</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'rejected', this)" class="btn" style="background:rgba(231,76,60,0.1); color:var(--danger); border:1px solid var(--danger);"><i class="ph-bold ph-x-circle"></i> Rechazar (Pago Falso / Sin Pago)</button>
         `;
     } else if (st === 'confirmed') {
         btnContainer.innerHTML += `
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'completed')" class="btn" style="background:#a777e8; color:#fff; border:none;"><i class="ph-bold ph-flag-checkered"></i> Marcar como Partido Jugado</button>
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'cancelled')" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'completed', this)" class="btn" style="background:#a777e8; color:#fff; border:none;"><i class="ph-bold ph-flag-checkered"></i> Marcar como Partido Jugado</button>
+            <button onclick="window.cambiarEstadoGestion('${r.id}', 'cancelled', this)" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
         `;
     } else if (st === 'completed') {
         if (!r.calificadoPorDueno) {
@@ -440,7 +466,7 @@ window.abrirCalificacionJugador = function (jugadorUid, reservaId, nombreJugador
     tagsCont.style.display = 'none';
     btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-check"></i> Enviar Reporte';
 
-    const TAGS_DUEÑO = {
+    const TAGS_DUENO = {
         5: [{ icon: "ph-thumbs-up", text: "Excelente equipo" }, { icon: "ph-clock", text: "Puntuales" }, { icon: "ph-broom", text: "Dejaron limpio" }, { icon: "ph-handshake", text: "Respetuosos" }],
         4: [{ icon: "ph-thumbs-up", text: "Buen equipo" }, { icon: "ph-handshake", text: "Sin problemas" }],
         3: [{ icon: "ph-clock", text: "Llegaron tarde" }, { icon: "ph-warning", text: "Desordenados" }],
@@ -456,7 +482,7 @@ window.abrirCalificacionJugador = function (jugadorUid, reservaId, nombreJugador
             const labels = { 1: "Pésimos / Peligrosos", 2: "Mal comportamiento", 3: "Regulares", 4: "Buenos", 5: "¡Excelentes!" };
             label.textContent = labels[selRating];
 
-            tagsCont.innerHTML = TAGS_DUEÑO[selRating].map(t => `<div class="tag-chip" data-text="${t.text}" style="padding:6px 12px; border:1px solid #555; border-radius:20px; font-size:0.8rem; color:#aaa; cursor:pointer;"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`).join('');
+            tagsCont.innerHTML = TAGS_DUENO[selRating].map(t => `<div class="tag-chip" data-text="${t.text}" style="padding:6px 12px; border:1px solid #555; border-radius:20px; font-size:0.8rem; color:#aaa; cursor:pointer;"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`).join('');
             tagsCont.style.display = 'flex';
 
             tagsCont.querySelectorAll('.tag-chip').forEach(chip => {
@@ -498,8 +524,9 @@ window.abrirCalificacionJugador = function (jugadorUid, reservaId, nombreJugador
     m.classList.add('mostrar');
 };
 
-// 🔥 BLINDAJE DE LA FUNCIÓN DE CAMBIAR ESTADO (CON TRADUCCIÓN VISUAL)
-window.cambiarEstadoGestion = async function (reservaId, nuevoEstado) {
+// 🔥 BLINDAJE DE LA FUNCIÓN DE CAMBIAR ESTADO (CON TRADUCCIÓN VISUAL Y ESTADO DE CARGA)
+window.cambiarEstadoGestion = async function (reservaId, nuevoEstado, btnEl = null) {
+    reservaId = reservaId || document.getElementById('modal-gestion-reserva')?.dataset?.reservaId;
     if (!reservaId) return;
 
     // DICCIONARIO PARA TRADUCIR EL ESTADO SOLO EN LA ALERTA VISUAL
@@ -514,7 +541,17 @@ window.cambiarEstadoGestion = async function (reservaId, nuevoEstado) {
     const estadoAmigable = nombresEstados[nuevoEstado] || nuevoEstado.toUpperCase();
 
     // MOSTRAMOS LA ALERTA EN ESPAÑOL
-    if (!await window.customConfirm(`¿Estás seguro de cambiar la reserva a estado: ${estadoAmigable}?`)) return;
+    const ok = window.customConfirm 
+        ? await window.customConfirm(`¿Estás seguro de cambiar la reserva a estado: ${estadoAmigable}?`)
+        : confirm(`¿Estás seguro de cambiar la reserva a estado: ${estadoAmigable}?`);
+    if (!ok) return;
+
+    let originalBtnHtml = '';
+    if (btnEl) {
+        btnEl.disabled = true;
+        originalBtnHtml = btnEl.innerHTML;
+        btnEl.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Actualizando...';
+    }
 
     try {
         // PERO GUARDAMOS EN INGLÉS EN LA BASE DE DATOS PARA QUE EL SISTEMA NO FALLE
@@ -535,6 +572,10 @@ window.cambiarEstadoGestion = async function (reservaId, nuevoEstado) {
     } catch (e) {
         console.error(e);
         toast('No se pudo actualizar la reserva.', true);
+        if (btnEl) {
+            btnEl.disabled = false;
+            btnEl.innerHTML = originalBtnHtml;
+        }
     }
 }
 async function refrescar() { await cargarReservas(); renderSchedule(); renderReservas() }
@@ -577,7 +618,27 @@ function renderReservas() {
 function renderWeeklyHours(data) { const box = document.getElementById('weekly-hours'); if (!box) return; box.innerHTML = dias.slice(1).concat(['domingo']).map(dia => { const h = data[dia] || { activo: true, apertura: '16:00', cierre: '23:00' }; return `<div class="day-config-row" data-day="${dia}"><label class="day-toggle"><input type="checkbox" class="day-active" ${h.activo ? 'checked' : ''}><span class="toggle-ui"></span><b>${dia.charAt(0).toUpperCase() + dia.slice(1)}</b></label><div class="day-times"><input type="time" class="day-open" value="${h.apertura || '16:00'}"><span>—</span><input type="time" class="day-close" value="${h.cierre || '23:00'}"></div><span class="day-state">${h.activo ? 'Abierto' : 'Cerrado'}</span></div>` }).join(''); box.querySelectorAll('.day-config-row').forEach(row => { const cb = row.querySelector('.day-active'), update = () => { row.classList.toggle('closed', !cb.checked); row.querySelector('.day-state').textContent = cb.checked ? 'Abierto' : 'Cerrado'; row.querySelectorAll('.day-open,.day-close').forEach(x => x.disabled = !cb.checked) }; cb.addEventListener('change', update); update() }) }
 function readWeeklyHours() { const out = {}; document.querySelectorAll('.day-config-row').forEach(row => { out[row.dataset.day] = { activo: row.querySelector('.day-active').checked, apertura: row.querySelector('.day-open').value, cierre: row.querySelector('.day-close').value } }); return out }
 const btnHoy = document.getElementById('btn-hoy'); btnHoy?.addEventListener('click', () => { fechaSeleccionada = new Date(); fechaSeleccionada.setHours(0, 0, 0, 0); renderWeekDays(); actualizarDia() }); document.getElementById('btn-copiar-lunes')?.addEventListener('click', () => { const lunes = document.querySelector('.day-config-row[data-day="lunes"]'); if (!lunes) return; document.querySelectorAll('.day-config-row').forEach(row => { if (row === lunes) return; row.querySelector('.day-active').checked = lunes.querySelector('.day-active').checked; row.querySelector('.day-open').value = lunes.querySelector('.day-open').value; row.querySelector('.day-close').value = lunes.querySelector('.day-close').value; row.querySelector('.day-active').dispatchEvent(new Event('change')) }); toast('Horario del lunes copiado a los demás días.') });
-async function subirImagen(archivo, ruta) { if (!archivo) return null; const storageRef = ref(storage, ruta); await uploadBytes(storageRef, archivo); return await getDownloadURL(storageRef) }
+async function subirImagen(archivo, ruta) { 
+    if (!archivo) return null; 
+    const storageRef = ref(storage, ruta); 
+    await uploadBytes(storageRef, archivo); 
+    return await getDownloadURL(storageRef); 
+}
+
+function sanitizeForFirestore(obj) {
+    if (obj === null || obj === undefined) return null;
+    if (typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) return obj.map(sanitizeForFirestore).filter(v => v !== undefined);
+    if (obj.constructor && obj.constructor.name !== 'Object') return obj;
+    const clean = {};
+    for (const [k, v] of Object.entries(obj)) {
+        if (v !== undefined) {
+            clean[k] = sanitizeForFirestore(v);
+        }
+    }
+    return clean;
+}
+
 const formPerfil = document.getElementById('form-perfil-cancha');
 if (formPerfil) {
     formPerfil.addEventListener('submit', async e => {
@@ -678,8 +739,9 @@ if (formPerfil) {
             const fotosFiltradas = [...fotos.map((x, i) => x || canchaActual?.fotos?.[i]).filter(Boolean)];
             if (fotosFiltradas.length > 0) dataToSave.fotos = fotosFiltradas;
 
-            await setDoc(doc(db, 'canchas', uid), dataToSave, { merge: true });
-            canchaActual = { ...canchaActual, ...dataToSave };
+            const cleanData = sanitizeForFirestore(dataToSave);
+            await setDoc(doc(db, 'canchas', uid), cleanData, { merge: true });
+            canchaActual = { ...canchaActual, ...cleanData };
             document.getElementById('mensaje-exito')?.classList.add('show');
             toast('¡Configuración guardada exitosamente!');
 

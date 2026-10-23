@@ -370,14 +370,33 @@
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, getDocs, getDoc, query, where, addDoc, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = { apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk", authDomain: "app-futbol-acd0f.firebaseapp.com", projectId: "app-futbol-acd0f", storageBucket: "app-futbol-acd0f.firebasestorage.app", messagingSenderId: "223446110165", appId: "1:223446110165:web:219afce6a9dac03203f75c" };
-    const app = initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig), db = getFirestore(app), auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+    // TOAST NOTIFICATIONS ELEGANTES
+    window.toast = function (mensaje, tipo = 'success') {
+        let container = document.getElementById('toast-container-global');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container-global';
+            document.body.appendChild(container);
+        }
+        const toastEl = document.createElement('div');
+        toastEl.className = `custom-toast toast-${tipo}`;
+        const iconClass = tipo === 'success' ? 'ph-check-circle' : tipo === 'error' ? 'ph-warning-circle' : 'ph-info';
+        toastEl.innerHTML = `<i class="ph-bold ${iconClass}"></i><span>${mensaje}</span>`;
+        container.appendChild(toastEl);
+        setTimeout(() => {
+            toastEl.classList.add('toast-out');
+            setTimeout(() => toastEl.remove(), 300);
+        }, 3200);
+    };
 
     let currentUser = null;
     let cacheComunidades = {};

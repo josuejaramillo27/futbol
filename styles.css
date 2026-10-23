@@ -744,4 +744,86 @@
     }
 }
 
+/* ==========================================
+   AUDITORÍA RESPONSIVE Y ESTABILIZACIÓN DEFINITIVA
+   ========================================== */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    position: relative;
+}
+
+/* Modales blindados con z-index alto, blur y botones de cerrar accesibles */
+.modal-oculto,
+.admin-modal,
+.modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.82) !important;
+    backdrop-filter: blur(16px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
+    z-index: 10000 !important;
+}
+
+.modal-contenido,
+.admin-modal-card {
+    max-width: 95vw !important;
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box !important;
+}
+
+.btn-cerrar,
+.admin-modal-close {
+    position: absolute !important;
+    top: 14px !important;
+    right: 14px !important;
+    z-index: 10002 !important;
+    width: 36px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #fff !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-cerrar:hover,
+.admin-modal-close:hover {
+    background: rgba(231, 76, 60, 0.2) !important;
+    border-color: #e74c3c !important;
+    color: #e74c3c !important;
+    transform: rotate(90deg) !important;
+}
+
+/* Tablas responsivas en pantallas pequeñas */
+@media (max-width: 768px) {
+    .table-responsive {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important;
+    }
+
+    .modal-contenido,
+    .admin-modal-card {
+        padding: 22px 16px !important;
+        border-radius: 16px !important;
+    }
+
+    .card,
+    .panel,
+    .section-box {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
+
 
