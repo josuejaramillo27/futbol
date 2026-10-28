@@ -15,7 +15,7 @@
         
         /* BARRA SUPERIOR RESPONSIVA */
         .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; width: 100%; box-sizing: border-box; }
-        .topbar-nav { display: flex; gap: 16px; align-items: center; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
+        .topbar-nav { display: flex; gap: 16px; align-items: center; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%); mask-image: linear-gradient(to right, black 85%, transparent 100%); }
         .topbar-nav::-webkit-scrollbar { display: none; width: 0; height: 0; }
         .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; transition: color 0.25s ease; font-size: 0.6rem; font-weight: 700; gap: 3px; letter-spacing: 0.5px; white-space: nowrap; flex-shrink: 0; }
         .topbar-nav a:hover, .topbar-nav a.active { color: var(--primary-green, #2ecc71); }
@@ -26,7 +26,7 @@
             .brand span { display: none !important; }
             .brand { gap: 0 !important; flex-shrink: 0 !important; }
             .brand img { height: 26px !important; }
-            .topbar-nav { gap: 8px !important; overflow-x: auto !important; overflow-y: hidden !important; white-space: nowrap !important; scrollbar-width: none !important; -webkit-overflow-scrolling: touch !important; padding: 2px 0 !important; }
+            .topbar-nav { gap: 8px !important; overflow-x: auto !important; overflow-y: hidden !important; white-space: nowrap !important; scrollbar-width: none !important; -webkit-overflow-scrolling: touch !important; padding: 2px 0 !important; -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%) !important; mask-image: linear-gradient(to right, black 85%, transparent 100%) !important; }
             .topbar-nav::-webkit-scrollbar { display: none !important; }
             .topbar-nav a { font-size: 0.55rem !important; gap: 2px !important; padding: 2px 2px !important; }
             .topbar-nav i { font-size: 1.15rem !important; }
@@ -176,17 +176,17 @@
         <!-- VISTA INTERIOR DE LA COMUNIDAD -->
         <div id="vista-interior-comunidad" style="display: none;">
             <div style="margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); padding: 16px 20px; border-radius: 16px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <button id="btn-volver-lista-comunidades" class="btn btn-ghost" title="Volver a Comunidades" style="padding: 8px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 14px; flex: 1 1 300px; min-width: 0; flex-wrap: wrap;">
+                    <button id="btn-volver-lista-comunidades" class="btn btn-ghost" title="Volver a Comunidades" style="padding: 8px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: #fff; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;">
                         <i class="ph-bold ph-arrow-left" style="font-size:1.1rem;"></i> Volver
                     </button>
                     <div id="vic-logo" style="width: 48px; height: 48px; border-radius: 12px; background: #111; border: 1.5px solid var(--primary-green); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;"></div>
-                    <div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <h2 id="vic-nombre" style="margin: 0; font-size: 1.45rem; color: #fff; font-weight: 800; line-height: 1.2;">...</h2>
-                            <span id="vic-rol"></span>
+                    <div style="min-width: 0; flex: 1 1 200px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap: wrap;">
+                            <h2 id="vic-nombre" style="margin: 0; font-size: clamp(1.1rem, 3.5vw, 1.45rem); color: #fff; font-weight: 800; line-height: 1.25; word-break: break-word; overflow-wrap: break-word;">...</h2>
+                            <span id="vic-rol" style="flex-shrink: 0;"></span>
                         </div>
-                        <div style="display:flex; gap:8px; margin-top:4px; font-size:0.8rem; color:#aaa;">
+                        <div style="display:flex; gap:8px; margin-top:4px; font-size:0.8rem; color:#aaa; flex-wrap: wrap; align-items: center;">
                             <span id="vic-deporte" style="color:var(--primary-green); font-weight:bold;">...</span>
                             <span>·</span>
                             <span id="vic-ciudad"><i class="ph-bold ph-map-pin"></i> ...</span>
@@ -800,6 +800,7 @@
         if (!comunidadActualData) return;
         const c = comunidadActualData;
         const liderUid = c.liderUid;
+        const soyLider = !!(currentUser && c && currentUser.uid === c.liderUid);
         const miembrosUids = Array.isArray(c.miembros_uids) ? c.miembros_uids : [];
 
         // Excluir al líder de la lista de miembros restantes para no duplicar

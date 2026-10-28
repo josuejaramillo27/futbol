@@ -825,5 +825,93 @@ html, body {
     }
 }
 
+/* =========================================================
+   INDICADOR DE SCROLL HORIZONTAL FANTASMA (FADE MASK HINT)
+   ========================================================= */
+.tabs-container,
+.subtabs-container,
+.topbar-nav {
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+@media (max-width: 768px) {
+    .tabs-container,
+    .subtabs-container,
+    .topbar-nav {
+        -webkit-mask-image: linear-gradient(to right, black 82%, transparent 98%);
+        mask-image: linear-gradient(to right, black 82%, transparent 98%);
+    }
+}
+
+/* =========================================================
+   ALINEACIÓN / MIEMBROS: BOTONES SIN SUPERPOSICIÓN (PC Y MÓVIL)
+   ========================================================= */
+.friend-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    box-sizing: border-box;
+}
+
+.friend-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 140px;
+    flex: 1 1 auto;
+}
+
+.friend-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 1 auto;
+}
+
+.friend-actions .btn,
+.friend-actions a,
+.friend-actions button {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+/* =========================================================
+   MODAL CARA A CARA: COMPACTO, ESCALADO Y SIN SCROLL HORIZONTAL
+   ========================================================= */
+.comparativa-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
+
+.comparativa-card {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+    transform: scale(0.96);
+    transform-origin: center top;
+}
+
+@media (max-width: 768px) {
+    .comparativa-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+    .comparativa-card {
+        transform: scale(1) !important;
+        width: 100% !important;
+    }
+}
+
 
 

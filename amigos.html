@@ -14,7 +14,7 @@
         body { min-height: 100vh; display: flex; flex-direction: column; margin: 0; padding: 0; font-family: var(--font-family); color: #fff; background: var(--bg-dark); }
         
         .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; background: rgba(8, 11, 10, 0.95); border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-sizing: border-box; width: 100%; }
-        .topbar-nav { display: flex; gap: 15px; align-items: center; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
+        .topbar-nav { display: flex; gap: 15px; align-items: center; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%); mask-image: linear-gradient(to right, black 85%, transparent 100%); }
         .topbar-nav::-webkit-scrollbar { display: none; width: 0; height: 0; }
         .topbar-nav a { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #aaa; transition: color 0.3s; font-size: 0.6rem; font-weight: bold; gap: 3px; white-space: nowrap; flex-shrink: 0; }
         .topbar-nav a.active { color: var(--primary-green); }
@@ -54,6 +54,8 @@
             border-radius: 14px;
             border: 1px solid rgba(255,255,255,0.08);
             overflow-x: auto;
+            -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+            mask-image: linear-gradient(to right, black 85%, transparent 100%);
         }
 
         .tab-btn {
@@ -83,11 +85,12 @@
 
         /* LISTAS DE TARJETAS Y JUGADORES */
         .friend-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-        .friend-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); transition: border-color 0.2s; }
+        .friend-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 15px; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(10px); transition: border-color 0.2s; gap: 12px; flex-wrap: wrap; }
         .friend-card:hover { border-color: rgba(46,204,113,0.3); }
-        .friend-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+        .friend-info { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1 1 200px; }
         .friend-avatar { width: 50px; height: 50px; aspect-ratio: 1/1; object-fit: cover; border-radius: 50%; border: 2px solid var(--primary-green); background: #111; flex-shrink: 0; }
         .friend-name { font-weight: 800; font-size: 0.98rem; color: #fff; margin: 0 0 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .friend-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end; flex-shrink: 0; }
 
         /* BUSCADOR */
         .search-box { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; }
@@ -313,19 +316,26 @@
         .comparativa-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 22px;
+            gap: 16px;
             align-items: stretch;
             margin-top: 15px;
+            max-width: 100%;
+            overflow-x: hidden;
+            box-sizing: border-box;
         }
         .comparativa-card {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 18px;
+            border-radius: 14px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             backdrop-filter: blur(8px);
+            box-sizing: border-box;
+            min-width: 0;
+            transform: scale(0.97);
+            transform-origin: center;
         }
         .comparativa-metric {
             display: flex;
@@ -366,7 +376,12 @@
             }
             .comparativa-grid {
                 grid-template-columns: 1fr !important;
-                gap: 15px !important;
+                gap: 14px !important;
+                max-width: 100vw !important;
+                overflow-x: hidden !important;
+            }
+            .comparativa-card {
+                transform: none !important;
             }
             .partido-header-flex {
                 flex-direction: column !important;
@@ -644,8 +659,8 @@
 </div>
 
 <!-- MODAL 3: COMPARATIVA CARA A CARA (MIEMBROS DE LA MANCHA) -->
-<div id="modal-comparar-amigos" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#0b0f0d; max-width:820px; width:95%; padding:28px 22px; position:relative; border-radius:20px; border:1.5px solid rgba(241,196,15,0.45); box-shadow:0 20px 50px rgba(0,0,0,0.85);">
+<div id="modal-comparar-amigos" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#0b0f0d; max-width:720px; width:100%; max-height:90vh; overflow-y:auto; overflow-x:hidden; padding:24px 18px; position:relative; border-radius:20px; border:1.5px solid rgba(241,196,15,0.45); box-shadow:0 20px 50px rgba(0,0,0,0.85); box-sizing:border-box;">
         <button id="cerrar-modal-comparar-amigos" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
         
         <div style="text-align: center; margin-bottom: 18px;">
@@ -1111,18 +1126,18 @@
                 const telClean = String(j.telefono || '').replace(/\D/g, '');
                 const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent('¡Habla! ¿Listo para el partido?')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
 
-                // Botón Comparar Cara a Cara
-                const btnComparar = `<button class="btn btn-comparar-amigo" onclick="window.abrirComparativaAmigos('${j.uid}')" style="width:auto !important; padding:6px 11px; font-size:0.75rem; font-weight:700; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Comparar estadísticas"><i class="ph-bold ph-scales"></i> ⚖️ Comparar</button>`;
+                // Botón Comparar Cara a Cara (El usuario siempre se compara contra este rival)
+                const btnComparar = `<button class="btn btn-comparar-amigo" onclick="window.abrirComparativaAmigos('${j.uid}')" style="width:auto !important; padding:6px 11px; font-size:0.75rem; font-weight:700; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" title="Comparar estadísticas"><i class="ph-bold ph-scales"></i> ⚖️ Comparar</button>`;
 
                 // Botón de quitar: Solo visible para el líder y NUNCA contra sí mismo
                 const btnQuitar = (soyLider && !esEsteLider)
-                    ? `<button class="btn" style="width: 34px; height: 34px; background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer;" onclick="window.quitarDelGrupo('${j.uid}')" title="Quitar del grupo">
+                    ? `<button class="btn" style="width: 34px; height: 34px; min-width:34px; background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer; flex-shrink:0;" onclick="window.quitarDelGrupo('${j.uid}')" title="Quitar del grupo">
                         <i class="ph-bold ph-trash"></i>
                     </button>`
                     : '';
 
                 const badgeLider = esEsteLider 
-                    ? `<span style="background: rgba(241,196,15,0.2); color: #f1c40f; border: 1px solid rgba(241,196,15,0.4); padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px;"><i class="ph-fill ph-crown"></i> Líder</span>`
+                    ? `<span style="background: rgba(241,196,15,0.2); color: #f1c40f; border: 1px solid rgba(241,196,15,0.4); padding: 2px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; white-space:nowrap;"><i class="ph-fill ph-crown"></i> Líder</span>`
                     : '';
 
                 const estiloCard = esEsteLider
@@ -1141,7 +1156,7 @@
                                 <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); font-weight:700;">${pos}</span>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                        <div class="friend-actions">
                             ${btnComparar}
                             ${waBtn}
                             ${btnQuitar}
@@ -1432,7 +1447,10 @@
 
     formPartido.onsubmit = async (e) => {
         e.preventDefault();
-        if (!grupoActivo || !currentUser) return;
+        if (!grupoActivo || !currentUser || !currentUser.uid) {
+            window.toast("Debes iniciar sesión para organizar un partido.", "error");
+            return;
+        }
 
         const editId = document.getElementById('partido-edit-id').value;
         const lugar = document.getElementById('pg-lugar').value.trim();
@@ -1446,8 +1464,8 @@
 
         try {
             if (editId) {
-                // Modo Edición
-                await updateDoc(doc(db, 'partidos_grupos', editId), {
+                // Modo Edición en la subcolección autorizada
+                await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad', editId), {
                     lugar,
                     fecha,
                     hora,
@@ -1456,8 +1474,8 @@
                 });
                 window.toast("Partido actualizado.", "success");
             } else {
-                // Modo Creación: el creador asiste por defecto
-                await addDoc(collection(db, 'partidos_grupos'), {
+                // Modo Creación en la subcolección autorizada
+                await addDoc(collection(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad'), {
                     grupoId: grupoActivo.id,
                     creadorUid: currentUser.uid,
                     lugar,
@@ -1490,13 +1508,19 @@
         const contenedorActivo = document.getElementById('contenedor-partido-activo');
         if (!grupoActivo || !contenedorActivo) return;
 
+        // Validación previa de sesión para evitar errores de permisos de Firestore
+        if (!currentUser || !currentUser.uid) {
+            contenedorActivo.innerHTML = '<p style="color:#aaa; text-align:center; padding:20px;">Inicia sesión para ver y organizar los partidos del vestuario.</p>';
+            return;
+        }
+
         contenedorActivo.innerHTML = '<div style="text-align:center; padding:35px; color:#888;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2rem; color:var(--primary-green);"></i><p style="margin-top:10px;">Cargando partido...</p></div>';
 
         try {
-            // Buscar partido activo
+            // Buscar partido activo en la subcolección autorizada: grupos_amigos/${grupoId}/partidos_comunidad
+            const colRef = collection(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad');
             const qActivo = query(
-                collection(db, 'partidos_grupos'),
-                where('grupoId', '==', grupoActivo.id),
+                colRef,
                 where('estado', '==', 'activo'),
                 limit(1)
             );
@@ -1718,9 +1742,9 @@
     };
 
     window.guardarPizarraEquipos = async function() {
-        if (!partidoActivoActual) return;
+        if (!partidoActivoActual || !grupoActivo) return;
         try {
-            await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+            await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad', partidoActivoActual.id), {
                 equipos: pizarraEquiposState,
                 updatedAt: serverTimestamp()
             });
@@ -1732,15 +1756,15 @@
     };
 
     window.toggleAsistenciaPartido = async function(asistir) {
-        if (!partidoActivoActual || !currentUser) return;
+        if (!partidoActivoActual || !grupoActivo || !currentUser || !currentUser.uid) return;
         try {
             if (asistir) {
-                await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+                await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad', partidoActivoActual.id), {
                     asistentes: arrayUnion(currentUser.uid)
                 });
                 window.toast("¡Te apuntaste al partido!", "success");
             } else {
-                await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+                await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad', partidoActivoActual.id), {
                     asistentes: arrayRemove(currentUser.uid)
                 });
                 window.toast("Te has desmarcado del partido.", "info");
@@ -1764,10 +1788,10 @@
     };
 
     window.cancelarPartidoActivo = async function() {
-        if (!partidoActivoActual) return;
+        if (!partidoActivoActual || !grupoActivo) return;
         if (!confirm("¿Estás seguro de cancelar este partido programado?")) return;
         try {
-            await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+            await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad', partidoActivoActual.id), {
                 estado: 'cancelado',
                 canceladoAt: serverTimestamp()
             });
@@ -1799,13 +1823,14 @@
 
     formMarcador.onsubmit = async (e) => {
         e.preventDefault();
+        if (!grupoActivo) return;
         const pId = document.getElementById('partido-resultado-id').value;
         const golesA = Number(document.getElementById('goles-equipo-a').value || 0);
         const golesB = Number(document.getElementById('goles-equipo-b').value || 0);
         const ganador = golesA > golesB ? 'A' : (golesB > golesA ? 'B' : 'Empate');
 
         try {
-            await updateDoc(doc(db, 'partidos_grupos', pId), {
+            await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad', pId), {
                 estado: 'finalizado',
                 resultado: {
                     golesA,
@@ -1827,10 +1852,13 @@
         const contenedor = document.getElementById('contenedor-historial-rivalidad');
         if (!contenedor || !grupoActivo) return;
 
+        // Validación previa de autenticación
+        if (!currentUser || !currentUser.uid) return;
+
         try {
+            const colRef = collection(db, 'grupos_amigos', grupoActivo.id, 'partidos_comunidad');
             const q = query(
-                collection(db, 'partidos_grupos'),
-                where('grupoId', '==', grupoActivo.id),
+                colRef,
                 where('estado', '==', 'finalizado')
             );
             const snap = await getDocs(q);
@@ -1902,33 +1930,48 @@
     cerrarModalCompararAmigos.onclick = () => { modalCompararAmigos.style.display = 'none'; };
     modalCompararAmigos.onclick = (e) => { if (e.target === modalCompararAmigos) modalCompararAmigos.style.display = 'none'; };
 
-    window.abrirComparativaAmigos = async function(uid1, uid2Param = null) {
+    window.abrirComparativaAmigos = async function(uidRivalParam = null) {
         if (!grupoActivo || miembrosDataGrupoActivo.length === 0) return;
 
-        // Seleccionar oponente por defecto si no viene
-        let uid2 = uid2Param;
+        // Regla de Negocio: Validar que el usuario autenticado exista
+        if (!currentUser || !currentUser.uid) {
+            window.toast("Debes iniciar sesión para comparar tus estadísticas.", "info");
+            return;
+        }
+
+        // Tarjeta 1 SIEMPRE está fijada con el usuario autenticado
+        const uid1 = currentUser.uid;
+
+        // Determinar rival: no puede ser el mismo usuario autenticado
+        let uid2 = uidRivalParam;
+        if (!uid2 || uid2 === uid1) {
+            const rivalPorDefecto = miembrosDataGrupoActivo.find(m => m.uid !== uid1);
+            uid2 = rivalPorDefecto ? rivalPorDefecto.uid : null;
+        }
+
         if (!uid2) {
-            const otro = miembrosDataGrupoActivo.find(m => m.uid !== uid1);
-            uid2 = otro ? otro.uid : uid1;
+            window.toast("Se necesita al menos otro miembro en el vestuario para comparar.", "info");
+            return;
         }
 
         const selectorBox = document.getElementById('comparar-amigos-selector-box');
         const gridContainer = document.getElementById('comparativa-amigos-grid-container');
 
-        // Construir selector de rival
+        // Construir selector que SOLO permite cambiar el rival
+        const rivalesDisponibles = miembrosDataGrupoActivo.filter(m => m.uid !== uid1);
         selectorBox.innerHTML = `
             <div style="display:inline-flex; align-items:center; gap:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); padding:6px 14px; border-radius:12px; max-width:100%; flex-wrap:wrap; justify-content:center;">
-                <span style="font-size:0.82rem; color:#aaa; font-weight:700;">Enfrentar a:</span>
+                <span style="font-size:0.82rem; color:#aaa; font-weight:700;">Comparar contra:</span>
                 <select id="select-oponente-amigo" style="background:#111; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 10px; border-radius:8px; font-size:0.85rem; cursor:pointer;">
-                    ${miembrosDataGrupoActivo.map(m => `
-                        <option value="${m.uid}" ${m.uid === uid2 ? 'selected' : ''} ${m.uid === uid1 ? 'disabled' : ''}>${m.nombre} (${m.posicion || 'JUG'})</option>
+                    ${rivalesDisponibles.map(m => `
+                        <option value="${m.uid}" ${m.uid === uid2 ? 'selected' : ''}>${m.nombre} (${m.posicion || 'JUG'})</option>
                     `).join('')}
                 </select>
             </div>
         `;
 
         document.getElementById('select-oponente-amigo').onchange = (e) => {
-            window.abrirComparativaAmigos(uid1, e.target.value);
+            window.abrirComparativaAmigos(e.target.value);
         };
 
         modalCompararAmigos.style.display = 'flex';
@@ -1948,8 +1991,8 @@
                 getDocs(query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', uid2)))
             ]);
 
-            const p1 = snapP1.exists() ? snapP1.data() : { nombre: 'Jugador 1' };
-            const p2 = snapP2.exists() ? snapP2.data() : { nombre: 'Jugador 2' };
+            const p1 = snapP1.exists() ? snapP1.data() : { nombre: currentUser.displayName || 'Mi Perfil' };
+            const p2 = snapP2.exists() ? snapP2.data() : { nombre: 'Rival' };
 
             const calcularStats = (snapRes, perfil) => {
                 let suma = 0, total = 0;
@@ -1971,11 +2014,14 @@
             const s1 = calcularStats(snapR1, p1);
             const s2 = calcularStats(snapR2, p2);
 
-            const foto1 = p1.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p1.nombre || 'J1')}&background=f1c40f&color=000`;
-            const foto2 = p2.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p2.nombre || 'J2')}&background=3498db&color=fff`;
+            const foto1 = p1.foto || currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(p1.nombre || 'Yo')}&background=2ecc71&color=fff`;
+            const foto2 = p2.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p2.nombre || 'Rival')}&background=f1c40f&color=000`;
 
-            const renderCardJugador = (p, s, foto, colorTheme) => `
+            const renderCardJugador = (p, s, foto, colorTheme, labelBadge) => `
                 <div class="comparativa-card" style="border-color:${colorTheme};">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.75rem; font-weight:800; color:${colorTheme}; text-transform:uppercase; letter-spacing:0.5px;">${labelBadge}</span>
+                    </div>
                     <img src="${foto}" class="comparativa-avatar" alt="${p.nombre}">
                     <h3 class="comparativa-name">${p.nombre || 'Jugador'}</h3>
                     <span class="comparativa-pos">${p.posicion || 'JUG'} · ${p.ciudad || 'Lima'}</span>
@@ -2007,8 +2053,8 @@
             `;
 
             gridContainer.innerHTML = `
-                ${renderCardJugador(p1, s1, foto1, 'var(--primary-green)')}
-                ${renderCardJugador(p2, s2, foto2, '#f1c40f')}
+                ${renderCardJugador(p1, s1, foto1, 'var(--primary-green)', 'Mi Tarjeta FUT (Tú)')}
+                ${renderCardJugador(p2, s2, foto2, '#f1c40f', 'Rival')}
             `;
 
         } catch (e) {
