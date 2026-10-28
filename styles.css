@@ -883,33 +883,94 @@ html, body {
 /* =========================================================
    MODAL CARA A CARA: COMPACTO, ESCALADO Y SIN SCROLL HORIZONTAL
    ========================================================= */
+#modal-comparar-jugadores .modal-contenido,
+#modal-comparar-amigos .modal-contenido,
+.modal-comparativa {
+    max-width: 760px !important;
+    width: 100% !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box !important;
+    border-radius: 20px !important;
+    background: #0b0f0d !important;
+    border: 1.5px solid rgba(241, 196, 15, 0.45) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85) !important;
+    padding: 24px 18px !important;
+}
+
 .comparativa-grid {
     display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: 1fr 1fr !important;
     gap: 16px !important;
     align-items: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
     box-sizing: border-box !important;
+    margin-top: 10px !important;
 }
 
 .comparativa-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px !important;
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    position: relative !important;
+    backdrop-filter: blur(12px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
-    box-sizing: border-box !important;
-    transform: scale(0.96);
-    transform-origin: center top;
+    transform: none !important;
+}
+
+/* Fotos controladas: no ocupan todo el contenedor, centradas y con borde verde */
+.comparativa-card img,
+.comparativa-card .avatar,
+.comparativa-card .comparativa-avatar {
+    width: 100px !important;
+    height: 100px !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    margin: 0 auto !important;
+    display: block !important;
+    border: 3px solid var(--primary-green) !important;
+    flex-shrink: 0 !important;
+}
+
+/* Ocultar selector de rival/enfrentar a temporalmente */
+#comparar-selector-box,
+#comparar-amigos-selector-box,
+#select-rival-comparar,
+#select-oponente-amigo {
+    display: none !important;
 }
 
 @media (max-width: 768px) {
+    #modal-comparar-jugadores .modal-contenido,
+    #modal-comparar-amigos .modal-contenido,
+    .modal-comparativa {
+        max-height: 85vh !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        padding: 20px 14px !important;
+    }
+
     .comparativa-grid {
         grid-template-columns: 1fr !important;
         gap: 14px !important;
     }
+
     .comparativa-card {
-        transform: scale(1) !important;
         width: 100% !important;
+        transform: none !important;
     }
 }
 

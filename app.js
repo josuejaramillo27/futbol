@@ -794,6 +794,14 @@ if (window.location.pathname.includes('jugadores.html')) {
                 }
             }
 
+            const esMismoUsuario = (usuarioActual && (usuarioActual.uid === d.uid || usuarioActual.uid === d.creadorUid)) || 
+                                   (auth?.currentUser && (auth.currentUser.uid === d.uid || auth.currentUser.uid === d.creadorUid));
+            const btnCompararHTML = esMismoUsuario ? '' : `
+                <button type="button" class="btn btn-comparar-bolsa" data-uid="${d.uid}" style="padding:4px 9px; font-size:0.75rem; font-weight:800; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.35); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.2s;" title="Comparar Cara a Cara con este jugador">
+                    <i class="ph-bold ph-scales"></i> ⚖️ Comparar
+                </button>
+            `;
+
             bufferHTML += `
             <article style="${estiloCard}">
                 ${badgeUrgente}
@@ -803,9 +811,7 @@ if (window.location.pathname.includes('jugadores.html')) {
                         ${d.nombreJugador || d.nombre || 'Jugador'}
                     </strong>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <button type="button" class="btn btn-comparar-bolsa" data-uid="${d.uid}" style="padding:4px 9px; font-size:0.75rem; font-weight:800; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.35); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.2s;" title="Comparar Cara a Cara con este jugador">
-                            <i class="ph-bold ph-scales"></i> ⚖️ Comparar
-                        </button>
+                        ${btnCompararHTML}
                         <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:12px;">${fechaTexto}</span>
                     </div>
                 </div>
