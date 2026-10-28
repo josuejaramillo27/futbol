@@ -1526,7 +1526,7 @@
 
                     // Botón Comparar Cara a Cara: Oculto estrictamente si es el propio usuario autenticado
                     const esMismoUsuario = (currentUser && currentUser.uid === j.uid) || (auth?.currentUser && auth.currentUser.uid === j.uid);
-                    const btnComparar = esMismoUsuario ? '' : `<button class="btn btn-comparar-amigo" onclick="window.abrirComparativaAmigos('${j.uid}')" style="width:auto !important; padding:6px 11px; font-size:0.75rem; font-weight:700; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" title="Comparar estadísticas"><i class="ph-bold ph-scales"></i> ⚖️ Comparar</button>`;
+                    const btnComparar = esMismoUsuario ? '' : `<button class="btn btn-comparar-amigo" onclick="window.abrirComparativaAmigos('${j.uid}')" style="width:auto !important; padding:6px 11px; font-size:0.75rem; font-weight:700; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" title="Comparar estadísticas"><i class="ph-bold ph-scales"></i> Comparar</button>`;
 
                     // Botón de quitar: Solo visible para el líder y NUNCA contra sí mismo
                     const btnQuitar = (soyLider && !esEsteLider)
