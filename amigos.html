@@ -1985,11 +1985,11 @@
 
             // Botón Asistiré
             const btnAsistire = yaAsisto ? `
-            <button class="btn" onclick="window.toggleAsistenciaPartido(false)" style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:10px 18px; font-weight:800; border-radius:10px; cursor:pointer; width:auto !important;">
-                <i class="ph-bold ph-check"></i> Ya estás anotado (Click para desmarcar)
+            <button class="btn" onclick="window.toggleAsistenciaPartido(false)" style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:10px 8px; font-weight:800; border-radius:10px; cursor:pointer; width:100%; white-space:normal; line-height:1.2; font-size:0.8rem; text-align:center; box-sizing:border-box;">
+                <i class="ph-bold ph-check"></i> ✅ CONFIRMADO (TOCA PARA CANCELAR)
             </button>
         ` : `
-            <button class="btn btn-primary" onclick="window.toggleAsistenciaPartido(true)" style="padding:10px 22px; font-weight:800; border-radius:10px; cursor:pointer; width:auto !important;">
+            <button class="btn btn-primary" onclick="window.toggleAsistenciaPartido(true)" style="padding:10px 8px; font-weight:800; border-radius:10px; cursor:pointer; width:100%; white-space:normal; line-height:1.2; font-size:0.85rem; text-align:center; box-sizing:border-box;">
                 <i class="ph-bold ph-hand-palm"></i> ¡Asistiré al partido!
             </button>
         `;
@@ -1997,14 +1997,14 @@
             contenedor.innerHTML = `
             <div class="partido-card-privado">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
-                    <div>
+                    <div style="min-width:0; flex:1 1 200px;">
                         <span class="mini-label" style="color:var(--primary-green); font-weight:900;">PRÓXIMO PARTIDO</span>
                         <h3 style="margin:4px 0 0; font-size:1.35rem; color:#fff; font-weight:800;">📍 ${partido.lugar || 'Cancha asignada'}</h3>
                         <p style="margin:4px 0 0; color:#aaa; font-size:0.88rem;">
                             📅 <b>${partido.fecha}</b> &nbsp;|&nbsp; ⏰ <b>${partido.hora} hrs</b>
                         </p>
                     </div>
-                    <div>${btnAsistire}</div>
+                    <div style="width:100%; max-width:260px; flex:1 1 200px;">${btnAsistire}</div>
                 </div>
 
                 <!-- CALCULADORA DE CUOTAS AUTOMÁTICA -->
