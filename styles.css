@@ -881,29 +881,34 @@ html, body {
 }
 
 /* =========================================================
-   MODAL CARA A CARA: COMPACTO, ESCALADO Y SIN SCROLL HORIZONTAL
+   MODAL CARA A CARA: COMPACTO, ESTILO VIDEOJUEGO Y SIN SCROLL HORIZONTAL
    ========================================================= */
+#modal-comparar-jugadores,
+#modal-comparar-amigos {
+    overflow-x: hidden !important;
+}
+
 #modal-comparar-jugadores .modal-contenido,
 #modal-comparar-amigos .modal-contenido,
 .modal-comparativa {
-    max-width: 760px !important;
-    width: 100% !important;
-    max-height: 85vh !important;
+    max-width: 700px !important;
+    width: 95% !important;
+    max-height: 88vh !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
     box-sizing: border-box !important;
-    border-radius: 20px !important;
+    border-radius: 18px !important;
     background: #0b0f0d !important;
     border: 1.5px solid rgba(241, 196, 15, 0.45) !important;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85) !important;
-    padding: 24px 18px !important;
+    padding: 20px 16px !important;
 }
 
 .comparativa-grid {
     display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 16px !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 12px !important;
     align-items: stretch !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -913,13 +918,13 @@ html, body {
 }
 
 .comparativa-card {
-    background: rgba(255, 255, 255, 0.03) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px !important;
-    padding: 16px !important;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.05) 0%, rgba(12, 18, 14, 0.95) 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    border-radius: 14px !important;
+    padding: 12px 10px !important;
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 8px !important;
     position: relative !important;
     backdrop-filter: blur(12px) saturate(120%) !important;
     -webkit-backdrop-filter: blur(12px) saturate(120%) !important;
@@ -929,20 +934,79 @@ html, body {
     max-width: 100% !important;
     overflow-x: hidden !important;
     transform: none !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
 }
 
-/* Fotos controladas: no ocupan todo el contenedor, centradas y con borde verde */
+/* Fotos controladas estrictamente: 90px x 90px con borde verde y cover */
 .comparativa-card img,
 .comparativa-card .avatar,
 .comparativa-card .comparativa-avatar {
-    width: 100px !important;
-    height: 100px !important;
-    object-fit: cover !important;
+    width: 90px !important;
+    height: 90px !important;
     border-radius: 50% !important;
     margin: 0 auto !important;
     display: block !important;
     border: 3px solid var(--primary-green) !important;
+    object-fit: cover !important;
     flex-shrink: 0 !important;
+}
+
+.stat-pill-row {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+}
+
+.stat-pill-row-2 {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+}
+
+.stat-pill {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 8px !important;
+    padding: 6px 4px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    min-width: 0 !important;
+}
+
+.stat-pill-label {
+    font-size: 0.68rem !important;
+    color: #aaa !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    display: block !important;
+}
+
+.stat-pill-value {
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+    color: #fff !important;
+    margin-top: 2px !important;
+    display: block !important;
+}
+
+.comparativa-metric {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 5px 0 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    font-size: 0.8rem !important;
+    min-width: 0 !important;
+}
+
+.comparativa-metric:last-child {
+    border-bottom: none !important;
 }
 
 /* Ocultar selector de rival/enfrentar a temporalmente */
@@ -957,15 +1021,16 @@ html, body {
     #modal-comparar-jugadores .modal-contenido,
     #modal-comparar-amigos .modal-contenido,
     .modal-comparativa {
+        width: 95% !important;
         max-height: 85vh !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
-        padding: 20px 14px !important;
+        padding: 16px 12px !important;
     }
 
     .comparativa-grid {
         grid-template-columns: 1fr !important;
-        gap: 14px !important;
+        gap: 12px !important;
     }
 
     .comparativa-card {
