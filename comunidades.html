@@ -236,19 +236,20 @@
     </div>
 </main>
 
-<!-- MODAL: ORGANIZAR PARTIDO EN COMUNIDAD (SOLO LÍDER) -->
+<!-- MODAL: ORGANIZAR / EDITAR PARTIDO EN COMUNIDAD (SOLO LÍDER) -->
 <div id="modal-organizar-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div class="modal-contenido" style="background:#111; padding:26px 24px; border-radius:18px; width:100%; max-width:440px; position:relative; border:1px solid rgba(46,204,113,0.3); box-shadow:0 15px 40px rgba(0,0,0,0.85);">
         <button id="cerrar-modal-organizar-partido" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
         
         <div style="margin-bottom:18px;">
             <span style="color:var(--primary-green); font-size:0.75rem; font-weight:800; letter-spacing:0.5px;">ORGANIZACIÓN DE PARTIDO</span>
-            <h2 style="margin:4px 0 0; font-size:1.35rem; color:#fff; font-weight:800; display:flex; align-items:center; gap:8px;">
+            <h2 id="op-titulo" style="margin:4px 0 0; font-size:1.35rem; color:#fff; font-weight:800; display:flex; align-items:center; gap:8px;">
                 <i class="ph-bold ph-calendar-plus" style="color:var(--primary-green);"></i> Nuevo Partido
             </h2>
         </div>
 
         <form id="form-organizar-partido">
+            <input type="hidden" id="op-partido-id" value="">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
                 <div>
                     <label style="color:#aaa; font-size:0.8rem; margin-bottom:4px; display:block; font-weight:600;">Fecha:</label>
@@ -276,7 +277,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width:100%; padding:13px; font-weight:800; font-size:0.95rem; justify-content:center;">
+            <button type="submit" id="btn-submit-organizar-partido" class="btn btn-primary" style="width:100%; padding:13px; font-weight:800; font-size:0.95rem; justify-content:center;">
                 <i class="ph-bold ph-check"></i> Publicar Partido
             </button>
         </form>
@@ -871,6 +872,13 @@
                 const telClean = String(m.telefono || '').replace(/\D/g, '');
                 const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent('¡Habla! Te escribo desde la comunidad en CHALACAPP.')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
 
+                // Botón Expulsar / Quitar visible EXCLUSIVAMENTE para el Líder
+                const btnExpulsar = soyLider ? `
+                    <button class="btn btn-ghost" onclick="window.expulsarMiembroComunidad('${uid}')" style="padding:6px 10px; font-size:0.75rem; font-weight:700; color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Expulsar de la comunidad">
+                        <i class="ph-bold ph-user-minus"></i> Expulsar
+                    </button>
+                ` : '';
+
                 html += `
                 <div class="friend-card">
                     <div class="friend-info">
@@ -881,6 +889,7 @@
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
+                        ${btnExpulsar}
                         ${waBtn}
                     </div>
                 </div>`;
@@ -892,6 +901,29 @@
             container.innerHTML = '<p style="color:red; grid-column:1/-1; text-align:center;">Error al cargar lista de miembros.</p>';
         }
     }
+
+    // EXPULSAR MIEMBRO (SOLO LÍDER)
+    window.expulsarMiembroComunidad = async function(uidMiembro) {
+        if (!currentUser || !comunidadActualId) return;
+        const soyLider = currentUser && comunidadActualData && currentUser.uid === comunidadActualData.liderUid;
+        if (!soyLider) return alert("Solo el líder de la comunidad tiene permisos para expulsar miembros.");
+
+        if (!confirm("¿Estás seguro de expulsar a este miembro de la comunidad?")) return;
+
+        try {
+            await updateDoc(doc(db, 'comunidades', comunidadActualId), {
+                miembros_uids: arrayRemove(uidMiembro)
+            });
+            if (comunidadActualData && Array.isArray(comunidadActualData.miembros_uids)) {
+                comunidadActualData.miembros_uids = comunidadActualData.miembros_uids.filter(u => u !== uidMiembro);
+            }
+            alert("Miembro expulsado de la comunidad.");
+            await cargarMiembrosComunidad();
+        } catch(err) {
+            console.error("Error al expulsar miembro:", err);
+            alert("Hubo un error al expulsar al miembro.");
+        }
+    };
 
     // ==========================================
     // CREACIÓN Y GESTIÓN DE PARTIDOS EN COMUNIDADES
@@ -905,6 +937,10 @@
 
     if (btnAbrirOrgPartido) {
         btnAbrirOrgPartido.onclick = () => {
+            document.getElementById('op-partido-id').value = '';
+            document.getElementById('op-titulo').innerHTML = '<i class="ph-bold ph-calendar-plus" style="color:var(--primary-green);"></i> Nuevo Partido';
+            document.getElementById('btn-submit-organizar-partido').innerHTML = '<i class="ph-bold ph-check"></i> Publicar Partido';
+            formOrganizarPartido.reset();
             const hoy = new Date().toISOString().split('T')[0];
             document.getElementById('op-fecha').value = hoy;
             modalOrganizarPartido.style.display = 'flex';
@@ -920,15 +956,55 @@
         modalGestionInscritos.onclick = (e) => { if (e.target === modalGestionInscritos) modalGestionInscritos.style.display = 'none'; };
     }
 
-    // FORMULARIO ORGANIZAR PARTIDO (LÍDER)
+    // EDITAR PARTIDO DE COMUNIDAD (LÍDER)
+    window.editarPartidoComunidad = function(partidoId) {
+        const p = cachePartidosComunidad[partidoId];
+        if (!p) return;
+
+        document.getElementById('op-partido-id').value = p.id;
+        document.getElementById('op-titulo').innerHTML = '<i class="ph-bold ph-pencil-simple" style="color:var(--primary-green);"></i> Editar Partido';
+        document.getElementById('btn-submit-organizar-partido').innerHTML = '<i class="ph-bold ph-check"></i> Guardar Cambios';
+
+        document.getElementById('op-fecha').value = p.fecha || '';
+        document.getElementById('op-hora').value = p.hora || '20:00';
+        document.getElementById('op-lugar').value = p.lugar || '';
+        document.getElementById('op-cupos').value = p.cupos || 12;
+        document.getElementById('op-precio-yape').value = p.precio_yape || '';
+
+        modalOrganizarPartido.style.display = 'flex';
+    };
+
+    // CANCELAR PARTIDO DE COMUNIDAD (LÍDER)
+    window.cancelarPartidoComunidad = async function(partidoId) {
+        if (!currentUser || !comunidadActualId) return;
+        const soyLider = currentUser && comunidadActualData && currentUser.uid === comunidadActualData.liderUid;
+        if (!soyLider) return alert("Solo el líder de la comunidad puede cancelar partidos.");
+
+        if (!confirm("¿Estás seguro de cancelar este partido de la comunidad?")) return;
+
+        try {
+            await updateDoc(doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', partidoId), {
+                estado: 'cancelado',
+                canceladoAt: serverTimestamp()
+            });
+            alert("Partido cancelado exitosamente.");
+            await cargarPartidosComunidad();
+        } catch(err) {
+            console.error("Error al cancelar partido:", err);
+            alert("No se pudo cancelar el partido.");
+        }
+    };
+
+    // FORMULARIO ORGANIZAR / EDITAR PARTIDO (LÍDER)
     if (formOrganizarPartido) {
         formOrganizarPartido.onsubmit = async (e) => {
             e.preventDefault();
             if (!currentUser || !comunidadActualId) return;
 
+            const editId = document.getElementById('op-partido-id').value;
             const btnSubmit = formOrganizarPartido.querySelector('button[type="submit"]');
             btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Publicando...';
+            btnSubmit.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
 
             const fecha = document.getElementById('op-fecha').value;
             const hora = document.getElementById('op-hora').value;
@@ -937,27 +1013,41 @@
             const precioYape = document.getElementById('op-precio-yape').value.trim();
 
             try {
-                await addDoc(collection(db, 'comunidades', comunidadActualId, 'partidos_comunidad'), {
-                    fecha,
-                    hora,
-                    lugar,
-                    cupos,
-                    precio_yape: precioYape,
-                    creadorUid: currentUser.uid,
-                    estado: 'activo',
-                    inscritos: [],
-                    createdAt: serverTimestamp()
-                });
-                modalOrganizarPartido.style.display = 'none';
-                formOrganizarPartido.reset();
-                alert('¡Partido publicado exitosamente en la comunidad!');
+                if (editId) {
+                    await updateDoc(doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', editId), {
+                        fecha,
+                        hora,
+                        lugar,
+                        cupos,
+                        precio_yape: precioYape,
+                        updatedAt: serverTimestamp()
+                    });
+                    modalOrganizarPartido.style.display = 'none';
+                    formOrganizarPartido.reset();
+                    alert('¡Partido actualizado exitosamente!');
+                } else {
+                    await addDoc(collection(db, 'comunidades', comunidadActualId, 'partidos_comunidad'), {
+                        fecha,
+                        hora,
+                        lugar,
+                        cupos,
+                        precio_yape: precioYape,
+                        creadorUid: currentUser.uid,
+                        estado: 'activo',
+                        inscritos: [],
+                        createdAt: serverTimestamp()
+                    });
+                    modalOrganizarPartido.style.display = 'none';
+                    formOrganizarPartido.reset();
+                    alert('¡Partido publicado exitosamente en la comunidad!');
+                }
                 cargarPartidosComunidad();
             } catch(err) {
-                console.error('Error al crear partido:', err);
-                alert('Error al publicar el partido.');
+                console.error('Error al guardar partido:', err);
+                alert('Error al guardar el partido.');
             } finally {
                 btnSubmit.disabled = false;
-                btnSubmit.innerHTML = '<i class="ph-bold ph-check"></i> Publicar Partido';
+                btnSubmit.innerHTML = editId ? '<i class="ph-bold ph-check"></i> Guardar Cambios' : '<i class="ph-bold ph-check"></i> Publicar Partido';
             }
         };
     }
@@ -1004,19 +1094,27 @@
                 const cuposTotales = parseInt(p.cupos) || 12;
                 const totalInscritos = inscritos.length;
                 const cuposLibres = Math.max(0, cuposTotales - totalInscritos);
+                const esCancelado = p.estado === 'cancelado';
 
                 const miInscripcion = currentUser ? inscritos.find(i => i.uid === currentUser.uid) : null;
                 const estoyInscrito = !!miInscripcion;
 
                 let estadoCuposHTML = '';
-                if (cuposLibres === 0) {
+                if (esCancelado) {
+                    estadoCuposHTML = `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cancelado</span>`;
+                } else if (cuposLibres === 0) {
                     estadoCuposHTML = `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cupos Llenos</span>`;
                 } else {
                     estadoCuposHTML = `<span style="background:rgba(46,204,113,0.15); color:var(--primary-green); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">${cuposLibres} cupo${cuposLibres === 1 ? '' : 's'} disponible${cuposLibres === 1 ? '' : 's'}</span>`;
                 }
 
                 let botoneraHTML = '';
-                if (estoyInscrito) {
+                if (esCancelado) {
+                    botoneraHTML = `
+                    <div style="background:rgba(231,76,60,0.08); border:1px solid rgba(231,76,60,0.2); border-radius:10px; padding:8px; margin-top:12px; text-align:center; color:#e74c3c; font-size:0.8rem; font-weight:700;">
+                        Este evento ha sido cancelado por el líder
+                    </div>`;
+                } else if (estoyInscrito) {
                     botoneraHTML = `
                     <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); border-radius:10px; padding:10px; margin-top:12px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
                         <div>
@@ -1056,6 +1154,20 @@
                     </button>`;
                 }
 
+                // Botones de Editar y Cancelar para eventos creados por el líder
+                let leaderMatchControls = '';
+                if (soyLider && !esCancelado) {
+                    leaderMatchControls = `
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                        <button onclick="window.editarPartidoComunidad('${p.id}')" class="btn btn-ghost" style="flex:1; padding:7px; font-size:0.78rem; font-weight:700; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                            <i class="ph-bold ph-pencil-simple"></i> Editar
+                        </button>
+                        <button onclick="window.cancelarPartidoComunidad('${p.id}')" class="btn btn-ghost" style="flex:1; padding:7px; font-size:0.78rem; font-weight:700; color:#e74c3c; border-color:rgba(231,76,60,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
+                            <i class="ph-bold ph-x-circle"></i> Cancelar
+                        </button>
+                    </div>`;
+                }
+
                 html += `
                 <div class="partido-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
@@ -1071,6 +1183,7 @@
 
                     ${botoneraHTML}
                     ${botonVerInscritos}
+                    ${leaderMatchControls}
                 </div>`;
             });
 

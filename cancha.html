@@ -102,6 +102,18 @@
         /* SPLIT-SCREEN LAYOUT PARA PC */
         .pc-split-grid { display: flex; flex-direction: column; gap: 25px; }
 
+        @media (max-width: 768px) {
+            body { overflow-x: hidden; }
+            .bio-actions-bar {
+                flex-direction: column !important;
+                width: 100% !important;
+            }
+            .bio-actions-bar .bio-btn {
+                width: 100% !important;
+                justify-content: center;
+            }
+        }
+
         @media (min-width: 880px) {
             .bio-container { max-width: 1140px; padding: 15px 25px 60px; }
             .bio-header { height: 260px; }
@@ -172,9 +184,14 @@
                         <div id="court-rating" style="margin-top: 10px; margin-bottom: 12px; display: inline-flex;"></div>
                     </div>
 
-                    <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline" style="width: auto; align-self: flex-start;">
-                        <i class="ph-bold ph-navigation-arrow" style="color:var(--primary-green);"></i> Cómo llegar con GPS
-                    </a>
+                    <div class="bio-actions-bar" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                        <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline" style="width: auto; align-self: flex-start;">
+                            <i class="ph-bold ph-navigation-arrow" style="color:var(--primary-green);"></i> Cómo llegar con GPS
+                        </a>
+                        <button id="btn-compartir-bio" type="button" class="bio-btn bio-btn-outline" style="width: auto; align-self: flex-start; cursor:pointer;">
+                            <i class="ph-bold ph-share-network" style="color:var(--primary-green);"></i> Compartir Complejo
+                        </button>
+                    </div>
 
                     <div class="bio-desc-container">
                         <h3 class="bio-desc-title"><i class="ph-bold ph-info" style="color: var(--primary-green);"></i> Sobre las instalaciones</h3>

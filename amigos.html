@@ -272,6 +272,117 @@
         .convocar-friend-item:hover { background: rgba(255,255,255,0.06); }
         .convocar-friend-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--primary-green); cursor: pointer; }
 
+        /* 📱 RESPONSIVE DESIGN ESTRICTO: LA PIZARRA, COMPARATIVA Y PARTIDOS */
+        .pizarra-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .pizarra-col {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 200px;
+            transition: all 0.2s ease;
+        }
+        .pizarra-col.equipo-a { border-color: rgba(52, 152, 219, 0.45); background: rgba(52, 152, 219, 0.05); }
+        .pizarra-col.equipo-b { border-color: rgba(231, 76, 60, 0.45); background: rgba(231, 76, 60, 0.05); }
+        
+        .pizarra-player-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px;
+            padding: 8px 12px;
+            gap: 10px;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+        .pizarra-player-item:hover {
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.09);
+        }
+
+        .comparativa-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            align-items: stretch;
+            margin-top: 15px;
+        }
+        .comparativa-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            backdrop-filter: blur(8px);
+        }
+        .comparativa-metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px dashed rgba(255,255,255,0.08);
+            font-size: 0.85rem;
+        }
+
+        .partido-card-privado {
+            background: rgba(255,255,255,0.03);
+            border: 1.5px solid rgba(46,204,113,0.3);
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 25px;
+        }
+
+        .invitacion-card {
+            background: linear-gradient(135deg, rgba(241,196,15,0.08), rgba(0,0,0,0.4));
+            border: 1px solid rgba(241,196,15,0.35);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 768px) {
+            body { overflow-x: hidden; }
+            .pizarra-grid {
+                grid-template-columns: 1fr !important;
+                gap: 14px !important;
+            }
+            .comparativa-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+            .partido-header-flex {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+            }
+            .partido-header-flex .btn-actions-row {
+                width: 100% !important;
+                display: flex !important;
+            }
+            .partido-header-flex .btn-actions-row .btn {
+                flex: 1 !important;
+                justify-content: center !important;
+            }
+        }
+
         @media (max-width: 650px) {
             #vista-lobby-grupos > div:first-child { flex-direction: column; align-items: stretch !important; gap: 14px; text-align: center; }
             #btn-crear-grupo { width: 100% !important; justify-content: center; }
@@ -298,6 +409,15 @@
 
     <!-- VISTA 1: LOBBY DE GRUPOS REALES DESDE FIRESTORE -->
     <div id="vista-lobby-grupos">
+        <!-- SECCIÓN DE INVITACIONES PENDIENTES -->
+        <div id="seccion-invitaciones-pendientes" style="margin-bottom: 24px; display: none;">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                <span class="mini-label" style="color:#f1c40f; font-weight:900;"><i class="ph-fill ph-envelope"></i> INVITACIONES</span>
+                <h3 style="margin:0; font-size:1.15rem; color:#fff;">Invitaciones a Vestuarios Pendientes</h3>
+            </div>
+            <div id="lista-invitaciones-pendientes"></div>
+        </div>
+
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
                 <h1 style="margin: 0; font-size: 1.8rem; color: #fff; font-weight: 800;">Mis Grupos</h1>
@@ -343,6 +463,9 @@
             <button class="tab-btn active" id="tab-miembros">
                 <i class="ph-bold ph-users-three"></i> Alineación
             </button>
+            <button class="tab-btn" id="tab-partidos">
+                <i class="ph-bold ph-calendar-check"></i> Partidos
+            </button>
             <button class="tab-btn" id="tab-explorar">
                 <i class="ph-bold ph-user-plus"></i> Añadir Jugadores
             </button>
@@ -354,10 +477,39 @@
         <!-- SUBSECCIÓN: MIEMBROS -->
         <div id="seccion-miembros">
             <div id="lista-amigos-grupo" class="friend-list"></div>
-            <!-- FAB PARA CONVOCAR -->
-            <button class="fab-convocar" id="btn-abrir-convocatoria" title="Armar Partido por WhatsApp">
-                <i class="ph-bold ph-megaphone"></i>
-            </button>
+        </div>
+
+        <!-- SUBSECCIÓN: PARTIDOS PRIVADOS Y LA PIZARRA -->
+        <div id="seccion-partidos" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <span class="mini-label" style="color:var(--primary-green); font-weight:800; font-size:0.75rem; letter-spacing:1px;">GESTIÓN INTERNA</span>
+                    <h2 style="margin: 3px 0 0; font-size: 1.45rem; color:#fff;">Partidos del Vestuario</h2>
+                </div>
+                <button id="btn-crear-partido-grupo" class="btn btn-primary" style="display:none; padding:10px 18px; font-weight:800; border-radius:10px; cursor:pointer;">
+                    <i class="ph-bold ph-plus-circle"></i> Organizar Partido
+                </button>
+            </div>
+
+            <!-- CONTENEDOR DE PARTIDO ACTIVO / PRÓXIMO -->
+            <div id="contenedor-partido-activo">
+                <div style="text-align:center; padding:35px; color:#888;">
+                    <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2rem; color:var(--primary-green);"></i>
+                    <p style="margin-top:10px;">Cargando partidos del grupo...</p>
+                </div>
+            </div>
+
+            <!-- HISTORIAL DE RIVALIDAD -->
+            <div style="margin-top: 35px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:15px;">
+                    <span style="font-size:1.4rem;">⚔️</span>
+                    <div>
+                        <h3 style="margin:0; font-size:1.25rem; color:#fff;">Historial de Rivalidad</h3>
+                        <p style="margin:2px 0 0; color:#888; font-size:0.8rem;">Registro histórico de enfrentamientos y resultados</p>
+                    </div>
+                </div>
+                <div id="contenedor-historial-rivalidad"></div>
+            </div>
         </div>
 
         <!-- SUBSECCIÓN: AÑADIR JUGADORES -->
@@ -417,52 +569,107 @@
     </div>
 </div>
 
-<!-- MODAL CONVOCATORIA POR WHATSAPP -->
-<div id="modal-convocar" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
-    <div class="modal-contenido" style="background:#111; max-width:480px; width:100%; padding:26px 24px; position:relative; border-radius:18px; border:1px solid rgba(241,196,15,0.3); box-shadow:0 15px 40px rgba(0,0,0,0.85);">
-        <button id="cerrar-convocar" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
+<!-- MODAL 1: CREAR / EDITAR PARTIDO DE GRUPO -->
+<div id="modal-partido-grupo" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; max-width:460px; width:100%; padding:28px 24px; position:relative; border-radius:18px; border:1px solid rgba(46,204,113,0.3); box-shadow:0 15px 40px rgba(0,0,0,0.85);">
+        <button id="cerrar-modal-partido" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
         
-        <div style="margin-bottom: 16px;">
-            <span style="color: #f1c40f; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.5px;">CONVOCATORIA RÁPIDA</span>
-            <h2 style="margin: 4px 0 0; font-size: 1.35rem; color: #fff; font-weight: 800; display:flex; align-items:center; gap:8px;">
-                <i class="ph-bold ph-megaphone" style="color: #f1c40f;"></i> Convocar a tu Vestuario
+        <div style="margin-bottom: 18px;">
+            <span class="mini-label" style="color:var(--primary-green); font-weight:800; font-size:0.75rem; letter-spacing:0.5px;">ORGANIZACIÓN DEL PARTIDO</span>
+            <h2 id="modal-partido-titulo" style="margin: 4px 0 0; font-size: 1.4rem; color: #fff; font-weight: 800; display:flex; align-items:center; gap:8px;">
+                <i class="ph-bold ph-calendar-plus" style="color:var(--primary-green);"></i> Organizar Partido
             </h2>
         </div>
 
-        <div class="form-group" style="margin-bottom: 12px; text-align: left;">
-            <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Cancha / Lugar:</label>
-            <input type="text" id="convocar-lugar" placeholder="Ej. Cancha Los Gallos - Cancha 1" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem;">
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
-            <div class="form-group" style="text-align: left;">
-                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Fecha:</label>
-                <input type="date" id="convocar-fecha" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem; color-scheme: dark;">
+        <form id="form-partido-grupo">
+            <input type="hidden" id="partido-edit-id" value="">
+            
+            <div class="form-group" style="margin-bottom: 14px; text-align: left;">
+                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Lugar / Cancha:</label>
+                <input type="text" id="pg-lugar" required placeholder="Ej. Cancha Los Gallos - Sintética 1" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem;">
             </div>
-            <div class="form-group" style="text-align: left;">
-                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Hora:</label>
-                <input type="time" id="convocar-hora" value="20:00" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem; color-scheme: dark;">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                <div class="form-group" style="text-align: left;">
+                    <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Fecha:</label>
+                    <input type="date" id="pg-fecha" required style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem; color-scheme: dark;">
+                </div>
+                <div class="form-group" style="text-align: left;">
+                    <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Hora:</label>
+                    <input type="time" id="pg-hora" required value="20:00" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.9rem; color-scheme: dark;">
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px; text-align: left;">
+                <label style="color: #aaa; font-size: 0.82rem; margin-bottom: 5px; display: block; font-weight: 600;">Costo Total de la Cancha (S/):</label>
+                <input type="number" id="pg-costo" required min="0" step="1" placeholder="Ej. 120" style="width: 100%; padding: 11px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
+                <small style="color:#888; font-size:0.75rem; margin-top:4px; display:block;">La calculadora dividirá este costo automáticamente entre los confirmados.</small>
+            </div>
+
+            <button type="submit" id="btn-guardar-partido-grupo" class="btn" style="width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 800; background: var(--primary-green); color: #080B0A; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="ph-bold ph-check"></i> Guardar Partido
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 2: REGISTRAR MARCADOR / RESULTADO DE PARTIDO -->
+<div id="modal-resultado-partido" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; max-width:440px; width:100%; padding:28px 24px; position:relative; border-radius:18px; border:1px solid rgba(241,196,15,0.4); box-shadow:0 15px 40px rgba(0,0,0,0.85); text-align:center;">
+        <button id="cerrar-modal-resultado" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
+        
+        <span class="mini-label" style="color:#f1c40f; font-weight:900;">HISTORIAL DE RIVALIDAD</span>
+        <h2 style="margin: 4px 0 16px; font-size: 1.4rem; color:#fff; font-weight:800;">Finalizar Partido</h2>
+        <p style="color:#aaa; font-size:0.85rem; margin-bottom:20px;">Registra el marcador del clásico entre Equipo A y Equipo B:</p>
+
+        <form id="form-marcador-partido">
+            <input type="hidden" id="partido-resultado-id" value="">
+            <div style="display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:25px;">
+                <div style="flex:1; text-align:center;">
+                    <span style="display:block; color:#3498db; font-weight:800; font-size:0.9rem; margin-bottom:6px;">Equipo A</span>
+                    <input type="number" id="goles-equipo-a" min="0" max="99" value="0" required style="width:70px; text-align:center; font-size:1.8rem; font-weight:900; padding:8px; background:rgba(52,152,219,0.1); border:2px solid #3498db; border-radius:10px; color:#fff;">
+                </div>
+                <span style="font-size:1.6rem; font-weight:900; color:#666;">VS</span>
+                <div style="flex:1; text-align:center;">
+                    <span style="display:block; color:#e74c3c; font-weight:800; font-size:0.9rem; margin-bottom:6px;">Equipo B</span>
+                    <input type="number" id="goles-equipo-b" min="0" max="99" value="0" required style="width:70px; text-align:center; font-size:1.8rem; font-weight:900; padding:8px; background:rgba(231,76,60,0.1); border:2px solid #e74c3c; border-radius:10px; color:#fff;">
+                </div>
+            </div>
+
+            <button type="submit" class="btn" style="width:100%; padding:13px; font-weight:800; background:linear-gradient(135deg, #f1c40f, #e67e22); color:#080B0A; border:none; border-radius:10px; cursor:pointer;">
+                <i class="ph-bold ph-trophy"></i> Guardar en Historial de Rivalidad
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL 3: COMPARATIVA CARA A CARA (MIEMBROS DE LA MANCHA) -->
+<div id="modal-comparar-amigos" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#0b0f0d; max-width:820px; width:95%; padding:28px 22px; position:relative; border-radius:20px; border:1.5px solid rgba(241,196,15,0.45); box-shadow:0 20px 50px rgba(0,0,0,0.85);">
+        <button id="cerrar-modal-comparar-amigos" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
+        
+        <div style="text-align: center; margin-bottom: 18px;">
+            <span class="mini-label" style="color: #f1c40f; font-weight: 900; letter-spacing: 1px;">CARA A CARA · LA MANCHA</span>
+            <h2 style="margin: 4px 0 0; color: #fff; font-size: 1.5rem; font-weight: 900; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="ph-bold ph-scales" style="color: #f1c40f;"></i> Comparativa Interna del Grupo
+            </h2>
+            <p style="color: #888; font-size: 0.82rem; margin: 4px 0 0;">Duelo de estadísticas y rendimiento en cancha</p>
+        </div>
+
+        <div id="comparar-amigos-selector-box" style="margin-bottom: 14px; text-align: center;"></div>
+
+        <div id="comparativa-amigos-grid-container" class="comparativa-grid">
+            <div style="grid-column: 1/-1; text-align: center; color: #888; padding: 25px;">
+                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 2rem; color: #f1c40f;"></i>
+                <p style="margin-top: 10px;">Cargando comparativa en vivo...</p>
             </div>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <span style="font-size: 0.85rem; color: #fff; font-weight: 700;">Seleccionar Jugadores:</span>
-            <button type="button" id="btn-toggle-select-all" style="background: none; border: none; color: var(--primary-green); font-size: 0.8rem; cursor: pointer; font-weight: bold; padding: 0;">Seleccionar todos</button>
-        </div>
-
-        <div id="convocar-lista-checks" style="max-height: 180px; overflow-y: auto; margin-bottom: 18px; padding-right: 4px;">
-            <p style="color: #888; font-size: 0.85rem; text-align: center;">Cargando amigos...</p>
-        </div>
-
-        <button id="btn-enviar-convocatoria-wa" class="btn" style="width: 100%; padding: 13px; font-size: 0.95rem; font-weight: 800; background: #25D366; color: #080B0A; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="ph-bold ph-whatsapp-logo" style="font-size: 1.25rem;"></i> Compartir en WhatsApp
-        </button>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, deleteDoc, addDoc, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, deleteDoc, addDoc, arrayRemove, arrayUnion, serverTimestamp, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -482,6 +689,8 @@
     let misGrupos = [];
     let grupoActivo = null;
     let miembrosDataGrupoActivo = [];
+    let partidoActivoActual = null;
+    let pizarraEquiposState = { equipoA: [], equipoB: [] };
 
     // TOAST NOTIFICATIONS ELEGANTES
     window.toast = function (mensaje, tipo = 'success') {
@@ -505,17 +714,20 @@
     // TABS DEL VESTUARIO
     const tabs = {
         mbr: document.getElementById('tab-miembros'),
+        par: document.getElementById('tab-partidos'),
         exp: document.getElementById('tab-explorar'),
         rnk: document.getElementById('tab-ranking')
     };
     const secs = {
         mbr: document.getElementById('seccion-miembros'),
+        par: document.getElementById('seccion-partidos'),
         exp: document.getElementById('seccion-explorar'),
         rnk: document.getElementById('seccion-ranking')
     };
 
     function switchTab(tabKey) {
         Object.keys(tabs).forEach(k => {
+            if (!tabs[k] || !secs[k]) return;
             if (k === tabKey) {
                 tabs[k].classList.add('active');
                 secs[k].style.display = 'block';
@@ -526,18 +738,22 @@
         });
         if (tabKey === 'rnk') {
             dibujarEquipoIdeal(grupoActivo ? grupoActivo.deporte : 'Fútbol');
+        } else if (tabKey === 'par') {
+            cargarPartidosDelGrupo();
         }
     }
 
-    tabs.mbr.addEventListener('click', () => switchTab('mbr'));
-    tabs.exp.addEventListener('click', () => switchTab('exp'));
-    tabs.rnk.addEventListener('click', () => switchTab('rnk'));
+    tabs.mbr?.addEventListener('click', () => switchTab('mbr'));
+    tabs.par?.addEventListener('click', () => switchTab('par'));
+    tabs.exp?.addEventListener('click', () => switchTab('exp'));
+    tabs.rnk?.addEventListener('click', () => switchTab('rnk'));
 
     // BOTÓN VOLVER AL LOBBY
     document.getElementById('btn-volver-lobby').onclick = () => {
         document.getElementById('vista-vestuario-grupo').style.display = 'none';
         document.getElementById('vista-lobby-grupos').style.display = 'block';
         grupoActivo = null;
+        partidoActivoActual = null;
         cargarMisGrupos();
     };
 
@@ -555,6 +771,7 @@
     function mostrarEstadoInvitado() {
         const lista = document.getElementById('lista-mis-grupos');
         document.getElementById('btn-crear-grupo').style.display = 'none';
+        document.getElementById('seccion-invitaciones-pendientes').style.display = 'none';
         lista.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 45px 20px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); border-radius: 16px;">
                 <i class="ph-bold ph-lock-key" style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 12px; display: block;"></i>
@@ -576,7 +793,7 @@
     }
 
     // ==========================================
-    // CARGAR MIS GRUPOS DESDE FIRESTORE (SIN MOCK DATA)
+    // CARGAR MIS GRUPOS E INVITACIONES PENDIENTES
     // ==========================================
     async function cargarMisGrupos() {
         if (!currentUser) return;
@@ -584,6 +801,9 @@
         lista.innerHTML = '<p style="color:#aaa; text-align:center; grid-column:1/-1;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green); display:block; margin-bottom:8px;"></i> Cargando tus grupos...</p>';
         
         try {
+            // Cargar invitaciones pendientes para mí
+            await cargarInvitacionesPendientes();
+
             const qOwned = query(collection(db, 'grupos_amigos'), where('ownerUid', '==', currentUser.uid));
             const qMember = query(collection(db, 'grupos_amigos'), where('miembros_uids', 'array-contains', currentUser.uid));
             const [snapOwned, snapMember] = await Promise.all([getDocs(qOwned), getDocs(qMember)]);
@@ -644,7 +864,89 @@
     }
 
     // ==========================================
-    // CREAR GRUPO (REQUISITO 3: MÁXIMO 3, ÚNICO DEPORTE)
+    // SISTEMA DE INVITACIONES PENDIENTES
+    // ==========================================
+    async function cargarInvitacionesPendientes() {
+        const secInvitaciones = document.getElementById('seccion-invitaciones-pendientes');
+        const listaInvitaciones = document.getElementById('lista-invitaciones-pendientes');
+        if (!secInvitaciones || !listaInvitaciones || !currentUser) return;
+
+        try {
+            const q = query(
+                collection(db, 'invitaciones_grupos'),
+                where('receptorUid', '==', currentUser.uid),
+                where('estado', '==', 'pendiente')
+            );
+            const snap = await getDocs(q);
+
+            if (snap.empty) {
+                secInvitaciones.style.display = 'none';
+                listaInvitaciones.innerHTML = '';
+                return;
+            }
+
+            secInvitaciones.style.display = 'block';
+            let html = '';
+            snap.forEach(docSnap => {
+                const inv = { id: docSnap.id, ...docSnap.data() };
+                const sportIcon = inv.deporte === 'Vóley' ? 'ph-volleyball' : (inv.deporte === 'Básquet' ? 'ph-basketball' : 'ph-soccer-ball');
+                html += `
+                    <div class="invitacion-card">
+                        <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+                            <div style="width:42px; height:42px; border-radius:12px; background:rgba(241,196,15,0.15); color:#f1c40f; display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;">
+                                <i class="ph-bold ${sportIcon}"></i>
+                            </div>
+                            <div style="min-width:0;">
+                                <h4 style="margin:0; font-size:0.95rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${inv.grupoNombre || 'Vestuario Privado'}</h4>
+                                <p style="margin:2px 0 0; font-size:0.78rem; color:#aaa;">Invitado por <b>${inv.emisorNombre || 'Capitán'}</b></p>
+                            </div>
+                        </div>
+                        <div class="invitacion-actions">
+                            <button class="btn btn-primary" onclick="window.responderInvitacionGrupo('${inv.id}', '${inv.grupoId}', true)" style="padding:7px 14px; font-size:0.8rem; font-weight:800; border-radius:8px; width:auto !important; cursor:pointer;">
+                                <i class="ph-bold ph-check"></i> Aceptar
+                            </button>
+                            <button class="btn btn-ghost" onclick="window.responderInvitacionGrupo('${inv.id}', '${inv.grupoId}', false)" style="padding:7px 14px; font-size:0.8rem; color:#e74c3c; border-color:rgba(231,76,60,0.3); border-radius:8px; width:auto !important; cursor:pointer;">
+                                <i class="ph-bold ph-x"></i> Rechazar
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            listaInvitaciones.innerHTML = html;
+        } catch (e) {
+            console.warn("No se pudieron cargar invitaciones:", e);
+            secInvitaciones.style.display = 'none';
+        }
+    }
+
+    window.responderInvitacionGrupo = async function(invitacionId, grupoId, aceptar) {
+        try {
+            if (aceptar) {
+                // Agregar al grupo
+                await updateDoc(doc(db, 'grupos_amigos', grupoId), {
+                    miembros_uids: arrayUnion(currentUser.uid)
+                });
+                await updateDoc(doc(db, 'invitaciones_grupos', invitacionId), {
+                    estado: 'aceptada',
+                    respondidaAt: serverTimestamp()
+                });
+                window.toast("¡Te has unido al vestuario!", "success");
+            } else {
+                await updateDoc(doc(db, 'invitaciones_grupos', invitacionId), {
+                    estado: 'rechazada',
+                    respondidaAt: serverTimestamp()
+                });
+                window.toast("Invitación rechazada.", "info");
+            }
+            await cargarMisGrupos();
+        } catch (e) {
+            console.error("Error al responder invitación:", e);
+            window.toast("Error al procesar la invitación", "error");
+        }
+    };
+
+    // ==========================================
+    // CREAR GRUPO
     // ==========================================
     const modalCrearGrupo = document.getElementById('modal-crear-grupo');
     document.getElementById('btn-crear-grupo').onclick = () => {
@@ -678,14 +980,14 @@
             await addDoc(collection(db, 'grupos_amigos'), {
                 ownerUid: currentUser.uid,
                 nombre: nombre,
-                deporte: deporte, // Único deporte: Fútbol, Vóley o Básquet
+                deporte: deporte,
                 miembros_uids: [],
                 createdAt: serverTimestamp()
             });
 
             modalCrearGrupo.style.display = 'none';
             e.target.reset();
-            alert("¡Grupo creado exitosamente!");
+            window.toast("¡Vestuario creado exitosamente!", "success");
             await cargarMisGrupos();
         } catch (err) {
             console.error("Error al crear grupo:", err);
@@ -712,12 +1014,17 @@
         // Mostrar u ocultar Eliminar vs Salir del Grupo según rol
         const btnEliminar = document.getElementById('btn-eliminar-grupo-actual');
         const btnSalir = document.getElementById('btn-salir-grupo-actual');
-        if (grupoActivo.ownerUid === currentUser.uid) {
+        const btnCrearPartido = document.getElementById('btn-crear-partido-grupo');
+        const soyLider = grupoActivo.ownerUid === currentUser.uid;
+
+        if (soyLider) {
             btnEliminar.style.display = 'inline-flex';
             btnSalir.style.display = 'none';
+            btnCrearPartido.style.display = 'inline-flex';
         } else {
             btnEliminar.style.display = 'none';
             btnSalir.style.display = 'inline-flex';
+            btnCrearPartido.style.display = 'none';
         }
 
         switchTab('mbr');
@@ -731,7 +1038,7 @@
 
         try {
             await deleteDoc(doc(db, 'grupos_amigos', grupoActivo.id));
-            alert("Grupo eliminado.");
+            window.toast("Grupo eliminado.", "info");
             document.getElementById('btn-volver-lobby').click();
         } catch (e) {
             console.error("Error al eliminar grupo:", e);
@@ -748,7 +1055,7 @@
             await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id), {
                 miembros_uids: arrayRemove(currentUser.uid)
             });
-            alert("Has salido del grupo.");
+            window.toast("Has salido del grupo.", "info");
             document.getElementById('btn-volver-lobby').click();
         } catch (e) {
             console.error("Error al salir del grupo:", e);
@@ -756,13 +1063,13 @@
         }
     };
 
+    // ==========================================
     // CARGAR MIEMBROS DEL GRUPO ACTIVO
+    // ==========================================
     async function cargarMiembrosDelGrupo() {
         const lista = document.getElementById('lista-amigos-grupo');
         const ownerUid = grupoActivo.ownerUid;
         const uidsRaw = Array.isArray(grupoActivo.miembros_uids) ? grupoActivo.miembros_uids : [];
-        
-        // Asegurar que el owner esté incluido en la lista si no lo está
         const todosUids = ownerUid && !uidsRaw.includes(ownerUid) ? [ownerUid, ...uidsRaw] : [...uidsRaw];
 
         if (todosUids.length === 0) {
@@ -775,7 +1082,6 @@
         try {
             miembrosDataGrupoActivo = [];
             
-            // Cargar perfiles de forma segura
             const perfilesSnaps = await Promise.all(
                 todosUids.map(uid => getDoc(doc(db, 'jugadores_perfiles', uid)).catch(() => null))
             );
@@ -805,6 +1111,9 @@
                 const telClean = String(j.telefono || '').replace(/\D/g, '');
                 const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent('¡Habla! ¿Listo para el partido?')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
 
+                // Botón Comparar Cara a Cara
+                const btnComparar = `<button class="btn btn-comparar-amigo" onclick="window.abrirComparativaAmigos('${j.uid}')" style="width:auto !important; padding:6px 11px; font-size:0.75rem; font-weight:700; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Comparar estadísticas"><i class="ph-bold ph-scales"></i> ⚖️ Comparar</button>`;
+
                 // Botón de quitar: Solo visible para el líder y NUNCA contra sí mismo
                 const btnQuitar = (soyLider && !esEsteLider)
                     ? `<button class="btn" style="width: 34px; height: 34px; background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; display:inline-flex; align-items:center; justify-content:center; padding:0; cursor:pointer;" onclick="window.quitarDelGrupo('${j.uid}')" title="Quitar del grupo">
@@ -832,7 +1141,8 @@
                                 <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); font-weight:700;">${pos}</span>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            ${btnComparar}
                             ${waBtn}
                             ${btnQuitar}
                         </div>
@@ -846,7 +1156,9 @@
         }
     }
 
-    // BUSCAR Y AGREGAR DIRECTO AL GRUPO
+    // ==========================================
+    // BUSCAR Y ENVIAR INVITACIÓN AL GRUPO
+    // ==========================================
     const inputBuscar = document.getElementById('input-buscar-jugador');
     const btnBuscar = document.getElementById('btn-buscar-jugador');
     const listaBusqueda = document.getElementById('lista-busqueda');
@@ -860,7 +1172,19 @@
 
         listaBusqueda.innerHTML = '<p style="text-align:center; grid-column:1/-1; padding:25px;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:1.8rem; color:var(--primary-green);"></i> Buscando jugadores...</p>';
         try {
+            // Traer perfiles y verificar si ya tienen invitación pendiente
             const snap = await getDocs(collection(db, 'jugadores_perfiles'));
+            
+            // Consultar invitaciones pendientes de este grupo
+            const qInv = query(
+                collection(db, 'invitaciones_grupos'),
+                where('grupoId', '==', grupoActivo.id),
+                where('estado', '==', 'pendiente')
+            );
+            const snapInv = await getDocs(qInv);
+            const invitadosPendientes = new Set();
+            snapInv.forEach(d => invitadosPendientes.add(d.data().receptorUid));
+
             let html = '';
             let count = 0;
 
@@ -870,11 +1194,18 @@
                 const match = (j.nombre || '').toLowerCase().includes(qTexto) || (j.apodo || '').toLowerCase().includes(qTexto);
                 if (match) {
                     count++;
-                    const yaEsta = grupoActivo.miembros_uids && grupoActivo.miembros_uids.includes(d.id);
+                    const yaEsta = (grupoActivo.miembros_uids && grupoActivo.miembros_uids.includes(d.id)) || grupoActivo.ownerUid === d.id;
+                    const yaInvitado = invitadosPendientes.has(d.id);
                     const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre || 'Jugador')}&background=2ecc71&color=fff`;
-                    const btnHtml = yaEsta
-                        ? `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#888; border-radius:8px;" disabled><i class="ph-bold ph-check"></i> En grupo</button>`
-                        : `<button class="btn" style="width: auto !important; padding:6px 14px; font-size:0.78rem; background:var(--primary-green); color:#080B0A; border:none; font-weight:800; border-radius:8px; cursor:pointer;" onclick="window.agregarAlGrupo('${d.id}')"><i class="ph-bold ph-plus"></i> Añadir</button>`;
+                    
+                    let btnHtml = '';
+                    if (yaEsta) {
+                        btnHtml = `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#888; border-radius:8px;" disabled><i class="ph-bold ph-check"></i> En grupo</button>`;
+                    } else if (yaInvitado) {
+                        btnHtml = `<button class="btn" style="width: auto !important; padding:6px 12px; font-size:0.75rem; background:rgba(241,196,15,0.15); border:1px solid rgba(241,196,15,0.3); color:#f1c40f; border-radius:8px;" disabled><i class="ph-bold ph-envelope"></i> Invitado</button>`;
+                    } else {
+                        btnHtml = `<button class="btn" style="width: auto !important; padding:6px 14px; font-size:0.78rem; background:var(--primary-green); color:#080B0A; border:none; font-weight:800; border-radius:8px; cursor:pointer;" onclick="window.enviarInvitacionGrupo('${d.id}')"><i class="ph-bold ph-paper-plane-tilt"></i> Invitar</button>`;
+                    }
 
                     html += `
                         <div class="friend-card">
@@ -902,20 +1233,34 @@
         if (e.key === 'Enter') btnBuscar.click();
     });
 
-    window.agregarAlGrupo = async function(uidJugador) {
-        if (!grupoActivo) return;
+    // SISTEMA DE INVITACIONES (CERO INSERCIÓN DIRECTA)
+    window.enviarInvitacionGrupo = async function(uidJugador) {
+        if (!grupoActivo || !currentUser) return;
         try {
-            let actualizados = grupoActivo.miembros_uids ? [...grupoActivo.miembros_uids] : [];
-            if (!actualizados.includes(uidJugador)) {
-                actualizados.push(uidJugador);
-                await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id), { miembros_uids: actualizados });
-                grupoActivo.miembros_uids = actualizados;
-                btnBuscar.click();
-                await cargarMiembrosDelGrupo();
+            // Verificar si ya está en el grupo
+            const yaEsta = (grupoActivo.miembros_uids && grupoActivo.miembros_uids.includes(uidJugador)) || grupoActivo.ownerUid === uidJugador;
+            if (yaEsta) {
+                window.toast("El jugador ya forma parte de este vestuario.", "info");
+                return;
             }
+
+            // Crear registro en la colección invitaciones_grupos
+            await addDoc(collection(db, 'invitaciones_grupos'), {
+                grupoId: grupoActivo.id,
+                grupoNombre: grupoActivo.nombre,
+                deporte: grupoActivo.deporte || 'Fútbol',
+                emisorUid: currentUser.uid,
+                emisorNombre: currentUser.displayName || 'Capitán',
+                receptorUid: uidJugador,
+                estado: 'pendiente',
+                createdAt: serverTimestamp()
+            });
+
+            window.toast("¡Invitación enviada al jugador!", "success");
+            btnBuscar.click();
         } catch (e) {
-            console.error("Error al añadir al grupo:", e);
-            alert("Error al añadir jugador al grupo.");
+            console.error("Error al enviar invitación:", e);
+            window.toast("Error al enviar la invitación.", "error");
         }
     };
 
@@ -925,6 +1270,7 @@
             let actualizados = (grupoActivo.miembros_uids || []).filter(id => id !== uidJugador);
             await updateDoc(doc(db, 'grupos_amigos', grupoActivo.id), { miembros_uids: actualizados });
             grupoActivo.miembros_uids = actualizados;
+            window.toast("Jugador retirado del grupo.", "info");
             await cargarMiembrosDelGrupo();
         } catch (e) {
             console.error("Error al quitar jugador del grupo:", e);
@@ -933,9 +1279,9 @@
     };
 
     // ==========================================
-    // EQUIPO IDEAL (RANKING DINÁMICO SEGÚN DEPORTE)
+    // STATS REALES (11 IDEAL SIN RANDOM)
     // ==========================================
-    function dibujarEquipoIdeal(deporte) {
+    async function dibujarEquipoIdeal(deporte) {
         const contenedor = document.getElementById('contenedor-cancha-ranking');
         if (!contenedor) return;
 
@@ -944,185 +1290,731 @@
             return;
         }
 
-        let ranking = miembrosDataGrupoActivo.map(j => ({
-            ...j,
-            score: j.rating ? Math.round(Number(j.rating) * 20) : Math.floor(75 + ((j.nombre.charCodeAt(0) * 3) % 23))
-        }));
+        contenedor.innerHTML = '<div style="text-align:center; padding:35px; color:#aaa;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2rem; color:var(--primary-green);"></i><p style="margin-top:10px;">Calculando valoraciones reales...</p></div>';
 
-        const yo = {
-            uid: currentUser.uid,
-            nombre: currentUser.displayName || 'Tú (Capitán)',
-            foto: currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.displayName || 'Capitán')}&background=f1c40f&color=000`,
-            score: 99,
-            posicion: 'CAPI'
-        };
-        ranking.push(yo);
-        ranking.sort((a, b) => b.score - a.score);
-
-        const generarCarta = (j, posForzada) => {
-            if (!j) {
-                return `
-                <div class="player-pitch-card" style="opacity:0.35;">
-                    <div class="player-pitch-photo-container">
-                        <div style="width:50px; height:50px; border-radius:50%; background:#222; border:2px dashed #777;"></div>
-                    </div>
-                    <div class="player-pitch-name">Libre</div>
-                    <div class="player-pitch-pos">${posForzada || 'VAC'}</div>
-                </div>`;
-            }
-            const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre)}&background=2ecc71&color=fff`;
-            const primerNombre = (j.nombre || 'Jugador').split(' ')[0];
-            return `
-            <div class="player-pitch-card" title="${j.nombre} - Score: ${j.score}">
-                <div class="player-pitch-photo-container">
-                    <img src="${foto}" alt="${j.nombre}">
-                    <div class="player-pitch-score">${j.score}</div>
-                </div>
-                <div class="player-pitch-name">${primerNombre}</div>
-                <div class="player-pitch-pos">${posForzada || j.posicion || 'JUG'}</div>
-            </div>`;
-        };
-
-        function armarEquipo(rank, reqs) {
-            let seleccionados = [];
-            let disponibles = [...rank];
-            reqs.forEach(req => {
-                let idx = disponibles.findIndex(jug => jug.posicion && jug.posicion.includes(req));
-                if (idx !== -1) {
-                    seleccionados.push({ jug: disponibles[idx], pos: req });
-                    disponibles.splice(idx, 1);
-                } else if (disponibles.length > 0) {
-                    seleccionados.push({ jug: disponibles[0], pos: req });
-                    disponibles.splice(0, 1);
-                } else {
-                    seleccionados.push({ jug: null, pos: req });
+        try {
+            // Obtener reseñas reales de cada miembro desde resenas_jugadores
+            const rankingPromesas = miembrosDataGrupoActivo.map(async (j) => {
+                try {
+                    const qRes = query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', j.uid));
+                    const snapRes = await getDocs(qRes);
+                    let score = 0;
+                    if (!snapRes.empty) {
+                        let suma = 0;
+                        let total = 0;
+                        snapRes.forEach(r => {
+                            const cal = Number(r.data().rating || 0);
+                            if (cal > 0) {
+                                suma += cal;
+                                total++;
+                            }
+                        });
+                        score = total > 0 ? Math.round((suma / total) * 20) : (j.rating ? Math.round(Number(j.rating) * 20) : 0);
+                    } else if (j.rating) {
+                        score = Math.round(Number(j.rating) * 20);
+                    } else {
+                        score = 0; // CERO MOCK DATA: 0 si no tienen calificaciones
+                    }
+                    return { ...j, score };
+                } catch {
+                    return { ...j, score: j.rating ? Math.round(Number(j.rating) * 20) : 0 };
                 }
             });
-            return seleccionados;
-        }
 
-        let html = '';
-        if (deporte === 'Vóley') {
-            const team = armarEquipo(ranking, ['ARM', 'OPU', 'ATQ', 'ATQ', 'CEN', 'LIB']);
-            html = `
-            <div class="voley-pitch">
-                <div class="voley-net"></div>
-                <div class="formation-row">${team.slice(2, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
-                <div class="formation-row" style="margin-top:20px;">
-                    ${team.slice(0, 2).map(t => generarCarta(t.jug, t.pos)).join('')}
-                    ${generarCarta(team[5].jug, team[5].pos)}
-                </div>
-            </div>`;
-        } else if (deporte === 'Básquet') {
-            const team = armarEquipo(ranking, ['BAS', 'ESC', 'ALE', 'API', 'PIV']);
-            html = `
-            <div class="basket-pitch">
-                <div class="pitch-line basket-center"></div>
-                <div class="pitch-line basket-circle"></div>
-                <div class="formation-row" style="margin-top:20px;">${team.slice(3, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
-                <div class="formation-row">${team.slice(1, 3).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
-                <div class="formation-row">${generarCarta(team[0].jug, team[0].pos)}</div>
-            </div>`;
-        } else {
-            // Fútbol
-            const team = armarEquipo(ranking, ['ARQ', 'DEF', 'DEF', 'MED', 'MED', 'DEL', 'DEL']);
-            html = `
-            <div class="soccer-pitch">
-                <div class="pitch-line pitch-center"></div>
-                <div class="pitch-line pitch-circle"></div>
-                <div class="formation-row">${team.slice(5, 7).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
-                <div class="formation-row">${team.slice(3, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
-                <div class="formation-row">${team.slice(1, 3).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
-                <div class="formation-row">${generarCarta(team[0].jug, team[0].pos)}</div>
-            </div>`;
-        }
+            const ranking = await Promise.all(rankingPromesas);
+            ranking.sort((a, b) => b.score - a.score);
 
-        contenedor.innerHTML = html;
+            const generarCarta = (j, posForzada) => {
+                if (!j) {
+                    return `
+                    <div class="player-pitch-card" style="opacity:0.35;">
+                        <div class="player-pitch-photo-container">
+                            <div style="width:50px; height:50px; border-radius:50%; background:#222; border:2px dashed #777;"></div>
+                        </div>
+                        <div class="player-pitch-name">Libre</div>
+                        <div class="player-pitch-pos">${posForzada || 'VAC'}</div>
+                    </div>`;
+                }
+                const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre)}&background=2ecc71&color=fff`;
+                const primerNombre = (j.nombre || 'Jugador').split(' ')[0];
+                return `
+                <div class="player-pitch-card" title="${j.nombre} - Score real: ${j.score}">
+                    <div class="player-pitch-photo-container">
+                        <img src="${foto}" alt="${j.nombre}">
+                        <div class="player-pitch-score" style="background:${j.score > 0 ? 'var(--primary-green)' : '#7f8c8d'}; color:#000;">${j.score}</div>
+                    </div>
+                    <div class="player-pitch-name">${primerNombre}</div>
+                    <div class="player-pitch-pos">${posForzada || j.posicion || 'JUG'}</div>
+                </div>`;
+            };
+
+            function armarEquipo(rank, reqs) {
+                let seleccionados = [];
+                let disponibles = [...rank];
+                reqs.forEach(req => {
+                    let idx = disponibles.findIndex(jug => jug.posicion && jug.posicion.includes(req));
+                    if (idx !== -1) {
+                        seleccionados.push({ jug: disponibles[idx], pos: req });
+                        disponibles.splice(idx, 1);
+                    } else if (disponibles.length > 0) {
+                        seleccionados.push({ jug: disponibles[0], pos: req });
+                        disponibles.splice(0, 1);
+                    } else {
+                        seleccionados.push({ jug: null, pos: req });
+                    }
+                });
+                return seleccionados;
+            }
+
+            let html = '';
+            if (deporte === 'Vóley') {
+                const team = armarEquipo(ranking, ['ARM', 'OPU', 'ATQ', 'ATQ', 'CEN', 'LIB']);
+                html = `
+                <div class="voley-pitch">
+                    <div class="voley-net"></div>
+                    <div class="formation-row">${team.slice(2, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                    <div class="formation-row" style="margin-top:20px;">
+                        ${team.slice(0, 2).map(t => generarCarta(t.jug, t.pos)).join('')}
+                        ${generarCarta(team[5].jug, team[5].pos)}
+                    </div>
+                </div>`;
+            } else if (deporte === 'Básquet') {
+                const team = armarEquipo(ranking, ['BAS', 'ESC', 'ALE', 'API', 'PIV']);
+                html = `
+                <div class="basket-pitch">
+                    <div class="pitch-line basket-center"></div>
+                    <div class="pitch-line basket-circle"></div>
+                    <div class="formation-row" style="margin-top:20px;">${team.slice(3, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                    <div class="formation-row">${team.slice(1, 3).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                    <div class="formation-row">${generarCarta(team[0].jug, team[0].pos)}</div>
+                </div>`;
+            } else {
+                // Fútbol
+                const team = armarEquipo(ranking, ['ARQ', 'DEF', 'DEF', 'MED', 'MED', 'DEL', 'DEL']);
+                html = `
+                <div class="soccer-pitch">
+                    <div class="pitch-line pitch-center"></div>
+                    <div class="pitch-line pitch-circle"></div>
+                    <div class="formation-row">${team.slice(5, 7).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                    <div class="formation-row">${team.slice(3, 5).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                    <div class="formation-row">${team.slice(1, 3).map(t => generarCarta(t.jug, t.pos)).join('')}</div>
+                    <div class="formation-row">${generarCarta(team[0].jug, team[0].pos)}</div>
+                </div>`;
+            }
+
+            contenedor.innerHTML = html;
+        } catch (e) {
+            console.error("Error al generar equipo ideal:", e);
+            contenedor.innerHTML = '<p style="color:red; text-align:center;">Error al procesar el equipo ideal.</p>';
+        }
     }
 
     // ==========================================
-    // MODAL CONVOCATORIA (FAB WHATSAPP)
+    // GESTOR COMPLETO DE PARTIDOS PRIVADOS Y LA PIZARRA
     // ==========================================
-    const modalConvocar = document.getElementById('modal-convocar');
-    const btnAbrirConvocar = document.getElementById('btn-abrir-convocatoria');
-    const btnCerrarConvocar = document.getElementById('cerrar-convocar');
-    const inputFecha = document.getElementById('convocar-fecha');
-    const checksContainer = document.getElementById('convocar-lista-checks');
-    const btnToggleAll = document.getElementById('btn-toggle-select-all');
-    const btnEnviarWa = document.getElementById('btn-enviar-convocatoria-wa');
+    const modalPartido = document.getElementById('modal-partido-grupo');
+    const formPartido = document.getElementById('form-partido-grupo');
+    const cerrarModalPartido = document.getElementById('cerrar-modal-partido');
 
-    const dHoy = new Date();
-    const hoyStr = `${dHoy.getFullYear()}-${String(dHoy.getMonth() + 1).padStart(2, '0')}-${String(dHoy.getDate()).padStart(2, '0')}`;
-    inputFecha.value = hoyStr;
-    inputFecha.min = hoyStr;
+    document.getElementById('btn-crear-partido-grupo').onclick = () => {
+        document.getElementById('partido-edit-id').value = '';
+        document.getElementById('modal-partido-titulo').innerHTML = '<i class="ph-bold ph-calendar-plus" style="color:var(--primary-green);"></i> Organizar Partido';
+        formPartido.reset();
+        const dHoy = new Date();
+        const hoyStr = `${dHoy.getFullYear()}-${String(dHoy.getMonth() + 1).padStart(2, '0')}-${String(dHoy.getDate()).padStart(2, '0')}`;
+        document.getElementById('pg-fecha').value = hoyStr;
+        document.getElementById('pg-fecha').min = hoyStr;
+        modalPartido.style.display = 'flex';
+    };
 
-    btnAbrirConvocar.onclick = () => {
-        if (!grupoActivo) return;
-        if (miembrosDataGrupoActivo.length === 0) {
-            alert("Añade jugadores primero para poder convocarlos.");
-            return;
+    cerrarModalPartido.onclick = () => { modalPartido.style.display = 'none'; };
+    modalPartido.onclick = (e) => { if (e.target === modalPartido) modalPartido.style.display = 'none'; };
+
+    formPartido.onsubmit = async (e) => {
+        e.preventDefault();
+        if (!grupoActivo || !currentUser) return;
+
+        const editId = document.getElementById('partido-edit-id').value;
+        const lugar = document.getElementById('pg-lugar').value.trim();
+        const fecha = document.getElementById('pg-fecha').value;
+        const hora = document.getElementById('pg-hora').value;
+        const costoTotal = Number(document.getElementById('pg-costo').value || 0);
+
+        const btn = document.getElementById('btn-guardar-partido-grupo');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando...';
+
+        try {
+            if (editId) {
+                // Modo Edición
+                await updateDoc(doc(db, 'partidos_grupos', editId), {
+                    lugar,
+                    fecha,
+                    hora,
+                    costoTotal,
+                    updatedAt: serverTimestamp()
+                });
+                window.toast("Partido actualizado.", "success");
+            } else {
+                // Modo Creación: el creador asiste por defecto
+                await addDoc(collection(db, 'partidos_grupos'), {
+                    grupoId: grupoActivo.id,
+                    creadorUid: currentUser.uid,
+                    lugar,
+                    fecha,
+                    hora,
+                    costoTotal,
+                    estado: 'activo',
+                    asistentes: [currentUser.uid],
+                    equipos: {
+                        equipoA: [currentUser.uid],
+                        equipoB: []
+                    },
+                    createdAt: serverTimestamp()
+                });
+                window.toast("¡Partido organizado con éxito!", "success");
+            }
+            modalPartido.style.display = 'none';
+            await cargarPartidosDelGrupo();
+        } catch (err) {
+            console.error("Error al guardar partido:", err);
+            window.toast("No se pudo guardar el partido", "error");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="ph-bold ph-check"></i> Guardar Partido';
         }
+    };
 
-        checksContainer.innerHTML = miembrosDataGrupoActivo.map(j => {
-            const foto = j.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.nombre)}&background=2ecc71&color=fff`;
-            return `
-            <label class="convocar-friend-item">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <img src="${foto}" style="width:34px; height:34px; aspect-ratio:1/1; object-fit:cover; border-radius:50%;" alt="${j.nombre}">
-                    <span style="font-size:0.88rem; font-weight:700; color:#fff;">${j.nombre}</span>
+    // CARGAR PARTIDOS Y RIVALIDAD
+    async function cargarPartidosDelGrupo() {
+        const contenedorActivo = document.getElementById('contenedor-partido-activo');
+        if (!grupoActivo || !contenedorActivo) return;
+
+        contenedorActivo.innerHTML = '<div style="text-align:center; padding:35px; color:#888;"><i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2rem; color:var(--primary-green);"></i><p style="margin-top:10px;">Cargando partido...</p></div>';
+
+        try {
+            // Buscar partido activo
+            const qActivo = query(
+                collection(db, 'partidos_grupos'),
+                where('grupoId', '==', grupoActivo.id),
+                where('estado', '==', 'activo'),
+                limit(1)
+            );
+            const snapActivo = await getDocs(qActivo);
+
+            if (snapActivo.empty) {
+                partidoActivoActual = null;
+                const soyLider = grupoActivo.ownerUid === currentUser.uid;
+                contenedorActivo.innerHTML = `
+                    <div style="text-align:center; padding:40px 20px; background:rgba(255,255,255,0.02); border:1px dashed rgba(255,255,255,0.12); border-radius:16px;">
+                        <i class="ph-bold ph-calendar-blank" style="font-size:3rem; color:#666; margin-bottom:10px; display:block;"></i>
+                        <h3 style="color:#fff; margin:0 0 6px;">No hay partido activo programado</h3>
+                        <p style="color:#aaa; font-size:0.88rem; margin:0 0 16px;">Organiza un partido para convocar a la mancha, dividir la cancha y armar los equipos.</p>
+                        ${soyLider ? `<button class="btn btn-primary" onclick="document.getElementById('btn-crear-partido-grupo').click()" style="width:auto !important; padding:10px 20px; border-radius:10px; font-weight:800; cursor:pointer;"><i class="ph-bold ph-plus"></i> Organizar Nuevo Partido</button>` : `<span style="color:#888; font-size:0.8rem;">Solo el Capitán del grupo puede abrir un nuevo partido.</span>`}
+                    </div>
+                `;
+            } else {
+                const docPart = snapActivo.docs[0];
+                partidoActivoActual = { id: docPart.id, ...docPart.data() };
+                renderizarPartidoActivo(partidoActivoActual);
+            }
+
+            // Cargar Historial de Rivalidad
+            await cargarHistorialRivalidad();
+
+        } catch (e) {
+            console.error("Error al cargar partidos del grupo:", e);
+            contenedorActivo.innerHTML = '<p style="color:red; text-align:center;">Error al cargar partidos del vestuario.</p>';
+        }
+    }
+
+    function renderizarPartidoActivo(partido) {
+        const contenedor = document.getElementById('contenedor-partido-activo');
+        if (!contenedor) return;
+
+        const soyLider = grupoActivo.ownerUid === currentUser.uid;
+        const asistentes = Array.isArray(partido.asistentes) ? partido.asistentes : [];
+        const yaAsisto = currentUser && asistentes.includes(currentUser.uid);
+        const costoTotal = Number(partido.costoTotal || 0);
+        const numAsistentes = asistentes.length;
+        const cuotaPorPersona = numAsistentes > 0 ? (costoTotal / numAsistentes).toFixed(2) : costoTotal.toFixed(2);
+
+        // Inicializar estado de la pizarra
+        pizarraEquiposState = {
+            equipoA: Array.isArray(partido.equipos?.equipoA) ? [...partido.equipos.equipoA] : [],
+            equipoB: Array.isArray(partido.equipos?.equipoB) ? [...partido.equipos.equipoB] : []
+        };
+
+        // Controles de líder (Editar / Cancelar / Finalizar)
+        const leaderControls = soyLider ? `
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:16px;">
+                <button class="btn btn-ghost" onclick="window.editarPartidoActivo()" style="padding:8px 14px; font-size:0.82rem; font-weight:700; border-radius:8px; cursor:pointer; width:auto !important;">
+                    <i class="ph-bold ph-pencil-simple"></i> Editar
+                </button>
+                <button class="btn btn-ghost" onclick="window.cancelarPartidoActivo()" style="padding:8px 14px; font-size:0.82rem; font-weight:700; color:#e74c3c; border-color:rgba(231,76,60,0.3); border-radius:8px; cursor:pointer; width:auto !important;">
+                    <i class="ph-bold ph-x-circle"></i> Cancelar
+                </button>
+                <button class="btn" onclick="window.abrirModalResultado()" style="padding:8px 16px; font-size:0.82rem; font-weight:800; background:linear-gradient(135deg, #f1c40f, #e67e22); color:#000; border:none; border-radius:8px; cursor:pointer; width:auto !important; margin-left:auto;">
+                    <i class="ph-bold ph-trophy"></i> Registrar Marcador
+                </button>
+            </div>
+        ` : '';
+
+        // Botón Asistiré
+        const btnAsistire = yaAsisto ? `
+            <button class="btn" onclick="window.toggleAsistenciaPartido(false)" style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:10px 18px; font-weight:800; border-radius:10px; cursor:pointer; width:auto !important;">
+                <i class="ph-bold ph-check"></i> Ya estás anotado (Click para desmarcar)
+            </button>
+        ` : `
+            <button class="btn btn-primary" onclick="window.toggleAsistenciaPartido(true)" style="padding:10px 22px; font-weight:800; border-radius:10px; cursor:pointer; width:auto !important;">
+                <i class="ph-bold ph-hand-palm"></i> ¡Asistiré al partido!
+            </button>
+        `;
+
+        contenedor.innerHTML = `
+            <div class="partido-card-privado">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+                    <div>
+                        <span class="mini-label" style="color:var(--primary-green); font-weight:900;">PRÓXIMO PARTIDO</span>
+                        <h3 style="margin:4px 0 0; font-size:1.35rem; color:#fff; font-weight:800;">📍 ${partido.lugar || 'Cancha asignada'}</h3>
+                        <p style="margin:4px 0 0; color:#aaa; font-size:0.88rem;">
+                            📅 <b>${partido.fecha}</b> &nbsp;|&nbsp; ⏰ <b>${partido.hora} hrs</b>
+                        </p>
+                    </div>
+                    <div>${btnAsistire}</div>
                 </div>
-                <input type="checkbox" class="check-convocar-amigo" value="${j.nombre}" data-uid="${j.uid}" checked>
-            </label>`;
-        }).join('');
 
-        modalConvocar.style.display = 'flex';
+                <!-- CALCULADORA DE CUOTAS AUTOMÁTICA -->
+                <div class="calculadora-cuota-box">
+                    <div>
+                        <span style="font-size:0.75rem; color:#888; text-transform:uppercase; font-weight:800; letter-spacing:0.5px;">Calculadora de Cancha</span>
+                        <div style="color:#fff; font-size:0.95rem; margin-top:3px;">
+                            Costo Total: <b>S/ ${costoTotal.toFixed(2)}</b> &nbsp;·&nbsp; Confirmados: <b style="color:var(--primary-green);">${numAsistentes} patas</b>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="font-size:0.75rem; color:var(--primary-green); font-weight:800;">CUOTA ESTIMADA</span>
+                        <div class="cuota-badge">S/ ${cuotaPorPersona} <span style="font-size:0.75rem; font-weight:normal; color:#aaa;">c/u</span></div>
+                    </div>
+                </div>
+
+                ${leaderControls}
+
+                <!-- LA PIZARRA DE EQUIPOS -->
+                <div style="margin-top:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                        <div>
+                            <h4 style="margin:0; font-size:1.15rem; color:#fff; display:flex; align-items:center; gap:6px;">
+                                📋 La Pizarra Táctica
+                            </h4>
+                            <p style="margin:2px 0 0; font-size:0.78rem; color:#888;">Asignación de asistentes al Equipo A y Equipo B (Arrastra o selecciona)</p>
+                        </div>
+                        ${soyLider ? `<button class="btn btn-primary" onclick="window.guardarPizarraEquipos()" style="padding:6px 14px; font-size:0.8rem; font-weight:800; border-radius:8px; width:auto !important; cursor:pointer;"><i class="ph-bold ph-floppy-disk"></i> Guardar Pizarra</button>` : ''}
+                    </div>
+
+                    <div id="pizarra-tactica-grid" class="pizarra-grid">
+                        <!-- RENDER DINÁMICO DE EQUIPOS -->
+                    </div>
+                </div>
+            </div>
+        `;
+
+        renderizarPizarra();
+    }
+
+    // RENDERIZAR LA PIZARRA TÁCTICA
+    function renderizarPizarra() {
+        const grid = document.getElementById('pizarra-tactica-grid');
+        if (!grid || !partidoActivoActual) return;
+
+        const soyLider = grupoActivo.ownerUid === currentUser.uid;
+        const asistentes = Array.isArray(partidoActivoActual.asistentes) ? partidoActivoActual.asistentes : [];
+
+        // Asegurar que todos los asistentes estén en algún equipo
+        asistentes.forEach(uid => {
+            const enA = pizarraEquiposState.equipoA.includes(uid);
+            const enB = pizarraEquiposState.equipoB.includes(uid);
+            if (!enA && !enB) {
+                // Distribuir equitativamente
+                if (pizarraEquiposState.equipoA.length <= pizarraEquiposState.equipoB.length) {
+                    pizarraEquiposState.equipoA.push(uid);
+                } else {
+                    pizarraEquiposState.equipoB.push(uid);
+                }
+            }
+        });
+
+        // Filtrar no asistentes
+        pizarraEquiposState.equipoA = pizarraEquiposState.equipoA.filter(u => asistentes.includes(u));
+        pizarraEquiposState.equipoB = pizarraEquiposState.equipoB.filter(u => asistentes.includes(u));
+
+        const getPlayerCard = (uid, currentTeam) => {
+            const perfil = miembrosDataGrupoActivo.find(m => m.uid === uid) || { nombre: 'Jugador', posicion: 'JUG' };
+            const foto = perfil.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(perfil.nombre)}&background=2ecc71&color=fff`;
+            const otherTeam = currentTeam === 'A' ? 'B' : 'A';
+
+            const moveBtn = soyLider ? `
+                <button class="btn btn-ghost" onclick="window.moverJugadorPizarra('${uid}', '${otherTeam}')" style="padding:3px 8px; font-size:0.7rem; border-radius:6px; cursor:pointer; width:auto !important;" title="Mover a Equipo ${otherTeam}">
+                    <i class="ph-bold ph-arrows-left-right"></i> Pasa a ${otherTeam}
+                </button>
+            ` : '';
+
+            return `
+                <div class="pizarra-player-item" draggable="${soyLider}" ondragstart="event.dataTransfer.setData('text/plain', '${uid}')">
+                    <img src="${foto}" class="pizarra-avatar" alt="${perfil.nombre}">
+                    <div style="min-width:0; flex:1;">
+                        <div style="font-size:0.85rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${perfil.nombre}</div>
+                        <span style="font-size:0.7rem; color:#aaa;">${perfil.posicion || 'JUG'}</span>
+                    </div>
+                    ${moveBtn}
+                </div>
+            `;
+        };
+
+        grid.innerHTML = `
+            <div class="pizarra-col equipo-a" ondragover="event.preventDefault()" ondrop="window.dropJugadorPizarra(event, 'A')">
+                <div class="pizarra-header team-a">
+                    <span>🔵 EQUIPO A</span>
+                    <span style="font-size:0.8rem; opacity:0.8;">(${pizarraEquiposState.equipoA.length} jug)</span>
+                </div>
+                <div class="pizarra-player-list">
+                    ${pizarraEquiposState.equipoA.length > 0 
+                        ? pizarraEquiposState.equipoA.map(u => getPlayerCard(u, 'A')).join('') 
+                        : '<p style="color:#666; font-size:0.8rem; text-align:center; padding:15px;">Sin jugadores en Equipo A</p>'}
+                </div>
+            </div>
+
+            <div class="pizarra-col equipo-b" ondragover="event.preventDefault()" ondrop="window.dropJugadorPizarra(event, 'B')">
+                <div class="pizarra-header team-b">
+                    <span>🔴 EQUIPO B</span>
+                    <span style="font-size:0.8rem; opacity:0.8;">(${pizarraEquiposState.equipoB.length} jug)</span>
+                </div>
+                <div class="pizarra-player-list">
+                    ${pizarraEquiposState.equipoB.length > 0 
+                        ? pizarraEquiposState.equipoB.map(u => getPlayerCard(u, 'B')).join('') 
+                        : '<p style="color:#666; font-size:0.8rem; text-align:center; padding:15px;">Sin jugadores en Equipo B</p>'}
+                </div>
+            </div>
+        `;
+    }
+
+    window.moverJugadorPizarra = function(uid, targetTeam) {
+        pizarraEquiposState.equipoA = pizarraEquiposState.equipoA.filter(u => u !== uid);
+        pizarraEquiposState.equipoB = pizarraEquiposState.equipoB.filter(u => u !== uid);
+        if (targetTeam === 'A') {
+            pizarraEquiposState.equipoA.push(uid);
+        } else {
+            pizarraEquiposState.equipoB.push(uid);
+        }
+        renderizarPizarra();
     };
 
-    btnCerrarConvocar.onclick = () => { modalConvocar.style.display = 'none'; };
-    modalConvocar.onclick = (e) => {
-        if (e.target === modalConvocar) modalConvocar.style.display = 'none';
+    window.dropJugadorPizarra = function(e, targetTeam) {
+        e.preventDefault();
+        const uid = e.dataTransfer.getData('text/plain');
+        if (uid) {
+            window.moverJugadorPizarra(uid, targetTeam);
+        }
     };
 
-    let allSelected = true;
-    btnToggleAll.onclick = () => {
-        const checks = document.querySelectorAll('.check-convocar-amigo');
-        allSelected = !allSelected;
-        checks.forEach(c => c.checked = allSelected);
-        btnToggleAll.textContent = allSelected ? 'Deseleccionar todos' : 'Seleccionar todos';
+    window.guardarPizarraEquipos = async function() {
+        if (!partidoActivoActual) return;
+        try {
+            await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+                equipos: pizarraEquiposState,
+                updatedAt: serverTimestamp()
+            });
+            window.toast("¡Pizarra de equipos guardada!", "success");
+        } catch (e) {
+            console.error("Error al guardar pizarra:", e);
+            window.toast("Error al guardar pizarra", "error");
+        }
     };
 
-    btnEnviarWa.onclick = () => {
-        const lugar = (document.getElementById('convocar-lugar').value || '').trim() || 'Cancha por definir';
-        const fecha = document.getElementById('convocar-fecha').value || hoyStr;
-        const hora = document.getElementById('convocar-hora').value || '20:00';
-        const deporte = grupoActivo ? grupoActivo.deporte : 'Partido';
+    window.toggleAsistenciaPartido = async function(asistir) {
+        if (!partidoActivoActual || !currentUser) return;
+        try {
+            if (asistir) {
+                await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+                    asistentes: arrayUnion(currentUser.uid)
+                });
+                window.toast("¡Te apuntaste al partido!", "success");
+            } else {
+                await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+                    asistentes: arrayRemove(currentUser.uid)
+                });
+                window.toast("Te has desmarcado del partido.", "info");
+            }
+            await cargarPartidosDelGrupo();
+        } catch (e) {
+            console.error("Error al actualizar asistencia:", e);
+            window.toast("No se pudo actualizar asistencia", "error");
+        }
+    };
 
-        const checks = document.querySelectorAll('.check-convocar-amigo:checked');
-        const seleccionados = Array.from(checks).map(c => c.value);
+    window.editarPartidoActivo = function() {
+        if (!partidoActivoActual) return;
+        document.getElementById('partido-edit-id').value = partidoActivoActual.id;
+        document.getElementById('modal-partido-titulo').innerHTML = '<i class="ph-bold ph-pencil-simple" style="color:var(--primary-green);"></i> Editar Partido';
+        document.getElementById('pg-lugar').value = partidoActivoActual.lugar || '';
+        document.getElementById('pg-fecha').value = partidoActivoActual.fecha || '';
+        document.getElementById('pg-hora').value = partidoActivoActual.hora || '20:00';
+        document.getElementById('pg-costo').value = partidoActivoActual.costoTotal || '';
+        modalPartido.style.display = 'flex';
+    };
 
-        if (seleccionados.length === 0) {
-            alert("Selecciona al menos un amigo para convocar.");
-            return;
+    window.cancelarPartidoActivo = async function() {
+        if (!partidoActivoActual) return;
+        if (!confirm("¿Estás seguro de cancelar este partido programado?")) return;
+        try {
+            await updateDoc(doc(db, 'partidos_grupos', partidoActivoActual.id), {
+                estado: 'cancelado',
+                canceladoAt: serverTimestamp()
+            });
+            window.toast("Partido cancelado.", "info");
+            await cargarPartidosDelGrupo();
+        } catch (e) {
+            console.error("Error al cancelar partido:", e);
+            alert("No se pudo cancelar el partido.");
+        }
+    };
+
+    // ==========================================
+    // HISTORIAL DE RIVALIDAD Y REGISTRO DE MARCADOR
+    // ==========================================
+    const modalResultado = document.getElementById('modal-resultado-partido');
+    const formMarcador = document.getElementById('form-marcador-partido');
+    const cerrarModalResultado = document.getElementById('cerrar-modal-resultado');
+
+    window.abrirModalResultado = function() {
+        if (!partidoActivoActual) return;
+        document.getElementById('partido-resultado-id').value = partidoActivoActual.id;
+        document.getElementById('goles-equipo-a').value = '0';
+        document.getElementById('goles-equipo-b').value = '0';
+        modalResultado.style.display = 'flex';
+    };
+
+    cerrarModalResultado.onclick = () => { modalResultado.style.display = 'none'; };
+    modalResultado.onclick = (e) => { if (e.target === modalResultado) modalResultado.style.display = 'none'; };
+
+    formMarcador.onsubmit = async (e) => {
+        e.preventDefault();
+        const pId = document.getElementById('partido-resultado-id').value;
+        const golesA = Number(document.getElementById('goles-equipo-a').value || 0);
+        const golesB = Number(document.getElementById('goles-equipo-b').value || 0);
+        const ganador = golesA > golesB ? 'A' : (golesB > golesA ? 'B' : 'Empate');
+
+        try {
+            await updateDoc(doc(db, 'partidos_grupos', pId), {
+                estado: 'finalizado',
+                resultado: {
+                    golesA,
+                    golesB,
+                    ganador
+                },
+                finalizadoAt: serverTimestamp()
+            });
+            window.toast("¡Resultado guardado en el Historial de Rivalidad!", "success");
+            modalResultado.style.display = 'none';
+            await cargarPartidosDelGrupo();
+        } catch (err) {
+            console.error("Error al registrar resultado:", err);
+            window.toast("No se pudo registrar el resultado.", "error");
+        }
+    };
+
+    async function cargarHistorialRivalidad() {
+        const contenedor = document.getElementById('contenedor-historial-rivalidad');
+        if (!contenedor || !grupoActivo) return;
+
+        try {
+            const q = query(
+                collection(db, 'partidos_grupos'),
+                where('grupoId', '==', grupoActivo.id),
+                where('estado', '==', 'finalizado')
+            );
+            const snap = await getDocs(q);
+
+            if (snap.empty) {
+                contenedor.innerHTML = '<p style="color:#666; font-size:0.85rem; text-align:center; padding:15px; background:rgba(255,255,255,0.02); border-radius:10px;">Aún no hay partidos finalizados con marcador registrado en este vestuario.</p>';
+                return;
+            }
+
+            let victoriasA = 0;
+            let victoriasB = 0;
+            let empates = 0;
+            const partidos = [];
+
+            snap.forEach(d => {
+                const data = { id: d.id, ...d.data() };
+                partidos.push(data);
+                if (data.resultado?.ganador === 'A') victoriasA++;
+                else if (data.resultado?.ganador === 'B') victoriasB++;
+                else empates++;
+            });
+
+            // Ordenar por fecha descendente
+            partidos.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
+
+            contenedor.innerHTML = `
+                <div class="rivalidad-stats-grid">
+                    <div class="rivalidad-stat-box" style="border-color:rgba(52,152,219,0.3);">
+                        <span style="font-size:0.75rem; color:#3498db; font-weight:800;">VICTORIAS EQUIPO A</span>
+                        <div style="font-size:1.8rem; font-weight:900; color:#fff; margin-top:4px;">${victoriasA}</div>
+                    </div>
+                    <div class="rivalidad-stat-box" style="border-color:rgba(255,255,255,0.15);">
+                        <span style="font-size:0.75rem; color:#aaa; font-weight:800;">EMPATES</span>
+                        <div style="font-size:1.8rem; font-weight:900; color:#fff; margin-top:4px;">${empates}</div>
+                    </div>
+                    <div class="rivalidad-stat-box" style="border-color:rgba(231,76,60,0.3);">
+                        <span style="font-size:0.75rem; color:#e74c3c; font-weight:800;">VICTORIAS EQUIPO B</span>
+                        <div style="font-size:1.8rem; font-weight:900; color:#fff; margin-top:4px;">${victoriasB}</div>
+                    </div>
+                </div>
+
+                <div class="historial-rivalidad-list">
+                    ${partidos.map(p => `
+                        <div class="partido-historial-item">
+                            <div>
+                                <span style="font-size:0.75rem; color:#888;">📅 ${p.fecha || ''} &nbsp;·&nbsp; 📍 ${p.lugar || 'Cancha'}</span>
+                            </div>
+                            <div class="partido-marcador-badge">
+                                <span style="color:#3498db;">${p.resultado?.golesA ?? 0}</span>
+                                <span style="color:#666;">-</span>
+                                <span style="color:#e74c3c;">${p.resultado?.golesB ?? 0}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+        } catch (e) {
+            console.error("Error al cargar historial:", e);
+            contenedor.innerHTML = '<p style="color:red; font-size:0.85rem;">Error al cargar historial de rivalidad.</p>';
+        }
+    }
+
+    // ==========================================
+    // COMPARATIVA INTERNA CARA A CARA (MIEMBROS)
+    // ==========================================
+    const modalCompararAmigos = document.getElementById('modal-comparar-amigos');
+    const cerrarModalCompararAmigos = document.getElementById('cerrar-modal-comparar-amigos');
+    cerrarModalCompararAmigos.onclick = () => { modalCompararAmigos.style.display = 'none'; };
+    modalCompararAmigos.onclick = (e) => { if (e.target === modalCompararAmigos) modalCompararAmigos.style.display = 'none'; };
+
+    window.abrirComparativaAmigos = async function(uid1, uid2Param = null) {
+        if (!grupoActivo || miembrosDataGrupoActivo.length === 0) return;
+
+        // Seleccionar oponente por defecto si no viene
+        let uid2 = uid2Param;
+        if (!uid2) {
+            const otro = miembrosDataGrupoActivo.find(m => m.uid !== uid1);
+            uid2 = otro ? otro.uid : uid1;
         }
 
-        const listaNombres = seleccionados.map((n, i) => `${i + 1}. ${n}`).join('\n');
+        const selectorBox = document.getElementById('comparar-amigos-selector-box');
+        const gridContainer = document.getElementById('comparativa-amigos-grid-container');
 
-        const mensaje = 
-`🏆 *¡CONVOCATORIA ${deporte.toUpperCase()} - ${grupoActivo ? grupoActivo.nombre.toUpperCase() : 'CHALACAPP'}!* 🏆
+        // Construir selector de rival
+        selectorBox.innerHTML = `
+            <div style="display:inline-flex; align-items:center; gap:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.12); padding:6px 14px; border-radius:12px; max-width:100%; flex-wrap:wrap; justify-content:center;">
+                <span style="font-size:0.82rem; color:#aaa; font-weight:700;">Enfrentar a:</span>
+                <select id="select-oponente-amigo" style="background:#111; color:#fff; border:1px solid rgba(255,255,255,0.2); padding:6px 10px; border-radius:8px; font-size:0.85rem; cursor:pointer;">
+                    ${miembrosDataGrupoActivo.map(m => `
+                        <option value="${m.uid}" ${m.uid === uid2 ? 'selected' : ''} ${m.uid === uid1 ? 'disabled' : ''}>${m.nombre} (${m.posicion || 'JUG'})</option>
+                    `).join('')}
+                </select>
+            </div>
+        `;
 
-¡Habla equipo! Se armó el partido y estás convocado:
-📍 *Lugar:* ${lugar}
-📅 *Fecha:* ${fecha}
-⏰ *Hora:* ${hora}
+        document.getElementById('select-oponente-amigo').onchange = (e) => {
+            window.abrirComparativaAmigos(uid1, e.target.value);
+        };
 
-👥 *Lista de Convocados:*
-${listaNombres}
+        modalCompararAmigos.style.display = 'flex';
+        gridContainer.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; color: #888; padding: 25px;">
+                <i class="ph-bold ph-spinner-gap ph-spin" style="font-size: 2rem; color: #f1c40f;"></i>
+                <p style="margin-top: 10px;">Cargando estadísticas en vivo...</p>
+            </div>
+        `;
 
-¿Quién confirma asistencia? ¡Responde a este mensaje para asegurar tu puesto en el equipo! 🔥`;
+        try {
+            // Cargar datos reales de ambos perfiles y sus reseñas
+            const [snapP1, snapP2, snapR1, snapR2] = await Promise.all([
+                getDoc(doc(db, 'jugadores_perfiles', uid1)),
+                getDoc(doc(db, 'jugadores_perfiles', uid2)),
+                getDocs(query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', uid1))),
+                getDocs(query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', uid2)))
+            ]);
 
-        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-        window.open(waUrl, '_blank');
-        modalConvocar.style.display = 'none';
+            const p1 = snapP1.exists() ? snapP1.data() : { nombre: 'Jugador 1' };
+            const p2 = snapP2.exists() ? snapP2.data() : { nombre: 'Jugador 2' };
+
+            const calcularStats = (snapRes, perfil) => {
+                let suma = 0, total = 0;
+                const tagMap = {};
+                snapRes.forEach(d => {
+                    const r = d.data();
+                    const cal = Number(r.rating || 0);
+                    if (cal > 0) { suma += cal; total++; }
+                    if (Array.isArray(r.tags)) {
+                        r.tags.forEach(t => tagMap[t] = (tagMap[t] || 0) + 1);
+                    }
+                });
+                const prom = total > 0 ? (suma / total) : (perfil.rating ? Number(perfil.rating) : 0);
+                const scoreFUT = prom > 0 ? Math.round(prom * 20) : 0;
+                const topTags = Object.keys(tagMap).sort((a,b) => tagMap[b] - tagMap[a]).slice(0, 3);
+                return { prom, total, scoreFUT, topTags };
+            };
+
+            const s1 = calcularStats(snapR1, p1);
+            const s2 = calcularStats(snapR2, p2);
+
+            const foto1 = p1.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p1.nombre || 'J1')}&background=f1c40f&color=000`;
+            const foto2 = p2.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(p2.nombre || 'J2')}&background=3498db&color=fff`;
+
+            const renderCardJugador = (p, s, foto, colorTheme) => `
+                <div class="comparativa-card" style="border-color:${colorTheme};">
+                    <img src="${foto}" class="comparativa-avatar" alt="${p.nombre}">
+                    <h3 class="comparativa-name">${p.nombre || 'Jugador'}</h3>
+                    <span class="comparativa-pos">${p.posicion || 'JUG'} · ${p.ciudad || 'Lima'}</span>
+
+                    <div class="stat-pill-row">
+                        <div class="stat-pill">
+                            <span class="stat-pill-label">Rating FUT</span>
+                            <span class="stat-pill-value" style="color:${colorTheme}; font-size:1.3rem;">${s.scoreFUT}</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill-label">Estrellas</span>
+                            <span class="stat-pill-value">⭐ ${s.prom > 0 ? s.prom.toFixed(1) : '0.0'}</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-pill-label">Reseñas</span>
+                            <span class="stat-pill-value">${s.total}</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:14px; text-align:left;">
+                        <span style="font-size:0.75rem; color:#888; font-weight:700; text-transform:uppercase;">Etiquetas de Cancha:</span>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
+                            ${s.topTags.length > 0 ? s.topTags.map(t => `
+                                <span style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; font-size:0.72rem; padding:2px 8px; border-radius:6px;">${t}</span>
+                            `).join('') : '<span style="color:#666; font-size:0.75rem;">Sin etiquetas registradas</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            gridContainer.innerHTML = `
+                ${renderCardJugador(p1, s1, foto1, 'var(--primary-green)')}
+                ${renderCardJugador(p2, s2, foto2, '#f1c40f')}
+            `;
+
+        } catch (e) {
+            console.error("Error al cargar comparativa de amigos:", e);
+            gridContainer.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1;">Error al cargar estadísticas de los jugadores.</p>';
+        }
     };
 </script>
 </body>

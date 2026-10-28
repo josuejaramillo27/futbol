@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, deleteDoc, runTransaction, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, deleteDoc, runTransaction, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // 2. CONFIGURACIÓN E INICIALIZACIÓN
@@ -332,7 +332,8 @@ if (esInicio()) {
                 const infoCanchas = c.cantidadCanchas > 1 ? ` · <span style="color:#aaa; font-weight:normal;">${c.cantidadCanchas} canchas${c.tiposMulti ? ` (${c.tiposMulti})` : ''}</span>` : (c.tiposMulti ? ` · <span style="color:#aaa; font-weight:normal;">${c.tiposMulti}</span>` : '');
                 const subtituloCanchas = `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem;">${textoTurnos}${infoCanchas}</p>`;
 
-                contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="cancha.html?id=${c.id}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${c.departamento ? ` · ${c.departamento}` : (obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : '')}${dist}</p>
+                const linkCancha = c.slug ? `cancha.html?slug=${encodeURIComponent(c.slug)}` : `cancha.html?id=${c.id}`;
+                contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="${linkCancha}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${c.departamento ? ` · ${c.departamento}` : (obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : '')}${dist}</p>
              ${subtituloCanchas}
              <div class="court-meta" style="margin-top:8px;"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol')}</span><strong>S/ ${c.precio ?? 'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`;
             });
@@ -511,9 +512,10 @@ async function pintarDisponibilidadModal(c, fechaElegida) {
         const targetId = c.id;
 
         // Botón secundario para visitar el perfil completo de la cancha (Link en Bio / cancha.html)
+        const linkCanchaModal = c.slug ? `cancha.html?slug=${encodeURIComponent(c.slug)}` : `cancha.html?id=${targetId}`;
         const botonPerfilCompleto = !window.location.pathname.includes('cancha.html') ? `
             <div style="margin-top: 20px; text-align: center; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 16px;">
-                <a href="cancha.html?id=${targetId}" class="btn btn-outline" style="width: 100%; font-size: 0.85rem; padding: 11px 16px; border-color: rgba(46, 204, 113, 0.35); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; border-radius: 10px; transition: all 0.2s ease;">
+                <a href="${linkCanchaModal}" class="btn btn-outline" style="width: 100%; font-size: 0.85rem; padding: 11px 16px; border-color: rgba(46, 204, 113, 0.35); color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; border-radius: 10px; transition: all 0.2s ease;">
                     Ver perfil completo, reseñas y mapa <i class="ph-bold ph-arrow-right"></i>
                 </a>
             </div>
@@ -795,12 +797,17 @@ if (window.location.pathname.includes('jugadores.html')) {
             bufferHTML += `
             <article style="${estiloCard}">
                 ${badgeUrgente}
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
                     <strong onclick="abrirPerfilJugador('${d.uid}')" style="display:flex; align-items:center; gap:8px; color:#fff; font-size:1.1rem; cursor:pointer; transition: color 0.3s;" onmouseover="this.style.color='var(--primary-green)'" onmouseout="this.style.color='#fff'" title="Ver Tarjeta FUT">
                         <i class="ph-fill ph-user-circle" style="font-size:1.8rem; color:var(--primary-green);"></i> 
                         ${d.nombreJugador || d.nombre || 'Jugador'}
                     </strong>
-                    <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:12px;">${fechaTexto}</span>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" class="btn btn-comparar-bolsa" data-uid="${d.uid}" style="padding:4px 9px; font-size:0.75rem; font-weight:800; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.35); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; transition:all 0.2s;" title="Comparar Cara a Cara con este jugador">
+                            <i class="ph-bold ph-scales"></i> ⚖️ Comparar
+                        </button>
+                        <span style="font-size:0.75rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:3px 8px; border-radius:12px;">${fechaTexto}</span>
+                    </div>
                 </div>
                 <p style="margin:5px 0; font-size:0.95rem; color:#ddd;">Busco: <b style="color:#f1c40f;">${d.tipo || 'jugador'}</b> · <b style="color:#f1c40f;">${d.modalidad || 'Fútbol 7'}</b></p>
                 ${d.texto ? `<p style="margin:12px 0; font-size:0.95rem; color:#eee; background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; border-left:3px solid var(--primary-green); font-style:italic;">"${d.texto}"</p>` : ''}
@@ -812,37 +819,73 @@ if (window.location.pathname.includes('jugadores.html')) {
 
         lista.innerHTML = bufferHTML;
 
+        // Fricción de teléfono: interceptar postulación ("Me Apunto")
         lista.querySelectorAll('.btn-postular').forEach(b => {
             b.addEventListener('click', async () => {
-                if (!usuarioActual) return window.toast('Inicia sesión con Google para postularte.', 'warning');
-
-                // 🔥 REQUERIMIENTO 1: Sin verificación SMS, solo datos en jugadores_perfiles
-                let perfil = null;
-                try {
-                    const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
-                    if (docSnap.exists()) perfil = docSnap.data();
-                } catch (err) { console.error(err); }
-
-                if (!perfil) {
-                    window.toast('Completa tu Tarjeta de Jugador antes de postularte.', 'warning');
-                    document.getElementById('modal-perfil-jugador')?.classList.add('mostrar');
-                    return;
+                if (!usuarioActual) {
+                    window.toast('Inicia sesión con Google para postularte.', 'warning');
+                    try {
+                        const prov = new GoogleAuthProvider();
+                        prov.setCustomParameters({ prompt: 'select_account' });
+                        const r = await signInWithPopup(auth, prov);
+                        usuarioActual = r.user;
+                    } catch (e) { return; }
                 }
+
+                // Fricción de teléfono obligatoria
+                const tieneTel = await verificarTelefonoFUT(usuarioActual);
+                if (!tieneTel) return;
 
                 const anuncioId = b.dataset.anuncio;
                 b.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i>'; b.disabled = true;
                 try {
-                    const telContacto = perfil.telefono || usuarioActual.phoneNumber || '';
+                    let perfil = null;
+                    try {
+                        const snap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
+                        if (snap.exists()) perfil = snap.data();
+                    } catch (err) {}
+
+                    const telContacto = perfil?.telefono || usuarioActual.phoneNumber || '';
                     await updateDoc(doc(db, 'bolsa_jugadores', anuncioId), {
                         [`postulantes.${usuarioActual.uid}`]: {
                             uid: usuarioActual.uid,
-                            nombre: perfil.nombre || usuarioActual.displayName || 'Jugador',
+                            nombre: perfil?.nombre || usuarioActual.displayName || 'Jugador',
                             telefono: telContacto ? formatWsp(telContacto) : '',
                             estado: 'pendiente'
                         }
                     });
                     window.toast('¡Te has apuntado con éxito!', 'success');
-                } catch (e) { window.toast('Error al apuntarse.', 'error'); b.innerHTML = '<i class="ph-bold ph-hand-palm"></i> ¡Me Apunto!'; b.disabled = false; }
+                } catch (e) { 
+                    window.toast('Error al apuntarse.', 'error'); 
+                    b.innerHTML = '<i class="ph-bold ph-hand-palm"></i> ¡Me Apunto!'; 
+                    b.disabled = false; 
+                }
+            });
+        });
+
+        // Fricción de teléfono: interceptar clics en "Contactar" (enlaces a WhatsApp)
+        lista.querySelectorAll('a[href*="wa.me"]').forEach(link => {
+            link.addEventListener('click', async (e) => {
+                if (!usuarioActual) {
+                    e.preventDefault();
+                    window.toast('Inicia sesión con Google para contactar.', 'warning');
+                    return;
+                }
+                const tieneTel = await verificarTelefonoFUT(usuarioActual);
+                if (!tieneTel) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Conectar botones de Cara a Cara ("⚖️ Comparar")
+        lista.querySelectorAll('.btn-comparar-bolsa').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const targetUid = btn.dataset.uid;
+                if (window.abrirComparativaJugadores) {
+                    window.abrirComparativaJugadores(targetUid);
+                }
             });
         });
 
@@ -872,6 +915,44 @@ if (window.location.pathname.includes('jugadores.html')) {
             });
         });
     }
+
+    // HELPER GLOBAL: FRICCIÓN DE TELÉFONO OBLIGATORIA
+    async function verificarTelefonoFUT(user) {
+        if (!user) return false;
+        try {
+            const docSnap = await getDoc(doc(db, "jugadores_perfiles", user.uid));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                const telLimpio = String(data?.telefono || '').replace(/\D/g, '');
+                if (telLimpio.length >= 7) {
+                    return true;
+                }
+            }
+        } catch (e) {
+            console.error("Error validando teléfono:", e);
+        }
+
+        // Si no tiene teléfono guardado, bloquear y forzar registro
+        if (window.toast) {
+            window.toast("¡Teléfono obligatorio! Registra tu WhatsApp para poder contactarte.", "warning");
+        } else {
+            alert("¡Teléfono obligatorio! Registra tu WhatsApp para continuar.");
+        }
+
+        const modalPerfil = document.getElementById('modal-perfil-jugador');
+        if (modalPerfil) {
+            modalPerfil.classList.add('mostrar');
+            setTimeout(() => {
+                const inpTel = document.getElementById('perfil-telefono');
+                if (inpTel) {
+                    inpTel.focus();
+                    inpTel.style.borderColor = '#e74c3c';
+                }
+            }, 300);
+        }
+        return false;
+    }
+    window.verificarTelefonoFUT = verificarTelefonoFUT;
 
     onAuthStateChanged(auth, u => {
         usuarioActual = u || null;
@@ -911,18 +992,15 @@ if (window.location.pathname.includes('jugadores.html')) {
             e.preventDefault();
             if (!usuarioActual) { window.toast('Inicia sesión con Google para publicar.', 'warning'); return; }
 
-            // 🔥 REQUERIMIENTO 1: Sin verificación SMS, solo datos en jugadores_perfiles
+            // 🔥 FRICCIÓN DE TELÉFONO OBLIGATORIA
+            const tieneTel = await verificarTelefonoFUT(usuarioActual);
+            if (!tieneTel) return;
+
             let perfil = null;
             try {
                 const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
                 if (docSnap.exists()) perfil = docSnap.data();
             } catch (err) { console.error(err); }
-
-            if (!perfil) {
-                window.toast('Configura tu Tarjeta de Jugador antes de publicar.', 'warning');
-                document.getElementById('modal-perfil-jugador')?.classList.add('mostrar');
-                return;
-            }
 
             const btn = formAnuncio.querySelector('button[type="submit"]');
             const textOriginal = btn ? btn.innerHTML : 'Publicar';
@@ -971,18 +1049,18 @@ if (window.location.pathname.includes('jugadores.html')) {
                 } catch(err) { return; }
             }
 
+            // 🔥 FRICCIÓN DE TELÉFONO OBLIGATORIA
+            const tieneTel = await verificarTelefonoFUT(usuarioActual);
+            if (!tieneTel) {
+                document.getElementById('modal-sos-anuncio')?.classList.remove('mostrar');
+                return;
+            }
+
             let perfil = null;
             try {
                 const docSnap = await getDoc(doc(db, "jugadores_perfiles", usuarioActual.uid));
                 if (docSnap.exists()) perfil = docSnap.data();
             } catch (err) { console.error(err); }
-
-            if (!perfil) {
-                window.toast('Configura tu Tarjeta de Jugador antes de publicar un SOS.', 'warning');
-                document.getElementById('modal-sos-anuncio')?.classList.remove('mostrar');
-                document.getElementById('modal-perfil-jugador')?.classList.add('mostrar');
-                return;
-            }
 
             const btn = formSos.querySelector('button[type="submit"]');
             const textOriginal = btn ? btn.innerHTML : 'Publicar SOS';
@@ -1054,9 +1132,15 @@ document.addEventListener('DOMContentLoaded', cargarEventosPublicos);
 // ==========================================
 if (window.location.pathname.includes('cancha.html')) {
     const urlParams = new URLSearchParams(window.location.search);
-    const canchaId = urlParams.get('id');
+    const slugParam = urlParams.get('slug');
+    const idParam = urlParams.get('id');
+    const fallbackParam = (!slugParam && !idParam && window.location.search.length > 1) 
+        ? window.location.search.substring(1).split('&')[0].split('=')[0] 
+        : null;
+    let canchaId = idParam || null;
     let ratingSeleccionado = 0;
     let etiquetasSeleccionadas = new Map();
+    let cPrincipalActual = null;
 
     const TAGS_POR_RATING = {
         5: [{ icon: "ph-leaf", text: "Césped impecable" }, { icon: "ph-lightbulb", text: "Buena iluminación" }, { icon: "ph-handshake", text: "Excelente atención" }, { icon: "ph-soccer-ball", text: "Pelotas buenas" }, { icon: "ph-shower", text: "Vestuarios limpios" }, { icon: "ph-car", text: "Estacionamiento" }],
@@ -1067,16 +1151,39 @@ if (window.location.pathname.includes('cancha.html')) {
     };
 
     async function cargarDetalleCancha() {
-        if (!canchaId) {
+        const identifier = slugParam || idParam || fallbackParam;
+        if (!identifier) {
             const titleEl = document.getElementById('bio-title');
             if (titleEl) titleEl.textContent = 'Cancha no encontrada';
             return;
         }
 
         try {
-            // 1. Obtener los datos del complejo principal
-            const docSnap = await getDoc(doc(db, 'canchas', canchaId));
-            if (!docSnap.exists()) {
+            // 1. Intentar primero buscar por campo 'slug' (ej. 'fundo-excalibur')
+            let docSnap = null;
+            try {
+                const qSlug = query(collection(db, 'canchas'), where('slug', '==', identifier), limit(1));
+                const snapSlug = await getDocs(qSlug);
+                if (!snapSlug.empty) {
+                    docSnap = snapSlug.docs[0];
+                }
+            } catch (eSlug) {
+                console.warn("Búsqueda por slug:", eSlug);
+            }
+
+            // Si no se encontró por slug, intentar por ID tradicional de Firestore
+            if (!docSnap) {
+                try {
+                    const snapId = await getDoc(doc(db, 'canchas', identifier));
+                    if (snapId.exists()) {
+                        docSnap = snapId;
+                    }
+                } catch (eId) {
+                    console.warn("Búsqueda por id:", eId);
+                }
+            }
+
+            if (!docSnap || !docSnap.exists()) {
                 const titleEl = document.getElementById('bio-title');
                 if (titleEl) titleEl.textContent = 'Cancha no encontrada';
                 return;
@@ -1084,6 +1191,19 @@ if (window.location.pathname.includes('cancha.html')) {
 
             const cPrincipal = docSnap.data();
             cPrincipal.id = docSnap.id;
+            canchaId = docSnap.id;
+            window.canchaIdActual = canchaId;
+            cPrincipalActual = cPrincipal;
+
+            // Mantener la URL lo más limpia posible si existe slug
+            if (cPrincipal.slug) {
+                const queryLimpia = `?slug=${encodeURIComponent(cPrincipal.slug)}`;
+                if (!window.location.search.includes(`slug=${cPrincipal.slug}`)) {
+                    try {
+                        window.history.replaceState({ slug: cPrincipal.slug }, '', `cancha.html${queryLimpia}`);
+                    } catch (eH) {}
+                }
+            }
 
             // Determinar el UID del dueño
             const ownerUid = cPrincipal.usuarioUid || cPrincipal.ownerUid || cPrincipal.uid || docSnap.id;
@@ -1112,6 +1232,41 @@ if (window.location.pathname.includes('cancha.html')) {
                 } else {
                     btnMapa.style.display = 'none';
                 }
+            }
+
+            // Configurar botón de Compartir Complejo
+            const btnCompartir = document.getElementById('btn-compartir-bio');
+            if (btnCompartir) {
+                btnCompartir.onclick = async () => {
+                    const baseOrigin = window.location.href.split('?')[0];
+                    const cleanUrl = cPrincipal.slug 
+                        ? `${baseOrigin}?slug=${encodeURIComponent(cPrincipal.slug)}` 
+                        : `${baseOrigin}?id=${encodeURIComponent(canchaId)}`;
+                    
+                    const shareData = {
+                        title: `${cPrincipal.nombre || 'Cancha'} | CHALACAPP`,
+                        text: `¡Mira ${cPrincipal.nombre || 'este complejo'} en CHALACAPP y reserva tu cancha!`,
+                        url: cleanUrl
+                    };
+
+                    if (navigator.share) {
+                        try {
+                            await navigator.share(shareData);
+                            return;
+                        } catch (errShare) {
+                            if (errShare?.name !== 'AbortError') console.warn('Error en share:', errShare);
+                        }
+                    }
+
+                    // Fallback portapapeles
+                    try {
+                        await navigator.clipboard.writeText(cleanUrl);
+                        if (window.toast) window.toast("¡Enlace copiado al portapapeles!", "success");
+                        else alert("¡Enlace copiado al portapapeles!");
+                    } catch (eClip) {
+                        prompt("Copia el enlace de este complejo:", cleanUrl);
+                    }
+                };
             }
 
             // 3. CONSULTAR CANCHAS PRINCIPALES Y SECUNDARIAS (ESPACIOS) DEL DUEÑO

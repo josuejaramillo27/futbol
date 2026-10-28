@@ -379,11 +379,12 @@ function abrirGestionReserva(r) {
 
     const clienteNombre = r.nombre || r.usuarioNombre || 'Cliente';
     const clienteTelefono = r.telefono || r.usuarioTelefono || 'Sin teléfono';
+    const jugadorUid = r.usuarioUid || r.uid || '';
 
     m.querySelector('#manage-title').textContent = `${clienteNombre} · ${r.horaInicio || '--:--'}`;
     m.querySelector('#manage-summary').innerHTML = `
         <div><span>Fecha:</span> <b>${fechaTexto(fechaSeleccionada)}</b></div>
-        <div><span>Jugador:</span> <b>${clienteNombre}</b></div>
+        <div><span>Jugador:</span> <b style="color:var(--primary-green); cursor:pointer; text-decoration:underline; display:inline-flex; align-items:center; gap:5px;" onclick="window.abrirReputacionJugador('${jugadorUid}', '${clienteNombre.replace(/'/g, "\\'")}', '${clienteTelefono}')" title="Ver Inteligencia de Reputación del Jugador"><i class="ph-bold ph-shield-check"></i> ${clienteNombre}</b></div>
         <div><span>WhatsApp:</span> <b>${clienteTelefono}</b></div>
         <div><span>Importe Total:</span> <b>${money(r.precio ?? canchaActual?.precio)}</b></div>
         <div><span>Adelanto (Seña):</span> <b>${senaBadge}</b></div>
@@ -523,6 +524,189 @@ window.abrirCalificacionJugador = function (jugadorUid, reservaId, nombreJugador
 
     m.classList.add('mostrar');
 };
+
+// ==========================================
+// INTELIGENCIA DE REPUTACIÓN: HISTORIAL Y EVALUACIÓN DE JUGADOR
+// ==========================================
+window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, telefonoFallback) {
+    let m = document.getElementById('modal-reputacion-jugador');
+    if (!m) {
+        m = document.createElement('div');
+        m.id = 'modal-reputacion-jugador';
+        m.className = 'admin-modal';
+        m.innerHTML = `
+        <div class="admin-modal-card" style="max-width: 520px; width: 95%; max-height: 88vh; overflow-y: auto; padding: 25px; border: 1.5px solid rgba(46,204,113,0.35); box-shadow: 0 15px 45px rgba(0,0,0,0.85); position:relative;">
+            <button type="button" class="btn-cerrar admin-modal-close" onclick="document.getElementById('modal-reputacion-jugador').classList.remove('mostrar')" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="ph-bold ph-x"></i></button>
+            <span class="mini-label" style="color:var(--primary-green); font-weight:800; letter-spacing:1px;"><i class="ph-fill ph-shield-check"></i> INTELIGENCIA DE REPUTACIÓN</span>
+            <h2 style="margin: 4px 0 16px; font-size: 1.4rem; color: #fff;">Historial del Jugador</h2>
+            
+            <div id="reputacion-jugador-body">
+                <div style="text-align:center; padding:30px; color:#aaa;">
+                    <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2rem; color:var(--primary-green);"></i>
+                    <p style="margin-top:10px;">Consultando historial en Firestore...</p>
+                </div>
+            </div>
+        </div>`;
+        document.body.appendChild(m);
+        m.onclick = (e) => { if (e.target === m) m.classList.remove('mostrar'); };
+    }
+
+    const bodyEl = m.querySelector('#reputacion-jugador-body');
+    bodyEl.innerHTML = `
+        <div style="text-align:center; padding:30px; color:#aaa;">
+            <i class="ph-bold ph-spinner-gap ph-spin" style="font-size:2rem; color:var(--primary-green);"></i>
+            <p style="margin-top:10px;">Consultando historial de reputación en vivo...</p>
+        </div>
+    `;
+    m.classList.add('mostrar');
+
+    try {
+        let perfilData = null;
+        let targetUid = jugadorUid;
+
+        if (targetUid) {
+            try {
+                const snapP = await getDoc(doc(db, 'jugadores_perfiles', targetUid));
+                if (snapP.exists()) perfilData = snapP.data();
+            } catch (errP) {
+                console.warn("Error leyendo perfil por UID:", errP);
+            }
+        }
+
+        // Si no tiene UID o no se encontró el perfil, intentar buscar por teléfono
+        if (!perfilData && telefonoFallback) {
+            const telLimpio = String(telefonoFallback).replace(/\D/g, '');
+            if (telLimpio.length >= 8) {
+                try {
+                    const qTel = query(collection(db, 'jugadores_perfiles'), where('telefono', '==', telLimpio));
+                    const snapTel = await getDocs(qTel);
+                    if (!snapTel.empty) {
+                        targetUid = snapTel.docs[0].id;
+                        perfilData = snapTel.docs[0].data();
+                    }
+                } catch (errTel) {
+                    console.warn("Error buscando perfil por teléfono:", errTel);
+                }
+            }
+        }
+
+        // Consultar reseñas del jugador en resenas_jugadores
+        let resenas = [];
+        if (targetUid) {
+            try {
+                const qRes = query(collection(db, 'resenas_jugadores'), where('jugadorUid', '==', targetUid));
+                const snapRes = await getDocs(qRes);
+                snapRes.forEach(d => resenas.push({ id: d.id, ...d.data() }));
+            } catch (errRes) {
+                console.warn("Error consultando resenas_jugadores:", errRes);
+            }
+        }
+
+        // Calcular promedio de estrellas y agrupar etiquetas
+        let sumaEstrellas = 0;
+        let countValidas = 0;
+        const tagCounts = {};
+
+        resenas.forEach(r => {
+            const cal = Number(r.rating || 0);
+            if (cal > 0) {
+                sumaEstrellas += cal;
+                countValidas++;
+            }
+            if (Array.isArray(r.tags)) {
+                r.tags.forEach(t => {
+                    if (t) tagCounts[t] = (tagCounts[t] || 0) + 1;
+                });
+            }
+        });
+
+        const promedio = countValidas > 0 ? (sumaEstrellas / countValidas) : 0;
+        const estrellasTxt = countValidas > 0 ? promedio.toFixed(1) : 'Sin calificar';
+        const nombreMostrar = perfilData?.nombre || nombreFallback || 'Jugador';
+        const fotoMostrar = perfilData?.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreMostrar)}&background=2ecc71&color=fff`;
+        const telMostrar = perfilData?.telefono || telefonoFallback || 'No registrado';
+        const posMostrar = perfilData?.posicion || 'JUG';
+        const ciudadMostrar = perfilData?.ciudad || 'Lima';
+
+        // Ordenar etiquetas por frecuencia
+        const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+
+        let estrellasIconos = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= Math.round(promedio)) {
+                estrellasIconos += '<i class="ph-fill ph-star" style="color:#f1c40f; font-size:1.3rem;"></i>';
+            } else {
+                estrellasIconos += '<i class="ph-bold ph-star" style="color:#444; font-size:1.3rem;"></i>';
+            }
+        }
+
+        bodyEl.innerHTML = `
+            <div style="display:flex; align-items:center; gap:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:14px; margin-bottom:16px;">
+                <img src="${fotoMostrar}" style="width:54px; height:54px; aspect-ratio:1/1; object-fit:cover; border-radius:50%; border:2px solid var(--primary-green); flex-shrink:0;" alt="${nombreMostrar}">
+                <div style="min-width:0; flex:1;">
+                    <h3 style="margin:0; font-size:1.15rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${nombreMostrar}</h3>
+                    <p style="margin:3px 0 0; font-size:0.8rem; color:#aaa;">${posMostrar} · ${ciudadMostrar} · 📞 ${telMostrar}</p>
+                </div>
+            </div>
+
+            <!-- PROMEDIO GLOBAL -->
+            <div style="background:rgba(241,196,15,0.08); border:1px solid rgba(241,196,15,0.25); border-radius:14px; padding:16px; margin-bottom:16px; text-align:center;">
+                <span style="font-size:0.75rem; color:#f1c40f; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">PROMEDIO DE REPUTACIÓN GLOBAL</span>
+                <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0;">
+                    ${countValidas > 0 ? estrellasIconos : '<span style="color:#888; font-size:0.9rem;">Sin estrellas aún</span>'}
+                    <span style="font-size:1.4rem; font-weight:900; color:#fff; margin-left:6px;">${estrellasTxt}</span>
+                </div>
+                <span style="font-size:0.8rem; color:#aaa;">Basado en <b>${countValidas}</b> evaluación(es) realizada(s) por administradores de canchas</span>
+            </div>
+
+            <!-- ETIQUETAS OTORGADAS POR OTROS DUEÑOS -->
+            <div style="margin-bottom:18px;">
+                <h4 style="margin:0 0 8px; font-size:0.92rem; color:#fff; display:flex; align-items:center; gap:6px;">
+                    <i class="ph-bold ph-tag" style="color:var(--primary-green);"></i> Etiquetas otorgadas por dueños de canchas:
+                </h4>
+                <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                    ${sortedTags.length > 0 ? sortedTags.map(([tag, count]) => {
+                        const esNegativa = /no show|pelea|violencia|dañaron|falta de pago|problem/i.test(tag);
+                        const bg = esNegativa ? 'rgba(231,76,60,0.15)' : 'rgba(46,204,113,0.12)';
+                        const border = esNegativa ? 'rgba(231,76,60,0.35)' : 'rgba(46,204,113,0.3)';
+                        const color = esNegativa ? '#e74c3c' : 'var(--primary-green)';
+                        const icon = esNegativa ? 'ph-warning' : 'ph-check';
+                        return `
+                            <span style="background:${bg}; border:1px solid ${border}; color:${color}; padding:5px 10px; border-radius:8px; font-size:0.8rem; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
+                                <i class="ph-bold ${icon}"></i> ${tag} <b style="opacity:0.85;">(${count})</b>
+                            </span>
+                        `;
+                    }).join('') : '<p style="color:#666; font-size:0.82rem; margin:0;">Aún no cuenta con etiquetas de comportamiento de otros dueños.</p>'}
+                </div>
+            </div>
+
+            <!-- HISTORIAL DE RESEÑAS DETALLADAS -->
+            <div>
+                <h4 style="margin:0 0 10px; font-size:0.92rem; color:#fff; display:flex; align-items:center; gap:6px;">
+                    <i class="ph-bold ph-buildings" style="color:#f1c40f;"></i> Evaluaciones registradas:
+                </h4>
+                <div style="display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto;">
+                    ${resenas.length > 0 ? resenas.map(r => `
+                        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); padding:10px 14px; border-radius:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                <b style="color:#fff; font-size:0.85rem;"><i class="ph-fill ph-map-pin"></i> ${r.nombreCancha || 'Cancha aliada'}</b>
+                                <span style="color:#f1c40f; font-weight:800; font-size:0.82rem;">⭐ ${r.rating || 0}/5</span>
+                            </div>
+                            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+                                ${Array.isArray(r.tags) ? r.tags.map(t => `<span style="font-size:0.72rem; color:#aaa; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">${t}</span>`).join('') : ''}
+                            </div>
+                        </div>
+                    `).join('') : '<p style="color:#666; font-size:0.82rem; margin:0;">No hay reseñas registradas aún para este usuario.</p>'}
+                </div>
+            </div>
+        `;
+
+    } catch (e) {
+        console.error("Error al cargar reputación de jugador:", e);
+        bodyEl.innerHTML = '<p style="color:red; text-align:center; padding:20px;">Error al consultar la inteligencia de reputación.</p>';
+    }
+};
+
 
 // 🔥 BLINDAJE DE LA FUNCIÓN DE CAMBIAR ESTADO (CON TRADUCCIÓN VISUAL Y ESTADO DE CARGA)
 window.cambiarEstadoGestion = async function (reservaId, nuevoEstado, btnEl = null) {
