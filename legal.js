@@ -115,3 +115,4 @@ export function initLegalCompliance() {
         renderCookieBanner();
     }
 }
+

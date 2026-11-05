@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { initLegalCompliance } from "./legal.js";
 initLegalCompliance();
@@ -16,6 +16,37 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+// MÓDULO 6: Auto-registro en jugadores_perfiles si el usuario inicia sesión con Google
+onAuthStateChanged(auth, async (user) => {
+    if (!user || !user.uid) return;
+    try {
+        const isGoogle = Array.isArray(user.providerData) && user.providerData.some(p => p.providerId === 'google.com');
+        if (!isGoogle) return;
+        const uSnap = await getDoc(doc(db, "usuarios", user.uid));
+        if (uSnap.exists() && ["owner", "admin"].includes(uSnap.data()?.rol)) return;
+        const pRef = doc(db, "jugadores_perfiles", user.uid);
+        const pSnap = await getDoc(pRef);
+        if (!pSnap.exists()) {
+            await setDoc(pRef, {
+                uid: user.uid,
+                nombre: user.displayName || "Jugador",
+                email: user.email || "",
+                foto: user.photoURL || "",
+                posicion: "MED",
+                ovr: 60,
+                partidosJugados: 0,
+                goles: 0,
+                asistencias: 0,
+                mvps: 0,
+                vallasInvictas: 0,
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+        }
+    } catch (e) {
+        console.warn("Sincronización automática de jugador:", e);
+    }
+});
 
 const inputEmail = document.getElementById('email');
 const inputPassword = document.getElementById('password');

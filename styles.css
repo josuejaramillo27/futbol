@@ -1317,3 +1317,406 @@ html, body {
         width: 100% !important;
     }
 }
+
+
+/* =========================================================
+   FASE COMERCIAL FINAL: 6 CORRECCIONES ESTRUCTURALES & UI/UX
+   ========================================================= */
+
+/* 1. SISTEMA DUAL: BADGES DE OVR DEPORTIVO (60-99) Y REPUTACIÓN (ESTRELLAS) */
+.ovr-badge-fut {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
+    color: #080B0A !important;
+    font-weight: 900;
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(241, 196, 15, 0.25);
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.rep-badge-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #f1c40f;
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+/* 3. TARJETAS DE MIEMBROS (.member-card / .friend-card) SIN BOTONES CHANCADOS */
+.friend-card,
+.member-card {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    padding: 16px !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    gap: 0 !important;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+    box-sizing: border-box !important;
+}
+
+.friend-card:hover,
+.member-card:hover {
+    border-color: rgba(46, 204, 113, 0.35) !important;
+}
+
+.member-card-top,
+.friend-card > .friend-info {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+.member-card-top .friend-avatar,
+.friend-card .friend-avatar {
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    aspect-ratio: 1 / 1 !important;
+    border-radius: 50% !important;
+    object-fit: cover !important;
+    flex-shrink: 0 !important;
+}
+
+.member-card-details {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 5px !important;
+}
+
+.member-card-details .friend-name,
+.friend-card .friend-name {
+    font-weight: 800 !important;
+    font-size: 0.98rem !important;
+    color: #ffffff !important;
+    margin: 0 !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+    line-height: 1.25 !important;
+}
+
+.member-card-badges {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+}
+
+.member-card-actions,
+.friend-card > .friend-actions {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+    padding-top: 10px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    width: 100% !important;
+    flex-wrap: wrap !important;
+}
+
+.btn-icon-square {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    max-width: 36px !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.1rem !important;
+    box-sizing: border-box !important;
+}
+
+/* 4. PUNTO ROJO DE NOTIFICACIÓN EN TOPBAR (INVITACIONES A PATAS) */
+.topbar-nav a,
+.topbar-nav-link {
+    position: relative !important;
+}
+
+.nav-badge-dot {
+    position: absolute;
+    top: -4px;
+    right: -6px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    background: #ff3b30;
+    color: #ffffff !important;
+    font-size: 0.62rem !important;
+    font-weight: 900 !important;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #080B0A;
+    box-shadow: 0 0 10px rgba(255, 59, 48, 0.85);
+    z-index: 10;
+    line-height: 1;
+    pointer-events: none;
+    animation: pulseBadgeRed 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseBadgeRed {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.14); }
+}
+
+/* 5. LOGIN Y CONTENEDORES PROPORCIONADOS EN PC */
+body.auth-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-dark, #080B0A);
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(46, 204, 113, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(46, 204, 113, 0.06) 0%, transparent 45%);
+}
+
+.auth-shell {
+    max-width: 1020px;
+    width: 100%;
+    margin: 36px auto 60px;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 450px;
+    gap: 42px;
+    align-items: center;
+    box-sizing: border-box;
+    flex: 1;
+}
+
+.auth-showcase {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 20px 10px;
+}
+
+.auth-showcase h1 {
+    font-size: clamp(2rem, 3.8vw, 2.85rem);
+    font-weight: 900;
+    line-height: 1.12;
+    margin: 10px 0 12px;
+    color: #ffffff;
+}
+
+.auth-showcase p {
+    color: var(--text-muted, #929C97);
+    font-size: 0.98rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.showcase-points {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.showcase-points > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #e2ece6;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 12px 16px;
+    border-radius: 12px;
+}
+
+.showcase-points > div i {
+    color: var(--primary-green, #2ecc71);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+#login-container,
+.auth-card-pro {
+    max-width: 450px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    background: rgba(14, 19, 16, 0.92);
+    border: 1px solid rgba(46, 204, 113, 0.25);
+    border-radius: 20px;
+    padding: 32px 28px;
+    box-shadow: 0 20px 55px rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-sizing: border-box;
+}
+
+.auth-card-head {
+    margin-bottom: 22px;
+    text-align: left;
+}
+
+.auth-card-head h2 {
+    margin: 6px 0 6px;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.auth-card-head p {
+    margin: 0;
+    font-size: 0.86rem;
+    color: var(--text-muted, #929C97);
+}
+
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+    text-align: left;
+}
+
+.auth-field span {
+    font-size: 0.82rem;
+    color: #b5c0ba;
+    font-weight: 600;
+}
+
+.auth-field input {
+    width: 100%;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 0.92rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.auth-field input:focus {
+    border-color: var(--primary-green, #2ecc71);
+}
+
+#login-container .btn-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#login-container .btn-group .btn {
+    max-width: 320px !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+}
+
+.auth-error {
+    display: none;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    border: 1px solid transparent;
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .auth-shell {
+        grid-template-columns: 1fr;
+        max-width: 500px;
+        gap: 24px;
+        margin: 20px auto 40px;
+    }
+    .auth-showcase {
+        text-align: center;
+        padding: 10px 0;
+    }
+    .showcase-points > div {
+        text-align: left;
+    }
+}
+
+/* TERCER TIEMPO / ESTADÍSTICAS DEL PARTIDO */
+.tercer-tiempo-box {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(241, 196, 15, 0.28);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 18px;
+    text-align: left;
+}
+
+.tercer-tiempo-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 4px;
+    margin-top: 10px;
+}
+
+.tercer-tiempo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 8px 10px;
+    flex-wrap: wrap;
+}
+
+.tercer-tiempo-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tercer-tiempo-inputs label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    color: #ccc;
+    font-weight: 700;
+}
+
+.tercer-tiempo-inputs input[type="number"] {
+    width: 46px !important;
+    padding: 4px 6px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 6px !important;
+    color: #fff !important;
+    text-align: center !important;
+    font-weight: 800 !important;
+    font-size: 0.8rem !important;
+}

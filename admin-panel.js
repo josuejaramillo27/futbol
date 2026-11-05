@@ -57,12 +57,14 @@ let chartCanchasInstance = null;
 // ==========================================
 onAuthStateChanged(auth, async (user) => {
     if (!user) {
-        window.location.href = "login.html";
+        window.location.replace("index.html");
         return;
     }
     try {
         const userDoc = await getDoc(doc(db, "usuarios", user.uid));
         if (userDoc.exists() && userDoc.data().rol === "admin" && userDoc.data().estado === "approved") {
+            document.body.style.opacity = "1";
+            document.body.style.pointerEvents = "auto";
             adminUser = user.uid;
             const adminName = userDoc.data().nombre || user.displayName || user.email || "Admin Maestro";
             const displayEl = document.getElementById("admin-user-display");
@@ -73,13 +75,11 @@ onAuthStateChanged(auth, async (user) => {
             cargarComunidadesAdmin();
             cargarTorneosAdmin();
         } else {
-            window.toast("Acceso Denegado. Esta sección es exclusiva para el Administrador Maestro.", 'error');
-            signOut(auth).then(() => { setTimeout(() => window.location.href = "login.html", 1500); });
+            window.location.replace("index.html");
         }
     } catch (err) {
         console.error("Error autenticando admin:", err);
-        window.toast("Error de autenticación con el servidor.", 'error');
-        signOut(auth).then(() => { setTimeout(() => window.location.href = "login.html", 1500); });
+        window.location.replace("index.html");
     }
 });
 
@@ -146,31 +146,40 @@ async function cargarDashboardEstadisticas(isManualRefresh = false) {
     if (refreshIcon && isManualRefresh) refreshIcon.classList.add('ph-spin');
 
     try {
-        const [snapUsuarios, snapCanchas, snapReservas, snapComunidades] = await Promise.all([
+        const [snapUsuarios, snapPerfiles, snapCanchas, snapReservas, snapComunidades] = await Promise.all([
             getDocs(collection(db, "usuarios")),
+            getDocs(collection(db, "jugadores_perfiles")),
             getDocs(collection(db, "canchas")),
             getDocs(collection(db, "reservas")),
             getDocs(collection(db, "comunidades"))
         ]);
 
-        // 1. Usuarios
-        let totalJugadores = 0;
+        // 1. Usuarios (Dueños en 'usuarios' + Jugadores Google en 'jugadores_perfiles')
         let totalDuenos = 0;
-        let totalUsuariosValidos = 0;
+        const uidsDuenosYAdmins = new Set();
+        const uidsJugadores = new Set();
 
         snapUsuarios.forEach(docSnap => {
             const u = docSnap.data();
             const rol = (u.rol || "").toLowerCase().trim();
-            if (rol === "player") {
-                totalJugadores++;
-                totalUsuariosValidos++;
-            } else if (rol === "owner") {
+            if (rol === "owner") {
                 totalDuenos++;
-                totalUsuariosValidos++;
-            } else if (rol !== "admin") {
-                totalUsuariosValidos++;
+                uidsDuenosYAdmins.add(docSnap.id);
+            } else if (rol === "admin") {
+                uidsDuenosYAdmins.add(docSnap.id);
+            } else if (rol === "player") {
+                uidsJugadores.add(docSnap.id);
             }
         });
+
+        snapPerfiles.forEach(docSnap => {
+            if (!uidsDuenosYAdmins.has(docSnap.id)) {
+                uidsJugadores.add(docSnap.id);
+            }
+        });
+
+        const totalJugadores = uidsJugadores.size;
+        const totalUsuariosValidos = totalJugadores + totalDuenos;
 
         // 2. Canchas
         let canchasPublicadas = 0;

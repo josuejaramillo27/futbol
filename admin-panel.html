@@ -1508,32 +1508,41 @@
             if (refreshIcon && isManualRefresh) refreshIcon.classList.add('ph-spin');
 
             try {
-                // Consulta eficiente en paralelo a todas las colecciones principales
-                const [snapUsuarios, snapCanchas, snapReservas, snapComunidades] = await Promise.all([
+                // Consulta eficiente en paralelo a todas las colecciones principales (incluyendo jugadores_perfiles de Google)
+                const [snapUsuarios, snapPerfiles, snapCanchas, snapReservas, snapComunidades] = await Promise.all([
                     getDocs(collection(db, "usuarios")),
+                    getDocs(collection(db, "jugadores_perfiles")),
                     getDocs(collection(db, "canchas")),
                     getDocs(collection(db, "reservas")),
                     getDocs(collection(db, "comunidades"))
                 ]);
 
-                // --- 1. PROCESAR USUARIOS ---
-                let totalJugadores = 0;
+                // --- 1. PROCESAR USUARIOS (DUEÑOS EN 'usuarios' + JUGADORES GOOGLE EN 'jugadores_perfiles') ---
                 let totalDuenos = 0;
-                let totalUsuariosValidos = 0;
+                const uidsDuenosYAdmins = new Set();
+                const uidsJugadores = new Set();
 
                 snapUsuarios.forEach(docSnap => {
                     const u = docSnap.data();
                     const rol = (u.rol || "").toLowerCase().trim();
-                    if (rol === "player") {
-                        totalJugadores++;
-                        totalUsuariosValidos++;
-                    } else if (rol === "owner") {
+                    if (rol === "owner") {
                         totalDuenos++;
-                        totalUsuariosValidos++;
-                    } else if (rol !== "admin") {
-                        totalUsuariosValidos++;
+                        uidsDuenosYAdmins.add(docSnap.id);
+                    } else if (rol === "admin") {
+                        uidsDuenosYAdmins.add(docSnap.id);
+                    } else if (rol === "player") {
+                        uidsJugadores.add(docSnap.id);
                     }
                 });
+
+                snapPerfiles.forEach(docSnap => {
+                    if (!uidsDuenosYAdmins.has(docSnap.id)) {
+                        uidsJugadores.add(docSnap.id);
+                    }
+                });
+
+                const totalJugadores = uidsJugadores.size;
+                const totalUsuariosValidos = totalJugadores + totalDuenos;
 
                 // --- 2. PROCESAR CANCHAS ---
                 let canchasPublicadas = 0;

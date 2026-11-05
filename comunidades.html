@@ -393,9 +393,37 @@
     </div>
 </div>
 
+<!-- MODAL TERCER TIEMPO / ESTADÍSTICAS DEL PARTIDO EN COMUNIDAD -->
+<div id="modal-tercer-tiempo-comunidad" class="modal-oculto" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:15px; box-sizing:border-box;">
+    <div class="modal-contenido" style="background:#111; max-width:540px; width:100%; max-height:90vh; overflow-y:auto; padding:26px 22px; position:relative; border-radius:18px; border:1px solid rgba(46,204,113,0.4); box-shadow:0 15px 40px rgba(0,0,0,0.85);">
+        <button id="cerrar-modal-tt-comunidad" style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); color:#aaa; font-size:1.2rem; cursor:pointer; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0;"><i class="ph-bold ph-x"></i></button>
+        <span class="mini-label" style="color:var(--primary-green); font-weight:900;">PROGRESIÓN OVR DEPORTIVO</span>
+        <h2 style="margin:4px 0 8px; font-size:1.35rem; color:#fff; font-weight:800;">Tercer Tiempo · Estadísticas del Partido</h2>
+        <p style="color:#aaa; font-size:0.84rem; margin-bottom:14px;">Suma Goles, Asistencias, Vallas Invictas y elige al MVP entre los asistentes confirmados para incrementar su OVR real:</p>
+
+        <form id="form-tercer-tiempo-comunidad">
+            <input type="hidden" id="tt-comunidad-partido-id" value="">
+            <div class="tercer-tiempo-box" style="margin-top:0;">
+                <div style="margin-bottom:12px; text-align:left;">
+                    <label style="display:block; font-size:0.78rem; color:#f1c40f; font-weight:800; margin-bottom:4px;">
+                        🏆 Elegir MVP del Partido (+3 OVR):
+                    </label>
+                    <select id="tt-comunidad-mvp" style="width:100%; padding:9px 12px; background:rgba(0,0,0,0.6); border:1px solid rgba(241,196,15,0.4); border-radius:8px; color:#fff; font-size:0.86rem;">
+                        <option value="">-- Sin MVP seleccionado --</option>
+                    </select>
+                </div>
+                <div id="tt-comunidad-jugadores-list" class="tercer-tiempo-list"></div>
+            </div>
+            <button type="submit" id="btn-guardar-tt-comunidad" class="btn" style="width:100%; margin-top:16px; padding:13px; font-weight:800; background:linear-gradient(135deg, #2ecc71, #27ae60); color:#080B0A; border:none; border-radius:10px; cursor:pointer;">
+                <i class="ph-bold ph-trophy"></i> Finalizar Partido y Subir OVR
+            </button>
+        </form>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, getDoc, query, where, addDoc, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, getDoc, setDoc, onSnapshot, query, where, addDoc, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { initLegalCompliance } from "./legal.js";
     initLegalCompliance();
@@ -437,6 +465,88 @@
     let cacheComunidades = {};
     let comunidadActualId = null;
     let comunidadActualData = null;
+
+    function calcularOVRDeportivo(perfil = {}) {
+        const pj = Number(perfil?.partidosJugados || 0);
+        const goles = Number(perfil?.goles || 0);
+        const asist = Number(perfil?.asistencias || 0);
+        const mvps = Number(perfil?.mvps || 0);
+        const vallas = Number(perfil?.vallasInvictas || 0);
+        return Math.min(99, 60 + (pj * 1) + (goles * 2) + (asist * 1) + (mvps * 3) + (vallas * 2));
+    }
+
+    function normalizarPosicion(posRaw, deporte = 'Fútbol') {
+        const raw = String(posRaw || '').toUpperCase().trim();
+        if (!raw) return deporte === 'Vóley' ? 'REC' : deporte === 'Básquet' ? 'BAS' : 'MED';
+        if (deporte === 'Vóley') {
+            if (raw.includes('ARM')) return 'ARM';
+            if (raw.includes('OPU')) return 'OPU';
+            if (raw.includes('CEN')) return 'CEN';
+            if (raw.includes('LIB') || raw.includes('LÍB')) return 'LIB';
+            return 'REC';
+        }
+        if (deporte === 'Básquet') {
+            if (raw.includes('BAS')) return 'BAS';
+            if (raw.includes('ESC')) return 'ESC';
+            if (raw.includes('ALE')) return 'ALE';
+            if (raw.includes('ALA') || raw.includes('API')) return 'ALA';
+            if (raw.includes('PIV') || raw.includes('PÍV')) return 'PIV';
+            return 'BAS';
+        }
+        if (raw.includes('ARQ') || raw.includes('PORTERO') || raw.includes('GUARDAMETA')) return 'ARQ';
+        if (raw.includes('DEF') || raw.includes('ZAGUERO') || raw.includes('LATERAL') || raw.includes('CENTRAL')) return 'DEF';
+        if (raw.includes('DEL') || raw.includes('ATACANTE') || raw.includes('PUNTA')) return 'DEL';
+        if (raw.includes('MED') || raw.includes('VOLANTE') || raw.includes('MIXTO')) return 'MED';
+        return 'MED';
+    }
+
+    let unsubInv1 = null, unsubInv2 = null;
+    function escucharInvitacionesTopbar(user) {
+        if (unsubInv1) { unsubInv1(); unsubInv1 = null; }
+        if (unsubInv2) { unsubInv2(); unsubInv2 = null; }
+        const pintarDot = (total) => {
+            document.querySelectorAll('.topbar-nav a[href*="amigos.html"]').forEach(link => {
+                let dot = link.querySelector('.nav-badge-dot');
+                if (total > 0) {
+                    if (!dot) { dot = document.createElement('span'); dot.className = 'nav-badge-dot'; link.appendChild(dot); }
+                    dot.textContent = total > 9 ? '9+' : String(total);
+                } else if (dot) { dot.remove(); }
+            });
+        };
+        if (!user || !user.uid) { pintarDot(0); return; }
+        const s1 = new Set(), s2 = new Set();
+        const upd = () => pintarDot(new Set([...s1, ...s2]).size);
+        try {
+            unsubInv1 = onSnapshot(query(collection(db, 'invitaciones_grupos'), where('paraUid', '==', user.uid), where('estado', '==', 'pendiente')), snap => { s1.clear(); snap.forEach(d => s1.add(d.id)); upd(); }, () => {});
+            unsubInv2 = onSnapshot(query(collection(db, 'invitaciones_grupos'), where('receptorUid', '==', user.uid), where('estado', '==', 'pendiente')), snap => { s2.clear(); snap.forEach(d => s2.add(d.id)); upd(); }, () => {});
+        } catch (e) {}
+    }
+
+    async function asegurarPerfilGoogleJugador(user) {
+        if (!user || !user.uid) return;
+        try {
+            const uSnap = await getDoc(doc(db, 'usuarios', user.uid));
+            if (uSnap.exists() && ['owner', 'admin'].includes(uSnap.data()?.rol)) return;
+            const refP = doc(db, 'jugadores_perfiles', user.uid);
+            const snapP = await getDoc(refP);
+            if (!snapP.exists()) {
+                await setDoc(refP, {
+                    uid: user.uid,
+                    nombre: user.displayName || 'Jugador',
+                    email: user.email || '',
+                    foto: user.photoURL || '',
+                    posicion: 'MED',
+                    ovr: 60,
+                    partidosJugados: 0,
+                    goles: 0,
+                    asistencias: 0,
+                    mvps: 0,
+                    vallasInvictas: 0,
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+            }
+        } catch (e) {}
+    }
 
     // PESTAÑAS PRINCIPALES
     const btnTorneos = document.getElementById('tab-torneos');
@@ -480,6 +590,12 @@
 
     onAuthStateChanged(auth, u => {
         currentUser = u || null;
+        if (u) {
+            asegurarPerfilGoogleJugador(u);
+            escucharInvitacionesTopbar(u);
+        } else {
+            escucharInvitacionesTopbar(null);
+        }
         cargarTorneos();
     });
 
@@ -877,74 +993,78 @@
             });
 
             // Renderizar Líder OBLIGATORIAMENTE PRIMERO
+            const depComunidad = (c.deporte || 'Fútbol').split(',')[0].trim();
             const fotoLider = liderData.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(liderData.nombre || 'Lider')}&background=f1c40f&color=000`;
-            const posLider = liderData.posicion || 'Líder';
+            const posLider = normalizarPosicion(liderData.posicion, depComunidad);
+            const ovrLider = calcularOVRDeportivo(liderData);
             const telLiderClean = String(liderData.telefono || '').replace(/\D/g, '');
-            const waLiderBtn = telLiderClean ? `<a href="https://wa.me/51${telLiderClean}?text=${encodeURIComponent('¡Hola Líder! Te escribo desde CHALACAPP.')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp Líder"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
+            const waLiderBtn = telLiderClean ? `<a href="https://wa.me/51${telLiderClean}?text=${encodeURIComponent('¡Hola Líder! Te escribo desde CHALACAPP.')}" target="_blank" class="btn btn-icon-square" style="background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.35); text-decoration:none;" title="WhatsApp Líder"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
 
             // Botón Comparar con el Líder: Solo si no es el propio usuario autenticado
             const esMismoLider = (currentUser && currentUser.uid === liderUid);
             const btnCompararLider = esMismoLider ? '' : `
-                <button type="button" class="btn btn-comparar-comunidad" onclick="window.abrirComparativaJugadores('${currentUser ? currentUser.uid : ''}', '${liderUid}')" style="width:auto !important; padding:6px 11px; font-size:0.75rem; font-weight:700; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" title="Comparar estadísticas">
-                    <i class="ph-bold ph-scales"></i> ⚖️ Comparar
+                <button type="button" class="btn btn-comparar-comunidad" onclick="window.abrirComparativaJugadores('${currentUser ? currentUser.uid : ''}', '${liderUid}')" style="width:auto !important; height:36px; padding:0 12px; font-size:0.78rem; font-weight:800; background:rgba(241,196,15,0.14); color:#f1c40f; border:1px solid rgba(241,196,15,0.35); border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; flex-shrink:0;" title="Comparar estadísticas">
+                    <i class="ph-bold ph-scales"></i> Comparar
                 </button>
             `;
 
+            const tieneAccionesLider = Boolean(btnCompararLider || waLiderBtn);
+
             let html = `
-            <div class="friend-card" style="border-color: rgba(241,196,15,0.45); background: linear-gradient(135deg, rgba(241,196,15,0.08), rgba(0,0,0,0.5));">
-                <div class="friend-info">
-                    <img src="${fotoLider}" class="friend-avatar" style="border: 2px solid #f1c40f;" alt="${liderData.nombre || 'Líder'}">
-                    <div style="min-width:0;">
-                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                            <h4 class="friend-name" style="margin:0;">${escapeHTML(liderData.nombre || 'Líder de la Comunidad')}</h4>
+            <div class="friend-card member-card" style="border-color: rgba(241,196,15,0.45); background: linear-gradient(135deg, rgba(241,196,15,0.08), rgba(0,0,0,0.5));">
+                <div class="member-card-top">
+                    <img src="${fotoLider}" class="friend-avatar" style="border: 2px solid #f1c40f;" alt="${escapeHTML(liderData.nombre || 'Líder')}">
+                    <div class="member-card-details">
+                        <h4 class="friend-name">${escapeHTML(liderData.nombre || 'Líder de la Comunidad')}</h4>
+                        <div class="member-card-badges">
                             <span class="badge-lider"><i class="ph-fill ph-crown"></i> Líder</span>
+                            <span style="font-size: 0.72rem; color: #f1c40f; background: rgba(241,196,15,0.12); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(241,196,15,0.3); font-weight:800;">${posLider}</span>
+                            <span class="ovr-badge-fut"><i class="ph-fill ph-lightning"></i> OVR ${ovrLider}</span>
                         </div>
-                        <span style="font-size: 0.75rem; color: #f1c40f; background: rgba(241,196,15,0.12); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(241,196,15,0.3); font-weight:700;">${posLider}</span>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
-                    ${btnCompararLider}
-                    ${waLiderBtn}
-                </div>
+                ${tieneAccionesLider ? `<div class="member-card-actions">${btnCompararLider}${waLiderBtn}</div>` : ''}
             </div>`;
 
             // Renderizar el resto de miembros
             otrosUids.forEach(uid => {
-                const m = miembrosMap[uid] || { uid, nombre: 'Miembro', posicion: 'JUG' };
+                const m = miembrosMap[uid] || { uid, nombre: 'Miembro', posicion: 'MED' };
                 const foto = m.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(m.nombre || 'Jugador')}&background=2ecc71&color=fff`;
-                const pos = m.posicion || 'JUG';
+                const pos = normalizarPosicion(m.posicion, depComunidad);
+                const ovrM = calcularOVRDeportivo(m);
                 const telClean = String(m.telefono || '').replace(/\D/g, '');
-                const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent('¡Habla! Te escribo desde la comunidad en CHALACAPP.')}" target="_blank" class="btn" style="width:34px; height:34px; padding:0; border-radius:8px; background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
+                const waBtn = telClean ? `<a href="https://wa.me/51${telClean}?text=${encodeURIComponent('¡Habla! Te escribo desde la comunidad en CHALACAPP.')}" target="_blank" class="btn btn-icon-square" style="background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.35); text-decoration:none;" title="WhatsApp"><i class="ph-bold ph-whatsapp-logo"></i></a>` : '';
 
-                // Botón Expulsar / Quitar visible EXCLUSIVAMENTE para el Líder
+                // Botón Expulsar / Quitar cuadrado visible EXCLUSIVAMENTE para el Líder
                 const btnExpulsar = soyLider ? `
-                    <button class="btn btn-ghost" onclick="window.expulsarMiembroComunidad('${uid}')" style="padding:6px 10px; font-size:0.75rem; font-weight:700; color:#e74c3c; border:1px solid rgba(231,76,60,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;" title="Expulsar de la comunidad">
-                        <i class="ph-bold ph-user-minus"></i> Expulsar
+                    <button class="btn btn-icon-square" onclick="window.expulsarMiembroComunidad('${uid}')" style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.35); cursor:pointer;" title="Expulsar de la comunidad">
+                        <i class="ph-bold ph-trash"></i>
                     </button>
                 ` : '';
 
                 // Botón Comparar Cara a Cara: Solo si no es el propio usuario autenticado
                 const esMismo = (currentUser && currentUser.uid === uid);
                 const btnComparar = esMismo ? '' : `
-                    <button type="button" class="btn btn-comparar-comunidad" onclick="window.abrirComparativaJugadores('${currentUser ? currentUser.uid : ''}', '${uid}')" style="width:auto !important; padding:6px 11px; font-size:0.75rem; font-weight:700; background:rgba(241,196,15,0.12); color:#f1c40f; border:1px solid rgba(241,196,15,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0;" title="Comparar estadísticas">
-                        <i class="ph-bold ph-scales"></i> ⚖️ Comparar
+                    <button type="button" class="btn btn-comparar-comunidad" onclick="window.abrirComparativaJugadores('${currentUser ? currentUser.uid : ''}', '${uid}')" style="width:auto !important; height:36px; padding:0 12px; font-size:0.78rem; font-weight:800; background:rgba(241,196,15,0.14); color:#f1c40f; border:1px solid rgba(241,196,15,0.35); border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; flex-shrink:0;" title="Comparar estadísticas">
+                        <i class="ph-bold ph-scales"></i> Comparar
                     </button>
                 `;
 
+                const tieneAccionesM = Boolean(btnComparar || waBtn || btnExpulsar);
+
                 html += `
-                <div class="friend-card">
-                    <div class="friend-info">
-                        <img src="${foto}" class="friend-avatar" alt="${m.nombre || 'Jugador'}">
-                        <div style="min-width:0;">
+                <div class="friend-card member-card">
+                    <div class="member-card-top">
+                        <img src="${foto}" class="friend-avatar" alt="${escapeHTML(m.nombre || 'Jugador')}">
+                        <div class="member-card-details">
                             <h4 class="friend-name">${escapeHTML(m.nombre || 'Jugador')}</h4>
-                            <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); font-weight:700;">${pos}</span>
+                            <div class="member-card-badges">
+                                <span style="font-size: 0.72rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); font-weight:800;">${pos}</span>
+                                <span class="ovr-badge-fut"><i class="ph-fill ph-lightning"></i> OVR ${ovrM}</span>
+                            </div>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: flex-end;">
-                        ${btnComparar}
-                        ${btnExpulsar}
-                        ${waBtn}
-                    </div>
+                    ${tieneAccionesM ? `<div class="member-card-actions">${btnComparar}${waBtn}${btnExpulsar}</div>` : ''}
                 </div>`;
             });
 
@@ -1148,6 +1268,7 @@
                 const totalInscritos = inscritos.length;
                 const cuposLibres = Math.max(0, cuposTotales - totalInscritos);
                 const esCancelado = p.estado === 'cancelado';
+                const esFinalizado = p.estado === 'finalizado';
 
                 const miInscripcion = currentUser ? inscritos.find(i => i.uid === currentUser.uid) : null;
                 const estoyInscrito = !!miInscripcion;
@@ -1155,6 +1276,8 @@
                 let estadoCuposHTML = '';
                 if (esCancelado) {
                     estadoCuposHTML = `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; border:1px solid rgba(231,76,60,0.3); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cancelado</span>`;
+                } else if (esFinalizado) {
+                    estadoCuposHTML = `<span style="background:rgba(46,204,113,0.18); color:var(--primary-green); border:1px solid rgba(46,204,113,0.4); padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Finalizado ✅</span>`;
                 } else if (cuposLibres === 0) {
                     estadoCuposHTML = `<span style="background:rgba(231,76,60,0.15); color:#e74c3c; padding:3px 8px; border-radius:6px; font-size:0.75rem; font-weight:bold;">Cupos Llenos</span>`;
                 } else {
@@ -1166,6 +1289,11 @@
                     botoneraHTML = `
                     <div style="background:rgba(231,76,60,0.08); border:1px solid rgba(231,76,60,0.2); border-radius:10px; padding:8px; margin-top:12px; text-align:center; color:#e74c3c; font-size:0.8rem; font-weight:700;">
                         Este evento ha sido cancelado por el líder
+                    </div>`;
+                } else if (esFinalizado) {
+                    botoneraHTML = `
+                    <div style="background:rgba(46,204,113,0.08); border:1px solid rgba(46,204,113,0.25); border-radius:10px; padding:8px; margin-top:12px; text-align:center; color:var(--primary-green); font-size:0.8rem; font-weight:700;">
+                        🏆 Partido finalizado · Estadísticas OVR actualizadas
                     </div>`;
                 } else if (estoyInscrito) {
                     botoneraHTML = `
@@ -1207,16 +1335,19 @@
                     </button>`;
                 }
 
-                // Botones de Editar y Cancelar para eventos creados por el líder
+                // Botones de Editar, Cancelar y Tercer Tiempo para eventos creados por el líder
                 let leaderMatchControls = '';
-                if (soyLider && !esCancelado) {
+                if (soyLider && !esCancelado && !esFinalizado) {
                     leaderMatchControls = `
-                    <div style="display:flex; gap:8px; margin-top:8px;">
+                    <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
                         <button onclick="window.editarPartidoComunidad('${p.id}')" class="btn btn-ghost" style="flex:1; padding:7px; font-size:0.78rem; font-weight:700; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
                             <i class="ph-bold ph-pencil-simple"></i> Editar
                         </button>
                         <button onclick="window.cancelarPartidoComunidad('${p.id}')" class="btn btn-ghost" style="flex:1; padding:7px; font-size:0.78rem; font-weight:700; color:#e74c3c; border-color:rgba(231,76,60,0.3); border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px;">
                             <i class="ph-bold ph-x-circle"></i> Cancelar
+                        </button>
+                        <button onclick="window.abrirTercerTiempoComunidad('${p.id}')" class="btn" style="width:100%; padding:8px; font-size:0.8rem; font-weight:800; background:linear-gradient(135deg, #2ecc71, #27ae60); color:#080B0A; border:none; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">
+                            <i class="ph-bold ph-trophy"></i> Finalizar / Tercer Tiempo (Subir OVR)
                         </button>
                     </div>`;
                 }
@@ -1444,6 +1575,114 @@
         }
     };
 
+    // ==========================================
+    // TERCER TIEMPO / ESTADÍSTICAS DEL PARTIDO EN COMUNIDAD
+    // ==========================================
+    const modalTtComunidad = document.getElementById('modal-tercer-tiempo-comunidad');
+    document.getElementById('cerrar-modal-tt-comunidad')?.addEventListener('click', () => {
+        if (modalTtComunidad) modalTtComunidad.style.display = 'none';
+    });
+    modalTtComunidad?.addEventListener('click', (e) => {
+        if (e.target === modalTtComunidad) modalTtComunidad.style.display = 'none';
+    });
+
+    window.abrirTercerTiempoComunidad = async function(partidoId) {
+        if (!currentUser || !comunidadActualId) return;
+        const p = cachePartidosComunidad[partidoId];
+        if (!p) return;
+
+        document.getElementById('tt-comunidad-partido-id').value = partidoId;
+        const inscritos = Array.isArray(p.inscritos) ? p.inscritos : [];
+        let participantes = inscritos.map(i => ({ uid: i.uid, nombre: i.nombre || 'Jugador' }));
+        if (participantes.length === 0 && comunidadActualData) {
+            const uids = Array.isArray(comunidadActualData.miembros_uids) ? [...comunidadActualData.miembros_uids] : [];
+            if (comunidadActualData.liderUid && !uids.includes(comunidadActualData.liderUid)) uids.unshift(comunidadActualData.liderUid);
+            const snaps = await Promise.all(uids.map(u => getDoc(doc(db, 'jugadores_perfiles', u)).catch(() => null)));
+            participantes = uids.map((u, idx) => ({
+                uid: u,
+                nombre: (snaps[idx] && snaps[idx].exists() && snaps[idx].data().nombre) ? snaps[idx].data().nombre : 'Jugador'
+            }));
+        }
+
+        const selectMvp = document.getElementById('tt-comunidad-mvp');
+        const listEl = document.getElementById('tt-comunidad-jugadores-list');
+
+        if (selectMvp) {
+            selectMvp.innerHTML = `<option value="">-- Sin MVP seleccionado --</option>` +
+                participantes.map(pt => `<option value="${escapeHTML(pt.uid)}">⭐ ${escapeHTML(pt.nombre)}</option>`).join('');
+        }
+        if (listEl) {
+            listEl.innerHTML = participantes.map(pt => `
+                <div class="tercer-tiempo-row" data-uid="${escapeHTML(pt.uid)}">
+                    <div style="min-width:0; flex:1;">
+                        <div style="font-size:0.84rem; font-weight:800; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                            ${escapeHTML(pt.nombre)}
+                        </div>
+                    </div>
+                    <div class="tercer-tiempo-inputs">
+                        <label title="Goles (+2 OVR c/u)">⚽G <input type="number" class="tt-com-goles" data-uid="${escapeHTML(pt.uid)}" min="0" max="30" value="0"></label>
+                        <label title="Asistencias (+1 OVR c/u)">👟A <input type="number" class="tt-com-asist" data-uid="${escapeHTML(pt.uid)}" min="0" max="30" value="0"></label>
+                        <label title="Valla Invicta (+2 OVR)" style="cursor:pointer;">🧤VI <input type="checkbox" class="tt-com-valla" data-uid="${escapeHTML(pt.uid)}" style="width:16px; height:16px; accent-color:#2ecc71;"></label>
+                    </div>
+                </div>
+            `).join('');
+        }
+        if (modalTtComunidad) modalTtComunidad.style.display = 'flex';
+    };
+
+    document.getElementById('form-tercer-tiempo-comunidad')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const partidoId = document.getElementById('tt-comunidad-partido-id')?.value;
+        if (!partidoId || !comunidadActualId) return;
+        const mvpUid = document.getElementById('tt-comunidad-mvp')?.value || '';
+        const btn = document.getElementById('btn-guardar-tt-comunidad');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Guardando y subiendo OVR...'; }
+
+        try {
+            await updateDoc(doc(db, 'comunidades', comunidadActualId, 'partidos_comunidad', partidoId), {
+                estado: 'finalizado',
+                mvpUid: mvpUid || null,
+                finalizadoAt: serverTimestamp()
+            });
+
+            const rows = document.querySelectorAll('#tt-comunidad-jugadores-list .tercer-tiempo-row');
+            await Promise.all(Array.from(rows).map(async (row) => {
+                const uid = row.getAttribute('data-uid');
+                if (!uid) return;
+                const addGoles = Math.max(0, Number(row.querySelector('.tt-com-goles')?.value || 0));
+                const addAsist = Math.max(0, Number(row.querySelector('.tt-com-asist')?.value || 0));
+                const addValla = row.querySelector('.tt-com-valla')?.checked ? 1 : 0;
+                const addMvp = (mvpUid && mvpUid === uid) ? 1 : 0;
+
+                const refP = doc(db, 'jugadores_perfiles', uid);
+                const snapP = await getDoc(refP);
+                const prev = snapP.exists() ? snapP.data() : {};
+                const nuevos = {
+                    uid,
+                    nombre: prev.nombre || 'Jugador',
+                    partidosJugados: Number(prev.partidosJugados || 0) + 1,
+                    goles: Number(prev.goles || 0) + addGoles,
+                    asistencias: Number(prev.asistencias || 0) + addAsist,
+                    mvps: Number(prev.mvps || 0) + addMvp,
+                    vallasInvictas: Number(prev.vallasInvictas || 0) + addValla,
+                    updatedAt: serverTimestamp()
+                };
+                nuevos.ovr = calcularOVRDeportivo(nuevos);
+                await setDoc(refP, nuevos, { merge: true });
+            }));
+
+            window.toast('¡Partido finalizado y OVR de jugadores actualizado!', 'success');
+            if (modalTtComunidad) modalTtComunidad.style.display = 'none';
+            await cargarMiembrosComunidad();
+            await cargarPartidosComunidad();
+        } catch (err) {
+            console.error('Error al finalizar partido:', err);
+            window.toast('Error al guardar estadísticas del partido', 'error');
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ph-bold ph-trophy"></i> Finalizar Partido y Subir OVR'; }
+        }
+    });
+
     async function cargarRetos() {
         subSecRet.innerHTML = '<p style="color:#aaa; grid-column:1/-1; text-align:center;"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando Zona de Retos...</p>';
         try {
@@ -1625,17 +1864,21 @@
 
             const [p1, p2] = await Promise.all([obtenerMetricsJugador(uid1), obtenerMetricsJugador(uid2)]);
 
-            const renderCardVersus = (data, esGanadorRating, labelLado, colorBorder) => {
+            const renderCardVersus = (data, esGanadorOvr, labelLado, colorBorder) => {
                 const foto = data.perfil.foto || (data.perfil.uid === currentUser?.uid ? currentUser?.photoURL : null) || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.perfil.nombre)}&background=2ecc71&color=fff`;
-                const crown = esGanadorRating && data.ratingReal > 0 
-                    ? `<span style="background:rgba(241,196,15,0.2); color:#f1c40f; border:1px solid #f1c40f; padding:2px 8px; border-radius:6px; font-size:0.72rem; font-weight:900; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-crown"></i> Líder</span>` 
-                    : '';
+                const ovrFut = calcularOVRDeportivo(data.perfil);
+                const posNorm = normalizarPosicion(data.perfil.posicion, data.perfil.deporte || 'Fútbol');
+                const pj = Number(data.perfil?.partidosJugados || 0);
                 const goles = Number(data.perfil?.goles || 0);
                 const asistencias = Number(data.perfil?.asistencias || 0);
-                const ratingFut = data.ratingReal > 0 ? Math.round(data.ratingReal * 20) : (data.perfil?.rating ? Math.round(Number(data.perfil.rating) * 20) : 0);
+                const mvps = Number(data.perfil?.mvps || 0);
+                const vallas = Number(data.perfil?.vallasInvictas || 0);
+                const crown = esGanadorOvr
+                    ? `<span style="background:rgba(241,196,15,0.2); color:#f1c40f; border:1px solid #f1c40f; padding:2px 8px; border-radius:6px; font-size:0.72rem; font-weight:900; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-crown"></i> Superior OVR</span>` 
+                    : '';
 
                 return `
-                <div class="comparativa-card" style="border-color:${colorBorder}; ${esGanadorRating && data.ratingReal > 0 ? 'box-shadow: 0 0 20px rgba(241,196,15,0.2);' : ''}">
+                <div class="comparativa-card" style="border-color:${colorBorder}; ${esGanadorOvr ? 'box-shadow: 0 0 20px rgba(241,196,15,0.2);' : ''}">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:0.75rem; font-weight:800; color:${colorBorder}; text-transform:uppercase; letter-spacing:0.5px;">${labelLado}</span>
                         ${crown}
@@ -1643,17 +1886,17 @@
 
                     <div style="text-align:center; margin: 2px 0 0;">
                         <div style="position:relative; display:inline-block; margin: 0 auto;">
-                            <img src="${foto}" class="comparativa-avatar" style="width:90px; height:90px; border-radius:50%; margin:0 auto; display:block; border:3px solid var(--primary-green); object-fit:cover;" alt="${data.perfil.nombre}">
-                            <span style="position:absolute; bottom:0px; right:2px; background:var(--primary-green); color:#000; font-size:0.7rem; font-weight:900; padding:2px 6px; border-radius:999px; border:2px solid #0b0f0d;">${data.perfil.posicion || 'JUG'}</span>
+                            <img src="${foto}" class="comparativa-avatar" style="width:90px; height:90px; border-radius:50%; margin:0 auto; display:block; border:3px solid var(--primary-green); object-fit:cover;" alt="${escapeHTML(data.perfil.nombre)}">
+                            <span style="position:absolute; bottom:0px; right:2px; background:var(--primary-green); color:#000; font-size:0.7rem; font-weight:900; padding:2px 6px; border-radius:999px; border:2px solid #0b0f0d;">${posNorm}</span>
                         </div>
                         <h3 style="margin:6px 0 2px; font-size:1.1rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(data.perfil.nombre)}</h3>
-                        <span style="font-size:0.78rem; color:#aaa;"><i class="ph-bold ph-map-pin"></i> ${data.perfil.ciudad || 'Perú'} · ${data.perfil.deporte || 'Fútbol'}</span>
+                        <span style="font-size:0.78rem; color:#aaa;"><i class="ph-bold ph-map-pin"></i> ${escapeHTML(data.perfil.ciudad || 'Perú')} · ${escapeHTML(data.perfil.deporte || 'Fútbol')}</span>
                     </div>
 
                     <div class="stat-pill-row">
                         <div class="stat-pill">
-                            <span class="stat-pill-label">Rating FUT</span>
-                            <span class="stat-pill-value" style="color:${colorBorder}; font-size:1.15rem;">${ratingFut > 0 ? ratingFut : '---'}</span>
+                            <span class="stat-pill-label">OVR FUT</span>
+                            <span class="stat-pill-value" style="color:${colorBorder}; font-size:1.15rem;">${ovrFut}</span>
                         </div>
                         <div class="stat-pill">
                             <span class="stat-pill-label">⚽ Goles</span>
@@ -1667,37 +1910,43 @@
 
                     <div style="margin-top:6px; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06);">
                         <div class="comparativa-metric">
-                            <span style="color:#aaa;">⭐ Valoración Media:</span>
-                            <strong style="color:${data.ratingReal > 0 ? '#f1c40f' : '#666'};">
-                                ${data.ratingReal > 0 ? `${data.ratingReal.toFixed(1)} / 5.0` : 'Sin reseñas'}
+                            <span style="color:#aaa;">🏟️ Partidos Jugados:</span>
+                            <strong style="color:#fff;">${pj}</strong>
+                        </div>
+                        <div class="comparativa-metric">
+                            <span style="color:#aaa;">🏆 MVPs / 🧤 Vallas Inv.:</span>
+                            <strong style="color:#f1c40f;">${mvps} MVPs · ${vallas} VI</strong>
+                        </div>
+                        <div class="comparativa-metric">
+                            <span style="color:#aaa;">⭐ Reputación Reserva:</span>
+                            <strong style="color:${data.ratingReal > 0 ? '#f1c40f' : '#888'};">
+                                ${data.ratingReal > 0 ? `${data.ratingReal.toFixed(1)} / 5.0 (${data.totalReviews})` : 'Sin reseñas (0.0)'}
                             </strong>
                         </div>
                         <div class="comparativa-metric">
-                            <span style="color:#aaa;">📋 Reseñas de Canchas:</span>
-                            <strong style="color:#fff;">${data.totalReviews}</strong>
-                        </div>
-                        <div class="comparativa-metric">
-                            <span style="color:#aaa;">🏆 Clubes / Grupos:</span>
+                            <span style="color:#aaa;">🛡️ Clubes / Grupos:</span>
                             <strong style="color:#fff;">${data.totalComunidades}</strong>
                         </div>
                         <div class="comparativa-metric">
                             <span style="color:#aaa;">👟 Pie / Perfil Hábil:</span>
-                            <strong style="color:#fff;">${data.perfil.habilidad || 'Diestro'}</strong>
+                            <strong style="color:#fff;">${escapeHTML(data.perfil.habilidad || 'Diestro')}</strong>
                         </div>
                         <div class="comparativa-metric" style="border-bottom:none;">
-                            <span style="color:#aaa;">🏷️ Rasgo Destacado:</span>
+                            <span style="color:#aaa;">🏷️ Conducta en Cancha:</span>
                             <span style="color:var(--primary-green); font-weight:bold; font-size:0.78rem;">
-                                ${data.topTag ? `✓ ${data.topTag}` : 'Jugador Disciplinado'}
+                                ${data.topTag ? `✓ ${escapeHTML(data.topTag)}` : 'Jugador Disciplinado'}
                             </span>
                         </div>
                     </div>
                 </div>`;
             };
 
-            const p1Gana = p1.ratingReal >= p2.ratingReal;
+            const ovr1 = calcularOVRDeportivo(p1.perfil);
+            const ovr2 = calcularOVRDeportivo(p2.perfil);
+            const p1Gana = ovr1 >= ovr2;
             container.innerHTML = `
                 ${renderCardVersus(p1, p1Gana, 'Mi Tarjeta FUT (Tú)', 'var(--primary-green)')}
-                ${renderCardVersus(p2, !p1Gana && p2.ratingReal > p1.ratingReal, 'Rival', '#f1c40f')}
+                ${renderCardVersus(p2, !p1Gana && ovr2 > ovr1, 'Rival', '#f1c40f')}
             `;
 
         } catch (error) {

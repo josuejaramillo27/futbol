@@ -442,30 +442,62 @@
     const topbarAuth = document.getElementById('topbar-auth');
     let currentUser = null;
 
-    // MAPA DE POSICIONES POR DEPORTE
+    // MAPA DE POSICIONES POR DEPORTE Y NORMALIZADOR ESTRICTO
+    function calcularOVRDeportivo(perfil = {}) {
+        const pj = Number(perfil?.partidosJugados || 0);
+        const goles = Number(perfil?.goles || 0);
+        const asist = Number(perfil?.asistencias || 0);
+        const mvps = Number(perfil?.mvps || 0);
+        const vallas = Number(perfil?.vallasInvictas || 0);
+        return Math.min(99, 60 + (pj * 1) + (goles * 2) + (asist * 1) + (mvps * 3) + (vallas * 2));
+    }
+
+    function normalizarPosicion(posRaw, deporte = 'Fútbol') {
+        const raw = String(posRaw || '').toUpperCase().trim();
+        if (!raw) return deporte === 'Vóley' ? 'REC' : deporte === 'Básquet' ? 'BAS' : 'MED';
+        if (deporte === 'Vóley') {
+            if (raw.includes('ARM')) return 'ARM';
+            if (raw.includes('OPU')) return 'OPU';
+            if (raw.includes('CEN')) return 'CEN';
+            if (raw.includes('LIB') || raw.includes('LÍB')) return 'LIB';
+            if (raw.includes('ATQ') || raw.includes('REC')) return 'REC';
+            return 'REC';
+        }
+        if (deporte === 'Básquet') {
+            if (raw.includes('BAS')) return 'BAS';
+            if (raw.includes('ESC')) return 'ESC';
+            if (raw.includes('ALE')) return 'ALE';
+            if (raw.includes('ALA') || raw.includes('API')) return 'ALA';
+            if (raw.includes('PIV') || raw.includes('PÍV')) return 'PIV';
+            return 'BAS';
+        }
+        if (raw.includes('ARQ') || raw.includes('PORTERO') || raw.includes('GUARDAMETA')) return 'ARQ';
+        if (raw.includes('DEF') || raw.includes('ZAGUERO') || raw.includes('LATERAL') || raw.includes('CENTRAL')) return 'DEF';
+        if (raw.includes('DEL') || raw.includes('ATACANTE') || raw.includes('PUNTA')) return 'DEL';
+        if (raw.includes('MED') || raw.includes('VOLANTE') || raw.includes('MIXTO')) return 'MED';
+        return 'MED';
+    }
+
     const posicionesPorDeporte = {
         'Fútbol': [
             { val: 'DEL', label: 'Delantero (DEL)' },
             { val: 'MED', label: 'Mediocampista (MED)' },
             { val: 'DEF', label: 'Defensa (DEF)' },
-            { val: 'ARQ', label: 'Arquero (ARQ)' },
-            { val: 'LIB', label: 'Polifuncional (LIB)' }
+            { val: 'ARQ', label: 'Arquero (ARQ)' }
         ],
         'Vóley': [
             { val: 'ARM', label: 'Armador / Colocador (ARM)' },
-            { val: 'ATQ', label: 'Atacante / Punta (ATQ)' },
+            { val: 'REC', label: 'Receptor / Punta (REC)' },
             { val: 'CEN', label: 'Central (CEN)' },
             { val: 'LIB', label: 'Líbero (LIB)' },
-            { val: 'OPU', label: 'Opuesto (OPU)' },
-            { val: 'POL', label: 'Polifuncional (POL)' }
+            { val: 'OPU', label: 'Opuesto (OPU)' }
         ],
         'Básquet': [
             { val: 'BAS', label: 'Base / Point Guard (BAS)' },
             { val: 'ESC', label: 'Escolta / Shooting Guard (ESC)' },
             { val: 'ALE', label: 'Alero / Small Forward (ALE)' },
-            { val: 'API', label: 'Ala-Pívot (API)' },
-            { val: 'PIV', label: 'Pívot / Center (PIV)' },
-            { val: 'POL', label: 'Polifuncional (POL)' }
+            { val: 'ALA', label: 'Ala-Pívot (ALA)' },
+            { val: 'PIV', label: 'Pívot / Center (PIV)' }
         ]
     };
 
@@ -475,7 +507,8 @@
         const lista = posicionesPorDeporte[deporteSeleccionado] || posicionesPorDeporte['Fútbol'];
         selectPos.innerHTML = lista.map(p => `<option value="${p.val}">${p.label}</option>`).join('');
         if (posicionGuardada) {
-            selectPos.value = posicionGuardada;
+            const norm = normalizarPosicion(posicionGuardada, deporteSeleccionado);
+            selectPos.value = norm;
         }
     }
 
@@ -626,19 +659,35 @@
             }
             const telefonoIngresado = document.getElementById('perfil-telefono')?.value.trim() || currentUser.phoneNumber || '';
 
+            const depSel = document.getElementById('perfil-deporte').value || 'Fútbol';
+            const posNorm = normalizarPosicion(document.getElementById('perfil-posicion').value, depSel);
+
+            let prevSnap = null;
+            try {
+                prevSnap = await getDoc(doc(db, "jugadores_perfiles", currentUser.uid));
+            } catch (e) {}
+            const prevData = prevSnap && prevSnap.exists() ? prevSnap.data() : {};
+
             const perfilData = {
                 uid: currentUser.uid, 
-                nombre: nombreIngresado, 
-                foto: currentUser.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreIngresado)}&background=2ecc71&color=fff`,
+                nombre: nombreIngresado,
+                email: currentUser.email || prevData.email || '',
+                foto: currentUser.photoURL || prevData.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreIngresado)}&background=2ecc71&color=fff`,
                 telefono: telefonoIngresado,
-                deporte: document.getElementById('perfil-deporte').value,
-                posicion: document.getElementById('perfil-posicion').value,
+                deporte: depSel,
+                posicion: posNorm,
                 ciudad: document.getElementById('perfil-ciudad').value,
-                habilidad: document.getElementById('perfil-habilidad').value
+                habilidad: document.getElementById('perfil-habilidad').value,
+                partidosJugados: Number(prevData.partidosJugados || 0),
+                goles: Number(prevData.goles || 0),
+                asistencias: Number(prevData.asistencias || 0),
+                mvps: Number(prevData.mvps || 0),
+                vallasInvictas: Number(prevData.vallasInvictas || 0)
             };
+            perfilData.ovr = calcularOVRDeportivo(perfilData);
 
             try {
-                await setDoc(doc(db, "jugadores_perfiles", currentUser.uid), perfilData);
+                await setDoc(doc(db, "jugadores_perfiles", currentUser.uid), perfilData, { merge: true });
                 btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-check"></i> ¡Tarjeta Guardada!';
                 setTimeout(() => { modalPerfil.classList.remove('mostrar'); btnGuardarPerfil.innerHTML = '<i class="ph-bold ph-floppy-disk"></i> Guardar Tarjeta'; btnGuardarPerfil.disabled = false; }, 1500);
             } catch (error) { btnGuardarPerfil.innerHTML = 'Error al guardar'; btnGuardarPerfil.disabled = false; }
@@ -692,6 +741,12 @@
                 }
                 
                 let fotoMostrada = data.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(nombreMostrado)}&background=2ecc71&color=fff`;
+                const ovrDeportivo = calcularOVRDeportivo(data);
+                const posNorm = normalizarPosicion(data.posicion, data.deporte || 'Fútbol');
+                const pj = Number(data.partidosJugados || 0);
+                const goles = Number(data.goles || 0);
+                const asist = Number(data.asistencias || 0);
+                const mvps = Number(data.mvps || 0);
                 
                 const btnCompararConmigo = (currentUser && currentUser.uid === jugadorUid) ? '' : `
                     <button type="button" class="btn" style="margin-top: 15px; width: 100%; background: rgba(241,196,15,0.15); color: #f1c40f; border: 1px solid rgba(241,196,15,0.4); padding: 10px 16px; border-radius: 10px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="document.getElementById('modal-ver-perfil').classList.remove('mostrar'); window.abrirComparativaJugadores('${jugadorUid}');">
@@ -703,16 +758,28 @@
                     <div class="player-card-container">
                         <div class="player-avatar-wrapper">
                             <img src="${fotoMostrada}" alt="Avatar" class="player-photo">
-                            <span class="player-pos">${data.posicion || '---'}</span>
+                            <span class="player-pos">${posNorm}</span>
                         </div>
                         <div class="player-info">
-                            <h3 class="player-name">${escapeHTML(nombreMostrado)}</h3>
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+                                <h3 class="player-name" style="margin:0;">${escapeHTML(nombreMostrado)}</h3>
+                                <span class="ovr-badge-fut"><i class="ph-fill ph-lightning"></i> OVR ${ovrDeportivo}</span>
+                            </div>
                             <div class="player-stats">
                                 <span class="stat-pill"><i class="ph-bold ph-map-pin"></i> ${escapeHTML(data.ciudad || 'Libre')}</span>
                                 <span class="stat-pill"><i class="ph-bold ph-soccer-ball"></i> ${escapeHTML(data.deporte || 'Fútbol')}</span>
-                                <span class="stat-pill">${data.habilidad || 'Diestro'}</span>
+                                <span class="stat-pill">${escapeHTML(data.habilidad || 'Diestro')}</span>
                             </div>
-                            ${starsHtml}
+                            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; font-size:0.78rem; color:#ddd;">
+                                <span style="background:rgba(255,255,255,0.06); padding:4px 8px; border-radius:6px;">🏟️ PJ: <b>${pj}</b></span>
+                                <span style="background:rgba(46,204,113,0.12); color:#2ecc71; padding:4px 8px; border-radius:6px;">⚽ Goles: <b>${goles}</b></span>
+                                <span style="background:rgba(52,152,219,0.12); color:#3498db; padding:4px 8px; border-radius:6px;">👟 Asist: <b>${asist}</b></span>
+                                <span style="background:rgba(241,196,15,0.15); color:#f1c40f; padding:4px 8px; border-radius:6px;">🏆 MVPs: <b>${mvps}</b></span>
+                            </div>
+                            <div style="margin-top:8px;">
+                                <small style="color:#888; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.5px;">Reputación de Reserva (Canchas):</small>
+                                ${starsHtml}
+                            </div>
                         </div>
                     </div>
                     ${btnCompararConmigo}
@@ -823,17 +890,21 @@
 
             const [p1, p2] = await Promise.all([obtenerMetricsJugador(uid1), obtenerMetricsJugador(uid2)]);
 
-            const renderCardVersus = (data, esGanadorRating, labelLado, colorBorder) => {
+            const renderCardVersus = (data, esGanadorOvr, labelLado, colorBorder) => {
                 const foto = data.perfil.foto || (data.perfil.uid === currentUser?.uid ? currentUser?.photoURL : null) || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.perfil.nombre)}&background=2ecc71&color=fff`;
-                const crown = esGanadorRating && data.ratingReal > 0 
-                    ? `<span style="background:rgba(241,196,15,0.2); color:#f1c40f; border:1px solid #f1c40f; padding:2px 8px; border-radius:6px; font-size:0.72rem; font-weight:900; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-crown"></i> Líder</span>` 
-                    : '';
+                const ovrFut = calcularOVRDeportivo(data.perfil);
+                const posNorm = normalizarPosicion(data.perfil.posicion, data.perfil.deporte || 'Fútbol');
+                const pj = Number(data.perfil?.partidosJugados || 0);
                 const goles = Number(data.perfil?.goles || 0);
                 const asistencias = Number(data.perfil?.asistencias || 0);
-                const ratingFut = data.ratingReal > 0 ? Math.round(data.ratingReal * 20) : (data.perfil?.rating ? Math.round(Number(data.perfil.rating) * 20) : 0);
+                const mvps = Number(data.perfil?.mvps || 0);
+                const vallas = Number(data.perfil?.vallasInvictas || 0);
+                const crown = esGanadorOvr
+                    ? `<span style="background:rgba(241,196,15,0.2); color:#f1c40f; border:1px solid #f1c40f; padding:2px 8px; border-radius:6px; font-size:0.72rem; font-weight:900; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-crown"></i> Superior OVR</span>` 
+                    : '';
 
                 return `
-                <div class="comparativa-card" style="border-color:${colorBorder}; ${esGanadorRating && data.ratingReal > 0 ? 'box-shadow: 0 0 20px rgba(241,196,15,0.2);' : ''}">
+                <div class="comparativa-card" style="border-color:${colorBorder}; ${esGanadorOvr ? 'box-shadow: 0 0 20px rgba(241,196,15,0.2);' : ''}">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-size:0.75rem; font-weight:800; color:${colorBorder}; text-transform:uppercase; letter-spacing:0.5px;">${labelLado}</span>
                         ${crown}
@@ -841,8 +912,8 @@
 
                     <div style="text-align:center; margin: 2px 0 0;">
                         <div style="position:relative; display:inline-block; margin: 0 auto;">
-                            <img src="${foto}" class="comparativa-avatar" style="width:90px; height:90px; border-radius:50%; margin:0 auto; display:block; border:3px solid var(--primary-green); object-fit:cover;" alt="${data.perfil.nombre}">
-                            <span style="position:absolute; bottom:0px; right:2px; background:var(--primary-green); color:#000; font-size:0.7rem; font-weight:900; padding:2px 6px; border-radius:999px; border:2px solid #0b0f0d;">${data.perfil.posicion || 'JUG'}</span>
+                            <img src="${foto}" class="comparativa-avatar" style="width:90px; height:90px; border-radius:50%; margin:0 auto; display:block; border:3px solid var(--primary-green); object-fit:cover;" alt="${escapeHTML(data.perfil.nombre)}">
+                            <span style="position:absolute; bottom:0px; right:2px; background:var(--primary-green); color:#000; font-size:0.7rem; font-weight:900; padding:2px 6px; border-radius:999px; border:2px solid #0b0f0d;">${posNorm}</span>
                         </div>
                         <h3 style="margin:6px 0 2px; font-size:1.1rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(data.perfil.nombre)}</h3>
                         <span style="font-size:0.78rem; color:#aaa;"><i class="ph-bold ph-map-pin"></i> ${escapeHTML(data.perfil.ciudad || 'Perú')} · ${escapeHTML(data.perfil.deporte || 'Fútbol')}</span>
@@ -850,8 +921,8 @@
 
                     <div class="stat-pill-row">
                         <div class="stat-pill">
-                            <span class="stat-pill-label">Rating FUT</span>
-                            <span class="stat-pill-value" style="color:${colorBorder}; font-size:1.15rem;">${ratingFut > 0 ? ratingFut : '---'}</span>
+                            <span class="stat-pill-label">OVR FUT</span>
+                            <span class="stat-pill-value" style="color:${colorBorder}; font-size:1.15rem;">${ovrFut}</span>
                         </div>
                         <div class="stat-pill">
                             <span class="stat-pill-label">⚽ Goles</span>
@@ -865,37 +936,43 @@
 
                     <div style="margin-top:6px; background:rgba(0,0,0,0.35); border-radius:10px; padding:10px; border:1px solid rgba(255,255,255,0.06);">
                         <div class="comparativa-metric">
-                            <span style="color:#aaa;">⭐ Valoración Media:</span>
-                            <strong style="color:${data.ratingReal > 0 ? '#f1c40f' : '#666'};">
-                                ${data.ratingReal > 0 ? `${data.ratingReal.toFixed(1)} / 5.0` : 'Sin reseñas'}
+                            <span style="color:#aaa;">🏟️ Partidos Jugados:</span>
+                            <strong style="color:#fff;">${pj}</strong>
+                        </div>
+                        <div class="comparativa-metric">
+                            <span style="color:#aaa;">🏆 MVPs / 🧤 Vallas Inv.:</span>
+                            <strong style="color:#f1c40f;">${mvps} MVPs · ${vallas} VI</strong>
+                        </div>
+                        <div class="comparativa-metric">
+                            <span style="color:#aaa;">⭐ Reputación Reserva:</span>
+                            <strong style="color:${data.ratingReal > 0 ? '#f1c40f' : '#888'};">
+                                ${data.ratingReal > 0 ? `${data.ratingReal.toFixed(1)} / 5.0 (${data.totalReviews})` : 'Sin reseñas (0.0)'}
                             </strong>
                         </div>
                         <div class="comparativa-metric">
-                            <span style="color:#aaa;">📋 Reseñas de Canchas:</span>
-                            <strong style="color:#fff;">${data.totalReviews}</strong>
-                        </div>
-                        <div class="comparativa-metric">
-                            <span style="color:#aaa;">🏆 Clubes / Grupos:</span>
+                            <span style="color:#aaa;">🛡️ Clubes / Grupos:</span>
                             <strong style="color:#fff;">${data.totalComunidades}</strong>
                         </div>
                         <div class="comparativa-metric">
                             <span style="color:#aaa;">👟 Pie / Perfil Hábil:</span>
-                            <strong style="color:#fff;">${data.perfil.habilidad || 'Diestro'}</strong>
+                            <strong style="color:#fff;">${escapeHTML(data.perfil.habilidad || 'Diestro')}</strong>
                         </div>
                         <div class="comparativa-metric" style="border-bottom:none;">
-                            <span style="color:#aaa;">🏷️ Rasgo Destacado:</span>
+                            <span style="color:#aaa;">🏷️ Conducta en Cancha:</span>
                             <span style="color:var(--primary-green); font-weight:bold; font-size:0.78rem;">
-                                ${data.topTag ? `✓ ${data.topTag}` : 'Jugador Disciplinado'}
+                                ${data.topTag ? `✓ ${escapeHTML(data.topTag)}` : 'Jugador Disciplinado'}
                             </span>
                         </div>
                     </div>
                 </div>`;
             };
 
-            const p1Gana = p1.ratingReal >= p2.ratingReal;
+            const ovr1 = calcularOVRDeportivo(p1.perfil);
+            const ovr2 = calcularOVRDeportivo(p2.perfil);
+            const p1Gana = ovr1 >= ovr2;
             container.innerHTML = `
                 ${renderCardVersus(p1, p1Gana, 'Mi Tarjeta FUT (Tú)', 'var(--primary-green)')}
-                ${renderCardVersus(p2, !p1Gana && p2.ratingReal > p1.ratingReal, 'Rival', '#f1c40f')}
+                ${renderCardVersus(p2, !p1Gana && ovr2 > ovr1, 'Rival', '#f1c40f')}
             `;
 
         } catch (error) {

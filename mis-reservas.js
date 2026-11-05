@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { initLegalCompliance } from "./legal.js";
 initLegalCompliance();
@@ -216,7 +216,33 @@ btnLogin?.addEventListener('click', async () => {
 });
 
 btnRefresh?.addEventListener('click', cargarReservas);
-onAuthStateChanged(auth, u => {
+onAuthStateChanged(auth, async u => {
     usuario = u || null;
+    if (u && u.uid) {
+        try {
+            const uSnap = await getDoc(doc(db, 'usuarios', u.uid));
+            const rol = uSnap.exists() ? uSnap.data()?.rol : null;
+            if (rol !== 'owner' && rol !== 'admin') {
+                const pRef = doc(db, 'jugadores_perfiles', u.uid);
+                const pSnap = await getDoc(pRef);
+                if (!pSnap.exists()) {
+                    await setDoc(pRef, {
+                        uid: u.uid,
+                        nombre: u.displayName || 'Jugador',
+                        email: u.email || '',
+                        foto: u.photoURL || '',
+                        posicion: 'MED',
+                        ovr: 60,
+                        partidosJugados: 0,
+                        goles: 0,
+                        asistencias: 0,
+                        mvps: 0,
+                        vallasInvictas: 0,
+                        updatedAt: serverTimestamp()
+                    }, { merge: true });
+                }
+            }
+        } catch (e) {}
+    }
     cargarReservas();
 });

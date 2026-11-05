@@ -770,7 +770,156 @@ async function confirmarReserva() {
 const btnCerrar = document.getElementById('cerrar-modal'), modalCancha = document.getElementById('modal-cancha'); if (btnCerrar) btnCerrar.addEventListener('click', cerrarModal); if (modalCancha) modalCancha.addEventListener('click', e => { if (e.target === modalCancha) cerrarModal() }); document.addEventListener('keydown', e => { if (e.key === 'Escape') { cerrarModal(); cerrarReserva() } }); function cerrarModal() { if (!modalCancha) return; modalCancha.classList.remove('mostrar'); document.body.style.overflow = '' }
 function cerrarReserva() { const m = document.getElementById('modal-reserva'); if (m) { m.classList.remove('mostrar'); m.setAttribute('aria-hidden', 'true') } }
 const cr = document.getElementById('cerrar-reserva'); cr?.addEventListener('click', cerrarReserva); document.getElementById('modal-reserva')?.addEventListener('click', e => { if (e.target.id === 'modal-reserva') cerrarReserva() }); document.getElementById('btn-confirmar-reserva')?.addEventListener('click', confirmarReserva);
-onAuthStateChanged(auth, u => { usuarioActual = u || null });
+// ==========================================
+// MÓDULO 1 & 2: OVR DEPORTIVO Y NORMALIZADOR DE POSICIÓN
+// ==========================================
+export function calcularOVRDeportivo(perfil = {}) {
+    const pj = Number(perfil?.partidosJugados || 0);
+    const goles = Number(perfil?.goles || 0);
+    const asist = Number(perfil?.asistencias || 0);
+    const mvps = Number(perfil?.mvps || 0);
+    const vallas = Number(perfil?.vallasInvictas || 0);
+    return Math.min(99, 60 + (pj * 1) + (goles * 2) + (asist * 1) + (mvps * 3) + (vallas * 2));
+}
+window.calcularOVRDeportivo = calcularOVRDeportivo;
+
+export function normalizarPosicion(posRaw, deporte = 'Fútbol') {
+    const raw = String(posRaw || '').toUpperCase().trim();
+    if (!raw) return deporte === 'Vóley' ? 'REC' : deporte === 'Básquet' ? 'BAS' : 'MED';
+    if (deporte === 'Vóley') {
+        if (raw.includes('ARM')) return 'ARM';
+        if (raw.includes('OPU')) return 'OPU';
+        if (raw.includes('CEN')) return 'CEN';
+        if (raw.includes('LIB') || raw.includes('LÍB')) return 'LIB';
+        return 'REC';
+    }
+    if (deporte === 'Básquet') {
+        if (raw.includes('BAS')) return 'BAS';
+        if (raw.includes('ESC')) return 'ESC';
+        if (raw.includes('ALE')) return 'ALE';
+        if (raw.includes('ALA')) return 'ALA';
+        if (raw.includes('PIV') || raw.includes('PÍV')) return 'PIV';
+        return 'BAS';
+    }
+    if (raw.includes('ARQ') || raw.includes('PORTERO') || raw.includes('GUARDAMETA')) return 'ARQ';
+    if (raw.includes('DEF') || raw.includes('ZAGUERO') || raw.includes('LATERAL') || raw.includes('CENTRAL')) return 'DEF';
+    if (raw.includes('DEL') || raw.includes('ATACANTE') || raw.includes('PUNTA')) return 'DEL';
+    if (raw.includes('MED') || raw.includes('VOLANTE') || raw.includes('MIXTO')) return 'MED';
+    return 'MED';
+}
+window.normalizarPosicion = normalizarPosicion;
+
+// ==========================================
+// MÓDULO 4 & 6: AUTO-REGISTRO GOOGLE Y BADGE DE INVITACIONES A PATAS
+// ==========================================
+let unsubInvPara = null;
+let unsubInvReceptor = null;
+
+function actualizarBadgePatasTopbar(totalPendientes) {
+    const linksPatas = document.querySelectorAll('.topbar-nav a[href*="amigos.html"]');
+    linksPatas.forEach(link => {
+        let dot = link.querySelector('.nav-badge-dot');
+        if (totalPendientes > 0) {
+            if (!dot) {
+                dot = document.createElement('span');
+                dot.className = 'nav-badge-dot';
+                link.appendChild(dot);
+            }
+            dot.textContent = totalPendientes > 9 ? '9+' : String(totalPendientes);
+            dot.title = `${totalPendientes} invitación(es) pendiente(s) a grupos de Patas`;
+        } else if (dot) {
+            dot.remove();
+        }
+    });
+}
+window.actualizarBadgePatasTopbar = actualizarBadgePatasTopbar;
+
+async function sincronizarPerfilJugadorGoogle(user) {
+    if (!user || !user.uid) return;
+    try {
+        const uSnap = await getDoc(doc(db, 'usuarios', user.uid));
+        if (uSnap.exists()) {
+            const rol = uSnap.data()?.rol;
+            if (rol === 'owner' || rol === 'admin') return;
+        }
+        const refPerfil = doc(db, 'jugadores_perfiles', user.uid);
+        const pSnap = await getDoc(refPerfil);
+        if (!pSnap.exists()) {
+            await setDoc(refPerfil, {
+                uid: user.uid,
+                nombre: user.displayName || 'Jugador',
+                email: user.email || '',
+                foto: user.photoURL || '',
+                posicion: 'MED',
+                ovr: 60,
+                partidosJugados: 0,
+                goles: 0,
+                asistencias: 0,
+                mvps: 0,
+                vallasInvictas: 0,
+                updatedAt: serverTimestamp()
+            }, { merge: true });
+        } else {
+            const pData = pSnap.data() || {};
+            if (!pData.uid || !pData.email) {
+                await setDoc(refPerfil, {
+                    uid: user.uid,
+                    nombre: pData.nombre || user.displayName || 'Jugador',
+                    email: pData.email || user.email || '',
+                    foto: pData.foto || user.photoURL || '',
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+            }
+        }
+    } catch (e) {
+        console.warn("No se pudo sincronizar perfil de jugador Google:", e);
+    }
+}
+
+function iniciarEscuchaInvitacionesGlobal(user) {
+    if (unsubInvPara) { unsubInvPara(); unsubInvPara = null; }
+    if (unsubInvReceptor) { unsubInvReceptor(); unsubInvReceptor = null; }
+
+    if (!user || !user.uid) {
+        actualizarBadgePatasTopbar(0);
+        return;
+    }
+
+    const idsPara = new Set();
+    const idsRec = new Set();
+    const recalcular = () => {
+        const union = new Set([...idsPara, ...idsRec]);
+        actualizarBadgePatasTopbar(union.size);
+    };
+
+    try {
+        const q1 = query(collection(db, 'invitaciones_grupos'), where('paraUid', '==', user.uid), where('estado', '==', 'pendiente'));
+        unsubInvPara = onSnapshot(q1, snap => {
+            idsPara.clear();
+            snap.forEach(d => idsPara.add(d.id));
+            recalcular();
+        }, () => {});
+
+        const q2 = query(collection(db, 'invitaciones_grupos'), where('receptorUid', '==', user.uid), where('estado', '==', 'pendiente'));
+        unsubInvReceptor = onSnapshot(q2, snap => {
+            idsRec.clear();
+            snap.forEach(d => idsRec.add(d.id));
+            recalcular();
+        }, () => {});
+    } catch (e) {
+        console.warn("Error escuchando invitaciones:", e);
+    }
+}
+
+onAuthStateChanged(auth, u => {
+    usuarioActual = u || null;
+    if (u) {
+        sincronizarPerfilJugadorGoogle(u);
+        iniciarEscuchaInvitacionesGlobal(u);
+    } else {
+        actualizarBadgePatasTopbar(0);
+    }
+});
 
 window.cerrarSesionChalacapp = async function () {
     if (!confirm('¿Seguro que deseas cerrar sesión en CHALACAPP?')) return;
