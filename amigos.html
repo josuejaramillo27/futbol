@@ -1084,6 +1084,17 @@
         import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where, doc, getDoc, updateDoc, setDoc, deleteDoc, addDoc, arrayRemove, arrayUnion, serverTimestamp, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { initLegalCompliance } from "./legal.js";
+        initLegalCompliance();
+
+        function escapeHTML(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
@@ -1264,7 +1275,7 @@
                             <span class="grupo-card-sport" style="margin-bottom:0;"><i class="ph-bold ${sportIcon}"></i> ${g.deporte || 'Fútbol'}</span>
                             ${rolBadge}
                         </div>
-                        <h3 class="grupo-card-title">${g.nombre}</h3>
+                        <h3 class="grupo-card-title">${escapeHTML(g.nombre)}</h3>
                         <p style="color:#888; font-size:0.85rem; margin:0;"><i class="ph-fill ph-users"></i> ${numJugadores} Jugador${numJugadores === 1 ? '' : 'es'}</p>
                     </div>
                 `;
@@ -1310,8 +1321,8 @@
                                 <i class="ph-bold ${sportIcon}"></i>
                             </div>
                             <div style="min-width:0;">
-                                <h4 style="margin:0; font-size:0.95rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${inv.grupoNombre || 'Vestuario Privado'}</h4>
-                                <p style="margin:2px 0 0; font-size:0.78rem; color:#aaa;">Invitado por <b>${inv.emisorNombre || 'Capitán'}</b></p>
+                                <h4 style="margin:0; font-size:0.95rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(inv.grupoNombre || 'Vestuario Privado')}</h4>
+                                <p style="margin:2px 0 0; font-size:0.78rem; color:#aaa;">Invitado por <b>${escapeHTML(inv.emisorNombre || 'Capitán')}</b></p>
                             </div>
                         </div>
                         <div class="invitacion-actions">
@@ -1549,7 +1560,7 @@
                             <img src="${foto}" class="friend-avatar" style="${esEsteLider ? 'border: 2px solid #f1c40f;' : ''}" alt="${j.nombre || 'Jugador'}">
                             <div style="min-width:0;">
                                 <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
-                                    <h4 class="friend-name" style="margin:0;">${j.nombre || 'Jugador'}</h4>
+                                    <h4 class="friend-name" style="margin:0;">${escapeHTML(j.nombre || 'Jugador')}</h4>
                                     ${badgeLider}
                                 </div>
                                 <span style="font-size: 0.75rem; color: #fff; background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); font-weight:700;">${pos}</span>
@@ -1626,7 +1637,7 @@
                             <div class="friend-info">
                                 <img src="${foto}" class="friend-avatar" alt="${j.nombre || 'Jugador'}">
                                 <div style="min-width:0;">
-                                    <h4 class="friend-name">${j.nombre || 'Jugador'}</h4>
+                                    <h4 class="friend-name">${escapeHTML(j.nombre || 'Jugador')}</h4>
                                     <span style="font-size:0.75rem; color:#aaa;">${j.posicion || 'JUG'} · ${j.ciudad || 'Lima'}</span>
                                 </div>
                             </div>
@@ -1999,7 +2010,7 @@
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
                     <div style="min-width:0; flex:1 1 200px;">
                         <span class="mini-label" style="color:var(--primary-green); font-weight:900;">PRÓXIMO PARTIDO</span>
-                        <h3 style="margin:4px 0 0; font-size:1.35rem; color:#fff; font-weight:800;">📍 ${partido.lugar || 'Cancha asignada'}</h3>
+                        <h3 style="margin:4px 0 0; font-size:1.35rem; color:#fff; font-weight:800;">📍 ${escapeHTML(partido.lugar || 'Cancha asignada')}</h3>
                         <p style="margin:4px 0 0; color:#aaa; font-size:0.88rem;">
                             📅 <b>${partido.fecha}</b> &nbsp;|&nbsp; ⏰ <b>${partido.hora} hrs</b>
                         </p>
@@ -2086,7 +2097,7 @@
                 <div class="pizarra-player-item" draggable="${soyLider}" ondragstart="event.dataTransfer.setData('text/plain', '${uid}')">
                     <img src="${foto}" class="pizarra-avatar" alt="${perfil.nombre}">
                     <div style="min-width:0; flex:1;">
-                        <div style="font-size:0.85rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${perfil.nombre}</div>
+                        <div style="font-size:0.85rem; font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(perfil.nombre)}</div>
                         <span style="font-size:0.7rem; color:#aaa;">${perfil.posicion || 'JUG'}</span>
                     </div>
                     ${moveBtn}
@@ -2303,7 +2314,7 @@
                     ${partidos.map(p => `
                         <div class="partido-historial-item">
                             <div>
-                                <span style="font-size:0.75rem; color:#888;">📅 ${p.fecha || ''} &nbsp;·&nbsp; 📍 ${p.lugar || 'Cancha'}</span>
+                                <span style="font-size:0.75rem; color:#888;">📅 ${escapeHTML(p.fecha || '')} &nbsp;·&nbsp; 📍 ${escapeHTML(p.lugar || 'Cancha')}</span>
                             </div>
                             <div class="partido-marcador-badge">
                                 <span style="color:#3498db;">${p.resultado?.golesA ?? 0}</span>
@@ -2419,7 +2430,7 @@
                                 <img src="${foto}" class="comparativa-avatar" style="width:90px; height:90px; border-radius:50%; margin:0 auto; display:block; border:3px solid var(--primary-green); object-fit:cover;" alt="${p.nombre || 'Jugador'}">
                                 <span style="position:absolute; bottom:0px; right:2px; background:var(--primary-green); color:#000; font-size:0.7rem; font-weight:900; padding:2px 6px; border-radius:999px; border:2px solid #0b0f0d;">${p.posicion || 'JUG'}</span>
                             </div>
-                            <h3 class="comparativa-name" style="margin:6px 0 2px; font-size:1.1rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.nombre || 'Jugador'}</h3>
+                            <h3 class="comparativa-name" style="margin:6px 0 2px; font-size:1.1rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(p.nombre || 'Jugador')}</h3>
                             <span class="comparativa-pos" style="font-size:0.78rem; color:#aaa;"><i class="ph-bold ph-map-pin"></i> ${p.ciudad || 'Lima'} · ${p.deporte || 'Fútbol'}</span>
                         </div>
 

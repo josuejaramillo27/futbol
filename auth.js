@@ -1,209 +1,210 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initLegalCompliance } from "./legal.js";
+initLegalCompliance();
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
-  authDomain: "app-futbol-acd0f.firebaseapp.com",
-  projectId: "app-futbol-acd0f",
-  storageBucket: "app-futbol-acd0f.firebasestorage.app",
-  messagingSenderId: "223446110165",
-  appId: "1:223446110165:web:219afce6a9dac03203f75c"
+    apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
+    authDomain: "app-futbol-acd0f.firebaseapp.com",
+    projectId: "app-futbol-acd0f",
+    storageBucket: "app-futbol-acd0f.firebasestorage.app",
+    messagingSenderId: "223446110165",
+    appId: "1:223446110165:web:219afce6a9dac03203f75c"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const emailInput = document.getElementById('email');
-const passwordInput = document.getElementById('password');
+const inputEmail = document.getElementById('email');
+const inputPassword = document.getElementById('password');
 const btnLogin = document.getElementById('btn-login');
-const btnRegister = document.getElementById('btn-register');
-const errorMessage = document.getElementById('auth-error-message');
-const successMessage = document.getElementById('auth-success-message');
+const btnRegistrar = document.getElementById('btn-registrar');
+const mensajeError = document.getElementById('mensaje-error');
 
-// Referencias de UI
-const btnShowRegister = document.getElementById('btn-show-register');
-const btnShowLogin = document.getElementById('btn-show-login');
-const registerFields = document.getElementById('register-fields');
-const loginActions = document.getElementById('login-actions');
-const registerActions = document.getElementById('register-actions');
-const formTitle = document.getElementById('form-title');
-const formSubtitle = document.getElementById('form-subtitle');
+const mostrarMensaje = (texto, esExito = false) => {
+    mensajeError.textContent = texto;
+    mensajeError.style.display = 'block';
+    if (esExito) {
+        mensajeError.style.backgroundColor = 'rgba(0, 217, 104, 0.1)';
+        mensajeError.style.borderColor = 'rgba(0, 217, 104, 0.4)';
+        mensajeError.style.color = '#71eaa3';
+    } else {
+        mensajeError.style.backgroundColor = 'rgba(255, 69, 69, 0.1)';
+        mensajeError.style.borderColor = 'rgba(255, 69, 69, 0.25)';
+        mensajeError.style.color = '#ff9c9c';
+    }
+};
 
 // ==========================================
-// FIX 1: Bloquear la tecla "Enter" para que no active botones por error
+// 1. REGISTRO DE NUEVOS DUEÑOS (CON VALIDACIÓN Y LEY N° 29733)
 // ==========================================
-document.getElementById('auth-form').addEventListener('submit', (e) => {
-    e.preventDefault();
+btnRegistrar.addEventListener('click', async () => {
+    const email = inputEmail.value.trim();
+    const password = inputPassword.value;
+    
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const telefono = document.getElementById('reg-telefono').value.trim();
+    const cancha = document.getElementById('reg-cancha').value.trim();
+    
+    const dpto = document.getElementById('reg-departamento').value;
+    const dist = document.getElementById('reg-distrito').value;
+    const ciudadCompleta = (dpto && dist) ? `${dist}, ${dpto}` : '';
+
+    const evidencia = document.getElementById('reg-evidencia').value.trim();
+    const ruc = document.getElementById('reg-ruc').value.trim();
+    const chkTerminos = document.getElementById('reg-terminos');
+
+    if (!email || !password || !nombre || !telefono || !cancha || !ciudadCompleta || !evidencia) {
+        mostrarMensaje("Por favor, completa todos los campos obligatorios y selecciona la ubicación de tu cancha.");
+        return;
+    }
+
+    if (!chkTerminos || !chkTerminos.checked) {
+        mostrarMensaje("Debes aceptar los Términos de Uso y la Política de Privacidad de Datos (Ley N° 29733) para registrarte.");
+        return;
+    }
+
+    if (password.length < 6) {
+        mostrarMensaje("La contraseña debe tener al menos 6 caracteres.");
+        return;
+    }
+
+    try {
+        btnRegistrar.disabled = true;
+        btnRegistrar.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Procesando...';
+
+        const credenciales = await createUserWithEmailAndPassword(auth, email, password);
+        const uid = credenciales.user.uid;
+
+        await setDoc(doc(db, "usuarios", uid), {
+            uid: uid,
+            email: email,
+            nombre: nombre,
+            telefono: telefono,
+            nombreCancha: cancha,
+            departamento: dpto,
+            distrito: dist,
+            ciudad: ciudadCompleta,
+            evidenciaLink: evidencia,
+            ruc: ruc || "No especificado",
+            rol: "owner",
+            estado: "pending",
+            terminosAceptados: true,
+            createdAt: serverTimestamp()
+        });
+
+        await setDoc(doc(db, "solicitudes_duenos", uid), {
+            uid: uid,
+            nombreDueno: nombre,
+            email: email,
+            telefono: telefono,
+            nombreCancha: cancha,
+            departamento: dpto,
+            distrito: dist,
+            ciudad: ciudadCompleta,
+            evidencia: evidencia,
+            ruc: ruc || "No especificado",
+            estado: "pendiente",
+            terminosAceptados: true,
+            fechaSolicitud: serverTimestamp()
+        });
+
+        const numeroAdmin = "51961341323"; 
+        
+        const textoWhatsapp = `Hola *CHALACAPP*! 👋⚽%0A` +
+                              `Acabo de registrar mi complejo en la web y solicito la activación de mi panel:%0A%0A` +
+                              `🏟️ *Cancha:* ${cancha}%0A` +
+                              `📍 *Ubicación:* ${ciudadCompleta}%0A` +
+                              `👤 *Dueño:* ${nombre}%0A` +
+                              `📱 *WhatsApp:* ${telefono}%0A` +
+                              `✉️ *Correo:* ${email}%0A` +
+                              `🔗 *Evidencia:* ${evidencia}%0A` +
+                              `📄 *RUC/DNI:* ${ruc || 'No especificado'}%0A%0A` +
+                              `Quedo atento a la validación. ¡Gracias!`;
+
+        const urlWhatsapp = `https://wa.me/${numeroAdmin}?text=${textoWhatsapp}`;
+
+        await signOut(auth);
+        
+        mostrarMensaje("¡Registro exitoso! Redirigiendo a WhatsApp para activar tu cuenta...", true);
+        btnRegistrar.innerHTML = '<i class="ph-bold ph-whatsapp-logo"></i> Abriendo WhatsApp...';
+
+        setTimeout(() => {
+            window.open(urlWhatsapp, '_blank');
+            window.location.reload();
+        }, 2000);
+
+    } catch (error) {
+        console.error(error);
+        btnRegistrar.disabled = false;
+        btnRegistrar.innerHTML = '<i class="ph-bold ph-paper-plane-tilt"></i> Enviar solicitud de registro';
+        
+        if (error.code === 'auth/email-already-in-use') {
+            mostrarMensaje("Este correo ya está registrado. Intenta iniciar sesión.");
+        } else {
+            mostrarMensaje("Hubo un error al registrar. Inténtalo de nuevo.");
+        }
+    }
 });
 
-if(btnShowRegister) {
-    btnShowRegister.addEventListener('click', () => {
-        registerFields.style.display = 'block';
-        registerActions.style.display = 'flex';
-        loginActions.style.display = 'none';
-        formTitle.innerText = 'Solicitud de Registro';
-        formSubtitle.innerText = 'Completa tus datos. Un administrador evaluará tu solicitud.';
-        errorMessage.innerText = '';
-    });
-}
-
-if(btnShowLogin) {
-    btnShowLogin.addEventListener('click', () => {
-        registerFields.style.display = 'none';
-        registerActions.style.display = 'none';
-        loginActions.style.display = 'flex';
-        formTitle.innerText = 'Panel de Socios';
-        formSubtitle.innerText = 'Gestiona tu cancha, automatiza tus reservas y aumenta tus ingresos.';
-        errorMessage.innerText = '';
-    });
-}
-
 // ==========================================
-// LÓGICA DE REGISTRO 
+// 2. INICIO DE SESIÓN (CON FILTRO DE SEGURIDAD)
 // ==========================================
-if(btnRegister) {
-    btnRegister.addEventListener('click', async () => {
-        errorMessage.innerText = '';
-        const nombre = document.getElementById('reg-nombre').value.trim();
-        const dni = document.getElementById('reg-dni').value.trim();
-        const telefono = document.getElementById('reg-telefono').value.trim();
-        const complejo = document.getElementById('reg-complejo').value.trim();
-        const direccion = document.getElementById('reg-direccion').value.trim();
-        const email = emailInput.value.trim();
-        const pass = passwordInput.value.trim();
+btnLogin.addEventListener('click', async () => {
+    const email = inputEmail.value.trim();
+    const password = inputPassword.value;
 
-        if(!nombre || !dni || !telefono || !complejo || !direccion || !email || !pass) {
-            errorMessage.innerText = 'Por favor, completa absolutamente todos los campos.';
-            return;
-        }
+    if (!email || !password) {
+        mostrarMensaje("Ingresa tu correo y contraseña.");
+        return;
+    }
 
-        btnRegister.disabled = true;
-        btnRegister.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> Enviando...';
-
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
-            const user = userCredential.user;
-            
-            await setDoc(doc(db, "usuarios", user.uid), {
-                uid: user.uid,
-                email: email,
-                rol: "owner",
-                estado: "pending",
-                nombre: nombre,
-                telefono: telefono,
-                documento: dni,
-                complejo: complejo,
-                direccion: direccion,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp()
-            });
-
-            await setDoc(doc(db, "solicitudes_duenos", user.uid), {
-                uid: user.uid,
-                email: email,
-                nombre: nombre,
-                telefono: telefono,
-                documento: dni,
-                complejo: complejo,
-                direccion: direccion,
-                estado: "pending",
-                createdAt: serverTimestamp()
-            });
-
-            successMessage.innerText = "¡Solicitud enviada! Abriendo WhatsApp...";
-            successMessage.style.display = "block";
-            
-            // ==========================================
-            // FIX 2: Alerta por WhatsApp segura contra bloqueos
-            // ==========================================
-            const tuNumeroWhatsApp = "51953066853"; // <-- CAMBIA ESTO POR TU NÚMERO
-            const mensajeWhatsApp = `Hola CHALACAPP, acabo de enviar una solicitud en la web para registrar mi complejo "${complejo}". Mi nombre es ${nombre} y mi DNI es ${dni}. Quedo a la espera de la aprobación.`;
-            
-            // Forzamos la redirección en la misma ventana para evitar pop-up blockers
-            window.location.href = `https://wa.me/${tuNumeroWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`;
-            
-            document.getElementById('auth-form').reset();
-            auth.signOut(); 
-
-        } catch (error) {
-            console.error(error);
-            errorMessage.innerText = "Error: " + (error.code === 'auth/email-already-in-use' ? 'El correo ya está registrado.' : error.message);
-        } finally {
-            btnRegister.disabled = false;
-            btnRegister.innerHTML = 'Enviar Solicitud';
-        }
-    });
-}
-
-// ==========================================
-// LÓGICA DE INICIO DE SESIÓN 
-// ==========================================
-if(btnLogin) {
-    btnLogin.addEventListener('click', async () => {
-        errorMessage.innerText = '';
-        
-        // FIX 3: Validar que no manden campos vacíos
-        const email = emailInput.value.trim();
-        const pass = passwordInput.value.trim();
-        
-        if(!email || !pass) {
-            errorMessage.innerText = 'Por favor, ingresa tu correo y contraseña.';
-            return;
-        }
-
+    try {
         btnLogin.disabled = true;
-        btnLogin.innerHTML = '<i class="ph-bold ph-spinner-gap"></i> Conectando...';
+        btnLogin.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Verificando...';
 
-        try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-            const user = userCredential.user;
-            
-            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-            
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                
-                if (userData.rol === "admin" && userData.estado === "approved") {
-                    window.location.href = "admin-panel.html";
-                    return;
-                }
+        const credenciales = await signInWithEmailAndPassword(auth, email, password);
+        const uid = credenciales.user.uid;
 
-                if (userData.estado === "pending") {
-                    errorMessage.innerText = "Tu solicitud aún está pendiente de aprobación por un administrador.";
-                    auth.signOut();
-                } else if (userData.estado === "rejected") {
-                    errorMessage.innerText = "Tu solicitud ha sido rechazada.";
-                    auth.signOut();
-                } else if (userData.estado === "approved") {
-                    window.location.href = "admin.html";
-                }
-            } else {
-                const canchaDoc = await getDoc(doc(db, "canchas", user.uid));
-                if(canchaDoc.exists()) {
-                    await setDoc(doc(db, "usuarios", user.uid), {
-                        uid: user.uid,
-                        email: user.email,
-                        rol: "owner",
-                        estado: "approved",
-                        nombre: canchaDoc.data().nombre || "Dueño Antiguo",
-                        migrado: true,
-                        createdAt: serverTimestamp(),
-                        updatedAt: serverTimestamp()
-                    });
-                    window.location.href = "admin.html";
-                } else {
-                    errorMessage.innerText = "Cuenta no encontrada en la base de datos.";
-                    auth.signOut();
-                }
+        const userDoc = await getDoc(doc(db, "usuarios", uid));
+
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            
+            if (data.rol === "admin" && data.estado === "approved") {
+                window.location.href = "admin-panel.html";
+                return;
             }
-        } catch (error) {
-            console.error(error);
-            errorMessage.innerText = "Credenciales incorrectas o correo inválido.";
-        } finally {
-            btnLogin.disabled = false;
-            btnLogin.innerHTML = 'Iniciar Sesión';
+
+            if (data.estado === "pending") {
+                await signOut(auth);
+                mostrarMensaje("⏳ Tu cuenta aún está en revisión. Te avisaremos por WhatsApp cuando sea aprobada.");
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="ph-bold ph-sign-in"></i> Entrar a mi panel';
+                return;
+            }
+            
+            if (data.estado === "rejected") {
+                await signOut(auth);
+                mostrarMensaje("❌ Tu solicitud de registro fue denegada por no cumplir los requisitos.");
+                btnLogin.disabled = false;
+                btnLogin.innerHTML = '<i class="ph-bold ph-sign-in"></i> Entrar a mi panel';
+                return;
+            }
+
+            if (data.estado === "approved") {
+                window.location.href = "admin.html";
+            }
+        } else {
+            window.location.href = "admin.html";
         }
-    });
-}
+
+    } catch (error) {
+        console.error(error);
+        btnLogin.disabled = false;
+        btnLogin.innerHTML = '<i class="ph-bold ph-sign-in"></i> Entrar a mi panel';
+        mostrarMensaje("Correo o contraseña incorrectos.");
+    }
+});

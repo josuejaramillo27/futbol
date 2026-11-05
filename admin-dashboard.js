@@ -5,6 +5,36 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstati
 import { calcularDisponibilidad, fechaISO } from './availability.js';
 let bloqueosDia = [];
 
+function escapeHTML(str) {
+    return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function minutosHora(h) {
+    const m = String(h || '').trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return null;
+    return Number(m[1]) * 60 + Number(m[2]);
+}
+
+function calcularPrecioTurnoAdmin(espacio, hora) {
+    const baseDia = Number(espacio?.precio ?? canchaActual?.precio ?? 0);
+    const tieneNoche = espacio?.tienePrecioNoche !== undefined ? !!espacio.tienePrecioNoche : !!canchaActual?.tienePrecioNoche;
+    const precioNoche = Number(espacio?.precioNoche || canchaActual?.precioNoche || 0);
+    const horaInicioNoche = espacio?.horaInicioNoche || canchaActual?.horaInicioNoche || '18:00';
+    if (tieneNoche && precioNoche > 0 && hora) {
+        const minSlot = minutosHora(hora);
+        const minNoche = minutosHora(horaInicioNoche);
+        if (minSlot !== null && minNoche !== null && minSlot >= minNoche) {
+            return precioNoche;
+        }
+    }
+    return baseDia;
+}
+
 window.customConfirm = function (mensaje) {
     return new Promise((resolve) => {
         let overlay = document.getElementById('custom-confirm-overlay');
@@ -98,11 +128,10 @@ async function cargarPerfil() {
     if (!bannerEstado) {
         bannerEstado = document.createElement('div');
         bannerEstado.id = 'banner-publicacion';
-        bannerEstado.style.cssText = 'padding:15px; margin-bottom:20px; border-radius:12px; display:flex; justify-content:space-between; align-items:center;';
+        bannerEstado.style.cssText = 'padding:15px; margin-bottom:20px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;';
         document.querySelector('.admin-heading').insertAdjacentElement('afterend', bannerEstado);
     }
 
-    // 🔥 LA SOLUCIÓN: SI LA CANCHA ES NUEVA Y NO EXISTE, DESBLOQUEAMOS EL PANEL PARA QUE PUEDA CONFIGURARLA
     if (!snap.exists()) {
         toast('Bienvenido. Configura los datos de tu complejo en Ajustes.', false);
         document.getElementById('nombre-cancha-admin').textContent = 'Complejo Nuevo (Sin Configurar)';
@@ -110,19 +139,17 @@ async function cargarPerfil() {
 
         bannerEstado.style.background = 'rgba(255, 193, 7, 0.15)';
         bannerEstado.style.border = '1px solid var(--warning)';
-        bannerEstado.innerHTML = `<div><strong style="color:var(--warning); display:block;">Paso 1: Configura tu Negocio</strong><span style="font-size:0.8rem; color:#ccc;">Ve a la pestaña "Ajustes", llena tus datos y dale a "Guardar Configuración".</span></div>`;
+        bannerEstado.innerHTML = `<div><strong style="color:var(--warning); display:block;">Paso 1: Configura tu Negocio</strong><span style="font-size:0.8rem; color:#ccc;">Ve a la pestaña "Ajustes", llena tus datos y dale a "Guardar Ajustes Generales".</span></div>`;
 
-        // DEBEMOS DEVOLVER TRUE PARA QUE EL RESTO DEL PANEL NO SE CONGELE
         return true;
     }
 
-    // Si ya existe, cargamos los datos normales
     canchaActual = { id: snap.id, ...snap.data() };
 
     const estadoPub = canchaActual.estadoPublicacion || 'draft';
     if (estadoPub === 'draft') {
         bannerEstado.style.background = 'rgba(255, 193, 7, 0.15)'; bannerEstado.style.border = '1px solid var(--warning)';
-        bannerEstado.innerHTML = `<div><strong style="color:var(--warning); display:block;">Cancha en Borrador (No visible)</strong><span style="font-size:0.8rem; color:#ccc;">Termina de configurar tus datos y solicita la publicación.</span></div><button id="btn-solicitar-pub" class="btn hero-primary" style="width:auto; padding:8px 15px;">Solicitar Revisión</button>`;
+        bannerEstado.innerHTML = `<div><strong style="color:var(--warning); display:block;">Cancha en Borrador (No visible)</strong><span style="font-size:0.8rem; color:#ccc;">Termina de configurar tus datos y solicita la publicación.</span></div><button id="btn-solicitar-pub" class="btn btn-primary" style="width:auto; padding:8px 15px;">Solicitar Revisión</button>`;
         document.getElementById('btn-solicitar-pub').onclick = async () => {
             if (!canchaActual.configurado) return toast('Guarda la configuración de tu cancha primero.', true);
             await updateDoc(doc(db, 'canchas', usuarioActual.uid), { estadoPublicacion: 'pending_review' });
@@ -136,9 +163,31 @@ async function cargarPerfil() {
         bannerEstado.innerHTML = `<div><strong style="color:var(--primary-green); display:block;">Cancha Publicada y Activa</strong><span style="font-size:0.8rem; color:#ccc;">Tu negocio es visible para todos los jugadores.</span></div>`;
     }
 
-    const campos = { 'admin-nombre': canchaActual.nombre, 'admin-whatsapp': canchaActual.whatsapp, 'admin-descripcion': canchaActual.descripcion, 'admin-precio': canchaActual.precio, 'admin-ubicacion-texto': canchaActual.ubicacionTexto, 'admin-ubicacion-link': canchaActual.ubicacionLink, 'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60 };
+    const campos = {
+        'admin-nombre': canchaActual.nombre,
+        'admin-whatsapp': canchaActual.whatsapp,
+        'admin-descripcion': canchaActual.descripcion,
+        'admin-precio': canchaActual.precio,
+        'admin-ubicacion-texto': canchaActual.ubicacionTexto,
+        'admin-ubicacion-link': canchaActual.ubicacionLink,
+        'admin-hora-inicio': canchaActual.horaApertura || canchaActual.horaInicio || '16:00',
+        'admin-hora-cierre': canchaActual.horaCierre || canchaActual.horaFin || '23:00',
+        'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60
+    };
     Object.entries(campos).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v ?? '' });
-    // 🔥 NUEVO: Cargar configuración de pagos y adelantos
+
+    // Cargar Tarifa Nocturna Diferenciada en Ajustes del Complejo
+    const elCheckNoche = document.getElementById('admin-check-noche');
+    const elCajaNoche = document.getElementById('admin-caja-noche');
+    const elHoraNoche = document.getElementById('admin-hora-noche');
+    const elPrecioNoche = document.getElementById('admin-precio-noche');
+    if (elCheckNoche) {
+        elCheckNoche.checked = !!canchaActual.tienePrecioNoche;
+        if (elCajaNoche) elCajaNoche.style.display = elCheckNoche.checked ? 'flex' : 'none';
+    }
+    if (elHoraNoche) elHoraNoche.value = canchaActual.horaInicioNoche || '18:00';
+    if (elPrecioNoche) elPrecioNoche.value = canchaActual.precioNoche ?? '';
+
     if (canchaActual.metodosPago) {
         const elMetodos = document.getElementById('admin-pago-metodos');
         if (elMetodos) elMetodos.value = canchaActual.metodosPago.textoMetodos || '';
@@ -156,7 +205,6 @@ async function cargarPerfil() {
         if (elMontoSena) elMontoSena.value = canchaActual.metodosPago.montoSena || '';
     }
 
-    // Sincronizar Departamento y Distrito con los selectores
     const dpto = canchaActual.departamento || '';
     const dist = canchaActual.distrito ?? canchaActual.ciudad ?? '';
     const elDpto = document.getElementById('admin-cancha-departamento') || document.getElementById('admin-departamento');
@@ -169,14 +217,12 @@ async function cargarPerfil() {
         elDist.value = dist;
     }
 
-    // Poblar Formato y Superficie
     const parsed = parsearTipoCancha(canchaActual);
     const elFormato = document.getElementById('admin-formato');
     if (elFormato) elFormato.value = parsed.formato;
     const elSuperficie = document.getElementById('admin-superficie');
     if (elSuperficie) elSuperficie.value = parsed.superficie;
 
-    // Compatibilidad en caso de selector antiguo
     const elTipos = document.getElementById('admin-tipos');
     if (elTipos) { if (elTipos.tagName === 'SELECT') { elTipos.value = `Fútbol ${parsed.formato} - ${parsed.superficie}`; } else { const checkBoxes = elTipos.querySelectorAll('input[type=checkbox]'); checkBoxes.forEach(c => { c.checked = (canchaActual.tiposCancha || []).includes(c.value); }); } }
 
@@ -190,7 +236,6 @@ async function cargarEspacios() {
     const snap = await getDocs(q);
     espacios = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // Lista completa con la cancha principal y las secundarias
     const todos = [
         {
             id: usuarioActual.uid,
@@ -198,23 +243,32 @@ async function cargarEspacios() {
             tipoCancha: (Array.isArray(canchaActual.tiposCancha) ? canchaActual.tiposCancha[0] : canchaActual.tipoCancha) || 'Sintética',
             horaApertura: canchaActual.horaApertura || '16:00',
             horaCierre: canchaActual.horaCierre || '23:00',
-            horariosSemana: canchaActual.horariosSemana
+            horariosSemana: canchaActual.horariosSemana,
+            precio: Number(canchaActual.precio || 0),
+            tienePrecioNoche: !!canchaActual.tienePrecioNoche,
+            horaInicioNoche: canchaActual.horaInicioNoche || '18:00',
+            precioNoche: Number(canchaActual.precioNoche || 0)
         },
         ...espacios.map(e => ({
             id: e.id,
             nombre: e.nombre,
             tipoCancha: e.tipo || 'Fútbol',
-            horaApertura: e.horaApertura || '16:00',
-            horaCierre: e.horaCierre || '23:00',
-            horariosSemana: canchaActual.horariosSemana
+            horaApertura: e.horaApertura || canchaActual.horaApertura || '16:00',
+            horaCierre: e.horaCierre || canchaActual.horaCierre || '23:00',
+            horariosSemana: canchaActual.horariosSemana,
+            precio: Number(e.precio ?? canchaActual.precio ?? 0),
+            tienePrecioNoche: e.tienePrecioNoche !== undefined ? !!e.tienePrecioNoche : !!canchaActual.tienePrecioNoche,
+            horaInicioNoche: e.horaInicioNoche || canchaActual.horaInicioNoche || '18:00',
+            precioNoche: Number(e.precioNoche ?? canchaActual.precioNoche ?? 0)
         }))
     ];
 
     if (!espacioSeleccionado || !todos.find(x => x.id === espacioSeleccionado.id)) {
         espacioSeleccionado = todos[0];
+    } else {
+        espacioSeleccionado = todos.find(x => x.id === espacioSeleccionado.id) || todos[0];
     }
 
-    // Dibujar el selector único en el contenedor
     let container = document.getElementById('dashboard-space-selector');
     if (!container) {
         const header = document.querySelector('.schedule-head');
@@ -226,12 +280,11 @@ async function cargarEspacios() {
     }
 
     if (container) {
-        // Inyecta únicamente el dropdown selector estilizado
         container.innerHTML = `
             <div style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.05); padding:6px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.1);">
                 <i class="ph-bold ph-soccer-ball" style="color:var(--primary-green, #2ecc71); font-size:1.1rem;"></i>
                 <select id="select-cancha-activa" style="background:transparent; color:#fff; border:none; font-size:0.9rem; font-weight:bold; outline:none; cursor:pointer;">
-                    ${todos.map(s => `<option value="${s.id}" ${s.id === espacioSeleccionado.id ? 'selected' : ''} style="background:#111; color:#fff;">${s.nombre} (${s.tipoCancha})</option>`).join('')}
+                    ${todos.map(s => `<option value="${escapeHTML(s.id)}" ${s.id === espacioSeleccionado.id ? 'selected' : ''} style="background:#111; color:#fff;">${escapeHTML(s.nombre)} (${escapeHTML(s.tipoCancha)})</option>`).join('')}
                 </select>
             </div>
         `;
@@ -242,8 +295,15 @@ async function cargarEspacios() {
         });
     }
 }
+
+window.addEventListener('chalacapp:espacios-updated', async () => {
+    if (usuarioActual && canchaActual) {
+        await cargarEspacios();
+        await actualizarDia();
+    }
+});
+
 async function cargarReservas() {
-    // 🔥 Ahora lee la cancha seleccionada en el menú, no solo la principal
     const idCancha = String(espacioSeleccionado?.id || canchaActual?.id || usuarioActual.uid);
     const fISO = fechaISO(fechaSeleccionada);
     const [snapReservas, snapBloqueos] = await Promise.all([
@@ -254,21 +314,27 @@ async function cargarReservas() {
     bloqueosDia = snapBloqueos.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-function generarSlots() { const h = horarioDelDia(); if (!h.activo) return []; const a = minutos(h.apertura), b0 = minutos(h.cierre), step = Number(canchaActual?.intervaloMinutos || canchaActual?.duracionReserva || 60); if (a === null || b0 === null || !Number.isFinite(step) || step <= 0) return []; let b = b0 <= a ? b0 + 1440 : b0; const out = []; for (let t = a; t < b; t += step) { const real = t % 1440; out.push({ hora: `${String(Math.floor(real / 60)).padStart(2, '0')}:${String(real % 60).padStart(2, '0')}`, min: real }) } return out }
-function reservaPara(hora) { return reservasDia.find(r => r.horaInicio === hora && !['cancelada', 'cancelado', 'cancelled'].includes(normalizar(r.estado))) } function esBloqueoManual(r) { return r?.tipo === 'bloqueo_manual' || r?.estado === 'bloqueada' }
 function estadoReserva(r) {
     const st = normalizar(r?.estado || 'pending');
     if (['pendiente', 'pending'].includes(st)) return 'pending';
-    if (['confirmada', 'confirmed'].includes(st)) return 'confirmed';
+    if (['confirmada', 'confirmed', 'sena_pagada', 'seña_pagada'].includes(st)) return 'confirmed';
     if (['cancelada', 'cancelado', 'cancelled'].includes(st)) return 'cancelled';
     if (['completada', 'completed', 'jugada'].includes(st)) return 'completed';
     if (['rechazada', 'rejected'].includes(st)) return 'rejected';
     return 'pending';
 }
 
+function esBloqueoManual(r) { return r?.tipo === 'bloqueo_manual' || r?.estado === 'bloqueada' }
+
 function renderSchedule() {
     const box = document.getElementById('admin-schedule'); if (!box) return;
-    const slots = calcularDisponibilidad(canchaActual, fechaSeleccionada, reservasDia, bloqueosDia);
+    const canchaConfig = {
+        ...canchaActual,
+        horaApertura: espacioSeleccionado?.horaApertura || canchaActual?.horaApertura || '16:00',
+        horaCierre: espacioSeleccionado?.horaCierre || canchaActual?.horaCierre || '23:00',
+        horariosSemana: espacioSeleccionado?.horariosSemana || canchaActual?.horariosSemana
+    };
+    const slots = calcularDisponibilidad(canchaConfig, fechaSeleccionada, reservasDia, bloqueosDia);
 
     if (!slots.length) {
         box.innerHTML = '<div class="admin-empty"><i class="ph-bold ph-moon"></i><b>Cancha cerrada o sin horarios</b><span>Revisa tu configuración semanal.</span></div>';
@@ -281,11 +347,12 @@ function renderSchedule() {
         if (s.estado === 'bloqueado') cls = 'occupied blocked';
         if (s.estado === 'pasado') cls += ' past';
         const label = s.estado === 'reservado' ? 'Reservada' : s.estado === 'bloqueado' ? 'Bloqueada' : s.estado === 'pasado' ? 'Pasado' : 'Disponible';
+        const precioTurno = calcularPrecioTurnoAdmin(espacioSeleccionado, s.hora);
 
-        return `<button type="button" class="admin-slot ${cls}" data-slot="${s.hora}" data-reserva="${s.reserva?.id || ''}" data-bloqueo="${s.bloqueo?.id || ''}" title="Clic para gestionar">
-            <span class="slot-time">${s.hora}</span>
-            <span class="slot-status"><i class="ph-fill ph-circle"></i>${label}</span>
-            ${s.reserva ? `<small>${s.reserva.nombre || 'Cliente'}</small>` : ''}
+        return `<button type="button" class="admin-slot ${cls}" data-slot="${escapeHTML(s.hora)}" data-reserva="${escapeHTML(s.reserva?.id || '')}" data-bloqueo="${escapeHTML(s.bloqueo?.id || '')}" title="Clic para gestionar">
+            <span class="slot-time">${escapeHTML(s.hora)}</span>
+            <span class="slot-status"><i class="ph-fill ph-circle"></i>${label} · S/ ${precioTurno}</span>
+            ${s.reserva ? `<small>${escapeHTML(s.reserva.nombre || 'Cliente')}</small>` : ''}
         </button>`;
     }).join('');
 
@@ -298,7 +365,11 @@ function actualizarKpis(slots) {
     document.getElementById('reservas-hoy').textContent = clientes.length;
     document.getElementById('reservas-count').textContent = clientes.length;
     document.getElementById('horas-libres').textContent = Math.max(0, slots.filter(s => s.estado === 'disponible').length);
-    document.getElementById('ingresos-hoy').textContent = money(clientes.reduce((sum, r) => sum + Number(r.precio ?? canchaActual?.precio ?? 0), 0));
+    const totalIngresos = clientes.reduce((sum, r) => {
+        const monto = Number(r.precioTotal ?? r.precio ?? calcularPrecioTurnoAdmin(espacioSeleccionado, r.horaInicio) ?? 0);
+        return sum + monto;
+    }, 0);
+    document.getElementById('ingresos-hoy').textContent = money(totalIngresos);
 }
 
 async function gestionarSlot(hora, reservaId, bloqueoId) {
@@ -327,7 +398,6 @@ async function gestionarSlot(hora, reservaId, bloqueoId) {
         : confirm(`¿Bloquear manualmente las ${hora}?\nNadie podrá reservar este horario.`);
     if (!confirmarBloqueo) return;
     try {
-        // 🔥 Aplica el bloqueo a la cancha específica que estés viendo
         const idCancha = espacioSeleccionado?.id || canchaActual?.id || usuarioActual?.uid;
         await addDoc(collection(db, 'bloqueos'), { 
             ownerUid: usuarioActual.uid, 
@@ -359,12 +429,14 @@ function abrirGestionReserva(r) {
             <div class="manage-actions" id="manage-buttons" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>`;
         document.body.appendChild(m);
-        m.querySelector('[data-close]').onclick = () => m.classList.remove('mostrar');
+        m.querySelector('[data-close]').onclick = () => {
+            m.classList.remove('mostrar');
+            m.style.display = '';
+        };
     }
     m.dataset.reservaId = r?.id ?? '';
     const st = estadoReserva(r);
 
-    // SEMÁFORO DE COLORES
     const statusLabels = {
         'pending': '<span style="color:#f1c40f; background:rgba(241,196,15,0.1); padding:4px 8px; border-radius:6px; border:1px solid #f1c40f; display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-hourglass-medium"></i> Pendiente de Validar</span>',
         'confirmed': '<span style="color:var(--primary-green); background:rgba(46,204,113,0.1); padding:4px 8px; border-radius:6px; border:1px solid var(--primary-green); display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-check-circle"></i> Confirmada</span>',
@@ -380,41 +452,50 @@ function abrirGestionReserva(r) {
     const clienteNombre = r.nombre || r.usuarioNombre || 'Cliente';
     const clienteTelefono = r.telefono || r.usuarioTelefono || 'Sin teléfono';
     const jugadorUid = r.usuarioUid || r.uid || '';
+    const importeTotal = Number(r.precioTotal ?? r.precio ?? calcularPrecioTurnoAdmin(espacioSeleccionado, r.horaInicio));
 
     m.querySelector('#manage-title').textContent = `${clienteNombre} · ${r.horaInicio || '--:--'}`;
     m.querySelector('#manage-summary').innerHTML = `
-        <div><span>Fecha:</span> <b>${fechaTexto(fechaSeleccionada)}</b></div>
-        <div><span>Jugador:</span> <b style="color:var(--primary-green); cursor:pointer; text-decoration:underline; display:inline-flex; align-items:center; gap:5px;" onclick="window.abrirReputacionJugador('${jugadorUid}', '${clienteNombre.replace(/'/g, "\\'")}', '${clienteTelefono}')" title="Ver Inteligencia de Reputación del Jugador"><i class="ph-bold ph-shield-check"></i> ${clienteNombre}</b></div>
-        <div><span>WhatsApp:</span> <b>${clienteTelefono}</b></div>
-        <div><span>Importe Total:</span> <b>${money(r.precio ?? canchaActual?.precio)}</b></div>
+        <div><span>Fecha:</span> <b>${escapeHTML(fechaTexto(fechaSeleccionada))}</b></div>
+        <div><span>Jugador:</span> <b style="color:var(--primary-green); cursor:pointer; text-decoration:underline; display:inline-flex; align-items:center; gap:5px;" id="btn-ver-reputacion-jugador" title="Ver Inteligencia de Reputación del Jugador"><i class="ph-bold ph-shield-check"></i> ${escapeHTML(clienteNombre)}</b></div>
+        <div><span>WhatsApp:</span> <b>${escapeHTML(clienteTelefono)}</b></div>
+        <div><span>Importe Total:</span> <b>${money(importeTotal)}</b></div>
         <div><span>Adelanto (Seña):</span> <b>${senaBadge}</b></div>
-        <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;"><span>Estado Reserva:</span> <b>${statusLabels[st] ?? st}</b></div>
+        <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;"><span>Estado Reserva:</span> <b>${statusLabels[st] ?? escapeHTML(st)}</b></div>
     `;
+
+    const btnRep = m.querySelector('#btn-ver-reputacion-jugador');
+    if (btnRep) {
+        btnRep.onclick = () => window.abrirReputacionJugador(jugadorUid, clienteNombre, clienteTelefono);
+    }
 
     const btnContainer = m.querySelector('#manage-buttons');
     btnContainer.innerHTML = '';
 
     if (r.telefono) {
         const phone = String(r.telefono).replace(/\D/g, '');
-        btnContainer.innerHTML += `<a href="https://wa.me/${phone}?text=${encodeURIComponent(`Hola ${r.nombre}, te escribimos de ${canchaActual.nombre} sobre tu reserva de hoy a las ${r.horaInicio}.`)}" target="_blank" class="btn" style="background:#25D366; color:#000;"><i class="ph-bold ph-whatsapp-logo"></i> Chatear por WhatsApp</a>`;
+        const cleanPhone = phone.startsWith('51') ? phone : `51${phone}`;
+        btnContainer.innerHTML += `<a href="https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hola ${clienteNombre}, te escribimos de ${canchaActual.nombre} sobre tu reserva de hoy a las ${r.horaInicio}.`)}" target="_blank" class="btn btn-outline" style="width:100%; border-color:#25D366 !important; color:#25D366 !important;"><i class="ph-bold ph-whatsapp-logo"></i> Chatear por WhatsApp</a>`;
     }
 
     if (st === 'pending') {
-        // 🔥 AQUÍ ESTÁ EL BLINDAJE: PASAMOS EL ID DE LA RESERVA DIRECTAMENTE Y EL BOTÓN
         btnContainer.innerHTML += `
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'confirmed', this)" class="btn hero-primary" style="background:#2ecc71; color:#000; border:none;"><i class="ph-bold ph-check-circle"></i> Validar Yape y Aprobar</button>
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'rejected', this)" class="btn" style="background:rgba(231,76,60,0.1); color:var(--danger); border:1px solid var(--danger);"><i class="ph-bold ph-x-circle"></i> Rechazar (Pago Falso / Sin Pago)</button>
+            <button onclick="window.cambiarEstadoGestion('${escapeHTML(r.id)}', 'confirmed', this)" class="btn btn-primary" style="width:100%;"><i class="ph-bold ph-check-circle"></i> Validar Yape y Aprobar</button>
+            <button onclick="window.cambiarEstadoGestion('${escapeHTML(r.id)}', 'rejected', this)" class="btn btn-danger" style="width:100%;"><i class="ph-bold ph-x-circle"></i> Rechazar (Pago Falso / Sin Pago)</button>
         `;
     } else if (st === 'confirmed') {
         btnContainer.innerHTML += `
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'completed', this)" class="btn" style="background:#a777e8; color:#fff; border:none;"><i class="ph-bold ph-flag-checkered"></i> Marcar como Partido Jugado</button>
-            <button onclick="window.cambiarEstadoGestion('${r.id}', 'cancelled', this)" class="btn btn-outline" style="color:var(--danger); border-color:var(--danger);"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
+            <button onclick="window.cambiarEstadoGestion('${escapeHTML(r.id)}', 'completed', this)" class="btn btn-primary" style="width:100%;"><i class="ph-bold ph-flag-checkered"></i> Marcar como Partido Jugado</button>
+            <button onclick="window.cambiarEstadoGestion('${escapeHTML(r.id)}', 'cancelled', this)" class="btn btn-danger" style="width:100%;"><i class="ph-bold ph-x"></i> Cancelar Reserva</button>
         `;
     } else if (st === 'completed') {
         if (!r.calificadoPorDueno) {
-            btnContainer.innerHTML += `
-                <button onclick="abrirCalificacionJugador('${r.usuarioUid}', '${r.id}', '${clienteNombre}')" class="btn" style="background:#f1c40f; color:#000; border:none; margin-top:10px; font-weight:700;"><i class="ph-fill ph-star"></i> Calificar y Reportar Equipo</button>
-            `;
+            const btnRate = document.createElement('button');
+            btnRate.className = 'btn btn-primary';
+            btnRate.style.cssText = 'background:#f1c40f; border-color:#f1c40f; color:#000; margin-top:10px; font-weight:800; width:100%;';
+            btnRate.innerHTML = '<i class="ph-fill ph-star"></i> Calificar y Reportar Equipo';
+            btnRate.onclick = () => window.abrirCalificacionJugador(jugadorUid, r.id, clienteNombre);
+            btnContainer.appendChild(btnRate);
         } else {
             btnContainer.innerHTML += `<div style="text-align:center; color:#aaa; font-size:0.85rem;"><i class="ph-fill ph-check-circle" style="color:#2ecc71;"></i> Ya calificaste a este equipo.</div>`;
         }
@@ -423,7 +504,7 @@ function abrirGestionReserva(r) {
     m.setAttribute('aria-hidden', 'false');
 }
 
-// NUEVO: SISTEMA DE CALIFICACIÓN DE JUGADOR (DEL DUEÑO AL JUGADOR)
+// SISTEMA DE CALIFICACIÓN DE JUGADOR (DEL DUEÑO AL JUGADOR)
 window.abrirCalificacionJugador = function (jugadorUid, reservaId, nombreJugador) {
     if (!jugadorUid) return toast("Este jugador no tiene un perfil registrado en la app.", true);
 
@@ -450,7 +531,7 @@ window.abrirCalificacionJugador = function (jugadorUid, reservaId, nombreJugador
 
             <div id="rate-tags-container" style="display:none; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:25px;"></div>
 
-            <button id="btn-submit-player-rate" class="btn hero-primary" style="width:100%;" disabled><i class="ph-bold ph-check"></i> Enviar Reporte</button>
+            <button id="btn-submit-player-rate" class="btn btn-primary" style="width:100%;" disabled><i class="ph-bold ph-check"></i> Enviar Reporte</button>
         </div>`;
         document.body.appendChild(m);
     }
@@ -483,7 +564,7 @@ window.abrirCalificacionJugador = function (jugadorUid, reservaId, nombreJugador
             const labels = { 1: "Pésimos / Peligrosos", 2: "Mal comportamiento", 3: "Regulares", 4: "Buenos", 5: "¡Excelentes!" };
             label.textContent = labels[selRating];
 
-            tagsCont.innerHTML = TAGS_DUENO[selRating].map(t => `<div class="tag-chip" data-text="${t.text}" style="padding:6px 12px; border:1px solid #555; border-radius:20px; font-size:0.8rem; color:#aaa; cursor:pointer;"><i class="ph-bold ${t.icon}"></i> ${t.text}</div>`).join('');
+            tagsCont.innerHTML = TAGS_DUENO[selRating].map(t => `<div class="tag-chip" data-text="${escapeHTML(t.text)}" style="padding:6px 12px; border:1px solid #555; border-radius:20px; font-size:0.8rem; color:#aaa; cursor:pointer;"><i class="ph-bold ${t.icon}"></i> ${escapeHTML(t.text)}</div>`).join('');
             tagsCont.style.display = 'flex';
 
             tagsCont.querySelectorAll('.tag-chip').forEach(chip => {
@@ -573,7 +654,6 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
             }
         }
 
-        // Si no tiene UID o no se encontró el perfil, intentar buscar por teléfono
         if (!perfilData && telefonoFallback) {
             const telLimpio = String(telefonoFallback).replace(/\D/g, '');
             if (telLimpio.length >= 8) {
@@ -590,7 +670,6 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
             }
         }
 
-        // Consultar reseñas del jugador en resenas_jugadores
         let resenas = [];
         if (targetUid) {
             try {
@@ -602,7 +681,6 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
             }
         }
 
-        // Calcular promedio de estrellas y agrupar etiquetas
         let sumaEstrellas = 0;
         let countValidas = 0;
         const tagCounts = {};
@@ -628,7 +706,6 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
         const posMostrar = perfilData?.posicion || 'JUG';
         const ciudadMostrar = perfilData?.ciudad || 'Lima';
 
-        // Ordenar etiquetas por frecuencia
         const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 
         let estrellasIconos = '';
@@ -642,24 +719,22 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
 
         bodyEl.innerHTML = `
             <div style="display:flex; align-items:center; gap:14px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:16px; border-radius:14px; margin-bottom:16px;">
-                <img src="${fotoMostrar}" style="width:54px; height:54px; aspect-ratio:1/1; object-fit:cover; border-radius:50%; border:2px solid var(--primary-green); flex-shrink:0;" alt="${nombreMostrar}">
+                <img src="${escapeHTML(fotoMostrar)}" style="width:54px; height:54px; aspect-ratio:1/1; object-fit:cover; border-radius:50%; border:2px solid var(--primary-green); flex-shrink:0;" alt="${escapeHTML(nombreMostrar)}">
                 <div style="min-width:0; flex:1;">
-                    <h3 style="margin:0; font-size:1.15rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${nombreMostrar}</h3>
-                    <p style="margin:3px 0 0; font-size:0.8rem; color:#aaa;">${posMostrar} · ${ciudadMostrar} · 📞 ${telMostrar}</p>
+                    <h3 style="margin:0; font-size:1.15rem; color:#fff; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(nombreMostrar)}</h3>
+                    <p style="margin:3px 0 0; font-size:0.8rem; color:#aaa;">${escapeHTML(posMostrar)} · ${escapeHTML(ciudadMostrar)} · 📞 ${escapeHTML(telMostrar)}</p>
                 </div>
             </div>
 
-            <!-- PROMEDIO GLOBAL -->
             <div style="background:rgba(241,196,15,0.08); border:1px solid rgba(241,196,15,0.25); border-radius:14px; padding:16px; margin-bottom:16px; text-align:center;">
                 <span style="font-size:0.75rem; color:#f1c40f; font-weight:800; text-transform:uppercase; letter-spacing:0.5px;">PROMEDIO DE REPUTACIÓN GLOBAL</span>
                 <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0;">
                     ${countValidas > 0 ? estrellasIconos : '<span style="color:#888; font-size:0.9rem;">Sin estrellas aún</span>'}
-                    <span style="font-size:1.4rem; font-weight:900; color:#fff; margin-left:6px;">${estrellasTxt}</span>
+                    <span style="font-size:1.4rem; font-weight:900; color:#fff; margin-left:6px;">${escapeHTML(estrellasTxt)}</span>
                 </div>
                 <span style="font-size:0.8rem; color:#aaa;">Basado en <b>${countValidas}</b> evaluación(es) realizada(s) por administradores de canchas</span>
             </div>
 
-            <!-- ETIQUETAS OTORGADAS POR OTROS DUEÑOS -->
             <div style="margin-bottom:18px;">
                 <h4 style="margin:0 0 8px; font-size:0.92rem; color:#fff; display:flex; align-items:center; gap:6px;">
                     <i class="ph-bold ph-tag" style="color:var(--primary-green);"></i> Etiquetas otorgadas por dueños de canchas:
@@ -673,14 +748,13 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
                         const icon = esNegativa ? 'ph-warning' : 'ph-check';
                         return `
                             <span style="background:${bg}; border:1px solid ${border}; color:${color}; padding:5px 10px; border-radius:8px; font-size:0.8rem; font-weight:700; display:inline-flex; align-items:center; gap:5px;">
-                                <i class="ph-bold ${icon}"></i> ${tag} <b style="opacity:0.85;">(${count})</b>
+                                <i class="ph-bold ${icon}"></i> ${escapeHTML(tag)} <b style="opacity:0.85;">(${count})</b>
                             </span>
                         `;
                     }).join('') : '<p style="color:#666; font-size:0.82rem; margin:0;">Aún no cuenta con etiquetas de comportamiento de otros dueños.</p>'}
                 </div>
             </div>
 
-            <!-- HISTORIAL DE RESEÑAS DETALLADAS -->
             <div>
                 <h4 style="margin:0 0 10px; font-size:0.92rem; color:#fff; display:flex; align-items:center; gap:6px;">
                     <i class="ph-bold ph-buildings" style="color:#f1c40f;"></i> Evaluaciones registradas:
@@ -689,11 +763,11 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
                     ${resenas.length > 0 ? resenas.map(r => `
                         <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); padding:10px 14px; border-radius:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                                <b style="color:#fff; font-size:0.85rem;"><i class="ph-fill ph-map-pin"></i> ${r.nombreCancha || 'Cancha aliada'}</b>
-                                <span style="color:#f1c40f; font-weight:800; font-size:0.82rem;">⭐ ${r.rating || 0}/5</span>
+                                <b style="color:#fff; font-size:0.85rem;"><i class="ph-fill ph-map-pin"></i> ${escapeHTML(r.nombreCancha || 'Cancha aliada')}</b>
+                                <span style="color:#f1c40f; font-weight:800; font-size:0.82rem;">⭐ ${Number(r.rating || 0)}/5</span>
                             </div>
                             <div style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
-                                ${Array.isArray(r.tags) ? r.tags.map(t => `<span style="font-size:0.72rem; color:#aaa; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">${t}</span>`).join('') : ''}
+                                ${Array.isArray(r.tags) ? r.tags.map(t => `<span style="font-size:0.72rem; color:#aaa; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">${escapeHTML(t)}</span>`).join('') : ''}
                             </div>
                         </div>
                     `).join('') : '<p style="color:#666; font-size:0.82rem; margin:0;">No hay reseñas registradas aún para este usuario.</p>'}
@@ -707,13 +781,10 @@ window.abrirReputacionJugador = async function (jugadorUid, nombreFallback, tele
     }
 };
 
-
-// 🔥 BLINDAJE DE LA FUNCIÓN DE CAMBIAR ESTADO (CON TRADUCCIÓN VISUAL Y ESTADO DE CARGA)
 window.cambiarEstadoGestion = async function (reservaId, nuevoEstado, btnEl = null) {
     reservaId = reservaId || document.getElementById('modal-gestion-reserva')?.dataset?.reservaId;
     if (!reservaId) return;
 
-    // DICCIONARIO PARA TRADUCIR EL ESTADO SOLO EN LA ALERTA VISUAL
     const nombresEstados = {
         'confirmed': 'CONFIRMADA',
         'completed': 'JUGADA',
@@ -721,10 +792,8 @@ window.cambiarEstadoGestion = async function (reservaId, nuevoEstado, btnEl = nu
         'rejected': 'RECHAZADA'
     };
 
-    // Si encuentra la traducción la usa, si no, usa el original en mayúsculas
     const estadoAmigable = nombresEstados[nuevoEstado] || nuevoEstado.toUpperCase();
 
-    // MOSTRAMOS LA ALERTA EN ESPAÑOL
     const ok = window.customConfirm 
         ? await window.customConfirm(`¿Estás seguro de cambiar la reserva a estado: ${estadoAmigable}?`)
         : confirm(`¿Estás seguro de cambiar la reserva a estado: ${estadoAmigable}?`);
@@ -738,7 +807,6 @@ window.cambiarEstadoGestion = async function (reservaId, nuevoEstado, btnEl = nu
     }
 
     try {
-        // PERO GUARDAMOS EN INGLÉS EN LA BASE DE DATOS PARA QUE EL SISTEMA NO FALLE
         const updateData = { estado: nuevoEstado, updatedAt: serverTimestamp() };
 
         if (nuevoEstado === 'confirmed') {
@@ -782,13 +850,14 @@ function renderReservas() {
 
         const clienteNombre = r.nombre || r.usuarioNombre || 'Cliente';
         const clienteTelefono = r.telefono || r.usuarioTelefono || 'Sin teléfono';
+        const montoTurno = Number(r.precioTotal ?? r.precio ?? calcularPrecioTurnoAdmin(espacioSeleccionado, r.horaInicio));
 
         return `<article class="reservation-row">
-            <div class="reservation-time">${r.horaInicio || '--:--'}<small>${r.horaFin && r.horaFin !== r.horaInicio ? `hasta ${r.horaFin}` : '1 hora'}</small></div>
-            <div class="reservation-client"><b>${clienteNombre}</b><span>${clienteTelefono} · ${label}</span></div>
+            <div class="reservation-time">${escapeHTML(r.horaInicio || '--:--')}<small>S/ ${montoTurno}</small></div>
+            <div class="reservation-client"><b>${escapeHTML(clienteNombre)}</b><span>${escapeHTML(clienteTelefono)} · ${label}</span></div>
             <div class="reservation-actions">
-                <button class="reservation-state ${colorClass}" data-id="${r.id}">${icon} ${label}</button>
-                <button class="icon-btn release-reservation" data-id="${r.id}" title="Gestionar"><i class="ph-bold ph-sliders-horizontal"></i></button>
+                <button class="reservation-state ${colorClass}" data-id="${escapeHTML(r.id)}">${icon} ${label}</button>
+                <button class="icon-btn release-reservation" data-id="${escapeHTML(r.id)}" title="Gestionar"><i class="ph-bold ph-sliders-horizontal"></i></button>
             </div>
         </article>`;
     }).join('');
@@ -800,7 +869,7 @@ function renderReservas() {
 }
 
 function renderWeeklyHours(data) { const box = document.getElementById('weekly-hours'); if (!box) return; box.innerHTML = dias.slice(1).concat(['domingo']).map(dia => { const h = data[dia] || { activo: true, apertura: '16:00', cierre: '23:00' }; return `<div class="day-config-row" data-day="${dia}"><label class="day-toggle"><input type="checkbox" class="day-active" ${h.activo ? 'checked' : ''}><span class="toggle-ui"></span><b>${dia.charAt(0).toUpperCase() + dia.slice(1)}</b></label><div class="day-times"><input type="time" class="day-open" value="${h.apertura || '16:00'}"><span>—</span><input type="time" class="day-close" value="${h.cierre || '23:00'}"></div><span class="day-state">${h.activo ? 'Abierto' : 'Cerrado'}</span></div>` }).join(''); box.querySelectorAll('.day-config-row').forEach(row => { const cb = row.querySelector('.day-active'), update = () => { row.classList.toggle('closed', !cb.checked); row.querySelector('.day-state').textContent = cb.checked ? 'Abierto' : 'Cerrado'; row.querySelectorAll('.day-open,.day-close').forEach(x => x.disabled = !cb.checked) }; cb.addEventListener('change', update); update() }) }
-function readWeeklyHours() { const out = {}; document.querySelectorAll('.day-config-row').forEach(row => { out[row.dataset.day] = { activo: row.querySelector('.day-active').checked, apertura: row.querySelector('.day-open').value, cierre: row.querySelector('.day-close').value } }); return out }
+function readWeeklyHours() { const rows = document.querySelectorAll('.day-config-row'); if (!rows.length) return canchaActual?.horariosSemana || {}; const out = {}; rows.forEach(row => { out[row.dataset.day] = { activo: row.querySelector('.day-active').checked, apertura: row.querySelector('.day-open').value, cierre: row.querySelector('.day-close').value } }); return out }
 const btnHoy = document.getElementById('btn-hoy'); btnHoy?.addEventListener('click', () => { fechaSeleccionada = new Date(); fechaSeleccionada.setHours(0, 0, 0, 0); renderWeekDays(); actualizarDia() }); document.getElementById('btn-copiar-lunes')?.addEventListener('click', () => { const lunes = document.querySelector('.day-config-row[data-day="lunes"]'); if (!lunes) return; document.querySelectorAll('.day-config-row').forEach(row => { if (row === lunes) return; row.querySelector('.day-active').checked = lunes.querySelector('.day-active').checked; row.querySelector('.day-open').value = lunes.querySelector('.day-open').value; row.querySelector('.day-close').value = lunes.querySelector('.day-close').value; row.querySelector('.day-active').dispatchEvent(new Event('change')) }); toast('Horario del lunes copiado a los demás días.') });
 async function subirImagen(archivo, ruta) { 
     if (!archivo) return null; 
@@ -829,14 +898,12 @@ if (formPerfil) {
         e.preventDefault();
         if (!usuarioActual) return;
 
-        // 🔥 EL BLINDAJE: Capturamos el botón para que NUNCA vuelva a ser 'undefined'
         const btn = document.getElementById('btn-guardar-admin');
         if (!btn) {
             console.error("No se encontró el botón de guardar en el HTML");
             return;
         }
 
-        // Lectura dinámica de Formato y Superficie con validación
         const elFormato = document.getElementById('admin-formato');
         const elSuperficie = document.getElementById('admin-superficie');
 
@@ -861,7 +928,6 @@ if (formPerfil) {
         try {
             const uid = usuarioActual.uid;
 
-            // Subida blindada de archivos
             let fotos = [];
             try {
                 const files = [document.getElementById('admin-foto1')?.files?.[0], document.getElementById('admin-foto2')?.files?.[0], document.getElementById('admin-foto3')?.files?.[0]].filter(Boolean);
@@ -882,11 +948,9 @@ if (formPerfil) {
                 console.warn('Advertencia al subir logo:', errLogo);
             }
 
-            // Lectura compatible y segura de campos
             const valDpto = (document.getElementById('admin-cancha-departamento')?.value || document.getElementById('admin-departamento')?.value || '').trim();
             const valDist = (document.getElementById('admin-cancha-distrito')?.value || document.getElementById('admin-distrito')?.value || '').trim();
 
-            // 🔥 NUEVO: Capturar datos de pagos y seña
             const metodosPagoConfig = {
                 textoMetodos: document.getElementById('admin-pago-metodos')?.value?.trim() || '',
                 numero: document.getElementById('admin-pago-numero')?.value?.trim() || '',
@@ -895,6 +959,10 @@ if (formPerfil) {
                 montoSena: Number(document.getElementById('admin-monto-sena')?.value || 0)
             };
 
+            const tienePrecioNoche = !!document.getElementById('admin-check-noche')?.checked;
+            const horaInicioNoche = document.getElementById('admin-hora-noche')?.value || '18:00';
+            const precioNoche = tienePrecioNoche ? Number(document.getElementById('admin-precio-noche')?.value || 0) : 0;
+
             const dataToSave = {
                 ownerUid: uid || '',
                 nombre: (document.getElementById('admin-nombre')?.value || '').trim(),
@@ -902,7 +970,10 @@ if (formPerfil) {
                 distrito: valDist,
                 whatsapp: (document.getElementById('admin-whatsapp')?.value || '').trim(),
                 precio: Number(document.getElementById('admin-precio')?.value || 0),
-                metodosPago: metodosPagoConfig, // 🔥 SE GUARDA LA CONFIGURACIÓN AQUÍ
+                tienePrecioNoche,
+                horaInicioNoche,
+                precioNoche,
+                metodosPago: metodosPagoConfig,
                 tiposCancha: tipos || ['Fútbol 7 - Sintética'],
                 formatoJugadores: formato || 7,
                 superficie: superficie || 'Sintética',
@@ -926,6 +997,8 @@ if (formPerfil) {
             const cleanData = sanitizeForFirestore(dataToSave);
             await setDoc(doc(db, 'canchas', uid), cleanData, { merge: true });
             canchaActual = { ...canchaActual, ...cleanData };
+            await cargarEspacios();
+            window.dispatchEvent(new CustomEvent('chalacapp:cancha-updated'));
             document.getElementById('mensaje-exito')?.classList.add('show');
             toast('¡Configuración guardada exitosamente!');
 
@@ -948,26 +1021,67 @@ if (formPerfil) {
 
 function init() {
     document.getElementById('fecha-hoy').textContent = fechaTexto(fechaSeleccionada); renderWeekDays();
-    const salirSeguro = async (e) => { e.preventDefault(); e.target.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Saliendo...'; try { await signOut(auth); window.location.href = 'login.html'; } catch (error) { console.error("Error al salir:", error); } };
+    const salirSeguro = async (e) => { e.preventDefault(); e.currentTarget.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Saliendo...'; try { await signOut(auth); window.location.replace('login.html'); } catch (error) { console.error("Error al salir:", error); } };
     const btnSalir1 = document.getElementById('btn-cerrar-sesion'), btnSalir2 = document.getElementById('btn-logout');
     if (btnSalir1) btnSalir1.addEventListener('click', salirSeguro); if (btnSalir2) btnSalir2.addEventListener('click', salirSeguro);
 
+    // MÓDULO 5: AUTH GUARD ESTRICTO EN ADMIN.HTML
     onAuthStateChanged(auth, async u => {
-        if (!u) { window.location.href = 'login.html'; return; }
-        const userDoc = await getDoc(doc(db, 'usuarios', u.uid));
-        if (userDoc.exists()) {
-            const data = userDoc.data();
-            if (data.rol === "admin" && data.estado === "approved") { window.location.href = "admin-panel.html"; return; }
-            if (data.estado === "pending") { document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#080b0a;color:white;text-align:center;padding:20px;"><i class="ph-bold ph-clock" style="font-size:60px;color:var(--warning);"></i><h2 style="margin:20px 0 10px;">Tu cuenta está en revisión</h2><p style="color:var(--text-muted);margin-bottom:20px;">Un administrador debe aprobar tu solicitud antes de configurar tu cancha.</p><button onclick="window.location.href='login.html'" class="btn btn-outline" style="width:auto;">Volver al inicio</button></div>`; auth.signOut(); return; }
-            if (data.estado === "rejected") { document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#080b0a;color:white;text-align:center;padding:20px;"><i class="ph-bold ph-x-circle" style="font-size:60px;color:var(--danger);"></i><h2 style="margin:20px 0 10px;">Solicitud Rechazada</h2><p style="color:var(--text-muted);margin-bottom:20px;">Lamentablemente tu solicitud para registrar la cancha ha sido rechazada.</p><button onclick="window.location.href='login.html'" class="btn btn-outline" style="width:auto;">Volver al inicio</button></div>`; auth.signOut(); return; }
+        if (!u) {
+            window.location.replace('index.html');
+            return;
         }
-        usuarioActual = u; document.getElementById('admin-user-label').textContent = u.email || '';
         try {
+            const [userDoc, canchaDoc] = await Promise.all([
+                getDoc(doc(db, 'usuarios', u.uid)),
+                getDoc(doc(db, 'canchas', u.uid))
+            ]);
+
+            if (userDoc.exists()) {
+                const data = userDoc.data();
+                if (data.rol === "admin" && data.estado === "approved") {
+                    window.location.replace("admin-panel.html");
+                    return;
+                }
+                if (data.rol !== "owner" && !canchaDoc.exists()) {
+                    // Usuario normal (jugador) intentando entrar por URL directa
+                    window.location.replace("index.html");
+                    return;
+                }
+                if (data.estado === "pending") {
+                    document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#080b0a;color:white;text-align:center;padding:20px;"><i class="ph-bold ph-clock" style="font-size:60px;color:var(--warning);"></i><h2 style="margin:20px 0 10px;">Tu cuenta está en revisión</h2><p style="color:var(--text-muted);margin-bottom:20px;">Un administrador debe aprobar tu solicitud antes de configurar tu cancha.</p><button onclick="window.location.href='index.html'" class="btn btn-outline" style="width:auto;">Volver al inicio</button></div>`;
+                    document.body.style.opacity = '1';
+                    document.body.style.pointerEvents = 'auto';
+                    await signOut(auth);
+                    return;
+                }
+                if (data.estado === "rejected") {
+                    document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#080b0a;color:white;text-align:center;padding:20px;"><i class="ph-bold ph-x-circle" style="font-size:60px;color:var(--danger);"></i><h2 style="margin:20px 0 10px;">Solicitud Rechazada</h2><p style="color:var(--text-muted);margin-bottom:20px;">Lamentablemente tu solicitud para registrar la cancha ha sido rechazada.</p><button onclick="window.location.href='index.html'" class="btn btn-outline" style="width:auto;">Volver al inicio</button></div>`;
+                    document.body.style.opacity = '1';
+                    document.body.style.pointerEvents = 'auto';
+                    await signOut(auth);
+                    return;
+                }
+            } else if (!canchaDoc.exists()) {
+                // Sin documento de usuario owner ni cancha asociada -> redirigir inmediatamente
+                window.location.replace('index.html');
+                return;
+            }
+
+            // Autorizado como owner: revelar el panel
+            document.body.style.opacity = '1';
+            document.body.style.pointerEvents = 'auto';
+
+            usuarioActual = u;
+            document.getElementById('admin-user-label').textContent = u.email || '';
             if (await cargarPerfil()) {
-                await cargarEspacios(); // Enciende el selector de múltiples canchas
+                await cargarEspacios();
                 actualizarDia();
             }
-        } catch (e) { console.error(e); toast('No se pudo cargar el panel.', true); }
+        } catch (e) {
+            console.error(e);
+            window.location.replace('index.html');
+        }
     });
 
     const adminFormatoInput = document.getElementById('admin-formato');

@@ -1,6 +1,17 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, serverTimestamp, query, where, orderBy, onSnapshot, deleteDoc, runTransaction, updateDoc, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { initLegalCompliance } from "./legal.js";
+initLegalCompliance();
+
+function escapeHTML(str) {
+    return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 // 2. CONFIGURACIÓN E INICIALIZACIÓN
 const firebaseConfig = {
@@ -143,6 +154,20 @@ const esInicio = () => { const p = window.location.pathname.replace(/\/$/, ''); 
 const fechaHoy = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` };
 const minutos = t => { const m = String(t || '').match(/^(\d{1,2}):(\d{2})$/); return m ? Number(m[1]) * 60 + Number(m[2]) : null };
 
+function calcularPrecioTurno(c, hora) {
+    const precioDia = Number(c?.precio || 0);
+    const tieneNoche = !!c?.tienePrecioNoche && Number(c?.precioNoche) > 0;
+    const horaInicioNoche = c?.horaInicioNoche || '18:00';
+    if (tieneNoche && hora) {
+        const minSlot = minutos(hora);
+        const minNoche = minutos(horaInicioNoche);
+        if (minSlot !== null && minNoche !== null && minSlot >= minNoche) {
+            return { precio: Number(c.precioNoche), esNoche: true };
+        }
+    }
+    return { precio: precioDia, esNoche: false };
+}
+
 const slotsDeCancha = (c, reservas = [], bloqueos = [], fechaReq = null) => {
     let fReq = fechaReq;
     let res = reservas;
@@ -184,7 +209,8 @@ const slotsDeCancha = (c, reservas = [], bloqueos = [], fechaReq = null) => {
         const real = t % 1440;
         const label = `${String(Math.floor(real / 60)).padStart(2, '0')}:${String(real % 60).padStart(2, '0')}`;
         const isBlocked = isPastDay || ocupadas.has(real) || bloqueadas.has(real) || (isToday && real <= actual);
-        out.push({ label, blocked: isBlocked });
+        const infoPrecio = calcularPrecioTurno(c, label);
+        out.push({ label, blocked: isBlocked, precio: infoPrecio.precio, esNoche: infoPrecio.esNoche });
     }
     return out;
 };
@@ -332,10 +358,14 @@ if (esInicio()) {
                 const infoCanchas = c.cantidadCanchas > 1 ? ` · <span style="color:#aaa; font-weight:normal;">${c.cantidadCanchas} canchas${c.tiposMulti ? ` (${c.tiposMulti})` : ''}</span>` : (c.tiposMulti ? ` · <span style="color:#aaa; font-weight:normal;">${c.tiposMulti}</span>` : '');
                 const subtituloCanchas = `<p class="court-canchas-subtitulo" style="margin: 6px 0 0 0; font-size: 0.84rem;">${textoTurnos}${infoCanchas}</p>`;
 
-                const linkCancha = c.slug ? `cancha.html?slug=${encodeURIComponent(c.slug)}` : `cancha.html?id=${c.id}`;
-                contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${portada}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${logo}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="${linkCancha}" style="text-decoration:none; color:inherit;"><h3>${c.nombre || 'Cancha'}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${c.ubicacionTexto || 'Ubicación'}${c.departamento ? ` · ${c.departamento}` : (obtenerCiudad(c) ? ` · ${obtenerCiudad(c)}` : '')}${dist}</p>
+                const linkCancha = c.slug ? `cancha.html?slug=${encodeURIComponent(c.slug)}` : `cancha.html?id=${encodeURIComponent(c.id)}`;
+                const tieneTarifaNoche = !!c.tienePrecioNoche && Number(c.precioNoche) > 0;
+                const precioHtmlCard = tieneTarifaNoche
+                    ? `<strong class="price-day-night-pill">☀️ Día: S/ ${Number(c.precio || 0)} | 🌙 Noche: S/ ${Number(c.precioNoche)} <small>(desde ${escapeHTML(c.horaInicioNoche || '18:00')})</small></strong>`
+                    : `<strong>S/ ${escapeHTML(c.precio ?? 'Consultar')} <small>/ hr</small></strong>`;
+                contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${escapeHTML(portada)}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${escapeHTML(logo)}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="${linkCancha}" style="text-decoration:none; color:inherit;"><h3>${escapeHTML(c.nombre || 'Cancha')}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${escapeHTML(c.ubicacionTexto || 'Ubicación')}${c.departamento ? ` · ${escapeHTML(c.departamento)}` : (obtenerCiudad(c) ? ` · ${escapeHTML(obtenerCiudad(c))}` : '')}${dist}</p>
              ${subtituloCanchas}
-             <div class="court-meta" style="margin-top:8px;"><span><i class="ph-bold ph-soccer-ball"></i> ${c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol')}</span><strong>S/ ${c.precio ?? 'Consultar'} <small>/ hr</small></strong></div><button class="court-action" data-court-id="${c.id}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`;
+             <div class="court-meta" style="margin-top:8px; flex-wrap:wrap; gap:6px;"><span><i class="ph-bold ph-soccer-ball"></i> ${escapeHTML(c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol'))}</span>${precioHtmlCard}</div><button class="court-action btn btn-primary" data-court-id="${escapeHTML(c.id)}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`;
             });
 
             contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
@@ -521,12 +551,17 @@ async function pintarDisponibilidadModal(c, fechaElegida) {
             </div>
         ` : '';
 
+        const leyendaTarifa = (c.tienePrecioNoche && Number(c.precioNoche) > 0)
+            ? `<div class="price-day-night-pill" style="margin-bottom:12px; width:100%; justify-content:center;"><span class="day-part">☀️ Día: S/ ${Number(c.precio || 0)}</span><span>|</span><span class="night-part">🌙 Noche: S/ ${Number(c.precioNoche)} (desde ${escapeHTML(c.horaInicioNoche || '18:00')})</span></div>`
+            : '';
+
         box.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:10px; border:1px solid var(--border-color);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px 15px; border-radius:10px; border:1px solid var(--border-color);">
                 <label style="display:flex; flex-direction:column; font-size:0.8rem; color:var(--text-muted); font-weight:bold;">FECHA DE RESERVA<input type="date" id="input-fecha-modal" value="${fReq}" min="${fechaHoy()}" style="background:transparent; border:none; color:#fff; font-size:1.1rem; font-weight:bold; outline:none; margin-top:4px; font-family:inherit; color-scheme:dark; cursor:pointer;"></label>
                 <div style="text-align:right;"><span style="font-size:0.75rem; color:var(--text-muted); font-weight:bold;">DISPONIBLES</span><strong style="font-size:1.3rem; color:var(--primary-green); display:block;">${libres}</strong></div>
             </div>
-            <div class="modal-slots">${slots.length ? slots.map(s => `<button type="button" class="modal-slot ${s.blocked ? 'blocked' : ''}" data-book-court="${c.id}" data-book-time="${s.label}" data-book-date="${fReq}" ${s.blocked ? 'disabled' : ''}>${s.label}</button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
+            ${leyendaTarifa}
+            <div class="modal-slots">${slots.length ? slots.map(s => `<button type="button" class="modal-slot ${s.blocked ? 'blocked' : ''} ${s.esNoche ? 'slot-night' : ''}" data-book-court="${escapeHTML(c.id)}" data-book-time="${escapeHTML(s.label)}" data-book-date="${escapeHTML(fReq)}" data-book-price="${s.precio}" ${s.blocked ? 'disabled' : ''}><span>${escapeHTML(s.label)}</span><small class="slot-price-tag">${s.blocked ? 'Ocupada' : `${s.esNoche ? '🌙' : '☀️'} S/ ${s.precio}`}</small></button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
             ${botonPerfilCompleto}
         `;
         document.getElementById('input-fecha-modal')?.addEventListener('change', (e) => pintarDisponibilidadModal(c, e.target.value));
@@ -541,32 +576,31 @@ function abrirReserva(c, hora, fechaElegida) {
     const modal = document.getElementById('modal-reserva');
     if (!modal) return;
 
+    const { precio: precioTurno, esNoche } = calcularPrecioTurno(c, hora);
+
     document.getElementById('booking-cancha-nombre').textContent = c.nombreCancha || c.nombre || 'Cancha';
     const dateObj = new Date(`${fechaElegida}T12:00:00`);
-    document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora}`;
+    document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora} — ${esNoche ? '🌙 Noche' : '☀️ Día'}: S/ ${precioTurno}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
 
-    // 🔥 LÓGICA DEL AVISO DE ADELANTO Y MÉTODOS DE PAGO (CON MAYOR ESPACIO)
     const metodos = c.metodosPago || {};
     let avisoHTML = '';
 
-    // Le añadimos margin-bottom: 25px al bloque del aviso para darle más aire respecto al botón de confirmar
     if (metodos.requiereSena && metodos.montoSena > 0) {
         avisoHTML = `
-            <div style="background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:15px; border-radius:10px; margin-top:25px; margin-bottom:15px; color:#f1c40f;">
-                <b style="display:block; margin-bottom:8px; font-size:1.05rem;"><i class="ph-bold ph-warning-circle"></i> Esta cancha exige un adelanto de S/ ${metodos.montoSena}</b>
-                <span style="font-size:0.9rem; color:#ccc; line-height:1.5;">Al confirmar, deberás transferir este monto al dueño a través de: <b>${metodos.textoMetodos || 'Yape/Plin'}</b> (Cuenta/Número: <b>${metodos.numero || 'No especificado'}</b> a nombre de <b>${metodos.titular || 'el dueño'}</b>) y enviarle el comprobante por WhatsApp para validar tu reserva.</span>
+            <div style="background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:15px; border-radius:10px; margin-top:14px; margin-bottom:12px; color:#f1c40f;">
+                <b style="display:block; margin-bottom:6px; font-size:0.98rem;"><i class="ph-bold ph-warning-circle"></i> Tarifa del turno: S/ ${precioTurno} · Adelanto requerido: S/ ${Number(metodos.montoSena)}</b>
+                <span style="font-size:0.85rem; color:#ccc; line-height:1.5;">Al confirmar, transfiere el adelanto a través de: <b>${escapeHTML(metodos.textoMetodos || 'Yape/Plin')}</b> (Cuenta/Número: <b>${escapeHTML(metodos.numero || 'No especificado')}</b> a nombre de <b>${escapeHTML(metodos.titular || 'el dueño')}</b>) y envía el comprobante por WhatsApp.</span>
             </div>
         `;
     } else {
         avisoHTML = `
-            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); padding:12px; border-radius:10px; margin-top:25px; margin-bottom:15px; color:#2ecc71; font-size:0.9rem; text-align:center;">
-                <i class="ph-bold ph-check-circle"></i> <b>Reserva Directa:</b> El pago total se realiza en el local.
+            <div style="background:rgba(46,204,113,0.1); border:1px solid rgba(46,204,113,0.3); padding:12px; border-radius:10px; margin-top:14px; margin-bottom:12px; color:#2ecc71; font-size:0.88rem; text-align:center;">
+                <i class="ph-bold ph-check-circle"></i> <b>Reserva Directa (Total: S/ ${precioTurno}):</b> El pago se realiza en el complejo deportivo.
             </div>
         `;
     }
 
-    // Invertimos el orden en el HTML del modal para asegurar que el botón vaya ABAJO del mensaje
     const bookingStatus = document.getElementById('booking-status');
     const btnConfirmar = document.getElementById('btn-confirmar-reserva');
 
@@ -575,12 +609,13 @@ function abrirReserva(c, hora, fechaElegida) {
         const modalInner = bookingStatus.parentNode;
         modalInner.appendChild(bookingStatus);
         modalInner.appendChild(btnConfirmar);
-        btnConfirmar.style.marginTop = '15px';
+        btnConfirmar.style.marginTop = '12px';
     }
 
     modal.dataset.courtId = c.id;
     modal.dataset.time = hora;
     modal.dataset.date = fechaElegida;
+    modal.dataset.price = String(precioTurno);
     modal.classList.add('mostrar');
     modal.setAttribute('aria-hidden', 'false');
 }
@@ -589,13 +624,18 @@ async function confirmarReserva() {
     const modal = document.getElementById('modal-reserva');
     const id = modal?.dataset.courtId, hora = modal?.dataset.time, fechaReq = modal?.dataset.date;
     const nombre = document.getElementById('booking-nombre')?.value.trim(), telefono = document.getElementById('booking-telefono')?.value.trim(), btn = document.getElementById('btn-confirmar-reserva');
+    const chkTerminos = document.getElementById('booking-terminos');
 
     if (!id || !hora || !fechaReq || !nombre || !telefono) {
         window.toast('Completa tu nombre y teléfono para continuar.', 'warning');
         return;
     }
 
-    // Validación contra fechas y horarios pasados
+    if (chkTerminos && !chkTerminos.checked) {
+        window.toast('Debes aceptar los Términos de Uso y la Política de Privacidad (Ley N° 29733).', 'warning');
+        return;
+    }
+
     const hoy = fechaHoy();
     if (fechaReq < hoy) {
         window.toast('No puedes reservar en fechas pasadas.', 'warning');
@@ -619,25 +659,56 @@ async function confirmarReserva() {
         } catch (e) { return; }
     }
 
-    const c = canchasGlobales.find(x => x.id === id);
+    const c = canchasGlobales.find(x => String(x.id) === String(id)) || { id };
+    const { precio: precioTurnoCalculado } = calcularPrecioTurno(c, hora);
+    const precioFinal = Number(modal?.dataset.price ?? precioTurnoCalculado ?? c?.precio ?? 0);
+
     if (btn) {
         btn.disabled = true;
-        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Confirmando horario...';
+        btn.innerHTML = '<i class="ph-bold ph-spinner-gap ph-spin"></i> Verificando disponibilidad...';
     }
-    window.toast('Confirmando horario...', 'info');
+    window.toast('Verificando disponibilidad en tiempo real...', 'info');
+
+    // ID determinístico anti-colisión
     const key = `${id}_${fechaReq}_${hora.replace(':', '')}`;
+    const keyConPuntos = `${id}_${fechaReq}_${hora}`;
 
     try {
-        // Verificar si existe bloqueo manual de administración
-        const snapBloq = await getDocs(query(collection(db, 'bloqueos'), where('canchaId', '==', id), where('fecha', '==', fechaReq)));
+        // MÓDULO 3: Consulta rápida en tiempo real + transacción atómica contra Race Conditions
+        const [snapBloq, snapResActivas] = await Promise.all([
+            getDocs(query(collection(db, 'bloqueos'), where('canchaId', '==', id), where('fecha', '==', fechaReq))),
+            getDocs(query(collection(db, 'reservas'), where('canchaId', '==', id), where('fecha', '==', fechaReq)))
+        ]);
+
         const estaBloqueado = snapBloq.docs.some(d => d.data().horaInicio === hora);
         if (estaBloqueado) {
             throw new Error('SLOT_BLOQUEADO');
         }
 
+        const conflictoPrevio = snapResActivas.docs.some(d => {
+            const rData = d.data();
+            const mismoHorario = (rData.horaInicio || rData.hora) === hora;
+            const estadoNorm = normalizar(rData.estado || 'pendiente');
+            const esActiva = !['cancelada', 'cancelado', 'cancelled', 'rejected', 'rechazada'].includes(estadoNorm);
+            return mismoHorario && esActiva;
+        });
+
+        if (conflictoPrevio) {
+            throw new Error('SLOT_OCUPADO');
+        }
+
         await runTransaction(db, async tx => {
-            const ref = doc(db, 'reservas', key), existing = await tx.get(ref);
-            if (existing.exists() && !['cancelada', 'cancelado', 'cancelled', 'rejected'].includes(normalizar(existing.data().estado))) throw new Error('SLOT_OCUPADO');
+            const ref = doc(db, 'reservas', key);
+            const refAlt = doc(db, 'reservas', keyConPuntos);
+            const [existing, existingAlt] = await Promise.all([tx.get(ref), tx.get(refAlt)]);
+
+            if (existing.exists() && !['cancelada', 'cancelado', 'cancelled', 'rejected', 'rechazada'].includes(normalizar(existing.data().estado))) {
+                throw new Error('SLOT_OCUPADO');
+            }
+            if (existingAlt.exists() && !['cancelada', 'cancelado', 'cancelled', 'rejected', 'rechazada'].includes(normalizar(existingAlt.data().estado))) {
+                throw new Error('SLOT_OCUPADO');
+            }
+
             tx.set(ref, {
                 id: key,
                 canchaId: id,
@@ -651,9 +722,11 @@ async function confirmarReserva() {
                 horaInicio: hora,
                 horaFin: hora,
                 estado: 'pendiente',
-                precio: Number(c?.precio || 0),
+                precio: precioFinal,
+                precioTotal: precioFinal,
                 metodoPago: 'pendiente',
                 senaPagada: false,
+                terminosAceptados: true,
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp()
             });
@@ -662,7 +735,7 @@ async function confirmarReserva() {
         document.getElementById('booking-status').innerHTML = `
             <div style="background:rgba(241,196,15,0.15); border:1px solid #f1c40f; padding:15px; border-radius:8px; color:#f1c40f; margin-top:15px; text-align:center;">
                 <i class="ph-fill ph-hourglass-high" style="font-size: 2rem;"></i><br>
-                <b style="font-size:1.1rem; display:block; margin:5px 0;">Reserva en estado PENDIENTE</b>
+                <b style="font-size:1.1rem; display:block; margin:5px 0;">Reserva registrada (S/ ${precioFinal}) · PENDIENTE</b>
                 <span>Abre WhatsApp, envía la foto del pago/seña y espera que la cancha valide tu reserva.</span>
             </div>`;
 
@@ -670,14 +743,18 @@ async function confirmarReserva() {
         const telOwner = formatWsp(c?.whatsapp);
 
         if (telOwner) {
-            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en la APP:\n*Nombre:* ${nombre}\n*Fecha:* ${fechaReq}\n*Hora:* ${hora}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
-            setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); }, 2500);
+            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en CHALACAPP:\n*Nombre:* ${nombre}\n*Fecha:* ${fechaReq}\n*Hora:* ${hora}\n*Tarifa del turno:* S/ ${precioFinal}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
+            setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); }, 2200);
         }
     } catch (e) {
         if (e.message === 'SLOT_BLOQUEADO') {
             window.toast('El horario fue bloqueado por mantenimiento o administración.', 'error');
+            cerrarReserva();
+            await pintarDisponibilidadModal(c, fechaReq);
         } else if (e.message === 'SLOT_OCUPADO') {
-            window.toast('Ese horario acaba de ser reservado.', 'error');
+            window.toast('¡Ups! Otro jugador reservó este horario hace unos milisegundos. Actualizando horarios...', 'warning');
+            cerrarReserva();
+            await pintarDisponibilidadModal(c, fechaReq);
         } else {
             console.error("Error al registrar reserva:", e);
             window.toast('No pudimos registrar la reserva. Intenta de nuevo.', 'error');
@@ -1300,19 +1377,23 @@ if (window.location.pathname.includes('cancha.html')) {
                     const snapEspacios = await getDocs(qEspacios);
                     snapEspacios.forEach(d => {
                         const data = d.data();
+                        const tienePrecioNocheHeredado = data.tienePrecioNoche !== undefined ? !!data.tienePrecioNoche : !!cPrincipal.tienePrecioNoche;
+                        const horaInicioNocheHeredada = data.horaInicioNoche || cPrincipal.horaInicioNoche || '18:00';
+                        const precioNocheHeredado = Number(data.precioNoche ?? cPrincipal.precioNoche ?? 0);
                         mapCanchas.set(d.id, {
                             id: d.id,
+                            ...data,
                             nombreCancha: data.nombre || 'Cancha Individual',
                             tipo: data.tipo || 'Fútbol',
                             precio: Number(data.precio || cPrincipal.precio || 0),
-                            // 🔥 HERENCIA AUTOMÁTICA DE HORARIOS: Si el espacio no especifica, usa los del complejo
                             horaApertura: data.horaApertura || aperturaBase,
                             horaCierre: data.horaCierre || cierreBase,
-                            precioNoche: data.precioNoche,
-                            tienePrecioNoche: data.tienePrecioNoche,
-                            horaInicioNoche: data.horaInicioNoche,
+                            tienePrecioNoche: tienePrecioNocheHeredado,
+                            horaInicioNoche: horaInicioNocheHeredada,
+                            precioNoche: precioNocheHeredado,
+                            metodosPago: data.metodosPago || cPrincipal.metodosPago || {},
+                            whatsapp: data.whatsapp || cPrincipal.whatsapp || '',
                             isOpen: true,
-                            ...data,
                             nombreComplejo: cPrincipal.nombre,
                             usuarioUid: ownerUid
                         });
@@ -1364,7 +1445,10 @@ if (window.location.pathname.includes('cancha.html')) {
                 canchasGlobales.forEach((c) => {
                     const nombreMostrar = c.nombreCancha || c.nombre || 'Cancha';
                     const deporteMostrar = c.tipo || 'Fútbol';
-                    const precioMostrar = c.precio ? `S/ ${c.precio}` : 'Consultar';
+                    const tieneNoche = !!c.tienePrecioNoche && Number(c.precioNoche) > 0;
+                    const precioDetalleHtml = tieneNoche
+                        ? `<span class="price-day-night-pill">☀️ Día: S/ ${Number(c.precio || 0)} | 🌙 Noche: S/ ${Number(c.precioNoche)} (desde ${escapeHTML(c.horaInicioNoche || '18:00')})</span>`
+                        : `<span style="color:var(--primary-green); font-weight:800; font-size:0.95rem;">${c.precio ? `S/ ${Number(c.precio)}` : 'Consultar'} <small style="color:#777; font-weight:normal;">/ hr</small></span>`;
                     const deporteIcono = deporteMostrar.toLowerCase().includes('voley') || deporteMostrar.toLowerCase().includes('vóley')
                         ? 'ph-volleyball'
                         : deporteMostrar.toLowerCase().includes('basket') || deporteMostrar.toLowerCase().includes('básquet')
@@ -1378,17 +1462,16 @@ if (window.location.pathname.includes('cancha.html')) {
                                 <span style="display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:10px; background:rgba(46,204,113,0.12); color:var(--primary-green); font-size:1.2rem;">
                                     <i class="ph-bold ${deporteIcono}"></i>
                                 </span>
-                                <h4 style="margin:0; color:#fff; font-size:1.1rem; font-weight:700;">${nombreMostrar}</h4>
+                                <h4 style="margin:0; color:#fff; font-size:1.1rem; font-weight:700;">${escapeHTML(nombreMostrar)}</h4>
                             </div>
-                            <div style="display:flex; align-items:center; gap:10px; font-size:0.88rem; color:#aaa;">
-                                <span>${deporteMostrar}</span>
+                            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:0.88rem; color:#aaa;">
+                                <span>${escapeHTML(deporteMostrar)}</span>
                                 <span>·</span>
-                                <span style="color:var(--primary-green); font-weight:800; font-size:0.95rem;">${precioMostrar}</span>
-                                <small style="color:#777;">/ hr</small>
+                                ${precioDetalleHtml}
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <button class="btn btn-reservar-dinamico" data-id="${c.id}" style="padding:10px 18px; font-weight:800; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px;">
+                            <button class="btn btn-primary btn-reservar-dinamico" data-id="${escapeHTML(c.id)}" style="padding:10px 18px; font-weight:800; font-size:0.88rem; display:inline-flex; align-items:center; gap:6px; width:auto;">
                                 <i class="ph-bold ph-calendar-plus"></i> Reservar
                             </button>
                         </div>

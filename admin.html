@@ -124,9 +124,38 @@
             border-color: var(--primary-green, #2ecc71);
             box-shadow: 0 0 0 2px rgba(46,204,113,0.2);
         }
+
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .admin-tabs::-webkit-scrollbar { display: none; }
+        .admin-tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #cfd8d3;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            box-shadow: none;
+        }
+        .admin-tab-btn.active {
+            background: #2ecc71;
+            border-color: #2ecc71;
+            color: #080B0A;
+            box-shadow: 0 4px 16px rgba(46, 204, 113, 0.28);
+        }
     </style>
 </head>
-<body class="admin-page">
+<body class="admin-page" style="opacity: 0; pointer-events: none; transition: opacity 0.25s ease;">
 
 <header class="topbar">
     <a class="brand" href="index.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
@@ -135,7 +164,7 @@
     </a>
     <div class="admin-header-right">
         <span id="admin-user-label" style="color: #aaa; font-size: 0.85rem; font-weight: bold;"></span>
-        <button id="btn-cerrar-sesion" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.85rem;"><i class="ph-bold ph-sign-out"></i> Salir</button>
+        <button id="btn-cerrar-sesion" class="btn btn-danger" style="padding: 6px 12px; font-size: 0.82rem; width: auto;"><i class="ph-bold ph-sign-out"></i> <span>Salir</span></button>
     </div>
 </header>
 
@@ -206,20 +235,20 @@
 
         <div class="dashboard-grid">
             <section class="schedule-card card" style="height: fit-content; position: relative; overflow: hidden;">
-    <div class="schedule-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-        <div>
-            <span class="mini-label">CUADRÍCULA DE CANCHAS</span>
-            <h2 id="schedule-title" style="margin:0; display: flex; align-items: center; gap: 8px;">
-                Disponibilidad
-            </h2>
-        </div>
-        <div id="dashboard-space-selector"></div>
-    </div>
+                <div class="schedule-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span class="mini-label">CUADRÍCULA DE CANCHAS</span>
+                        <h2 id="schedule-title" style="margin:0; display: flex; align-items: center; gap: 8px;">
+                            Disponibilidad
+                        </h2>
+                    </div>
+                    <div id="dashboard-space-selector"></div>
+                </div>
 
-    <div id="admin-schedule" class="admin-schedule">
-        <div class="admin-loading"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando horarios...</div>
-    </div>
-</section>
+                <div id="admin-schedule" class="admin-schedule">
+                    <div class="admin-loading"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando horarios...</div>
+                </div>
+            </section>
 
             <section class="card reservations-card" style="height: fit-content;">
                 <div class="section-title" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px;">
@@ -244,7 +273,7 @@
                     <h2 style="margin: 0 0 5px 0;">Administrar Losas y Canchas</h2>
                     <p style="color: #aaa; font-size: 0.85rem; margin: 0;">Configura precios diferentes para el día y la noche por cada espacio.</p>
                 </div>
-                <button id="btn-nuevo-espacio" type="button" class="btn hero-primary" style="width: auto;"><i class="ph-bold ph-plus"></i> Nueva Cancha</button>
+                <button id="btn-nuevo-espacio" type="button" class="btn btn-primary" style="width: auto;"><i class="ph-bold ph-plus"></i> Nueva Cancha</button>
             </div>
             <div id="lista-espacios" class="spaces-grid" style="margin-top: 20px;">
                 <div class="admin-loading"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando espacios...</div>
@@ -258,7 +287,7 @@
                     <h2 style="margin: 0 0 5px 0;">Abonados y Campeonatos</h2>
                     <p style="color: #aaa; font-size: 0.85rem; margin: 0;">Añade clientes fijos semanales o bloquea la cancha por eventos largos.</p>
                 </div>
-                <button id="btn-nuevo-evento" type="button" class="btn hero-primary" style="background:#3498db; width: auto;"><i class="ph-bold ph-plus"></i> Nuevo Bloqueo</button>
+                <button id="btn-nuevo-evento" type="button" class="btn btn-outline" style="width: auto;"><i class="ph-bold ph-plus"></i> Nuevo Bloqueo</button>
             </div>
             <div id="lista-eventos" class="events-list" style="margin-top: 20px;">
                 <div class="admin-loading">Cargando eventos...</div>
@@ -267,7 +296,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 3: CONFIGURACIÓN PESADA (OCULTA)       -->
+    <!-- TAB 3: CONFIGURACIÓN PESADA (AJUSTES)      -->
     <!-- ========================================== -->
     <div id="tab-configuracion" class="tab-content">
         <section id="configuracion-cancha" class="card config-card">
@@ -306,26 +335,42 @@
                 </div>
                 
                 <div class="form-group">
-    <label for="admin-cancha-departamento">Departamento del Complejo</label>
-    <select id="admin-cancha-departamento" required class="admin-input">
-        <option value="">Selecciona departamento...</option>
-    </select>
-</div>
+                    <label for="admin-cancha-departamento">Departamento del Complejo</label>
+                    <select id="admin-cancha-departamento" required class="admin-input">
+                        <option value="">Selecciona departamento...</option>
+                    </select>
+                </div>
 
-<div class="form-group">
-    <label for="admin-cancha-distrito">Distrito / Provincia</label>
-    <select id="admin-cancha-distrito" required disabled class="admin-input">
-        <option value="">Primero elige un departamento</option>
-    </select>
-</div>
+                <div class="form-group">
+                    <label for="admin-cancha-distrito">Distrito / Provincia</label>
+                    <select id="admin-cancha-distrito" required disabled class="admin-input">
+                        <option value="">Primero elige un departamento</option>
+                    </select>
+                </div>
 
-                <div style="display:flex; gap:15px; margin-bottom:25px;">
-                    <label style="flex:1; color:#aaa; font-size:0.85rem;">WhatsApp de Reservas
+                <div style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
+                    <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">WhatsApp de Reservas
                         <input type="tel" id="admin-whatsapp" placeholder="987654321" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
                     </label>
-                    <label style="flex:1; color:#aaa; font-size:0.85rem;">Precio Base (S/ por hora)
-        <input type="number" id="admin-precio" placeholder="Ej. 60" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
-    </label>
+                    <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem;">Precio Base Día (S/ por hora)
+                        <input type="number" id="admin-precio" placeholder="Ej. 60" min="0" required style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                    </label>
+                </div>
+
+                <!-- MOTOR DE TARIFA DINÁMICA: DÍA VS. NOCHE (COMPLEJO PRINCIPAL) -->
+                <div style="background: rgba(241,196,15,0.04); border: 1px dashed rgba(241,196,15,0.38); padding: 16px 20px; border-radius: 12px; margin-bottom: 25px;">
+                    <label style="display:flex; align-items:center; gap:10px; color:#fff; font-size:0.9rem; font-weight:700; cursor:pointer; margin:0;">
+                        <input type="checkbox" id="admin-check-noche" style="width:18px; height:18px; accent-color:#f1c40f; margin:0;" onchange="document.getElementById('admin-caja-noche').style.display = this.checked ? 'flex' : 'none'">
+                        <span>🌙 ¿Aplicar tarifa nocturna diferenciada?</span>
+                    </label>
+                    <div id="admin-caja-noche" style="display:none; gap:15px; flex-wrap:wrap; margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.1);">
+                        <label style="flex:1; min-width:140px; color:#aaa; font-size:0.85rem; margin:0;">Hora inicio noche
+                            <input type="time" id="admin-hora-noche" value="18:00" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.15); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                        </label>
+                        <label style="flex:1; min-width:140px; color:#f1c40f; font-size:0.85rem; font-weight:bold; margin:0;">Precio Noche (S/)
+                            <input type="number" id="admin-precio-noche" min="0" placeholder="Ej. 90" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid #f1c40f; border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Pagos -->
@@ -388,7 +433,7 @@
                 </div>
 
                 <!-- MANTENIENDO COMPATIBILIDAD CON TUS SCRIPTS DE COORDENADAS -->
-                <div class="form-two" style="display:flex; gap:15px; margin-bottom:15px; flex-wrap:wrap; display:none;">
+                <div class="form-two" style="display:none; gap:15px; margin-bottom:15px; flex-wrap:wrap;">
                     <label style="flex:1; min-width:140px;">Latitud <input type="text" id="admin-lat"></label>
                     <label style="flex:1; min-width:140px;">Longitud <input type="text" id="admin-lng"></label>
                 </div>
@@ -402,7 +447,7 @@
                     </label>
                 </div>
 
-                <button type="submit" id="btn-guardar-admin" class="btn hero-primary" style="width:100%;"><i class="ph-bold ph-floppy-disk"></i> Guardar Ajustes Generales</button>
+                <button type="submit" id="btn-guardar-admin" class="btn btn-primary" style="width:100%;"><i class="ph-bold ph-floppy-disk"></i> Guardar Ajustes Generales</button>
             </form>
         </section>
     </div>
@@ -411,9 +456,9 @@
 <!-- ========================================== -->
 <!-- MODAL: AGREGAR ESPACIO (CON TARIFA NOCTURNA)-->
 <!-- ========================================== -->
-<div id="modal-espacio" class="admin-modal" aria-hidden="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+<div id="modal-espacio" class="admin-modal" aria-hidden="true">
     <div class="admin-modal-card" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #2ecc71;">
-        <button type="button" class="btn-cerrar admin-modal-close" id="cerrar-modal-espacio" data-close="modal-espacio" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <button type="button" class="btn-cerrar admin-modal-close" id="cerrar-modal-espacio" data-close="modal-espacio"><i class="ph-bold ph-x"></i></button>
         <span class="mini-label" style="color: #2ecc71;">NUEVA CANCHA</span>
         <h2 id="espacio-modal-title" style="margin-top:0; color:#fff;">Detalles de la Cancha</h2>
         
@@ -440,42 +485,40 @@
                 </div>
             </div>
             <div class="admin-form-group">
-    <label style="color:#aaa; font-size:0.85rem;">Horario de atención (Opcional - Deja vacío para usar el del complejo):</label>
-    <div style="display: flex; gap: 10px; margin-top: 5px;">
-        <div style="flex:1;">
-            <span style="font-size:0.75rem; color:#888;">Hora Apertura</span>
-            <input type="time" id="espacio-hora-apertura" class="admin-input">
-        </div>
-        <div style="flex:1;">
-            <span style="font-size:0.75rem; color:#888;">Hora Cierre</span>
-            <input type="time" id="espacio-hora-cierre" class="admin-input">
-        </div>
-    </div>
-</div>
+                <label style="color:#aaa; font-size:0.85rem;">Horario de atención (Opcional - Deja vacío para usar el del complejo):</label>
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <div style="flex:1;">
+                        <span style="font-size:0.75rem; color:#888;">Hora Apertura</span>
+                        <input type="time" id="espacio-hora-apertura" class="admin-input">
+                    </div>
+                    <div style="flex:1;">
+                        <span style="font-size:0.75rem; color:#888;">Hora Cierre</span>
+                        <input type="time" id="espacio-hora-cierre" class="admin-input">
+                    </div>
+                </div>
+            </div>
             <!-- MAGIA COMERCIAL: PRECIOS DINÁMICOS -->
             <div style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px dashed rgba(46,204,113,0.4); margin-bottom: 15px;">
                 <label style="display:block; margin-bottom:10px; color:#fff; font-size:0.9rem; font-weight:bold;">Tarifa Base (De Día) S/
                     <input id="espacio-precio" type="number" min="0" required placeholder="Ej: 40" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
                 </label>
                 
-                <label style="display:flex; align-items:center; gap:8px; color:#aaa; font-size:0.85rem; margin-bottom: 10px; cursor:pointer;">
-                    <input type="checkbox" id="espacio-check-noche" onchange="document.getElementById('caja-noche').style.display = this.checked ? 'block' : 'none'">
-                    ¿Cobras más caro en la Noche? (Por Luz)
+                <label style="display:flex; align-items:center; gap:8px; color:#fff; font-size:0.85rem; font-weight:700; margin-bottom: 10px; cursor:pointer;">
+                    <input type="checkbox" id="espacio-check-noche" style="width:auto; margin:0; accent-color:#f1c40f;" onchange="document.getElementById('caja-noche').style.display = this.checked ? 'flex' : 'none'">
+                    🌙 ¿Aplicar tarifa nocturna diferenciada?
                 </label>
 
-                <div id="caja-noche" style="display:none; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                        <label style="flex:1; min-width:120px; color:#aaa; font-size:0.85rem;">Hora inicio Noche
-                            <input id="espacio-hora-noche" type="time" value="18:00" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
-                        </label>
-                        <label style="flex:1; min-width:120px; color:#f1c40f; font-size:0.85rem; font-weight:bold;">Precio Noche (S/)
-                            <input id="espacio-precio-noche" type="number" min="0" placeholder="Ej: 60" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid #f1c40f; border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
-                        </label>
-                    </div>
+                <div id="caja-noche" style="display:none; gap:10px; flex-wrap:wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <label style="flex:1; min-width:120px; color:#aaa; font-size:0.85rem;">Hora inicio noche
+                        <input id="espacio-hora-noche" type="time" value="18:00" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                    </label>
+                    <label style="flex:1; min-width:120px; color:#f1c40f; font-size:0.85rem; font-weight:bold;">Precio Noche (S/)
+                        <input id="espacio-precio-noche" type="number" min="0" placeholder="Ej: 60" style="width:100%; padding:10px; background:rgba(0,0,0,0.5); border:1px solid #f1c40f; border-radius:8px; color:#fff; margin-top:5px; box-sizing:border-box;">
+                    </label>
                 </div>
             </div>
             
-            <button type="submit" class="btn hero-primary" style="width:100%;"><i class="ph-bold ph-floppy-disk"></i> Guardar Cancha</button>
+            <button type="submit" class="btn btn-primary" style="width:100%;"><i class="ph-bold ph-floppy-disk"></i> Guardar Cancha</button>
         </form>
     </div>
 </div>
@@ -483,9 +526,9 @@
 <!-- ========================================== -->
 <!-- MODAL: EVENTOS Y ABONADOS FIJOS -->
 <!-- ========================================== -->
-<div id="modal-evento" class="admin-modal" aria-hidden="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+<div id="modal-evento" class="admin-modal" aria-hidden="true">
     <div class="admin-modal-card" style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:450px; position:relative; border:1px solid #3498db;">
-        <button type="button" class="btn-cerrar admin-modal-close" id="cerrar-modal-evento" data-close="modal-evento" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#aaa; font-size:1.5rem; cursor:pointer;"><i class="ph-bold ph-x"></i></button>
+        <button type="button" class="btn-cerrar admin-modal-close" id="cerrar-modal-evento" data-close="modal-evento"><i class="ph-bold ph-x"></i></button>
         <span class="mini-label" style="color: #3498db;">BLOQUEOS DE CANCHA</span>
         <h2 style="margin-top:0; color:#fff;">Nuevo Bloqueo</h2>
         
@@ -528,7 +571,7 @@
                 </select>
             </label>
 
-            <button type="submit" class="btn" style="width:100%; background:#3498db; color:#fff; font-weight:bold;"><i class="ph-bold ph-lock-key"></i> Bloquear Cancha</button>
+            <button type="submit" class="btn btn-primary" style="width:100%;"><i class="ph-bold ph-lock-key"></i> Bloquear Cancha</button>
         </form>
     </div>
 </div>
@@ -548,21 +591,6 @@
         });
     });
 
-    document.getElementById('btn-nuevo-espacio').addEventListener('click', () => {
-        document.getElementById('modal-espacio').style.display = 'flex';
-    });
-    
-    document.getElementById('btn-nuevo-evento').addEventListener('click', () => {
-        document.getElementById('modal-evento').style.display = 'flex';
-    });
-
-    document.body.addEventListener('click', (e) => {
-        if(e.target.closest('.admin-modal-close')) {
-            const modalId = e.target.closest('.admin-modal-close').getAttribute('data-close');
-            if(modalId) document.getElementById(modalId).style.display = 'none';
-        }
-    });
-
     // SCRIPTS DE DESPLAZAMIENTO DEL CALENDARIO EXACTO (EFECTO SNAP)
     document.getElementById('btn-cal-prev').addEventListener('click', () => {
         const container = document.getElementById('week-days');
@@ -576,31 +604,7 @@
         container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
 </script>
-<script>
-    // LÓGICA DEL CARRUSEL DE CANCHAS
-    const sliderCanchas = document.getElementById('canchas-slider-container');
-    const btnCanchaPrev = document.getElementById('btn-cancha-prev');
-    const btnCanchaNext = document.getElementById('btn-cancha-next');
-
-    if (sliderCanchas && btnCanchaPrev && btnCanchaNext) {
-        btnCanchaPrev.addEventListener('click', () => {
-            const width = sliderCanchas.offsetWidth;
-            sliderCanchas.scrollBy({ left: -width, behavior: 'smooth' });
-        });
-        
-        btnCanchaNext.addEventListener('click', () => {
-            const width = sliderCanchas.offsetWidth;
-            sliderCanchas.scrollBy({ left: width, behavior: 'smooth' });
-        });
-
-        // Opcional: Escuchar el scroll para actualizar qué cancha se está viendo
-        sliderCanchas.addEventListener('scroll', () => {
-            // Aquí en el futuro puedes conectar con tu base de datos para 
-            // cambiar el texto de 'cancha-actual-label' según el slide activo.
-        });
-    }
-</script>
-<!-- TUS SCRIPTS ORIGINALES CONECTADOS -->
+<!-- SCRIPTS CONECTADOS -->
 <script type="module" src="admin-dashboard.js"></script>
 <script type="module" src="admin-operations.js"></script>
 <script type="module" src="admin-hours.js"></script>
@@ -638,12 +642,10 @@
     const selDistAdmin = document.getElementById('admin-cancha-distrito');
 
     if (selDeptoAdmin && selDistAdmin) {
-        // Cargar Departamentos
         Object.keys(peruDataAdmin).forEach(dpto => {
             selDeptoAdmin.innerHTML += `<option value="${dpto}">${dpto}</option>`;
         });
 
-        // Cambiar Distritos al elegir Departamento
         selDeptoAdmin.addEventListener('change', function() {
             const deptoSel = this.value;
             selDistAdmin.innerHTML = '<option value="">Selecciona distrito...</option>';
@@ -660,20 +662,24 @@
         });
     }
 </script>
-    <div id="custom-alert-modal" class="admin-modal" aria-hidden="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
+<div id="custom-alert-modal" class="admin-modal" aria-hidden="true" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:20px; box-sizing:border-box;">
     <div style="background:#111; padding:30px 25px; border-radius:16px; width:100%; max-width:350px; text-align:center; border:1px solid #f1c40f; box-shadow: 0 10px 30px rgba(0,0,0,0.8); animation: fadeIn 0.3s ease;">
         <i class="ph-fill ph-warning-circle" style="font-size:3.5rem; color:#f1c40f; margin-bottom:15px;"></i>
         <h3 style="margin: 0 0 10px 0; color:#fff; font-size: 1.25rem;">Aviso del Sistema</h3>
         <p id="custom-alert-text" style="color:#aaa; font-size:0.95rem; margin-bottom:25px; line-height: 1.5;"></p>
-        <button onclick="document.getElementById('custom-alert-modal').style.display='none'" class="btn hero-primary" style="width:100%; background:linear-gradient(45deg, #f1c40f, #e67e22); color:#000; font-weight:bold; border:none; padding:12px; border-radius:8px;">Entendido</button>
+        <button onclick="document.getElementById('custom-alert-modal').style.display='none'; document.getElementById('custom-alert-modal').classList.remove('mostrar');" class="btn btn-primary" style="width:100%;">Entendido</button>
     </div>
 </div>
 
 <script>
-    // 🔥 MAGIA: Sobrescribimos el alert() aburrido del navegador
     window.alert = function(mensaje) {
-        document.getElementById('custom-alert-text').textContent = mensaje;
-        document.getElementById('custom-alert-modal').style.display = 'flex';
+        const txt = document.getElementById('custom-alert-text');
+        const m = document.getElementById('custom-alert-modal');
+        if (txt && m) {
+            txt.textContent = mensaje;
+            m.style.display = 'flex';
+            m.classList.add('mostrar');
+        }
     };
 </script>
 </body>

@@ -88,7 +88,7 @@
         /* BOTONES */
         .bio-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; background: var(--primary-green, #2ecc71); color: #080b0a; font-weight: 800; font-size: 0.92rem; border: 1px solid var(--primary-green, #2ecc71); border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-sizing: border-box; }
         .bio-btn:hover { background: var(--primary-hover, #27ae60); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3); }
-        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.18); color: #fff; box-shadow: none; }
+        .bio-btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.22); color: #fff; box-shadow: none; }
         .bio-btn-outline:hover { border-color: var(--primary-green, #2ecc71); color: var(--primary-green, #2ecc71); background: rgba(46,204,113,0.06); }
 
         /* DESCRIPCIÓN Y TARJETAS */
@@ -150,7 +150,7 @@
 
     <!-- BARRA SUPERIOR INDEPENDIENTE -->
     <header class="topbar-header">
-        <a href="index.html" class="back-link-top">
+        <a href="index.html" class="back-link-top btn-ghost">
             <i class="ph-bold ph-arrow-left"></i> Volver a Explorar
         </a>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -163,11 +163,11 @@
         <!-- PORTADA Y LOGO DEL COMPLEJO -->
         <div class="bio-header">
             <div class="bio-cover-box">
-                <img id="bio-cover" class="bio-cover" src="" alt="Portada del Complejo">
+                <img id="bio-cover" class="bio-cover" src="" alt="Portada del Complejo" loading="lazy">
                 <div class="bio-cover-gradient"></div>
             </div>
             <div class="bio-logo-wrapper">
-                <img id="bio-logo" class="bio-logo" src="" alt="Logo">
+                <img id="bio-logo" class="bio-logo" src="" alt="Logo" loading="lazy">
             </div>
         </div>
 
@@ -185,10 +185,10 @@
                     </div>
 
                     <div class="bio-actions-bar" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-                        <a id="btn-mapa-bio" href="#" target="_blank" class="bio-btn bio-btn-outline" style="width: auto; align-self: flex-start;">
+                        <a id="btn-mapa-bio" href="#" target="_blank" class="btn btn-outline bio-btn bio-btn-outline" style="width: auto; align-self: flex-start;">
                             <i class="ph-bold ph-navigation-arrow" style="color:var(--primary-green);"></i> Cómo llegar con GPS
                         </a>
-                        <button id="btn-compartir-bio" type="button" class="bio-btn bio-btn-outline" style="width: auto; align-self: flex-start; cursor:pointer;">
+                        <button id="btn-compartir-bio" type="button" class="btn btn-outline bio-btn bio-btn-outline" style="width: auto; align-self: flex-start; cursor:pointer;">
                             <i class="ph-bold ph-share-network" style="color:var(--primary-green);"></i> Compartir Complejo
                         </button>
                     </div>
@@ -216,7 +216,7 @@
                             <div id="quick-tags-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;"></div>
                         </div>
 
-                        <button id="btn-submit-review" class="btn" style="background: rgba(255,255,255,0.06); color: #888; border: 1px solid rgba(255,255,255,0.12); width: 100%; font-size: 0.88rem; padding: 12px; border-radius:10px;" disabled>
+                        <button id="btn-submit-review" class="btn btn-primary" style="width: 100%; font-size: 0.88rem; padding: 12px; border-radius:10px;" disabled>
                             Publicar Calificación
                         </button>
                     </div>
@@ -265,14 +265,20 @@
                 <input type="text" id="booking-nombre" placeholder="Ej. Juan Pérez" style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
             </div>
 
-            <div class="form-group" style="margin-bottom: 18px; text-align: left;">
+            <div class="form-group" style="margin-bottom: 14px; text-align: left;">
                 <label style="color: #aaa; font-size: 0.85rem; margin-bottom: 6px; display: block; font-weight: 600;">WhatsApp de contacto</label>
                 <input type="tel" id="booking-telefono" placeholder="Ej. 987654321" style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
             </div>
 
+            <!-- MÓDULO 4: CHECKBOX OBLIGATORIO LEY N° 29733 -->
+            <label class="terms-check-container" for="booking-terminos">
+                <input type="checkbox" id="booking-terminos" required checked>
+                <span>Acepto los <a href="#" class="legal-link-trigger" onclick="event.preventDefault(); event.stopPropagation(); window.abrirModalTerminos && window.abrirModalTerminos();">Términos de Uso y la Política de Privacidad de Datos (Ley N° 29733)</a></span>
+            </label>
+
             <div id="booking-status"></div>
 
-            <button id="btn-confirmar-reserva" class="btn" style="width: 100%; padding: 13px; font-size: 1rem; font-weight: bold; background: var(--primary-green); color: #000; border: none; border-radius: 10px; margin-top: 15px; cursor: pointer;">
+            <button id="btn-confirmar-reserva" class="btn btn-primary" style="width: 100%; padding: 13px; font-size: 1rem; font-weight: bold; margin-top: 15px; cursor: pointer;">
                 <i class="ph-bold ph-check-circle"></i> Solicitar Reserva
             </button>
         </div>

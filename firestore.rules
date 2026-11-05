@@ -1,0 +1,218 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ==========================================
+    // HELPERS DE AUTENTICACIÓN Y ROLES
+    // ==========================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnerUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
+
+    function hasUserDoc() {
+      return isSignedIn() && exists(/databases/$(database)/documents/usuarios/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return hasUserDoc() && getUserData().rol == 'admin' && getUserData().estado == 'approved';
+    }
+
+    function isApprovedCourtOwner() {
+      return hasUserDoc() && getUserData().rol == 'owner' && getUserData().estado == 'approved';
+    }
+
+    // ==========================================
+    // 1. COLECCIÓN: usuarios
+    // ==========================================
+    match /usuarios/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId
+                    && (!('rol' in request.resource.data) || request.resource.data.rol in ['player', 'owner']);
+      allow update: if isAdmin() || (
+                      isSignedIn() && request.auth.uid == userId
+                      && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['rol', 'estado', 'approvedBy']))
+                    );
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 2. COLECCIÓN: canchas
+    // ==========================================
+    match /canchas/{canchaId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (request.auth.uid == canchaId || isAdmin());
+      allow update: if isSignedIn() && (
+                      isAdmin() ||
+                      request.auth.uid == canchaId ||
+                      resource.data.ownerUid == request.auth.uid
+                    );
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 3. COLECCIÓN: espacios (Sub-canchas / Campos)
+    // ==========================================
+    match /espacios/{espacioId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (
+                      isAdmin() ||
+                      request.resource.data.complejoId == request.auth.uid
+                    );
+      allow update, delete: if isSignedIn() && (
+                              isAdmin() ||
+                              resource.data.complejoId == request.auth.uid
+                            );
+    }
+
+    // ==========================================
+    // 4. COLECCIÓN: reservas
+    // ==========================================
+    match /reservas/{reservaId} {
+      allow read: if true;
+      allow create: if isSignedIn()
+                    && request.resource.data.canchaId is string
+                    && request.resource.data.fecha is string
+                    && request.resource.data.hora is string
+                    && request.resource.data.estado in ['pendiente', 'confirmada', 'seña_pagada'];
+      allow update: if isSignedIn() && (
+                      isAdmin() ||
+                      resource.data.uidUsuario == request.auth.uid ||
+                      resource.data.canchaId == request.auth.uid ||
+                      resource.data.complejoId == request.auth.uid
+                    );
+      allow delete: if isSignedIn() && (
+                      isAdmin() ||
+                      resource.data.canchaId == request.auth.uid ||
+                      resource.data.complejoId == request.auth.uid
+                    );
+    }
+
+    // ==========================================
+    // 5. COLECCIÓN: jugadores_perfiles (Tarjetas FUT)
+    // ==========================================
+    match /jugadores_perfiles/{jugadorId} {
+      allow read: if true;
+      allow create, update: if isSignedIn() && (request.auth.uid == jugadorId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ==========================================
+    // 6. COLECCIÓN: comunidades y subcolección partidos_comunidad
+    // ==========================================
+    match /comunidades/{comunidadId} {
+      allow read: if true;
+      allow create: if isSignedIn() && (isAdmin() || request.resource.data.liderUid == request.auth.uid);
+      allow update: if isSignedIn() && (
+                      isAdmin() ||
+                      resource.data.liderUid == request.auth.uid ||
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['miembros_uids', 'miembros'])
+                    );
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.liderUid == request.auth.uid);
+
+      match /partidos_comunidad/{partidoId} {
+        allow read: if isSignedIn();
+        allow create, update, delete: if isSignedIn();
+      }
+    }
+
+    // ==========================================
+    // 7. COLECCIÓN: grupos_amigos (Vestuarios Privados)
+    // ==========================================
+    match /grupos_amigos/{grupoId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSignedIn() && (
+                      isAdmin() ||
+                      resource.data.ownerUid == request.auth.uid ||
+                      (resource.data.miembros_uids is list && request.auth.uid in resource.data.miembros_uids) ||
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['miembros_uids'])
+                    );
+      allow delete: if isSignedIn() && (resource.data.ownerUid == request.auth.uid || isAdmin());
+
+      match /partidos_comunidad/{partidoId} {
+        allow read, create, update, delete: if isSignedIn();
+      }
+    }
+
+    // ==========================================
+    // 8. COLECCIÓN: invitaciones_grupos
+    // ==========================================
+    match /invitaciones_grupos/{invitacionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.emisorUid == request.auth.uid;
+      allow update: if isSignedIn() && (
+                      resource.data.receptorUid == request.auth.uid ||
+                      resource.data.emisorUid == request.auth.uid ||
+                      isAdmin()
+                    );
+      allow delete: if isSignedIn() && (
+                      resource.data.receptorUid == request.auth.uid ||
+                      resource.data.emisorUid == request.auth.uid ||
+                      isAdmin()
+                    );
+    }
+
+    // ==========================================
+    // 9. COLECCIONES COMPLEMENTARIAS OPERATIVAS
+    // ==========================================
+    match /bloqueos/{bloqueoId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn() && (
+                                      isAdmin() ||
+                                      request.resource.data.complejoId == request.auth.uid ||
+                                      resource.data.complejoId == request.auth.uid ||
+                                      request.resource.data.canchaId == request.auth.uid ||
+                                      resource.data.canchaId == request.auth.uid
+                                    );
+    }
+
+    match /eventos/{eventoId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn();
+    }
+
+    match /resenas/{resenaId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /resenas_jugadores/{resenaId} {
+      allow read: if true;
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    match /bolsa_jugadores/{anuncioId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    match /anuncios_ligas/{anuncioId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /solicitudes_duenos/{solicitudId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /retos_comunidades/{retoId} {
+      allow read: if true;
+      allow create, update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+  }
+}

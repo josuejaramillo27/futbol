@@ -932,7 +932,7 @@
     </style>
 </head>
 
-<body>
+<body style="opacity: 0; pointer-events: none; transition: opacity 0.25s ease;">
 
     <!-- BARRA LATERAL (SIDEBAR) -->
     <aside class="sidebar">
@@ -1355,6 +1355,17 @@
         import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, getDoc, updateDoc, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { initLegalCompliance } from "./legal.js";
+        initLegalCompliance();
+
+        function escapeHTML(str) {
+            return String(str ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         // 1. CONFIGURACIÓN FIREBASE
         const firebaseConfig = {
@@ -1404,15 +1415,17 @@
         let chartReservasInstance = null;
         let chartCanchasInstance = null;
 
-        // 2. SEGURIDAD Y GUARD DE ACCESO
+        // 2. SEGURIDAD Y GUARD DE ACCESO ESTRICTO (Auth Guard)
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                window.location.href = "login.html";
+                window.location.replace("index.html");
                 return;
             }
             try {
                 const userDoc = await getDoc(doc(db, "usuarios", user.uid));
                 if (userDoc.exists() && userDoc.data().rol === "admin" && userDoc.data().estado === "approved") {
+                    document.body.style.opacity = "1";
+                    document.body.style.pointerEvents = "auto";
                     adminUser = user.uid;
                     const adminName = userDoc.data().nombre || user.displayName || user.email || "Admin Maestro";
                     const displayEl = document.getElementById("admin-user-display");
@@ -1425,13 +1438,11 @@
                     cargarComunidadesAdmin();
                     cargarTorneosAdmin();
                 } else {
-                    window.toast("Acceso Denegado. Esta sección es exclusiva para el Administrador Maestro.", 'error');
-                    signOut(auth).then(() => { setTimeout(() => window.location.href = "login.html", 1500); });
+                    window.location.replace("index.html");
                 }
             } catch (err) {
                 console.error("Error autenticando admin:", err);
-                window.toast("Error de autenticación con el servidor.", 'error');
-                signOut(auth).then(() => { setTimeout(() => window.location.href = "login.html", 1500); });
+                window.location.replace("index.html");
             }
         });
 
@@ -1841,11 +1852,11 @@
 
                 card.innerHTML = `
                     <div style="flex: 1; min-width: 250px;">
-                        <h3 class="owner-title">${owner.complejo || owner.canchaData?.nombre || "Complejo Sin Nombre"}</h3>
+                        <h3 class="owner-title">${escapeHTML(owner.complejo || owner.canchaData?.nombre || "Complejo Sin Nombre")}</h3>
                         <div class="owner-meta">
-                            <span><i class="ph-bold ph-user"></i> ${owner.nombre || "Dueño no registrado"}</span>
-                            <span><i class="ph-bold ph-envelope"></i> ${owner.email || "Sin email"}</span>
-                            ${owner.documento ? `<span><i class="ph-bold ph-identification-card"></i> Doc: ${owner.documento}</span>` : ''}
+                            <span><i class="ph-bold ph-user"></i> ${escapeHTML(owner.nombre || "Dueño no registrado")}</span>
+                            <span><i class="ph-bold ph-envelope"></i> ${escapeHTML(owner.email || "Sin email")}</span>
+                            ${owner.documento ? `<span><i class="ph-bold ph-identification-card"></i> Doc: ${escapeHTML(owner.documento)}</span>` : ''}
                         </div>
                         <div class="owner-badges">
                             <span class="badge badge-${estadoCuenta}">
@@ -2019,11 +2030,11 @@
                             <td style="font-weight: 700; color: #fff;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <i class="ph-fill ph-shield-checkered" style="color: var(--primary-green); font-size: 1.1rem;"></i>
-                                    <span>${c.nombre || "Sin nombre"}</span>
+                                    <span>${escapeHTML(c.nombre || "Sin nombre")}</span>
                                 </div>
                             </td>
-                            <td>${c.deporte || "Fútbol"} • <span style="color: var(--text-muted);">${c.categoria || "Libre"}</span></td>
-                            <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${c.ciudad || "No especificada"}</td>
+                            <td>${escapeHTML(c.deporte || "Fútbol")} • <span style="color: var(--text-muted);">${escapeHTML(c.categoria || "Libre")}</span></td>
+                            <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${escapeHTML(c.ciudad || "No especificada")}</td>
                             <td><a href="https://wa.me/${String(c.whatsappLider || '').replace(/\D/g, '')}" target="_blank" style="color: var(--primary-green); font-weight: 600; text-decoration: none;"><i class="ph-bold ph-whatsapp-logo"></i> ${c.whatsappLider || "Sin teléfono"}</a></td>
                             <td style="text-align: right;">
                                 <button class="btn btn-danger btn-borrar-comunidad" data-id="${docSnap.id}" style="padding: 6px 12px; font-size: 0.78rem;">
@@ -2125,11 +2136,11 @@
                             <td style="font-weight: 700; color: #fff;">
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <i class="ph-fill ph-trophy" style="color: var(--warning); font-size: 1.15rem;"></i>
-                                    <span>${t.nombre || "Torneo sin título"}</span>
+                                    <span>${escapeHTML(t.nombre || "Torneo sin título")}</span>
                                 </div>
                             </td>
-                            <td>${t.tipo ? t.tipo.toUpperCase() : 'TORNEO'} • <span style="color: var(--text-muted);">${t.deporte || 'Fútbol'} (${t.categorias || 'Libre'})</span></td>
-                            <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${t.sede || "No especificada"}<br><small style="color:var(--text-dim);">${t.premiosHorario || 'Premios a confirmar'}</small></td>
+                            <td>${escapeHTML(t.tipo ? t.tipo.toUpperCase() : 'TORNEO')} • <span style="color: var(--text-muted);">${escapeHTML(t.deporte || 'Fútbol')} (${escapeHTML(t.categorias || 'Libre')})</span></td>
+                            <td><i class="ph-bold ph-map-pin" style="color: var(--primary-green);"></i> ${escapeHTML(t.sede || "No especificada")}<br><small style="color:var(--text-dim);">${escapeHTML(t.premiosHorario || 'Premios a confirmar')}</small></td>
                             <td>${wspLink}${linkVerif}</td>
                             <td>${badgeEstado}</td>
                             <td style="text-align: right; white-space: nowrap;">

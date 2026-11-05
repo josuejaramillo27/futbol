@@ -1,225 +1,222 @@
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs, doc, updateDoc, serverTimestamp, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { initLegalCompliance } from "./legal.js";
+initLegalCompliance();
 
-// LLAVE CORREGIDA
-const cfg = { apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk", authDomain: "app-futbol-acd0f.firebaseapp.com", projectId: "app-futbol-acd0f", storageBucket: "app-futbol-acd0f.firebasestorage.app", messagingSenderId: "223446110165", appId: "1:223446110165:web:219afce6a9dac03203f75c" };
-const app = getApps().length ? getApps()[0] : initializeApp(cfg);
-const auth = getAuth(app);
+function escapeHTML(str) {
+    return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBqZSb3ZkI1QqoLGyP47ckD7eexwdStdXk",
+    authDomain: "app-futbol-acd0f.firebaseapp.com",
+    projectId: "app-futbol-acd0f",
+    storageBucket: "app-futbol-acd0f.firebasestorage.app",
+    messagingSenderId: "223446110165",
+    appId: "1:223446110165:web:219afce6a9dac03203f75c"
+};
+
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-let usuarioActual = null;
-const contenedorReservas = document.getElementById('reservas-lista');
+let usuario = null;
+let reservas = [];
+let filtro = 'todas';
 
-// LOGIN CON GOOGLE
-document.getElementById('btn-login')?.addEventListener('click', async () => {
-    try {
-        const btn = document.getElementById('btn-login');
-        btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> Conectando...';
-        await signInWithPopup(auth, new GoogleAuthProvider());
-    } catch (e) {
-        alert("Error al iniciar sesión: " + e.message);
-        document.getElementById('btn-login').innerHTML = '<i class="ph-bold ph-google-logo"></i> Continuar con Google';
+const authState = document.getElementById('auth-state');
+const lista = document.getElementById('reservas-lista');
+const btnLogin = document.getElementById('btn-login');
+const btnRefresh = document.getElementById('btn-refresh');
+
+const hoyISO = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+function normalizarEstado(raw) {
+    const s = String(raw || '').toLowerCase();
+    if (s === 'pending' || s === 'pendiente') return 'pendiente';
+    if (s === 'confirmed' || s === 'confirmada') return 'confirmada';
+    if (s === 'cancelled' || s === 'cancelada' || s === 'cancelado') return 'cancelada';
+    if (s === 'rejected' || s === 'rechazada') return 'rechazada';
+    if (s === 'completed' || s === 'completada' || s === 'jugada') return 'jugada';
+    if (s === 'seña_pagada' || s === 'sena_pagada') return 'seña_pagada';
+    return 'pendiente';
+}
+
+function estadoInfo(estadoRaw) {
+    const e = normalizarEstado(estadoRaw);
+    const map = {
+        confirmada: { label: 'Confirmada', icon: 'ph-check-circle' },
+        seña_pagada: { label: 'Seña recibida', icon: 'ph-Receipt' },
+        pendiente: { label: 'Pendiente de Validar', icon: 'ph-clock' },
+        jugada: { label: 'Jugado', icon: 'ph-soccer-ball' },
+        cancelada: { label: 'Cancelada', icon: 'ph-x-circle' },
+        rechazada: { label: 'Rechazada por Cancha', icon: 'ph-prohibit' }
+    };
+    return map[e] || { label: e, icon: 'ph-info' };
+}
+
+function parseFecha(f) {
+    const [y, m, d] = String(f || '').split('-').map(Number);
+    return y && m && d ? new Date(y, m - 1, d, 12, 0, 0) : new Date();
+}
+
+function esProxima(r) {
+    const e = normalizarEstado(r.estado);
+    return String(r.fecha || '') >= hoyISO() && !['cancelada', 'rechazada'].includes(e);
+}
+
+function filtrarReservas() {
+    if (filtro === 'todas') return reservas;
+    if (filtro === 'proximas') return reservas.filter(esProxima);
+    return reservas.filter(r => normalizarEstado(r.estado) === filtro);
+}
+
+function render() {
+    if (!usuario) {
+        authState.style.display = 'flex';
+        lista.innerHTML = '';
+        return;
     }
-});
+    authState.style.display = 'none';
+    const items = filtrarReservas();
 
-onAuthStateChanged(auth, u => {
-    if (u) {
-        usuarioActual = u;
-        document.getElementById('auth-state').style.display = 'none';
-        cargarMisReservas();
-    } else {
-        usuarioActual = null;
-        document.getElementById('auth-state').style.display = 'flex';
-        contenedorReservas.innerHTML = '';
+    if (!items.length) {
+        lista.innerHTML = `<div class="empty-reservas"><i class="ph-fill ph-calendar-blank"></i><h2>No hay reservas en esta vista</h2><p>Explora las canchas disponibles y separa tu próximo horario en segundos.</p><a href="index.html#canchas" class="btn btn-primary">Buscar canchas</a></div>`;
+        return;
     }
-});
 
-// REFRESCAR SOLO LA LISTA, NO LA PÁGINA COMPLETA
-document.getElementById('btn-refresh')?.addEventListener('click', () => {
-    if(usuarioActual) {
-        cargarMisReservas();
-        // Al refrescar, devolvemos el filtro a "Todas"
-        document.querySelectorAll('.reserva-tab').forEach(t => t.classList.remove('active'));
-        document.querySelector('.reserva-tab[data-filter="todas"]')?.classList.add('active');
-    }
-});
+    lista.innerHTML = items.map(r => {
+        const d = parseFecha(r.fecha);
+        const estadoNorm = normalizarEstado(r.estado);
+        const st = estadoInfo(r.estado);
+        const day = d.getDate();
+        const weekday = d.toLocaleDateString('es-PE', { weekday: 'short' }).replace('.', '').toUpperCase();
+        const month = d.toLocaleDateString('es-PE', { month: 'short' }).replace('.', '');
+        const puedeCancelar = esProxima(r) && !['cancelada', 'jugada', 'rechazada'].includes(estadoNorm);
+        const montoMostrar = r.precioTotal ?? r.precio ?? '--';
 
-async function cargarMisReservas() {
-    contenedorReservas.innerHTML = '<div style="text-align:center; padding: 40px; color: #aaa;"><i class="ph-bold ph-spinner ph-spin" style="font-size:2rem;"></i><p>Buscando tus partidos...</p></div>';
-    
-    try {
-        const q = query(collection(db, 'reservas'), where('usuarioUid', '==', usuarioActual.uid));
-        const snap = await getDocs(q);
-        
-        if (snap.empty) {
-            contenedorReservas.innerHTML = `
-                <div style="text-align:center; padding:50px 20px; background:rgba(255,255,255,0.02); border-radius:16px; border:1px dashed #333;">
-                    <i class="ph-fill ph-calendar-x" style="font-size:3rem; color:#555; margin-bottom:15px;"></i>
-                    <h3 style="color:#fff; margin:0 0 10px 0;">No tienes reservas</h3>
-                    <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">Aún no has solicitado ninguna cancha con tu cuenta.</p>
-                    <a href="index.html" class="btn" style="width:auto; padding:10px 20px; background:var(--primary-green); color:#000;">Explorar canchas</a>
-                </div>
-            `;
-            return;
-        }
-
-        const reservasArr = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        // Ordenar por fecha (las más recientes/futuras primero)
-        reservasArr.sort((a, b) => new Date(`${b.fecha}T${b.hora||'00:00'}`) - new Date(`${a.fecha}T${a.hora||'00:00'}`));
-
-        let html = '';
-        const ahora = new Date();
-
-        reservasArr.forEach(r => {
-            const fechaStr = r.fecha || 'Sin fecha';
-            const horaStr = r.hora || 'Sin hora';
-            const canchaNom = r.canchaNombre || 'Cancha Desconocida';
-            
-            // Determinar si es pasado
-            let esPasado = false;
-            if(r.fecha && r.hora) {
-                const fechaHoraReserva = new Date(`${r.fecha}T${r.hora}`);
-                esPasado = fechaHoraReserva < ahora;
-            }
-
-            const estadoNorm = normalizarEstado(r.estado);
-            const { clase: estadoClase, txt: estadoTexto } = getEstadoUI(estadoNorm);
-
-            // AGREGAMOS LOS DATA-ATTRIBUTES (data-estado y data-proxima) AQUÍ PARA LOS FILTROS
-            html += `
-            <div class="reserva-card ${esPasado ? 'pasado' : ''}" data-estado="${estadoNorm}" data-proxima="${!esPasado}">
-                <div class="reserva-header">
-                    <span class="reserva-estado ${estadoClase}">${estadoTexto}</span>
-                    <span style="font-size:0.8rem; color:#888;">ID: ${r.id.substring(0,6).toUpperCase()}</span>
-                </div>
-                
-                <h3 class="reserva-titulo">${canchaNom}</h3>
-                
-                <div class="reserva-datos">
-                    <div class="reserva-dato"><i class="ph-bold ph-calendar-blank"></i> ${formatearFecha(fechaStr)}</div>
-                    <div class="reserva-dato"><i class="ph-bold ph-clock"></i> ${horaStr}</div>
-                    <div class="reserva-dato"><i class="ph-bold ph-currency-circle-dollar"></i> S/ ${r.precio || '--'}</div>
-                </div>
-
-                <div class="reserva-actions">
-                    ${(estadoNorm === 'pending' || estadoNorm === 'seña_pagada') && !esPasado ? `<button class="btn btn-cancelar" onclick="cancelarReserva('${r.id}')"><i class="ph-bold ph-x"></i> Cancelar Solicitud</button>` : ''}
-                    ${esPasado && estadoNorm === 'confirmed' ? `<button class="btn btn-resena" onclick="dejarResena('${r.id}', '${r.canchaId}')"><i class="ph-bold ph-star"></i> Calificar Cancha</button>` : ''}
-                    ${!esPasado && estadoNorm === 'confirmed' ? `<a href="#" class="btn btn-outline" style="pointer-events:none; border-color:var(--primary-green); color:var(--primary-green);"><i class="ph-bold ph-check-circle"></i> ¡Todo listo para jugar!</a>` : ''}
+        return `<article class="reserva-card ${escapeHTML(estadoNorm)}">
+            <div class="reserva-date"><small>${escapeHTML(weekday)}</small><b>${day}</b><span>${escapeHTML(month)}</span></div>
+            <div class="reserva-info">
+                <span class="reserva-status ${escapeHTML(estadoNorm)}"><i class="ph-fill ${st.icon}"></i> ${escapeHTML(st.label)}</span>
+                <h2>${escapeHTML(r.canchaNombre || 'Cancha deportiva')}</h2>
+                <p><i class="ph-bold ph-clock"></i> ${escapeHTML(r.horaInicio || '--:--')}${r.horaFin && r.horaFin !== r.horaInicio ? ` – ${escapeHTML(r.horaFin)}` : ''}</p>
+                <p><i class="ph-bold ph-user"></i> ${escapeHTML(r.nombre || usuario.displayName || 'Jugador')}</p>
+                <p><i class="ph-bold ph-whatsapp-logo"></i> ${escapeHTML(r.telefono || 'Sin teléfono')}</p>
+                <div class="reserva-flow">
+                    <span class="${['pendiente', 'seña_pagada', 'confirmada', 'jugada'].includes(estadoNorm) ? 'done' : ''}">1. Solicitada</span>
+                    <span class="${['seña_pagada', 'confirmada', 'jugada'].includes(estadoNorm) ? 'done' : ''}">2. Validada</span>
+                    <span class="${['confirmada', 'jugada'].includes(estadoNorm) ? 'done' : ''}">3. Confirmada</span>
+                    <span class="${estadoNorm === 'jugada' ? 'done' : ''}">4. Jugado</span>
                 </div>
             </div>
-            `;
+            <div class="reserva-price">
+                <small>Tarifa</small>
+                <strong>S/ ${escapeHTML(montoMostrar)}</strong>
+                ${puedeCancelar ? `<button class="btn btn-danger cancelar-reserva" data-id="${escapeHTML(r.id)}" style="padding:6px 10px; font-size:0.72rem;">Cancelar</button>` : ''}
+            </div>
+        </article>`;
+    }).join('');
+
+    lista.querySelectorAll('.cancelar-reserva').forEach(btn => {
+        btn.addEventListener('click', () => cancelarReserva(btn.dataset.id, btn));
+    });
+}
+
+async function cargarReservas() {
+    if (!usuario) return render();
+    lista.innerHTML = `<div class="loading-reservas"><i class="ph-bold ph-spinner-gap ph-spin"></i> Cargando tus reservas...</div>`;
+    try {
+        const snap = await getDocs(query(collection(db, 'reservas'), where('usuarioUid', '==', usuario.uid)));
+        reservas = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => {
+            const cmp = String(b.fecha || '').localeCompare(String(a.fecha || ''));
+            return cmp !== 0 ? cmp : String(b.horaInicio || '').localeCompare(String(a.horaInicio || ''));
         });
-
-        contenedorReservas.innerHTML = html;
-        
-        // Al cargar, aplicamos el filtro que esté activo (por si recargan estando en "Próximas")
-        const tabActiva = document.querySelector('.reserva-tab.active');
-        if(tabActiva) filtrarReservas(tabActiva.getAttribute('data-filter'));
-
-    } catch (error) {
-        console.error("Error al cargar reservas: ", error);
-        contenedorReservas.innerHTML = '<p style="color:red; text-align:center;">Hubo un error al cargar tus reservas.</p>';
+        render();
+    } catch (e) {
+        console.error(e);
+        lista.innerHTML = `<div class="empty-reservas"><i class="ph-bold ph-warning-circle"></i><h2>No pudimos cargar tus reservas</h2><p>Revisa tu conexión e inténtalo nuevamente.</p></div>`;
     }
 }
 
-// CANCELAR RESERVA
-window.cancelarReserva = async function(id) {
-    if(!confirm("¿Estás seguro que deseas cancelar esta solicitud de reserva?")) return;
+function mostrarAlertaPremium(titulo, mensaje) {
+    let box = document.getElementById('premium-cancel-alert');
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'premium-cancel-alert';
+        box.className = 'premium-alert';
+        box.innerHTML = `<i class="ph-fill ph-shield-warning"></i><div><strong></strong><span></span></div><button type="button" aria-label="Cerrar"><i class="ph-bold ph-x"></i></button>`;
+        box.querySelector('button').onclick = () => box.style.display = 'none';
+        lista.parentElement.insertBefore(box, lista);
+    }
+    box.querySelector('strong').textContent = titulo;
+    box.querySelector('span').textContent = mensaje;
+    box.style.display = 'flex';
+}
+
+function faltanMenosDe12Horas(r) {
+    const [y, m, d] = String(r.fecha || '').split('-').map(Number);
+    const match = String(r.horaInicio || '00:00').match(/^(\d{1,2}):(\d{2})$/);
+    if (!y || !m || !d || !match) return false;
+    const inicio = new Date(y, m - 1, d, Number(match[1]), Number(match[2]), 0);
+    return (inicio.getTime() - Date.now()) < 12 * 60 * 60 * 1000;
+}
+
+async function cancelarReserva(id, btn) {
+    const r = reservas.find(x => x.id === id);
+    if (r && faltanMenosDe12Horas(r)) {
+        mostrarAlertaPremium(
+            'Política de Protección al Dueño (12 horas)',
+            'No es posible cancelar una reserva cuando faltan menos de 12 horas para el partido. Si tienes una urgencia, comunícate directamente con la cancha.'
+        );
+        return;
+    }
+    if (!confirm('¿Deseas cancelar esta reserva? El horario volverá a quedar disponible.')) return;
+    btn.disabled = true;
+    btn.textContent = 'Cancelando...';
     try {
         await updateDoc(doc(db, 'reservas', id), {
             estado: 'cancelled',
-            canceladaPor: 'usuario',
-            fechaCancelacion: serverTimestamp()
+            canceladaEn: serverTimestamp(),
+            canceladaPor: usuario.uid,
+            updatedAt: serverTimestamp()
         });
-        alert("Reserva cancelada exitosamente.");
-        cargarMisReservas();
+        await cargarReservas();
     } catch (e) {
-        alert("Ocurrió un error al cancelar.");
+        console.error(e);
+        btn.disabled = false;
+        btn.textContent = 'Cancelar';
     }
 }
 
-// SISTEMA DE RESEÑAS
-window.dejarResena = async function(reservaId, canchaId) {
-    const rating = prompt("Califica la cancha del 1 al 5:");
-    if(!rating || isNaN(rating) || rating < 1 || rating > 5) return alert("Calificación inválida.");
-    const comentario = prompt("Escribe un breve comentario (Opcional):");
-
-    try {
-        const cSeguro = String(comentario || '').replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]));
-        await addDoc(collection(db, 'resenas'), {
-            reservaId, canchaId, usuarioUid: usuarioActual.uid, nombre: usuarioActual.displayName || 'Jugador', rating: Number(rating), comentario: cSeguro, createdAt: serverTimestamp()
-        });
-        alert("¡Gracias por tu reseña!");
-    } catch(e) {
-        alert("Hubo un error al guardar tu reseña.");
-    }
-};
-
-function normalizarEstado(st) {
-    const s = String(st||'pending').toLowerCase();
-    if(['pendiente', 'pending'].includes(s)) return 'pending';
-    if(['confirmada', 'confirmed'].includes(s)) return 'confirmed';
-    if(['cancelada', 'cancelado', 'cancelled'].includes(s)) return 'cancelled';
-    if(['seña', 'sena', 'seña_pagada', 'deposit_paid'].includes(s)) return 'seña_pagada';
-    return 'pending';
-}
-
-function getEstadoUI(estado) {
-    switch(estado) {
-        case 'pending': return { clase: 'badge-pendiente', txt: 'Esperando Confirmación' };
-        case 'seña_pagada': return { clase: 'badge-sena', txt: 'Seña Recibida' };
-        case 'confirmed': return { clase: 'badge-confirmada', txt: 'Confirmada' };
-        case 'cancelled': return { clase: 'badge-cancelada', txt: 'Cancelada' };
-        default: return { clase: 'badge-pendiente', txt: 'Pendiente' };
-    }
-}
-
-function formatearFecha(fechaIso) {
-    if(!fechaIso || fechaIso === 'Sin fecha') return fechaIso;
-    try {
-        const [y,m,d] = fechaIso.split('-');
-        const f = new Date(y, m-1, d);
-        const dias = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-        const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-        return `${dias[f.getDay()]}, ${d} de ${meses[f.getMonth()]}`;
-    } catch(e) { return fechaIso; }
-}
-
-
-// ==========================================
-// LÓGICA DE PESTAÑAS (FILTROS DE RESERVAS)
-// ==========================================
-document.querySelectorAll('.reserva-tab').forEach(btnTab => {
-    btnTab.addEventListener('click', (e) => {
-        // Quitar la clase active de todos los botones
+document.querySelectorAll('.reserva-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
         document.querySelectorAll('.reserva-tab').forEach(t => t.classList.remove('active'));
-        
-        // Agregar la clase active al botón presionado
-        e.currentTarget.classList.add('active');
-        
-        // Ejecutar el filtro
-        filtrarReservas(e.currentTarget.getAttribute('data-filter'));
+        tab.classList.add('active');
+        filtro = tab.dataset.filter;
+        render();
     });
 });
 
-function filtrarReservas(filtro) {
-    const tarjetas = document.querySelectorAll('.reserva-card');
-    
-    tarjetas.forEach(tarjeta => {
-        const estado = tarjeta.getAttribute('data-estado'); // pending, confirmed, seña_pagada, cancelled
-        const esProxima = tarjeta.getAttribute('data-proxima') === 'true';
+btnLogin?.addEventListener('click', async () => {
+    try {
+        const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        await signInWithPopup(auth, provider);
+    } catch (e) { console.error(e); }
+});
 
-        if (filtro === 'todas') {
-            tarjeta.style.display = 'block';
-        } else if (filtro === 'proximas') {
-            tarjeta.style.display = esProxima ? 'block' : 'none';
-        } else if (filtro === 'seña_pagada') {
-            tarjeta.style.display = (estado === 'seña_pagada') ? 'block' : 'none';
-        } else if (filtro === 'confirmada') {
-            tarjeta.style.display = (estado === 'confirmed') ? 'block' : 'none';
-        } else if (filtro === 'pendiente') {
-            tarjeta.style.display = (estado === 'pending') ? 'block' : 'none';
-        }
-    });
-}
+btnRefresh?.addEventListener('click', cargarReservas);
+onAuthStateChanged(auth, u => {
+    usuario = u || null;
+    cargarReservas();
+});

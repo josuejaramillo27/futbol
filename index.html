@@ -105,7 +105,6 @@
             color: var(--primary-green);
         }
 
-        /* Ajustes para celulares (Mobile-First) */
         @media (max-width: 600px) {
             .topbar {
                 padding: 8px 10px !important;
@@ -221,7 +220,7 @@
                 <h1>Encuentra dónde<br><strong>jugar hoy.</strong></h1>
                 <p>Descubre canchas, encuentra jugadores y arma tu próximo partido. Todo en un solo lugar.</p>
                 <div class="hero-actions">
-                    <a href="#canchas" class="btn hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Encontrar
+                    <a href="#canchas" class="btn btn-primary hero-primary"><i class="ph-bold ph-magnifying-glass"></i> Encontrar
                         cancha</a>
                     <a href="jugadores.html" class="btn btn-outline hero-secondary"><i
                             class="ph-bold ph-users-three"></i> Buscar jugadores</a>
@@ -314,8 +313,7 @@
 
             <!-- Botón del Mapa interactivo justo antes de las canchas -->
             <div style="margin-bottom: 20px; display: flex;">
-                <button id="btn-abrir-mapa" class="btn btn-outline"
-                    style="border-color: rgba(46,204,113,0.4); color: #fff;">
+                <button id="btn-abrir-mapa" class="btn btn-outline">
                     <i class="ph-fill ph-map-trifold" style="color: var(--primary-green);"></i> Explorar canchas en el
                     mapa
                 </button>
@@ -338,7 +336,7 @@
                 <h2>Bolsa de Jugadores</h2>
                 <p>¿Te falta uno? ¿Buscas equipo o retadores para hoy?</p>
             </div>
-            <a href="jugadores.html" class="btn community-btn">Entrar <i class="ph-bold ph-arrow-up-right"></i></a>
+            <a href="jugadores.html" class="btn btn-primary community-btn">Entrar <i class="ph-bold ph-arrow-up-right"></i></a>
         </section>
 
         <!-- ==============================================
@@ -351,10 +349,14 @@
                 <h2>Haz crecer tu cancha con CHALACAPP.</h2>
                 <p>Digitaliza reservas, reduce inasistencias y consigue nuevos jugadores.</p>
             </div>
-            <a href="login.html" id="btn-contacto-admin" class="btn">Únete a la red <i
+            <a href="login.html" id="btn-contacto-admin" class="btn btn-primary">Únete a la red <i
                     class="ph-bold ph-arrow-up-right"></i></a>
         </section>
 
+        <footer class="site-footer" style="margin-top:30px;">
+            <span><i class="ph-fill ph-shield-check"></i> CHALACAPP · Plataforma Deportiva Segura</span>
+            <span><a href="#" class="legal-link-trigger" onclick="event.preventDefault(); window.abrirModalTerminos && window.abrirModalTerminos();">Términos de Uso y Privacidad (Ley N° 29733)</a></span>
+        </footer>
     </main>
 
     <!-- ==============================================
@@ -397,16 +399,22 @@
                     style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
             </div>
 
-            <div class="form-group" style="margin-bottom: 18px; text-align: left;">
+            <div class="form-group" style="margin-bottom: 14px; text-align: left;">
                 <label style="color: #aaa; font-size: 0.85rem; margin-bottom: 6px; display: block; font-weight: 600;">WhatsApp de contacto</label>
                 <input type="tel" id="booking-telefono" placeholder="Ej. 987654321"
                     style="width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.18); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 0.95rem;">
             </div>
 
+            <!-- MÓDULO 4: CHECKBOX OBLIGATORIO LEY N° 29733 -->
+            <label class="terms-check-container" for="booking-terminos">
+                <input type="checkbox" id="booking-terminos" required checked>
+                <span>Acepto los <a href="#" class="legal-link-trigger" onclick="event.preventDefault(); event.stopPropagation(); window.abrirModalTerminos && window.abrirModalTerminos();">Términos de Uso y la Política de Privacidad de Datos (Ley N° 29733)</a></span>
+            </label>
+
             <div id="booking-status"></div>
 
-            <button id="btn-confirmar-reserva" class="btn"
-                style="width: 100%; padding: 13px; font-size: 1rem; font-weight: bold; background: var(--primary-green); color: #000; border: none; border-radius: 10px; margin-top: 15px; cursor: pointer;">
+            <button id="btn-confirmar-reserva" class="btn btn-primary"
+                style="width: 100%; padding: 13px; font-size: 1rem; font-weight: bold; margin-top: 15px; cursor: pointer;">
                 <i class="ph-bold ph-check-circle"></i> Solicitar Reserva
             </button>
         </div>
@@ -429,7 +437,7 @@
                 style="padding: 10px 20px; background: #080b0a; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
                 <span id="map-status" style="font-size: 0.85rem; color: #aaa;">Cargando...</span>
                 <button id="btn-mi-ubicacion" class="btn btn-outline"
-                    style="padding: 6px 12px; font-size: 0.8rem; width: auto; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff; border-radius: 6px;"><i
+                    style="padding: 6px 12px; font-size: 0.8rem; width: auto;"><i
                         class="ph-bold ph-navigation"></i> Mi ubicación</button>
             </div>
             <div id="map-canchas" style="flex: 1; width: 100%; background: #1a1a1a;"></div>
@@ -447,11 +455,11 @@
             <h2 style="color: #fff; margin-bottom: 10px; font-size: 1.5rem;">¿Dónde juegas?</h2>
             <p style="color: #aaa; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;">Permítenos detectar tu
                 departamento para mostrarte al instante las mejores canchas cerca de ti.</p>
-            <button id="btn-detectar-gps" class="btn"
-                style="width: 100%; margin-bottom: 12px; color: #000; font-weight:bold; background: var(--primary-green); border: none; padding: 12px; border-radius: 8px;"><i
+            <button id="btn-detectar-gps" class="btn btn-primary"
+                style="width: 100%; margin-bottom: 12px; padding: 12px;"><i
                     class="ph-bold ph-navigation-arrow"></i> Detectar mi ubicación</button>
             <button id="btn-cerrar-gps" class="btn btn-outline"
-                style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: #fff;">Elegir
+                style="width: 100%; padding: 12px;">Elegir
                 manualmente</button>
         </div>
     </div>
