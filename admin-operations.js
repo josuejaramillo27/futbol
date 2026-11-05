@@ -327,10 +327,10 @@ function bindUI() {
 
     $('form-espacio')?.addEventListener('submit', async e => {
         e.preventDefault(); if (!user) return;
-        const id = $('espacio-id').value;
-        const checkNoche = $('espacio-check-noche').checked;
-        const horaAperturaVal = $('espacio-hora-apertura').value;
-        const horaCierreVal = $('espacio-hora-cierre').value;
+        const id = ($('espacio-id')?.value || '').trim();
+        const checkNoche = Boolean($('espacio-check-noche')?.checked);
+        const horaAperturaVal = ($('espacio-hora-apertura')?.value || '').trim();
+        const horaCierreVal = ($('espacio-hora-cierre')?.value || '').trim();
 
         let formato = parseInt($('espacio-formato')?.value, 10);
         if (isNaN(formato) || formato < 5) formato = 5;
@@ -340,17 +340,21 @@ function bindUI() {
         const superficie = ($('espacio-superficie')?.value || 'Sintética').trim();
         const tipoCombinado = `Fútbol ${formato} - ${superficie}`;
 
-        const horaInicioNoche = checkNoche ? ($('espacio-hora-noche').value || canchaPrincipalData?.horaInicioNoche || '18:00') : '18:00';
-        const precioNoche = checkNoche ? Number($('espacio-precio-noche').value || canchaPrincipalData?.precioNoche || 0) : 0;
+        const horaInicioNoche = checkNoche ? (($('espacio-hora-noche')?.value || canchaPrincipalData?.horaInicioNoche || '18:00').trim() || '18:00') : '18:00';
+        const rawPrecioNoche = Number($('espacio-precio-noche')?.value ?? canchaPrincipalData?.precioNoche ?? 0);
+        const precioNoche = (checkNoche && Number.isFinite(rawPrecioNoche) && rawPrecioNoche >= 0) ? rawPrecioNoche : 0;
+        const rawPrecioBase = Number($('espacio-precio')?.value ?? 0);
+        const precioBase = (Number.isFinite(rawPrecioBase) && rawPrecioBase >= 0) ? rawPrecioBase : 0;
+        const nombreEspacio = ($('espacio-nombre')?.value || '').trim() || 'Cancha';
 
         const payload = {
             ownerUid: user.uid,
             canchaId: user.uid,
-            nombre: $('espacio-nombre').value.trim(),
+            nombre: nombreEspacio,
             tipo: tipoCombinado,
             formatoJugadores: formato,
             superficie: superficie,
-            precio: Number($('espacio-precio').value || 0),
+            precio: precioBase,
             tienePrecioNoche: checkNoche,
             horaInicioNoche,
             precioNoche,

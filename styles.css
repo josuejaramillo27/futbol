@@ -831,16 +831,16 @@ html, body {
 .tabs-container,
 .subtabs-container,
 .topbar-nav {
-    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
-    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
 }
 
 @media (max-width: 768px) {
     .tabs-container,
     .subtabs-container,
     .topbar-nav {
-        -webkit-mask-image: linear-gradient(to right, black 82%, transparent 98%);
-        mask-image: linear-gradient(to right, black 82%, transparent 98%);
+        -webkit-mask-image: none !important;
+        mask-image: none !important;
     }
 }
 

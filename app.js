@@ -361,11 +361,11 @@ if (esInicio()) {
                 const linkCancha = c.slug ? `cancha.html?slug=${encodeURIComponent(c.slug)}` : `cancha.html?id=${encodeURIComponent(c.id)}`;
                 const tieneTarifaNoche = !!c.tienePrecioNoche && Number(c.precioNoche) > 0;
                 const precioHtmlCard = tieneTarifaNoche
-                    ? `<strong class="price-day-night-pill">☀️ Día: S/ ${Number(c.precio || 0)} | 🌙 Noche: S/ ${Number(c.precioNoche)} <small>(desde ${escapeHTML(c.horaInicioNoche || '18:00')})</small></strong>`
+                    ? `<strong>S/ ${Number(c.precio || 0)} - S/ ${Number(c.precioNoche)} <small>/ hr</small></strong>`
                     : `<strong>S/ ${escapeHTML(c.precio ?? 'Consultar')} <small>/ hr</small></strong>`;
                 contenedor.innerHTML += `<article class="card court-card"><div class="court-cover" style="background-image:url('${escapeHTML(portada)}')"><div class="court-status">${estado}</div><div class="court-cover-gradient"></div></div><div class="court-body"><img src="${escapeHTML(logo)}" alt="Logo" loading="lazy" class="court-logo" style="aspect-ratio:1/1;object-fit:cover;"><div class="court-content"><div class="court-title-line"><a href="${linkCancha}" style="text-decoration:none; color:inherit;"><h3>${escapeHTML(c.nombre || 'Cancha')}</h3></a><span class="court-rating"><i class="ph-fill ph-star"></i> ${c.rating > 0 ? c.rating.toFixed(1) : 'Nuevo'}</span></div><p class="court-location"><i class="ph-bold ph-map-pin"></i> ${escapeHTML(c.ubicacionTexto || 'Ubicación')}${c.departamento ? ` · ${escapeHTML(c.departamento)}` : (obtenerCiudad(c) ? ` · ${escapeHTML(obtenerCiudad(c))}` : '')}${dist}</p>
              ${subtituloCanchas}
-             <div class="court-meta" style="margin-top:8px; flex-wrap:wrap; gap:6px;"><span><i class="ph-bold ph-soccer-ball"></i> ${escapeHTML(c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol'))}</span>${precioHtmlCard}</div><button class="court-action btn btn-primary" data-court-id="${escapeHTML(c.id)}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`;
+             <div class="court-meta" style="margin-top:8px;"><span><i class="ph-bold ph-soccer-ball"></i> ${escapeHTML(c.multiCancha ? 'Múltiples' : (obtenerTipo(c) || 'Fútbol'))}</span>${precioHtmlCard}</div><button class="court-action btn btn-primary" data-court-id="${escapeHTML(c.id)}"><span>Ver Horarios y Reservar</span><i class="ph-bold ph-calendar-plus"></i></button></div></div></article>`;
             });
 
             contenedor.querySelectorAll('[data-court-id]').forEach(b => b.addEventListener('click', () => {
@@ -552,7 +552,7 @@ async function pintarDisponibilidadModal(c, fechaElegida) {
         ` : '';
 
         const leyendaTarifa = (c.tienePrecioNoche && Number(c.precioNoche) > 0)
-            ? `<div class="price-day-night-pill" style="margin-bottom:12px; width:100%; justify-content:center;"><span class="day-part">☀️ Día: S/ ${Number(c.precio || 0)}</span><span>|</span><span class="night-part">🌙 Noche: S/ ${Number(c.precioNoche)} (desde ${escapeHTML(c.horaInicioNoche || '18:00')})</span></div>`
+            ? ''
             : '';
 
         box.innerHTML = `
@@ -561,7 +561,7 @@ async function pintarDisponibilidadModal(c, fechaElegida) {
                 <div style="text-align:right;"><span style="font-size:0.75rem; color:var(--text-muted); font-weight:bold;">DISPONIBLES</span><strong style="font-size:1.3rem; color:var(--primary-green); display:block;">${libres}</strong></div>
             </div>
             ${leyendaTarifa}
-            <div class="modal-slots">${slots.length ? slots.map(s => `<button type="button" class="modal-slot ${s.blocked ? 'blocked' : ''} ${s.esNoche ? 'slot-night' : ''}" data-book-court="${escapeHTML(c.id)}" data-book-time="${escapeHTML(s.label)}" data-book-date="${escapeHTML(fReq)}" data-book-price="${s.precio}" ${s.blocked ? 'disabled' : ''}><span>${escapeHTML(s.label)}</span><small class="slot-price-tag">${s.blocked ? 'Ocupada' : `${s.esNoche ? '🌙' : '☀️'} S/ ${s.precio}`}</small></button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
+            <div class="modal-slots">${slots.length ? slots.map(s => `<button type="button" class="modal-slot ${s.blocked ? 'blocked' : ''} ${s.esNoche ? 'slot-night' : ''}" data-book-court="${escapeHTML(c.id)}" data-book-time="${escapeHTML(s.label)}" data-book-date="${escapeHTML(fReq)}" data-book-price="${s.precio}" ${s.blocked ? 'disabled' : ''}><span>${escapeHTML(s.label)}</span><small class="slot-price-tag">${s.blocked ? 'Ocupada' : `S/ ${s.precio}`}</small></button>`).join('') : '<span style="color:var(--text-muted);">El dueño aún no configuró sus horarios.</span>'}</div>
             ${botonPerfilCompleto}
         `;
         document.getElementById('input-fecha-modal')?.addEventListener('change', (e) => pintarDisponibilidadModal(c, e.target.value));
@@ -580,7 +580,7 @@ function abrirReserva(c, hora, fechaElegida) {
 
     document.getElementById('booking-cancha-nombre').textContent = c.nombreCancha || c.nombre || 'Cancha';
     const dateObj = new Date(`${fechaElegida}T12:00:00`);
-    document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora} — ${esNoche ? '🌙 Noche' : '☀️ Día'}: S/ ${precioTurno}`;
+    document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora} — S/ ${precioTurno}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
 
     const metodos = c.metodosPago || {};
@@ -1596,7 +1596,7 @@ if (window.location.pathname.includes('cancha.html')) {
                     const deporteMostrar = c.tipo || 'Fútbol';
                     const tieneNoche = !!c.tienePrecioNoche && Number(c.precioNoche) > 0;
                     const precioDetalleHtml = tieneNoche
-                        ? `<span class="price-day-night-pill">☀️ Día: S/ ${Number(c.precio || 0)} | 🌙 Noche: S/ ${Number(c.precioNoche)} (desde ${escapeHTML(c.horaInicioNoche || '18:00')})</span>`
+                        ? `<strong style="color:var(--primary-green); font-weight:800; font-size:0.95rem;">S/ ${Number(c.precio || 0)} - S/ ${Number(c.precioNoche)} <small style="color:#777; font-weight:normal;">/ hr</small></strong>`
                         : `<span style="color:var(--primary-green); font-weight:800; font-size:0.95rem;">${c.precio ? `S/ ${Number(c.precio)}` : 'Consultar'} <small style="color:#777; font-weight:normal;">/ hr</small></span>`;
                     const deporteIcono = deporteMostrar.toLowerCase().includes('voley') || deporteMostrar.toLowerCase().includes('vóley')
                         ? 'ph-volleyball'

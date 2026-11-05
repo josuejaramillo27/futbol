@@ -151,9 +151,27 @@ async function cargarPerfil() {
         bannerEstado.style.background = 'rgba(255, 193, 7, 0.15)'; bannerEstado.style.border = '1px solid var(--warning)';
         bannerEstado.innerHTML = `<div><strong style="color:var(--warning); display:block;">Cancha en Borrador (No visible)</strong><span style="font-size:0.8rem; color:#ccc;">Termina de configurar tus datos y solicita la publicación.</span></div><button id="btn-solicitar-pub" class="btn btn-primary" style="width:auto; padding:8px 15px;">Solicitar Revisión</button>`;
         document.getElementById('btn-solicitar-pub').onclick = async () => {
-            if (!canchaActual.configurado) return toast('Guarda la configuración de tu cancha primero.', true);
-            await updateDoc(doc(db, 'canchas', usuarioActual.uid), { estadoPublicacion: 'pending_review' });
-            toast('Solicitud enviada a los administradores.'); cargarPerfil();
+            if (!canchaActual?.configurado) return toast('Guarda la configuración de tu cancha primero.', true);
+            try {
+                const tieneNocheRev = Boolean(document.getElementById('admin-check-noche')?.checked ?? canchaActual?.tienePrecioNoche);
+                const payloadRev = sanitizeForFirestore({
+                    nombre: String(canchaActual?.nombre || document.getElementById('admin-nombre')?.value || '').trim(),
+                    precio: Number(canchaActual?.precio ?? document.getElementById('admin-precio')?.value ?? 0) || 0,
+                    lat: String(canchaActual?.lat ?? document.getElementById('admin-lat')?.value ?? '').trim(),
+                    lng: String(canchaActual?.lng ?? document.getElementById('admin-lng')?.value ?? '').trim(),
+                    tienePrecioNoche: tieneNocheRev,
+                    horaInicioNoche: String(document.getElementById('admin-hora-noche')?.value || canchaActual?.horaInicioNoche || '18:00').trim() || '18:00',
+                    precioNoche: tieneNocheRev ? (Number(document.getElementById('admin-precio-noche')?.value ?? canchaActual?.precioNoche ?? 0) || 0) : 0,
+                    estadoPublicacion: 'pending_review',
+                    updatedAt: serverTimestamp()
+                });
+                await updateDoc(doc(db, 'canchas', usuarioActual.uid), payloadRev);
+                toast('Solicitud enviada a los administradores.');
+                await cargarPerfil();
+            } catch (errRev) {
+                console.error('Error al solicitar revisión:', errRev);
+                toast('No se pudo enviar la solicitud de revisión.', true);
+            }
         };
     } else if (estadoPub === 'pending_review') {
         bannerEstado.style.background = 'rgba(23, 162, 184, 0.15)'; bannerEstado.style.border = '1px solid #17a2b8';
@@ -172,7 +190,9 @@ async function cargarPerfil() {
         'admin-ubicacion-link': canchaActual.ubicacionLink,
         'admin-hora-inicio': canchaActual.horaApertura || canchaActual.horaInicio || '16:00',
         'admin-hora-cierre': canchaActual.horaCierre || canchaActual.horaFin || '23:00',
-        'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60
+        'admin-intervalo': canchaActual.intervaloMinutos || canchaActual.duracionReserva || 60,
+        'admin-lat': canchaActual.lat ?? '',
+        'admin-lng': canchaActual.lng ?? ''
     };
     Object.entries(campos).forEach(([id, v]) => { const el = document.getElementById(id); if (el) el.value = v ?? '' });
 
@@ -880,6 +900,7 @@ async function subirImagen(archivo, ruta) {
 
 function sanitizeForFirestore(obj) {
     if (obj === null || obj === undefined) return null;
+    if (typeof obj === 'number') return Number.isFinite(obj) ? obj : 0;
     if (typeof obj !== 'object') return obj;
     if (Array.isArray(obj)) return obj.map(sanitizeForFirestore).filter(v => v !== undefined);
     if (obj.constructor && obj.constructor.name !== 'Object') return obj;
@@ -959,17 +980,23 @@ if (formPerfil) {
                 montoSena: Number(document.getElementById('admin-monto-sena')?.value || 0)
             };
 
-            const tienePrecioNoche = !!document.getElementById('admin-check-noche')?.checked;
-            const horaInicioNoche = document.getElementById('admin-hora-noche')?.value || '18:00';
-            const precioNoche = tienePrecioNoche ? Number(document.getElementById('admin-precio-noche')?.value || 0) : 0;
+            const tienePrecioNoche = Boolean(document.getElementById('admin-check-noche')?.checked);
+            const horaInicioNoche = String(document.getElementById('admin-hora-noche')?.value || '18:00').trim() || '18:00';
+            const rawPrecioNoche = Number(document.getElementById('admin-precio-noche')?.value ?? 0);
+            const precioNoche = (tienePrecioNoche && Number.isFinite(rawPrecioNoche) && rawPrecioNoche >= 0) ? rawPrecioNoche : 0;
+            const rawPrecioDia = Number(document.getElementById('admin-precio')?.value ?? 0);
+            const precioDiaVal = (Number.isFinite(rawPrecioDia) && rawPrecioDia >= 0) ? rawPrecioDia : 0;
+            const nombreComplejoVal = String(document.getElementById('admin-nombre')?.value ?? canchaActual?.nombre ?? '').trim();
+            const latVal = String(document.getElementById('admin-lat')?.value ?? canchaActual?.lat ?? '').trim();
+            const lngVal = String(document.getElementById('admin-lng')?.value ?? canchaActual?.lng ?? '').trim();
 
             const dataToSave = {
                 ownerUid: uid || '',
-                nombre: (document.getElementById('admin-nombre')?.value || '').trim(),
+                nombre: nombreComplejoVal,
                 departamento: valDpto,
                 distrito: valDist,
                 whatsapp: (document.getElementById('admin-whatsapp')?.value || '').trim(),
-                precio: Number(document.getElementById('admin-precio')?.value || 0),
+                precio: precioDiaVal,
                 tienePrecioNoche,
                 horaInicioNoche,
                 precioNoche,
@@ -980,8 +1007,8 @@ if (formPerfil) {
                 descripcion: (document.getElementById('admin-descripcion')?.value || '').trim(),
                 ubicacionTexto: (document.getElementById('admin-ubicacion-texto')?.value || '').trim(),
                 ubicacionLink: (document.getElementById('admin-ubicacion-link')?.value || '').trim(),
-                lat: (document.getElementById('admin-lat')?.value || '').trim(),
-                lng: (document.getElementById('admin-lng')?.value || '').trim(),
+                lat: latVal,
+                lng: lngVal,
                 intervaloMinutos: Number(document.getElementById('admin-intervalo')?.value || 60),
                 horaApertura: document.getElementById('admin-hora-inicio')?.value || '16:00',
                 horaCierre: document.getElementById('admin-hora-cierre')?.value || '23:00',
@@ -1027,8 +1054,8 @@ function init() {
 
     // MÓDULO 5: AUTH GUARD ESTRICTO EN ADMIN.HTML
     onAuthStateChanged(auth, async u => {
-        if (!u) {
-            window.location.replace('index.html');
+            if (!u) {
+            window.location.href = 'index.html';
             return;
         }
         try {
@@ -1045,7 +1072,7 @@ function init() {
                 }
                 if (data.rol !== "owner" && !canchaDoc.exists()) {
                     // Usuario normal (jugador) intentando entrar por URL directa
-                    window.location.replace("index.html");
+                    window.location.href = 'index.html';
                     return;
                 }
                 if (data.estado === "pending") {
@@ -1064,7 +1091,7 @@ function init() {
                 }
             } else if (!canchaDoc.exists()) {
                 // Sin documento de usuario owner ni cancha asociada -> redirigir inmediatamente
-                window.location.replace('index.html');
+                window.location.href = 'index.html';
                 return;
             }
 
@@ -1080,7 +1107,7 @@ function init() {
             }
         } catch (e) {
             console.error(e);
-            window.location.replace('index.html');
+            window.location.href = 'index.html';
         }
     });
 
