@@ -576,20 +576,27 @@ function abrirReserva(c, hora, fechaElegida) {
     const modal = document.getElementById('modal-reserva');
     if (!modal) return;
 
-    const { precio: precioTurno, esNoche } = calcularPrecioTurno(c, hora);
+    const { precio: precioTurno } = calcularPrecioTurno(c, hora);
+    const precioTurnoReal = Number.isFinite(parseFloat(precioTurno)) ? parseFloat(precioTurno) : 0;
 
     document.getElementById('booking-cancha-nombre').textContent = c.nombreCancha || c.nombre || 'Cancha';
     const dateObj = new Date(`${fechaElegida}T12:00:00`);
     document.getElementById('booking-hora').textContent = `${new Intl.DateTimeFormat('es-PE', { weekday: 'long', day: 'numeric', month: 'short' }).format(dateObj).toUpperCase()} · ${hora} — S/ ${precioTurno}`;
     document.getElementById('booking-nombre').value = usuarioActual?.displayName ? (usuarioActual.displayName.split(' ')[0]) : '';
 
-    const metodos = c.metodosPago || {};
+    const metodos = c?.metodosPago || {};
+    const porcentajeSenaRaw = parseFloat(metodos.montoSena ?? metodos.porcentajeSena ?? 0);
+    const porcentajeSena = Number.isFinite(porcentajeSenaRaw) ? Math.min(100, Math.max(0, porcentajeSenaRaw)) : 0;
+    const montoSenaCalculadoRaw = (precioTurnoReal * porcentajeSena) / 100;
+    const montoSenaCalculado = Number.isFinite(montoSenaCalculadoRaw)
+        ? (Number.isInteger(montoSenaCalculadoRaw) ? montoSenaCalculadoRaw : Number(montoSenaCalculadoRaw.toFixed(2)))
+        : 0;
     let avisoHTML = '';
 
-    if (metodos.requiereSena && metodos.montoSena > 0) {
+    if (metodos.requiereSena && porcentajeSena > 0) {
         avisoHTML = `
             <div style="background:rgba(241,196,15,0.1); border:1px solid rgba(241,196,15,0.3); padding:15px; border-radius:10px; margin-top:14px; margin-bottom:12px; color:#f1c40f;">
-                <b style="display:block; margin-bottom:6px; font-size:0.98rem;"><i class="ph-bold ph-warning-circle"></i> Tarifa del turno: S/ ${precioTurno} · Adelanto requerido: S/ ${Number(metodos.montoSena)}</b>
+                <b style="display:block; margin-bottom:6px; font-size:0.98rem;"><i class="ph-bold ph-warning-circle"></i> Esta cancha exige un adelanto del ${porcentajeSena}% (S/ ${montoSenaCalculado}) · Tarifa del turno: S/ ${precioTurnoReal}</b>
                 <span style="font-size:0.85rem; color:#ccc; line-height:1.5;">Al confirmar, transfiere el adelanto a través de: <b>${escapeHTML(metodos.textoMetodos || 'Yape/Plin')}</b> (Cuenta/Número: <b>${escapeHTML(metodos.numero || 'No especificado')}</b> a nombre de <b>${escapeHTML(metodos.titular || 'el dueño')}</b>) y envía el comprobante por WhatsApp.</span>
             </div>
         `;
@@ -615,7 +622,9 @@ function abrirReserva(c, hora, fechaElegida) {
     modal.dataset.courtId = c.id;
     modal.dataset.time = hora;
     modal.dataset.date = fechaElegida;
-    modal.dataset.price = String(precioTurno);
+    modal.dataset.price = String(precioTurnoReal);
+    modal.dataset.sena = String(montoSenaCalculado);
+    modal.dataset.porcentajeSena = String(porcentajeSena);
     modal.classList.add('mostrar');
     modal.setAttribute('aria-hidden', 'false');
 }
@@ -725,6 +734,8 @@ async function confirmarReserva() {
                 precio: precioFinal,
                 precioTotal: precioFinal,
                 metodoPago: 'pendiente',
+                montoSena: Number(modal?.dataset.sena || 0),
+                porcentajeSena: Number(modal?.dataset.porcentajeSena || 0),
                 senaPagada: false,
                 terminosAceptados: true,
                 createdAt: serverTimestamp(),
@@ -743,7 +754,10 @@ async function confirmarReserva() {
         const telOwner = formatWsp(c?.whatsapp);
 
         if (telOwner) {
-            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en CHALACAPP:\n*Nombre:* ${nombre}\n*Fecha:* ${fechaReq}\n*Hora:* ${hora}\n*Tarifa del turno:* S/ ${precioFinal}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
+            const senaValor = parseFloat(modal?.dataset.sena || '0');
+            const pctValor = modal?.dataset.porcentajeSena;
+            const detalleSenaWa = senaValor > 0 ? `\n*Adelanto requerido (${pctValor}%):* S/ ${senaValor}` : '';
+            const mensajeWa = `Hola *${c?.nombre || 'Cancha'}*, acabo de reservar en CHALACAPP:\n*Nombre:* ${nombre}\n*Fecha:* ${fechaReq}\n*Hora:* ${hora}\n*Tarifa del turno:* S/ ${precioFinal}${detalleSenaWa}\n\n*Te adjunto la seña para que puedas VALIDAR la reserva:*`;
             setTimeout(() => { window.open(`https://wa.me/${telOwner}?text=${encodeURIComponent(mensajeWa)}`, '_blank'); }, 2200);
         }
     } catch (e) {

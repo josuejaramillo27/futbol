@@ -222,7 +222,10 @@ async function cargarPerfil() {
         if (elReqSena) elReqSena.checked = !!canchaActual.metodosPago.requiereSena;
 
         const elMontoSena = document.getElementById('admin-monto-sena');
-        if (elMontoSena) elMontoSena.value = canchaActual.metodosPago.montoSena || '';
+        if (elMontoSena) {
+            const rawPct = parseFloat(canchaActual.metodosPago.porcentajeSena ?? canchaActual.metodosPago.montoSena ?? '');
+            elMontoSena.value = Number.isFinite(rawPct) ? Math.min(100, Math.max(0, rawPct)) : '';
+        }
     }
 
     const dpto = canchaActual.departamento || '';
@@ -465,9 +468,12 @@ function abrirGestionReserva(r) {
         'rejected': '<span style="color:var(--danger); display:inline-flex; align-items:center; gap:4px;"><i class="ph-bold ph-prohibit"></i> Rechazada por la Cancha</span>'
     };
 
+    const senaVal = Number(r.montoSena || 0);
+    const senaPct = Number(r.porcentajeSena || 0);
+    const detalleMontoSena = senaVal > 0 ? ` (S/ ${senaVal}${senaPct > 0 ? ` · ${senaPct}%` : ''})` : '';
     const senaBadge = r.senaPagada
-        ? '<span style="color:#4ba3ff; font-weight:bold;"><i class="ph-fill ph-check-circle"></i> Seña recibida</span>'
-        : '<span style="color:var(--text-muted);">Pendiente / Sin seña</span>';
+        ? `<span style="color:#4ba3ff; font-weight:bold;"><i class="ph-fill ph-check-circle"></i> Seña recibida${detalleMontoSena}</span>`
+        : `<span style="color:var(--text-muted);">Pendiente / Sin seña${detalleMontoSena}</span>`;
 
     const clienteNombre = r.nombre || r.usuarioNombre || 'Cliente';
     const clienteTelefono = r.telefono || r.usuarioTelefono || 'Sin teléfono';
@@ -977,7 +983,8 @@ if (formPerfil) {
                 numero: document.getElementById('admin-pago-numero')?.value?.trim() || '',
                 titular: document.getElementById('admin-pago-titular')?.value?.trim() || '',
                 requiereSena: document.getElementById('admin-req-sena')?.checked || false,
-                montoSena: Number(document.getElementById('admin-monto-sena')?.value || 0)
+                montoSena: (() => { const p = parseFloat(document.getElementById('admin-monto-sena')?.value ?? '0'); return Number.isFinite(p) ? Math.min(100, Math.max(0, p)) : 0; })(),
+                porcentajeSena: (() => { const p = parseFloat(document.getElementById('admin-monto-sena')?.value ?? '0'); return Number.isFinite(p) ? Math.min(100, Math.max(0, p)) : 0; })()
             };
 
             const tienePrecioNoche = Boolean(document.getElementById('admin-check-noche')?.checked);

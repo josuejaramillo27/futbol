@@ -23,7 +23,7 @@ async function load(){
         if($('admin-pago-numero')) $('admin-pago-numero').value=p.numero||'';
         if($('admin-pago-titular')) $('admin-pago-titular').value=p.titular||'';
         if($('admin-req-sena')) $('admin-req-sena').checked=!!p.requiereSena;
-        if($('admin-monto-sena')) $('admin-monto-sena').value=p.montoSena||'';
+        if($('admin-monto-sena')) $('admin-monto-sena').value=p.porcentajeSena??p.montoSena??'';
         if($('admin-pago-nota')) $('admin-pago-nota').value=p.nota||'';
         sync();
     }catch(e){console.error(e)}
@@ -38,7 +38,8 @@ async function save(){
         numero:$('admin-pago-numero')?.value?.trim() || '',
         titular:$('admin-pago-titular')?.value?.trim() || '',
         requiereSena:$('admin-req-sena')?.checked || false,
-        montoSena:Number($('admin-monto-sena')?.value||0),
+        montoSena:(() => { const v = parseFloat($('admin-monto-sena')?.value ?? '0'); return Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : 0; })(),
+        porcentajeSena:(() => { const v = parseFloat($('admin-monto-sena')?.value ?? '0'); return Number.isFinite(v) ? Math.min(100, Math.max(0, v)) : 0; })(),
         nota:$('admin-pago-nota')?.value?.trim() || ''
     };
     if (!p.yape && !p.plin && !p.efectivo) {
